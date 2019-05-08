@@ -1,4 +1,13 @@
 *.o
-bin/*
-.dep/*
-openqcd
+*~
+INSTALL
+Makefile
+Makefile.in
+aclocal.m4
+autom4te.cache
+config.log
+config.status
+configure
+include/ganalyze_config_internal.h
+include/ganalyze_config_internal.h.in
+include/stamp-h1

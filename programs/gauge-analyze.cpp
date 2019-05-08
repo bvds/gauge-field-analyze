@@ -8,7 +8,7 @@
 // Needed to define all OpenQCD global arrays
 #define MAIN_PROGRAM
 
-#include "qdp_to_openqcd.hpp"
+#include "gauge-analyze.hpp"
 #include <iomanip>
 
 using namespace fastsum;
