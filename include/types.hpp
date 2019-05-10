@@ -9,14 +9,10 @@
 #define TYPES_HPP
 
 #include <qdp.h>
-extern "C" {
-#include "su3.h"
-}
 
 namespace fastsum {
 
 using QDP_Gauge_Field = QDP::multi1d<QDP::LatticeColorMatrixD>;
-using OpenQCD_Gauge_Field = su3_dble*;
 
 } // namespace fastsum 
 

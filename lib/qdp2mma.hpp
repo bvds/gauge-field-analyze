@@ -10,12 +10,11 @@
 
 #include <qdp.h>
 #include <types.hpp>
-#include <openqcd_utilities.hpp>
 
 namespace fastsum {
 
-void copy(QDP::ColorMatrixD const&from, su3_dble &to);
-void copy(QDP_Gauge_Field const& from, OpenQCD_Gauge_Field &to);
+void copy(QDP::ColorMatrixD const& from);
+void copy(QDP_Gauge_Field const& from);
 
 } // namespace fastsum 
 
