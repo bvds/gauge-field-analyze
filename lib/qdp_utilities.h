@@ -5,16 +5,16 @@
  * Author: Jonas R. Glesaaen (jonas@glesaaen.com)
  */
 
-#ifndef QDP_UTILITIES_HPP
-#define QDP_UTILITIES_HPP
+#ifndef QDP_UTILITIES_H
+#define QDP_UTILITIES_H
 
-#include <types.hpp>
+#include <qdp.h>
 
 namespace fastsum {
 
-double average_plaquette(QDP_Gauge_Field const &);
+double average_plaquette(const QDP::multi1d<QDP::LatticeColorMatrix>& u);
 
 } // namespace fastsum 
 
 
-#endif /* QDP_UTILITIES_HPP */
+#endif /* QDP_UTILITIES_H */

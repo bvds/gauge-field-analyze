@@ -11,3 +11,5 @@ configure
 include/ganalyze_config_internal.h
 include/ganalyze_config_internal.h.in
 include/stamp-h1
+programs/ganalyze
+lib/*.a
