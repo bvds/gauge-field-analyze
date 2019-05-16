@@ -36,6 +36,55 @@ Program_Parameters parse_input_arguments(int argc, char **argv)
 }
 
 
+/*
+ * Read the scidac file name and the lattice size from
+ * the purgaug xml file.
+ * From Chroma file mainprogs/main/purgaug.cc
+ * Stripped out the fields we don't need.
+ */
+struct Cfg_t
+{
+  std::string cfg_file;
+};
+void read(QDP::XMLReader& xml, const std::string& path, Cfg_t& input)
+{
+  QDP::XMLReader inputtop(xml, path);
+  QDP::read(inputtop, "cfg_file", input.cfg_file);
+}
+
+ //! Holds params for Heat-bath
+struct HBItrParams 
+{
+  QDP::multi1d<int> nrow;
+};
+void read(QDP::XMLReader& xml, const std::string& path, HBItrParams& p) 
+{
+  try {
+    QDP::XMLReader paramtop(xml, path);
+    QDP::read(paramtop, "nrow", p.nrow);
+  }
+  catch( const std::string& e ) { 
+    QDPIO::cerr << "Error reading HBItrParams XML : " << e << std::endl;
+    QDP_abort(1);
+  }
+}
+
+void read(QDP::XMLReader& xml_in, const std::string& path,
+	  HBItrParams& hbitr_params,
+	  Cfg_t& cfg)
+{
+  try {
+    QDP::XMLReader paramtop(xml_in, path);
+    read(paramtop, "HBItr", hbitr_params);
+    read(paramtop, "Cfg", cfg);
+  }
+  catch(const std::string& e) {
+    QDPIO::cerr << "Caught Exception reading HBControl: " << e << std::endl;
+    QDP_abort(1);
+  }
+}
+
+
 int main(int argc, char **argv)
 {
   // This only works for scalar!
@@ -58,16 +107,50 @@ int main(int argc, char **argv)
     return 1;
   }
 
+  /*
+   * Input data file name and lattice dimensions
+   * from purgaug output xml file.
+   *
+   * Ideally, one would get the dimensions directly from
+   * the scidac (*.lime) file directly.  However,
+   * the QIO library discover_dims_mode is triggered off
+   * the lattice dimensions, which is a compile-time parameter
+   * for QDP/QDP++.  Thus, the lattice dimensions should be checked
+   * against the lime file.  
+   * A better solution would be for discover_dims_mode to trigger
+   * from lattice volume=0 or maybe one of the sizes=0.
+   *
+   * In addition, the QDP++ library is not set up to trigger
+   * discover_dims_mode anyway.  Finally, it is not clear if 
+   * discover_dims_mode has ever been tested.
+   */
+  HBItrParams hbitr_params;
+  Cfg_t cfg;
+  try
+    {
+      QDP::XMLReader xml_in(params.input_file);
+      read(xml_in, "/purgaug", hbitr_params, cfg);
+    }
+  catch( const std::string& e ) {
+    QDPIO::cerr << "Caught Exception reading input XML: " << e << std::endl;
+    QDP_abort(1);
+  }
+  catch( std::exception& e ) {
+    QDPIO::cerr << "Caught standard library exception: " << e.what() << std::endl;
+    QDP_abort(1);
+  }
+  catch(...) {
+    QDPIO::cerr << "Caught unknown exception " << std::endl;
+    QDP_abort(1);
+  }
+
   // Set lattice dimensions
   /*
-   * This needs to be determined from the scidac file.
+   * This could be determined from the scidac file.
    * Also, the other parameters in the scidac file
    * should be compared against the currently used QDP++
    */
-  QDP::multi1d<int> nrow(Nd);
-  for(int i=0; i<Nd; i++)
-    nrow[i]=4;
-  QDP::Layout::setLattSize(nrow);
+  QDP::Layout::setLattSize(hbitr_params.nrow);
   QDP::Layout::create();
 
   // following chroma file /mainprogs/main/purgaug.cc
@@ -76,8 +159,7 @@ int main(int argc, char **argv)
   {
     QDP::XMLReader file_xml;
     QDP::XMLReader config_xml;
-    std::string cfg_file = params.input_file;
-    Chroma::readGauge(file_xml, config_xml, u, cfg_file, QDP::QDPIO_SERIAL);
+    Chroma::readGauge(file_xml, config_xml, u, cfg.cfg_file, QDP::QDPIO_SERIAL);
   }
 
 
