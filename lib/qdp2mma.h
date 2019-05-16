@@ -18,7 +18,8 @@ namespace mma {
   void write(std::ostream& to, const int &from);
 
   void dump_lattice(std::string& filename,
-		    const QDP::multi1d<QDP::LatticeColorMatrix>& u);
+		    const QDP::multi1d<QDP::LatticeColorMatrix>& u,
+		    const QDP::Real& beta);
 
 } // namespace mma
 

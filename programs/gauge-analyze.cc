@@ -42,41 +42,22 @@ Program_Parameters parse_input_arguments(int argc, char **argv)
  * From Chroma file mainprogs/main/purgaug.cc
  * Stripped out the fields we don't need.
  */
-struct Cfg_t
-{
-  std::string cfg_file;
-};
-void read(QDP::XMLReader& xml, const std::string& path, Cfg_t& input)
-{
-  QDP::XMLReader inputtop(xml, path);
-  QDP::read(inputtop, "cfg_file", input.cfg_file);
-}
 
  //! Holds params for Heat-bath
 struct HBItrParams 
 {
   QDP::multi1d<int> nrow;
+  QDP::Real beta;
 };
-void read(QDP::XMLReader& xml, const std::string& path, HBItrParams& p) 
-{
-  try {
-    QDP::XMLReader paramtop(xml, path);
-    QDP::read(paramtop, "nrow", p.nrow);
-  }
-  catch( const std::string& e ) { 
-    QDPIO::cerr << "Error reading HBItrParams XML : " << e << std::endl;
-    QDP_abort(1);
-  }
-}
-
 void read(QDP::XMLReader& xml_in, const std::string& path,
 	  HBItrParams& hbitr_params,
-	  Cfg_t& cfg)
+	  std::string& cfg_file)
 {
   try {
     QDP::XMLReader paramtop(xml_in, path);
-    read(paramtop, "HBItr", hbitr_params);
-    read(paramtop, "Cfg", cfg);
+    QDP::read(paramtop, "HBItr/nrow", hbitr_params.nrow);
+    QDP::read(paramtop, "HBItr/GaugeAction/beta", hbitr_params.beta);
+    QDP::read(paramtop, "Cfg/cfg_file", cfg_file);
   }
   catch(const std::string& e) {
     QDPIO::cerr << "Caught Exception reading HBControl: " << e << std::endl;
@@ -125,11 +106,11 @@ int main(int argc, char **argv)
    * discover_dims_mode has ever been tested.
    */
   HBItrParams hbitr_params;
-  Cfg_t cfg;
+  std::string cfg_file;
   try
     {
       QDP::XMLReader xml_in(params.input_file);
-      read(xml_in, "/purgaug", hbitr_params, cfg);
+      read(xml_in, "/purgaug", hbitr_params, cfg_file);
     }
   catch( const std::string& e ) {
     QDPIO::cerr << "Caught Exception reading input XML: " << e << std::endl;
@@ -159,7 +140,7 @@ int main(int argc, char **argv)
   {
     QDP::XMLReader file_xml;
     QDP::XMLReader config_xml;
-    Chroma::readGauge(file_xml, config_xml, u, cfg.cfg_file, QDP::QDPIO_SERIAL);
+    Chroma::readGauge(file_xml, config_xml, u, cfg_file, QDP::QDPIO_SERIAL);
   }
 
 
@@ -168,7 +149,7 @@ int main(int argc, char **argv)
             << std::endl;
 
   try {
-    mma::dump_lattice(params.output_file, u);
+    mma::dump_lattice(params.output_file, u, hbitr_params.beta);
   } catch (std::exception &err) {
     QDPIO::cerr << err.what() << std::endl;
     return 1;

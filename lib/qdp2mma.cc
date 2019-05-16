@@ -10,6 +10,23 @@
 #include <iostream>
 #include <fstream>
 
+/*
+ * The QDP++ macro CONFIG_LAYOUT is missing from the 
+ * header files, so we have to brute-force it
+ */
+#if QDP_USE_LEXICO_LAYOUT == 1
+#define CONFIG_LAYOUT "lexicographic"
+#elif QDP_USE_CB2_LAYOUT == 1
+#define CONFIG_LAYOUT "cb2"
+#elif QDP_USE_CB3D_LAYOUT == 1
+#define CONFIG_LAYOUT "cb3d"
+#elif QDP_USE_CB32_LAYOUT == 1
+#define CONFIG_LAYOUT "cb32"
+#error "no appropriate layout defined"
+#else
+
+#endif
+
 namespace mma {
 
   int count = 0;
@@ -96,7 +113,8 @@ namespace mma {
   }
 
 
-  /* Extracts the lattice gauge field and places it in a two dimensional array
+  /* 
+   *Extracts the lattice gauge field and places it in a two dimensional array
    * where outer dim is direction and inner dim is coordinate
    */
   QDP::multi1d<QDP::multi1d<QDP::ColorMatrix>>
@@ -119,17 +137,20 @@ namespace mma {
      Lattice gauge field to Mathematica format
   */
   void dump_lattice(std::string& filename,
-		    const QDP::multi1d<QDP::LatticeColorMatrix>& u)
+		    const QDP::multi1d<QDP::LatticeColorMatrix>& u,
+		    const QDP::Real& beta)
   {
     std::ofstream to(filename);
-    to.precision(16);  // Double, no matter what
+    to.precision(15);  // Double, no matter what
     to << std::fixed;  // Fixed point:  handle exponents manually
 
     // A lot of this is also in the XML file.
+    to << "beta=" << beta << "; ";
     to << "nd=" << Nd << "; nc=" << Nc << ";" << std::endl;
     to << "latticeDimensions=";
     write(to, QDP::Layout::lattSize());
     to << ";" << std::endl;
+    to << "latticeLayout=\"" << CONFIG_LAYOUT << "\";" << std::endl;
 
     to << "gaugeField=";
 
@@ -137,6 +158,25 @@ namespace mma {
     write(to, qdp_gauge_array);
 
     to << ";" << std::endl;
+
+    /*
+     * Lattice Coordinates
+     * Instead of figuring out how checkerboard works,
+     * just provide a lookup table.
+     */
+    for(int linear=0; linear<QDP::Layout::vol(); ++linear)
+      {
+	// Get the true lattice coord of this linear site index
+	multi1d<int> coord = Layout::siteCoords(0, linear);
+	// Shift coordinates by 1 to match Mathematica array numbering
+	for(int i=0; i<Nd; i++)
+	  coord[i]++;
+	count=0;
+	to << "linearSiteIndex[";
+	write(to, coord);
+	to << "]=" << linear+1 << ";" << std::endl;
+      }
+
     to.close();
   }
 
