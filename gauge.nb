@@ -32,6 +32,17 @@ Cell[BoxData[{
    ";"}], " "}], "\[IndentingNewLine]", 
  RowBox[{
   RowBox[{
+   RowBox[{
+    RowBox[{"setLink", "[", 
+     RowBox[{"dir_", ",", "coords_List", ",", "mat_"}], "]"}], ":=", 
+    RowBox[{
+     RowBox[{"gaugeField", "[", 
+      RowBox[{"[", 
+       RowBox[{"dir", ",", 
+        RowBox[{"linearSiteIndex", "[", "coords", "]"}]}], "]"}], "]"}], "=", 
+     "mat"}]}], ";"}], " "}], "\[IndentingNewLine]", 
+ RowBox[{
+  RowBox[{
    RowBox[{"latticeVolume", "[", "]"}], ":=", 
    RowBox[{"Apply", "[", 
     RowBox[{"Times", ",", " ", "latticeDimensions"}], "]"}]}], 
@@ -70,7 +81,8 @@ Cell[BoxData[{
  RowBox[{
   RowBox[{
    RowBox[{"shift", "[", 
-    RowBox[{"dir_", ",", "coords_"}], "]"}], ":=", 
+    RowBox[{"dir_", ",", "coords_", ",", 
+     RowBox[{"size_:", "1"}]}], "]"}], ":=", 
    RowBox[{"(*", " ", 
     RowBox[{
      RowBox[{"Wrap", "-", "around"}], ",", " ", 
@@ -88,8 +100,9 @@ Cell[BoxData[{
        RowBox[{"1", "+", 
         RowBox[{"Mod", "[", 
          RowBox[{
-          RowBox[{"cc", "[", 
-           RowBox[{"[", "dir", "]"}], "]"}], ",", 
+          RowBox[{
+           RowBox[{"cc", "[", 
+            RowBox[{"[", "dir", "]"}], "]"}], "+", "size", "-", "1"}], ",", 
           RowBox[{"latticeDimensions", "[", 
            RowBox[{"[", "dir", "]"}], "]"}]}], "]"}]}]}], ";", "cc"}]}], 
     "]"}]}], ";"}], "\[IndentingNewLine]", 
@@ -139,40 +152,8 @@ Cell[BoxData[{
         RowBox[{"(", 
          RowBox[{"nd", "-", "1"}], ")"}]}], ")"}]}]}], "]"}]}], 
   ";"}]}], "Input",
- InitializationCell->True,
- CellChangeTimes->{{3.766971701556139*^9, 3.766971824183812*^9}, {
-   3.766971864391036*^9, 3.766971991142065*^9}, {3.76697203628332*^9, 
-   3.766972036581699*^9}, {3.766972071464315*^9, 3.766972147825996*^9}, {
-   3.766972241963923*^9, 3.766972362430109*^9}, {3.766972399279151*^9, 
-   3.766972399900756*^9}, {3.766972467553906*^9, 3.766972631345945*^9}, {
-   3.766973121313527*^9, 3.766973184165906*^9}, {3.766973217303822*^9, 
-   3.766973367198934*^9}, {3.7669734522118063`*^9, 3.766973581991638*^9}, {
-   3.766973675916101*^9, 3.766973679800232*^9}, {3.7669737176775217`*^9, 
-   3.766973721069648*^9}, {3.766973782419417*^9, 3.766973818911992*^9}, {
-   3.766973866597672*^9, 3.766973877788909*^9}, {3.7669957885458307`*^9, 
-   3.7669958136611977`*^9}, {3.7669958448553667`*^9, 3.766995854433608*^9}, {
-   3.7669958994258966`*^9, 3.766995962360224*^9}, {3.7669960773097067`*^9, 
-   3.766996125757427*^9}, {3.766996161856401*^9, 3.766996165563612*^9}, {
-   3.766996203845356*^9, 3.7669962288881207`*^9}, {3.7669962975222816`*^9, 
-   3.766996432922181*^9}, {3.766996478097427*^9, 3.766996515459103*^9}, {
-   3.766996670339596*^9, 3.766996750418782*^9}, {3.7669967877933817`*^9, 
-   3.766996808359536*^9}, {3.7669968686708097`*^9, 3.766996871459394*^9}, {
-   3.766997599169236*^9, 3.766997890831791*^9}, {3.76699796535077*^9, 
-   3.7669979664026747`*^9}, {3.766998108385273*^9, 3.766998135773552*^9}, 
-   3.76699819841088*^9, {3.766998241729259*^9, 3.766998300543516*^9}, {
-   3.766998368049994*^9, 3.7669983693488903`*^9}, {3.76699840171522*^9, 
-   3.7669984933596897`*^9}, 3.766998526682329*^9, {3.766998570665627*^9, 
-   3.7669985823388367`*^9}, {3.76699868228093*^9, 3.766998693555489*^9}, {
-   3.76699883912613*^9, 3.7669988453197947`*^9}, {3.766998887464439*^9, 
-   3.766998889606883*^9}, {3.766999004409031*^9, 3.766999013268873*^9}, {
-   3.7669991076063232`*^9, 3.766999168156556*^9}, 3.76700206037728*^9, {
-   3.767002124807054*^9, 3.767002127258336*^9}, {3.7670021854213057`*^9, 
-   3.767002190359082*^9}, {3.767019476754698*^9, 3.767019512388295*^9}, {
-   3.7670196130922127`*^9, 3.7670196159784803`*^9}, {3.767019717870956*^9, 
-   3.767019751204719*^9}, {3.767019795954755*^9, 3.767019803794281*^9}, {
-   3.767019927873599*^9, 3.767019936846271*^9}, {3.767020415202099*^9, 
-   3.7670205295948877`*^9}},ExpressionUUID->"6c880b77-3e17-4cda-b61a-\
-af6936bf44d6"],
+ InitializationCell->
+  True,ExpressionUUID->"6c880b77-3e17-4cda-b61a-af6936bf44d6"],
 
 Cell[BoxData[{
  RowBox[{
@@ -337,7 +318,121 @@ Cell[BoxData[
  InitializationCell->True,
  CellChangeTimes->{{3.764090054416305*^9, 
   3.764090105420974*^9}},ExpressionUUID->"d49a298e-44df-4fce-80e5-\
-9da35ae92600"]
+9da35ae92600"],
+
+Cell[BoxData[
+ RowBox[{
+  RowBox[{"setAxialGauge", "[", "dir_", "]"}], ":=", 
+  RowBox[{"(*", " ", 
+   RowBox[{
+    RowBox[{
+    "Set", " ", "gauge", " ", "for", " ", "the", " ", "current", " ", 
+     "lattice", " ", 
+     RowBox[{"configuration", ".", "  ", "This"}], " ", "should", " ", "be", 
+     " ", "exact"}], ",", " ", 
+    RowBox[{
+    "so", " ", "the", " ", "average", " ", "plaquette", " ", "should", " ", 
+     "be", " ", 
+     RowBox[{"unchanged", "."}]}]}], " ", "*)"}], "\[IndentingNewLine]", 
+  RowBox[{"Do", "[", 
+   RowBox[{
+    RowBox[{"Block", "[", 
+     RowBox[{
+      RowBox[{"{", 
+       RowBox[{
+        RowBox[{"coords", "=", 
+         RowBox[{"latticeCoordinates", "[", "i", "]"}]}], ",", "v", ",", "vt",
+         ",", "ct"}], "}"}], ",", 
+      RowBox[{
+       RowBox[{"Print", "[", "\"\<Written but not tested\>\"", "]"}], ";", 
+       RowBox[{"Abort", "[", "]"}], ";", 
+       RowBox[{"If", "[", 
+        RowBox[{
+         RowBox[{
+          RowBox[{"coords", "[", 
+           RowBox[{"[", "dir", "]"}], "]"}], "\[Equal]", "1"}], ",", 
+         RowBox[{
+          RowBox[{"v", "=", 
+           RowBox[{"IdentityMatrix", "[", "nc", "]"}]}], ";", 
+          RowBox[{"Do", "[", 
+           RowBox[{
+            RowBox[{"v", "=", 
+             RowBox[{"v", ".", 
+              RowBox[{"getLink", "[", 
+               RowBox[{"dir", ",", 
+                RowBox[{"shift", "[", 
+                 RowBox[{"dir", ",", "coords", ",", 
+                  RowBox[{"j", "-", "1"}]}], "]"}]}], "]"}]}]}], ",", 
+            RowBox[{"{", 
+             RowBox[{"j", ",", 
+              RowBox[{"latticeDimensions", "[", 
+               RowBox[{"[", "dir", "]"}], "]"}]}], "}"}]}], "]"}], ";", 
+          RowBox[{"v", "=", 
+           RowBox[{"suPower", "[", 
+            RowBox[{"v", ",", 
+             RowBox[{"1", "/", 
+              RowBox[{"latticeDimensions", "[", 
+               RowBox[{"[", "dir", "]"}], "]"}]}]}], "]"}]}], ";", 
+          RowBox[{"Do", "[", 
+           RowBox[{"(*", " ", 
+            RowBox[{
+            "Apply", " ", "gauge", " ", "choice", " ", "to", " ", "each", " ",
+              "site"}], " ", "*)"}], "\[IndentingNewLine]", 
+           RowBox[{
+            RowBox[{
+             RowBox[{"ct", "=", 
+              RowBox[{"shift", "[", 
+               RowBox[{"dir", ",", "coords", ",", 
+                RowBox[{"j", "-", "1"}]}], "]"}]}], ";", 
+             RowBox[{"vt", "=", 
+              RowBox[{
+               RowBox[{"ConjugateTranspose", "[", 
+                RowBox[{"getLink", "[", 
+                 RowBox[{"dir", ",", "ct"}], "]"}], "]"}], ".", "v"}]}], ";", 
+             
+             RowBox[{"Do", "[", 
+              RowBox[{
+               RowBox[{
+                RowBox[{"setLink", "[", 
+                 RowBox[{"dd", ",", 
+                  RowBox[{"shift", "[", 
+                   RowBox[{"dd", ",", "ct", ",", 
+                    RowBox[{"-", "1"}]}], "]"}], ",", 
+                  RowBox[{
+                   RowBox[{"getLink", "[", 
+                    RowBox[{"dd", ",", 
+                    RowBox[{"shift", "[", 
+                    RowBox[{"dd", ",", "ct", ",", 
+                    RowBox[{"-", "1"}]}], "]"}]}], "]"}], ".", "vt"}]}], 
+                 "]"}], ";", 
+                RowBox[{"setLink", "[", 
+                 RowBox[{"dd", ",", "ct", ",", 
+                  RowBox[{
+                   RowBox[{"ConjugateTranspose", "[", "vt", "]"}], ".", 
+                   RowBox[{"getLink", "[", 
+                    RowBox[{"dd", ",", "ct"}], "]"}]}]}], "]"}]}], ",", 
+               RowBox[{"{", 
+                RowBox[{"dd", ",", "nd"}], "}"}]}], "]"}]}], ",", 
+            RowBox[{"{", 
+             RowBox[{"j", ",", "2", ",", 
+              RowBox[{"latticeDimensions", "[", 
+               RowBox[{"[", "dir", "]"}], "]"}]}], "}"}]}], "]"}], ";", 
+          RowBox[{"(*", " ", 
+           RowBox[{
+           "Verify", " ", "that", " ", "it", " ", "all", " ", "worked", " ", 
+            "out"}], " ", "*)"}], 
+          RowBox[{"Print", "[", 
+           RowBox[{"Chop", "[", 
+            RowBox[{"v", "-", 
+             RowBox[{"getLink", "[", 
+              RowBox[{"dir", ",", "coords", ",", 
+               RowBox[{"-", "1"}]}], "]"}]}], "]"}], "]"}]}]}], "]"}]}]}], 
+     "]"}], ",", 
+    RowBox[{"{", 
+     RowBox[{"i", ",", 
+      RowBox[{"latticeVolume", "[", "]"}]}], "}"}]}], "]"}]}]], "Input",
+ InitializationCell->
+  True,ExpressionUUID->"9083f81b-6c62-4ab0-b753-7947975525cd"]
 }, Open  ]],
 
 Cell[CellGroupData[{
@@ -451,9 +546,6 @@ Cell[BoxData[
    3.767020323310501*^9},ExpressionUUID->"f2a11410-3bc5-49fa-80c2-\
 9acbc39d1831"]
 }, Open  ]],
-
-Cell[BoxData[""], \
-"Input",ExpressionUUID->"4cdedab3-c3b8-46f7-9b55-a0dec7261b2e"],
 
 Cell[CellGroupData[{
 
@@ -1121,7 +1213,7 @@ Cell[BoxData["39.92397113418695`"], "Output",
 }, Open  ]]
 },
 WindowSize->{731, 677},
-WindowMargins->{{Automatic, 255}, {0, Automatic}},
+WindowMargins->{{Automatic, 0}, {0, Automatic}},
 PrivateNotebookOptions->{"FileOutlineCache"->False},
 TrackCellChangeTimes->False,
 FrontEndVersion->"11.2 for Linux x86 (64-bit) (September 10, 2017)",
