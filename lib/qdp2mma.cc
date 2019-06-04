@@ -164,6 +164,7 @@ namespace mma {
      * Instead of figuring out how checkerboard works,
      * just provide a lookup table.
      */
+    to << "Clear[linearSiteIndex];" << std:endl;
     for(int linear=0; linear<QDP::Layout::vol(); ++linear)
       {
 	// Get the true lattice coord of this linear site index
