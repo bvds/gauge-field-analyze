@@ -52,9 +52,11 @@ we need a Krylov space method for solving symmtric-indefinite
 singular (or incompatible) linear systems.
 
 The MINRES-QLP algorithm can handle this case, however the associated [MATLAB
-code](https://www.mathworks.com/matlabcentral/fileexchange/42419-minres-qlp) contains an error. Also, I cleaned up the code a bit:
+code](https://www.mathworks.com/matlabcentral/fileexchange/42419-minres-qlp) contains some errors. Also, I cleaned up the code a bit:
 
 * Initialization error in `minresxxxM` (lines 746, 747)
+
+* Condition `flag != flag0` (line 543) means that MINRES is never called.
 
 * Replace `length(x)>0` with `~isempty(x)`
 

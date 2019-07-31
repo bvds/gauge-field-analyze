@@ -539,8 +539,8 @@ while flag == flag0 && iter < maxit
   xl2norm = norm([xl2norm ul2]);
   xnorm   = norm([xl2norm ul u]);
 
-%% Update w. Update x except if it will become too big
-  if (Acond < TranCond) && flag ~= flag0 && QLPiter==0  %% MINRES updates
+%% Update w. Update x except if it will become too big  BvdS: fixed flag check
+  if (Acond < TranCond) && flag == flag0 && QLPiter==0  %% MINRES updates
     wl2 = wl;     wl = w;
     w   = (v - epln*wl2 - dlta_QLP*wl) * (1/gama_tmp);
     if xnorm < maxxnorm

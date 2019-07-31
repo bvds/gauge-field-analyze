@@ -56,10 +56,10 @@ If tranCondition=aConditionLimit, all iterations will be conventional
                    MINRES iterations (which are slightly cheaper).
 Default trandCondition = 10^7.
 
-showDetails specifies the printing option.
-If showDetails=True,  an iteration log will be output.
-If snowDetails=False, the log is suppressed.
-Default showDetails=True.
+printDetails specifies the printing option.
+If printDetails=True,  an iteration log will be output.
+If printDetails=False, the log is suppressed.
+Default printDetails=False.
 
 If returnVectors is True, then the RESVEC and ARESVEC are returned.
 
@@ -211,7 +211,7 @@ minresqlp::usage = "MINRES-QLP solver for symmetric indefinte linear systems.  T
 minresqlp::indefinite = "`1` appears to be indefinite.";
 Options[minresqlp] = {rTolerance -> $MachineEpsilon, 
    maxIterations -> Automatic, maxXNorm -> 10.0^7, aConditionLimit -> 10.0^15, 
-   tranCondition -> 10.0^7, showDetails -> True, returnVectors->True};
+   tranCondition -> 10.0^7, printDetails -> False, returnVectors->True};
 minresqlp[A_?MatrixQ, rest__] := minresqlp[(A.#) &, rest];
 minresqlp[A_, b_, M_?MatrixQ, rest___] := 
   minresqlp[A, b, LinearSolve[M], rest];
@@ -225,7 +225,7 @@ Module[{
     (* Mimic MATLAB function *)
     zeros = Function[Array[0.0&, {##}]],
 
-    show = OptionValue[showDetails],
+    show = OptionValue[printDetails],
     rtol = OptionValue[rTolerance], maxxnorm = OptionValue[maxXNorm], 
     Acondlim = OptionValue[aConditionLimit],
     TranCond = OptionValue[tranCondition],
@@ -239,7 +239,7 @@ If[OptionValue[returnVectors],
    resvec = zeros[maxit + 1];
    Aresvec = zeros[maxit + 1]];
 
-(* Set up {beta1,p,v} for the first Lanczos vector v1. *)   
+(* Set up {beta1,p,v} for the first Lanczos vector v1. *) 
 r2 = N[b];        (* r2=b *)
 r3 = r2;          (* r3=b *)
 beta1 = Norm[r2]; (* beta1=norm(b) *)
@@ -323,7 +323,7 @@ While[flag == flag0 && iter < maxit,
 
     alfa = Re[Conjugate[r3].v]; (* Allow for Hermitian A. Must get real alfa here. *)
     r3 = r3 - (alfa/beta)*r2; r1 = r2; r2 = r3;
-    
+
     If[M === None,
        betan = Norm[r3];
        If[iter == 1, (* Something special can happen *)
@@ -342,7 +342,7 @@ While[flag == flag0 && iter < maxit,
     If[iter <= 2,
        pnorm = Norm[{alfa, betan}], 
        pnorm = Norm[{betal, alfa, betan}]];
-    
+
     If[debug,
        Print["Lanczos iteration ", iter, ":"];
        Print["  v_", iter, "     = ", Take[v, Min[n, 5]]];
@@ -352,13 +352,13 @@ While[flag == flag0 && iter < maxit,
        Print["  alpha_", iter, " = ", alfa, ", beta_", iter, " = ", 
              beta, ", beta_", iter + 1, " = ", betan, " pnorm_", iter, 
              " = ", pnorm]];
-    
+
     (* Apply previous left reflection Q_{k-1} *)
     Block[{dbar = dltan},
     dlta = cs*dbar + sn*alfa; epln = eplnn;
     gbar = sn*dbar - cs*alfa; eplnn = sn*betan;
     dltan = -cs*betan; dltaQLP = dlta;
- 
+
     If[debug, 
        Print["Apply previous left reflection Q_{", iter-1, ",", iter, "}:"];
        Print["  c_", iter-1, "     = ", cs,", s_", iter-1,"    = ",sn];
@@ -376,7 +376,7 @@ While[flag == flag0 && iter < maxit,
        Print["  c_",iter, "     = ",cs, ", s_",iter,"    = ",sn];
        Print["  tau_",iter,"   = ",tau,", phi_",iter,"  = ",phi];
        Print["  gama_", iter, " = ", gama]];
-    
+
     (* Apply the previous right reflection P{k-2,k} *)
     Block[{dltaTmp},
     If[iter > 2,
@@ -384,7 +384,7 @@ While[flag == flag0 && iter < maxit,
        dltaTmp = sr2*vepln - cr2*dlta;
        veplnl = cr2*vepln + sr2*dlta;
        dlta = dltaTmp; eta = sr2*gama; gama = -cr2*gama;
-       
+
        If[debug, 
           Print["Apply the previous right reflection P_{",iter-2,",",iter,"}:"];
           Print["  cr2_",iter, "   = ",cr2,", sr2_",iter, "    = ",sr2];
@@ -398,13 +398,13 @@ While[flag == flag0 && iter < maxit,
        {cr1, sr1, gamal} = SymOrtho[gamal, dlta];
        vepln = sr1*gama;
        gama = -cr1*gama;
-       
+
        If[debug, 
           Print["Compute the second current right reflections P_{",iter-1,",",iter,"}:"];
           Print["  cr1_",iter, "   = ", cr1, ", sr1_",iter,"   = " sr1];
           Print["  gama_",iter-1, " = ", gamal, ", gama_",iter, 
 		" = ", gama, ", vepln_",iter, " = ", vepln]]];
-    
+
     (* Update xnorm *)
     Block[{ul4 = ul3,xnormTmp},
     xnorml = xnorm; ul3 = ul2;
@@ -423,7 +423,7 @@ While[flag == flag0 && iter < maxit,
     xnorm = Norm[{xl2norm, ul, u}]];
 
     (* Update w.Update x except if it will become too big *)
-    If[Acond < TranCond && flag != flag0 && QLPiter == 0,
+    If[Acond < TranCond && flag == flag0 && QLPiter == 0,
        (* MINRES updates *)
        wl2 = wl; wl = w;
        w = (v - epln*wl2 - dltaQLP*wl)*(1/gamaTmp);
@@ -461,7 +461,7 @@ While[flag == flag0 && iter < maxit,
              "     = ", ul, ", u_",iter, "     = ", u];
        Print["  x_",iter, "     = ", Take[x, Min[n, 5]]];
        Print["  ||x_",iter, "|| = ", xnorm]];
-    
+
     (* Compute the next right reflection P{k-1,k+1} *)
     gamalTmp = gamal;
     {cr2, sr2, gamal} = SymOrtho[gamal, eplnn];
@@ -487,7 +487,7 @@ While[flag == flag0 && iter < maxit,
     Arnorml = rnorml*rootl;
     relAresl = rootl/Anorm];
 
-    (* See if any of the stopping criteria are satisfied. *)  
+    (* See if any of the stopping criteria are satisfied. *)
     Block[{epsx = Anorm*xnorm*eps, t1, t2},
 	  If[flag == flag0 || flag == 9,
 	     t1 = 1 + relres;
@@ -500,7 +500,7 @@ While[flag == flag0 && iter < maxit,
              If[t1 <= 1, flag = 3]; (* Accurate Ax=b solution *)
              If[relAresl <= rtol, flag = 2]; (* Good enough LS solution *)
              If[relres <= rtol, flag = 1]; (* Good enough Ax=b solution *)
-	     
+
              If[debug,
 		Print["Update other norms:"];
 		Print["  gmin_",iter, "   = ", gmin];
@@ -538,7 +538,7 @@ If[disable && (iter<maxit),
           If[iter > 1 && Mod[iter, headlines] == 1,
 	     Print[head]]]]];
 
-(* We have exited the main loop. *) 
+(* We have exited the main loop. *)
 Block[{Arnorm, relAres,
        start = If[QLPiter == 1, "P", " "],
        Miter = iter - QLPiter},
@@ -654,13 +654,13 @@ If[ Im[a]==0 && Im[b]==0,
 	  (* Both a and b are non-zero *)
 	  absb > absa,
 	  t = a/b;
-	  s = signb / Sqrt[1 + t^2]; 
+	  s = signb / Sqrt[1 + t^2];
 	  c = s*t;
 	  r = b/s, (* computationally better than d = a / c since |c| <= |s| *)
 
 	  True,
-	  t = b/a; 
-	  c = signa / Sqrt[1 + t^2]; 
+	  t = b/a;
+	  c = signa / Sqrt[1 + t^2];
 	  s = c*t;
 	  r = a/c], (* computationally better than d = b / s since |s| <= |c| *)
 

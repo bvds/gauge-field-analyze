@@ -6,7 +6,7 @@ The intention here is for the Mathematica code to match, as close as possible,
 the original MATLAB code.
  
 function [ x, istop, itn, rnorm, Arnorm, Anorm, Acond, ynorm resvec] = ...
-           minres( A, b, M, shift, showDetails, check, itnLimit,
+           minres( A, b, M, shift, printDetails, check, maxIterations,
                    rTolerance, localSize )
 
 minres solves the n x n system of linear equations Ax = b
@@ -72,8 +72,9 @@ Known bugs:
 
 minres::usage = 
   "MINRES solver for symmetric indefinte linear systems.  The matrix can be expressed as a pure function that acts on a vector.";
-Options[minres] := {showDetails -> False, check -> True, itnLimit -> Automatic,
-    rTolerance -> $MachineEpsilon, localSize -> 0};
+Options[minres] := {printDetails -> False, check -> True,
+    maxIterations -> Automatic, rTolerance -> $MachineEpsilon,
+    localSize -> 0};
 minres[A_?MatrixQ, rest__] := minres[(A.#) &, rest];
 minres[A_, b_, M_?MatrixQ, rest___] := 
   minres[A, b, LinearSolve[M], rest];
@@ -83,7 +84,7 @@ minres[A_Function, b_,
 
  (* Initialize *)
  Module[{(* MATLAB constants *) eps = $MachineEpsilon, 
-   realmax = $MaxMachineNumber, (* Mimic MATLAB function *) 
+   realmax = $MaxMachineNumber, (* Mimic MATLAB function *)
    zeros = Function[Array[0.0 &, {##}]],
    localOrtho, localVEnqueue, localVOrtho,
    msg = {"beta2=0. If M=I, b and x are eigenvectors", 
@@ -98,17 +99,17 @@ minres[A_Function, b_,
      "M does not define a symmetric matrix", 
 	  "M does not define a pos-def preconditioner"},
     n = Length[b],	 
-   itnlim = OptionValue[itnLimit], rtol = OptionValue[rTolerance], 
-   show = OptionValue[showDetails], istop = 0, itn = 0, Anorm = 0, Acond = 0,
+   itnlim = OptionValue[maxIterations], rtol = OptionValue[rTolerance], 
+   show = OptionValue[printDetails], istop = 0, itn = 0, Anorm = 0, Acond = 0,
     rnorm = 0, ynorm = 0, done = False, x, resvec, y, r1, beta1, 
    Arnorm},
    If[itnlim === Automatic, itnlim = 5 n]; (* Not in MATLAB code *)
   If[show,
     Print["minres.m SOL, Stanford University Version of 2015"];
-    Print["Solution of symmetric Ax=b or (A-shift*I)x=b"]; 
-    Print["n=", n, " shift=", shift]; 
+    Print["Solution of symmetric Ax=b or (A-shift*I)x=b"];
+    Print["n=", n, " shift=", shift];
     Print["itnlim=", itnlim, " rtol=", rtol]];
-  x = zeros[n]; 
+  x = zeros[n];
   resvec = zeros[itnlim];
 
   (* Initialization for local reorthogonalization *)
@@ -118,16 +119,16 @@ minres[A_Function, b_,
   (* Set up y and v for the first Lanczos vector v1.
      y=beta1 P^T v1, where P=C**(-1).
      v is really P^T v1. *)
-  y = N[b]; 
+  y = N[b];
   r1 = N[b]; (* initial guess x=0 initial residual *)
   If[M =!= None, y = M[b]];
   beta1 = Conjugate[b].y;
- 
+
   (* Test for an indefinite preconditioner.
   If b=0 exactly, stop with x=0. *)
-  
-  If[beta1 < 0, istop = 9; show = True; done = True]; 
-  If[beta1 == 0, show = True; done = True]; 
+
+  If[beta1 < 0, istop = 9; show = True; done = True];
+  If[beta1 == 0, show = True; done = True];
   If[beta1 > 0,
    beta1 = Sqrt[beta1]; (* Normalize y to get v1 later.*)
 
@@ -136,9 +137,9 @@ minres[A_Function, b_,
     Block[{r2, s, t, z, epsa},
      r2   = M[y];
      s    = y.y;
-     t    = r1.r2; 
+     t    = r1.r2;
      z    = Abs[s - t];
-     epsa = (s + eps)*eps^(1/3); 
+     epsa = (s + eps)*eps^(1/3);
      If[z > epsa, istop = 8; show = True; done = True]]];
 
    (* See if A is symmetric. *)
@@ -146,10 +147,10 @@ minres[A_Function, b_,
     Block[{r2, w, s, t, z, epsa},
      w    = A[y];
      r2   = A[w];
-     s    = w.w; 
+     s    = w.w;
      t    = y.r2;
      z    = Abs[s - t];
-     epsa = (s + eps)*eps^(1/3); 
+     epsa = (s + eps)*eps^(1/3);
      If[ z > epsa, istop = 7; done = True; show = True]]]];
 
   (* Initialize other quantities. *)
@@ -182,7 +183,7 @@ minres[A_Function, b_,
 
      (* if localOrtho turned on store old v for local reorthogonaliztion of new v *)
      If[localOrtho,
-	localVEnqueue[v]]; 
+	localVEnqueue[v]];
      y = A[v] - shift*v; (* shift is 0 otherwise solving A-shift*I *)
      If[itn >= 2,
 	y = y - (beta/oldb)*r1]; (* normalization is the division r1 by oldb *)
@@ -198,7 +199,7 @@ minres[A_Function, b_,
      oldb = beta; (* oldb=betak *)
      beta = r2.y; (* beta=betak+1^2 *)
      If[beta < 0, istop = 9; Break[]];
-     beta = Sqrt[beta]; 
+     beta = Sqrt[beta];
      tnorm2 = tnorm2 + alfa^2 + oldb^2 + beta^2;
 
      If[itn == 1,  (* Initialize a few things. *)
@@ -211,10 +212,10 @@ minres[A_Function, b_,
      Block[{oldeps, delta, gbar, root, gamma, phi, epsx, epsr}, 
       oldeps = epsln;
       delta = cs*dbar + sn*alfa; (* delta1=0 deltak *)
-      gbar  = sn*dbar - cs*alfa; (* gbar 1=alfa1 gbar k *) 
+      gbar  = sn*dbar - cs*alfa; (* gbar 1=alfa1 gbar k *)
       epsln = sn*beta; (* epsln2=0 epslnk+1 *)
       dbar  = -cs*beta; (* dbar 2=beta2 dbar k+1 *)
-      root = Norm[{gbar, dbar}]; 
+      root = Norm[{gbar, dbar}];
       Arnorm = phibar*root; (* ||Ar{k-1}|| *)
 
       (* Compute the next plane rotation Qk *)
@@ -222,37 +223,37 @@ minres[A_Function, b_,
       gamma = Max[gamma, eps];
       cs = gbar/gamma; (* ck *)
       sn = beta/gamma; (* sk *)
-      phi = cs*phibar; (* phik *) 
+      phi = cs*phibar; (* phik *)
       phibar = sn*phibar; (* phibark+1 *)
 
       (* Update x. *)
       Block[{denom, w1},
        denom = 1/gamma;
        w1 = w2;
-       w2 = w; 
+       w2 = w;
        w = (v - oldeps*w1 - delta*w2)*denom];
        x = x + phi*w;
 
       (* Go round again. *)
-      gmax = Max[gmax, gamma]; 
-      gmin = Min[gmin, gamma]; 
+      gmax = Max[gmax, gamma];
+      gmin = Min[gmin, gamma];
       Block[{z = rhs1/gamma},
-       rhs1 = rhs2 - delta*z; 
+       rhs1 = rhs2 - delta*z;
        rhs2 = -epsln*z];
 
       (* Estimate various norms. *)
       Block[{epsa, diag},
        Anorm = Sqrt[tnorm2];
        ynorm = Norm[x];
-       epsa = Anorm*eps; 
+       epsa = Anorm*eps;
        epsx = Anorm*ynorm*eps;
        epsr = Anorm*ynorm*rtol;
-       diag = gbar; 
+       diag = gbar;
        If[diag == 0, diag = epsa]];
 
       qrnorm = phibar;
       rnorm = qrnorm;
-      resvec[[itn]] = rnorm; 
+      resvec[[itn]] = rnorm;
       Block[{test1, test2},
 	test1 = rnorm/(Anorm*ynorm); (* ||r|| /(||A|| ||x||) *)
 	test2 = root/Anorm; (* ||Ar{k-1}|| /(||A|| ||r_{k-1}||) *)
@@ -261,7 +262,7 @@ minres[A_Function, b_,
 	  In this version we look at the diagonals of R in the
 	  factorization of the lower Hessenberg matrix, Q*H=R,
           where H is the tridiagonal matrix from Lanczos with one
-	  extra row, beta(k+1) e_k^T. *) 
+	  extra row, beta(k+1) e_k^T. *)
        Acond = gmax/gmin;
 
        (* See if any of the stopping criteria are satisfied. 
@@ -270,50 +271,50 @@ minres[A_Function, b_,
         Block[{t1, t2},
 	 t1 = 1 + test1; (* These tests work if rtol<eps *)
 	 t2 = 1 + test2;
-	 If[t2 <= 1, istop = 2]; 
+	 If[t2 <= 1, istop = 2];
          If[t1 <= 1, istop = 1];
-         If[itn >= itnlim, istop = 6]; 
-         If[Acond >= 0.1/eps, istop = 4]; 
+         If[itn >= itnlim, istop = 6];
+         If[Acond >= 0.1/eps, istop = 4];
          If[epsx >= beta1, istop = 3];
-	 If[test2 <= rtol, istop = 2]; 
+	 If[test2 <= rtol, istop = 2];
          If[test1 <= rtol, istop = 1]]];
 
        (* See if it is time to print something. *)
        Block[{prnt = False, debug, ww, vv, trueArnorm}, 
         If[n <= 40, prnt = True];
-	If[itn <= 10, prnt = True]; 
-        If[itn >= itnlim - 10, prnt = True]; 
-        If[Mod[itn, 10] == 0, prnt = True]; 
-        If[qrnorm <= 10*epsx, prnt = True]; 
-        If[qrnorm <= 10*epsr, prnt = True]; 
-        If[Acond <= 10^-2/eps, prnt = True]; 
-        If[istop != 0, prnt = True]; 
+	If[itn <= 10, prnt = True];
+        If[itn >= itnlim - 10, prnt = True];
+        If[Mod[itn, 10] == 0, prnt = True];
+        If[qrnorm <= 10*epsx, prnt = True];
+        If[qrnorm <= 10*epsr, prnt = True];
+        If[Acond <= 10^-2/eps, prnt = True];
+        If[istop != 0, prnt = True];
         If[show && prnt,
 	 If[Mod[itn, 10] == 0, Print[""]];
-	   Print[{itn, x[[1]], test1, test2, Anorm, Acond, gbar/Anorm}]]; 
+	   Print[{itn, x[[1]], test1, test2, Anorm, Acond, gbar/Anorm}]];
 
 	debug = False (* True *);
 	If[debug, (* Print true Arnorm.
                      This works only if no preconditioning. *)
          vv = b - A[x] + shift*x; (* vv=b-(A-shift*I)*x *)
          ww = A[vv] - shift*vv; (*  ww=(A-shift*I)*vv="Ar" *)
-         trueArnorm = Norm[ww]; 
+         trueArnorm = Norm[ww];
          Print["Arnorm=", Arnorm, " True||Ar|| =", trueArnorm]]];
  
        If[istop != 0, Break[]]]]]]];
   resvec = Take[resvec, {itn}];
 
-  (* Display final status. *) 
+  (* Display final status. *)
   If[show,
-   Print["istop=", istop, " itn=", itn]; 
-   Print["Anorm=", Anorm, " Acond=", Acond]; 
+   Print["istop=", istop, " itn=", itn];
+   Print["Anorm=", Anorm, " Acond=", Acond];
    Print["rnorm=", rnorm, " ynorm=", ynorm];
    Print["Arnorm=", Arnorm];
    Print[msg[[istop + 2]]]];
   {x, istop, itn, rnorm, Arnorm, Anorm, Acond, ynorm resvec}];
 (*  End function minres.m *)
 
-makrOrtho::usage = "Create instance of the orthogonalizer."; 
+makrOrtho::usage = "Create instance of the orthogonalizer.";
 makeOrtho[n_, localSizeIn_] := 
  Module[{localPointer, localOrtho, localSize = localSizeIn, 
    localVQueueFull, localV, localVEnqueue, localVOrtho},
@@ -349,6 +350,6 @@ makeOrtho[n_, localSizeIn_] :=
        (* orthogonalize to each stored vector-
        note we don't have to normalize since it is explicitly done
        in the code and so we don't need to redo it *)], 
-       {localOrthoCount, localOrthoLimit}]; 
-     vOutput]]; 
+       {localOrthoCount, localOrthoLimit}];
+     vOutput]];
   {localOrtho, localVEnqueue, localVOrtho}];
