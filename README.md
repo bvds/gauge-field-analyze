@@ -44,4 +44,27 @@ To build:
  - Sara Collins, Regensburg:
    - [Usage example for `purgage`](https://homepages.uni-regensburg.de/~cos14742/lqcd-1/exercise5/extras/purgaug.html)
    - [slides](https://homepages.uni-regensburg.de/~cos14742/lqcd-1/exercise5/extras/slides.pdf)
-   
+
+# MATLAB linear system solvers #
+
+To find stationary points of the action for some lattice configuration
+we need a Krylov space method for solving symmtric-indefinite
+singular (or incompatible) linear systems.
+
+The MINRES-QLP algorithm can handle this case, however the associated [MATLAB
+code](https://www.mathworks.com/matlabcentral/fileexchange/42419-minres-qlp) contains an error. Also, I cleaned up the code a bit:
+
+* Initialization error in `minresxxxM` (lines 746, 747)
+
+* Replace `length(x)>0` with `~isempty(x)`
+
+* Value of w_{k-3} (lines 557 to 559) is never used.
+
+* `gamal3` is never used.
+
+* Initial value is overwritten:  `gamal2`, `u`, and `wl2`.
+
+* Added explicit `end` to each function.
+
+Modified version:  [`matlab-lib/minresqlp.m`](matlab-lib/minresqlp.m).
+I used this mainly to validate my export of the code to Mathematica.
