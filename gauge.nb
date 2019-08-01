@@ -2173,7 +2173,8 @@ we can handle fixed>0.\>\""}], ";",
      RowBox[{
       RowBox[{"fixed", "<", "1"}], ",", "1", ",", 
       RowBox[{"1", "/", 
-       RowBox[{"latticeDimensions", "[", "fixed", "]"}]}]}], "]"}]}]}], 
+       RowBox[{"latticeDimensions", "[", 
+        RowBox[{"[", "fixed", "]"}], "]"}]}]}], "]"}]}]}], 
   ";"}], "\[IndentingNewLine]", 
  RowBox[{
   RowBox[{
@@ -7676,6 +7677,11 @@ Cell[BoxData[
   "\"\<../data/3-3/periodic-4-7.5-3.m\>\""}]], \
 "Input",ExpressionUUID->"b526a658-67f0-4875-8ac5-1b6bfa49b5a2"],
 
+Cell[BoxData[
+ RowBox[{"<<", 
+  "\"\<../data/3-3/periodic-6-8.175-3.m\>\""}]], \
+"Input",ExpressionUUID->"de8dcad6-ee9f-4c4d-b8ef-a91861ade22e"],
+
 Cell[CellGroupData[{
 
 Cell[BoxData[
@@ -7694,15 +7700,15 @@ Cell[BoxData[
   RowBox[{"\<\"times:  \"\>", "\[InvisibleSpace]", 
    RowBox[{"{", 
     RowBox[{
-    "2.2152950000000000003`3.3095553494185674", ",", 
-     "2.642562`6.572540183382698", ",", "0.70001`5.995619242008818", ",", 
-     "0.017128`4.384221652118372"}], "}"}]}],
+    "8.5850959999999999996`3.369595160848135", ",", 
+     "10.216313`7.1598091878910415", ",", "22.729036`7.507096014341888", ",", 
+     "0.060053`4.929049705672529"}], "}"}]}],
   SequenceForm[
   "times:  ", {
-   2.2152950000000000003`3.3095553494185674, 2.642562`6.572540183382698, 
-    0.70001`5.995619242008818, 0.017128`4.384221652118372}],
+   8.5850959999999999996`3.369595160848135, 10.216313`7.1598091878910415, 
+    22.729036`7.507096014341888, 0.060053`4.929049705672529}],
   Editable->
-   False]], "Print",ExpressionUUID->"b0a193fe-ad65-4c1c-968c-728c882398aa"]
+   False]], "Print",ExpressionUUID->"656a6c45-864d-4f1b-b820-9cd082e6e1ce"]
 }, Open  ]],
 
 Cell[CellGroupData[{
@@ -7722,15 +7728,43 @@ Cell[BoxData[
   RowBox[{"\<\"times:  \"\>", "\[InvisibleSpace]", 
    RowBox[{"{", 
     RowBox[{
-    "2.3329809999999999993`3.3320349840126378", ",", 
-     "2.774332`6.593673429025065", ",", "1.178999`6.2220284345685855", ",", 
-     "0.017208`4.386245395211396"}], "}"}]}],
+    "8.3354660000000000013`3.356779889346003", ",", 
+     "9.976034`7.149472918453561", ",", 
+     "35.3743689999999999999`7.699203699586607", ",", 
+     "0.065682`4.967961366299944"}], "}"}]}],
   SequenceForm[
   "times:  ", {
-   2.3329809999999999993`3.3320349840126378, 2.774332`6.593673429025065, 
-    1.178999`6.2220284345685855, 0.017208`4.386245395211396}],
+   8.3354660000000000013`3.356779889346003, 9.976034`7.149472918453561, 
+    35.3743689999999999999`7.699203699586607, 0.065682`4.967961366299944}],
   Editable->
-   False]], "Print",ExpressionUUID->"94af9cfc-13c3-40c9-b2e3-57301f8643dd"]
+   False]], "Print",ExpressionUUID->"01206b62-3a76-4832-87aa-b5029a662385"]
+}, Open  ]],
+
+Cell[CellGroupData[{
+
+Cell[BoxData[
+ RowBox[{
+  RowBox[{"latticeSaddlePointStep", "[", 
+   RowBox[{
+    RowBox[{"storePairs", "\[Rule]", "True"}], ",", 
+    RowBox[{"rescaleCutoff", "\[Rule]", "Infinity"}], ",", 
+    RowBox[{"fixedDir", "\[Rule]", "2"}]}], "]"}], 
+  ";"}]], "Input",ExpressionUUID->"960616c7-1d22-419a-9ab1-93fd71aac29e"],
+
+Cell[BoxData[
+ InterpretationBox[
+  RowBox[{"\<\"times:  \"\>", "\[InvisibleSpace]", 
+   RowBox[{"{", 
+    RowBox[{
+    "2.1219300000000000022`3.290854835068834", ",", 
+     "2.476049`6.544274232775812", ",", "1.083061`6.185167915415158", ",", 
+     "0.021682`4.4866143379170795"}], "}"}]}],
+  SequenceForm[
+  "times:  ", {
+   2.1219300000000000022`3.290854835068834, 2.476049`6.544274232775812, 
+    1.083061`6.185167915415158, 0.021682`4.4866143379170795}],
+  Editable->
+   False]], "Print",ExpressionUUID->"1134769c-6a0c-470a-8ffe-5851336e191e"]
 }, Open  ]],
 
 Cell[CellGroupData[{
@@ -11321,7 +11355,7 @@ Cell[BoxData[
 }, Open  ]]
 },
 WindowSize->{765, 655},
-WindowMargins->{{99, Automatic}, {Automatic, 34}},
+WindowMargins->{{234, Automatic}, {39, Automatic}},
 PrivateNotebookOptions->{"FileOutlineCache"->False},
 TrackCellChangeTimes->False,
 FrontEndVersion->"11.2 for Linux x86 (64-bit) (September 10, 2017)",

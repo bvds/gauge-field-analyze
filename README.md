@@ -68,5 +68,6 @@ code](https://www.mathworks.com/matlabcentral/fileexchange/42419-minres-qlp) con
 
 * Added explicit `end` to each function.
 
-Modified version:  [`matlab-lib/minresqlp.m`](matlab-lib/minresqlp.m).
+Modified versions:  [`matlab-lib/minresqlpFull.m`](matlab-lib/minresqlpFull.m)
+and [`matlab-lib/minresqlp0.m`](matlab-lib/minresqlp0.m) (no MINRES version).
 I used this mainly to validate my export of the code to Mathematica.
