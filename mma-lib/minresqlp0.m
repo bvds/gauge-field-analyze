@@ -3,32 +3,31 @@
  
 Import MATLAB code from https://web.stanford.edu/group/SOL/software/minresqlp/
 The intention here is for the Mathematica code to match, as close as possible,
-the original MATLAB code.
+the original MATLAB code.  This version does not use MINRES.
  
-function [x, flag, iter, Miter, QLPiter, relres, relAres, 
+function [x, flag, iter, relres, relAres, 
         Anorm, Acond, xnorm, Axnorm, resvec, Aresvec] =
-    minresqlp(A, b, M, shift, rtol, maxit, maxxnorm, Acondlim,
-        TranCond, show)
+    minresqlp0(A, b, M, shift, rtol, maxit, maxxnorm, Acondlim, show)
 
-MINRESQLP: min-length solution to symmetric (possibly singular) Ax=b or
+MINRESQLP0: min-length solution to symmetric (possibly singular) Ax=b or
 min||Ax-b||.
 
-MINRESQLP(A,B) solves the system of linear equations A*X=B
+MINRESQLP0(A,B) solves the system of linear equations A*X=B
 or the least-squares problem min norm(B-A*X) if A is singular.
 The N-by-N matrix A must be symmetric or Hermitian, but need not be
 positive definite or nonsingular.  The rhs vector B must have length N.
 
-MINRESQLP(AFUN,B) accepts a function handle AFUN instead of
+MINRESQLP0(AFUN,B) accepts a function handle AFUN instead of
 the matrix A.  Y = AFUN(X) returns the matrix-vector product Y=A*X.
 In all of the following syntaxes, A can be replaced by AFUN.
 
-MINRESQLP(A,B,M) uses a matrix M as preconditioner.
+MINRESQLP0(A,B,M) uses a matrix M as preconditioner.
 M must be positive definite and symmetric or Hermitian.
 It may be a function handle MFUN such that Y=MFUN(X) returns a
 solution of M.Y=X.
 If M is not supplied or M=None, a preconditioner is not applied.
 
-MINRESQLP(A,B,M,SHIFT) solves (A - SHIFT*I)X = B, or the corresponding
+MINRESQLP0(A,B,M,SHIFT) solves (A - SHIFT*I)X = B, or the corresponding
 least-squares problem if (A - SHIFT*I) is singular, where SHIFT is a
 real scalar.
 Default SHIFT = 0.
@@ -39,7 +38,7 @@ Default rTolerance = machine epsilon.
 maxIterations specifies the maximum number of iterations.
 Default maxIterations = 4*N.
 
-maxXNorm, aConditionLimit, tranCondition are three parameters associated
+maxXNorm, aConditionLimit are parameters associated
 with singular or ill-conditioned systems (A - SHIFT*I)*X = B.
 
 maxXNorm is an upper bound on norm(X). Alternatively, maxXNorm may be
@@ -49,14 +48,6 @@ Default maxXNorm = 10^7.
 aConditionLimit is an upper bound on ACOND, an estimate of condition(A).
 Default aConditionLimit = 10^15.
 
-tranCondition is a real scalar >= 1.
-If tranCondition>1,        a switch is made from MINRES iterations to
-                      MINRES-QLP iterationsd when ACOND >= TRANCOND.
-If tranCondition=1,        all iterations will be MINRES-QLP iterations.
-If tranCondition=aConditionLimit, all iterations will be conventional
-                   MINRES iterations (which are slightly cheaper).
-Default trandCondition = 10^7.
-
 printDetails specifies the printing option.
 If printDetails=True,  an iteration log will be output.
 If printDetails=False, the log is suppressed.
@@ -64,7 +55,7 @@ Default printDetails=False.
 
 If returnVectors is True, then the RESVEC and ARESVEC are returned.
 
-Returns an array {X, FLAG, ITER, MITER, QLPITER, RELRES, RELARES,
+Returns an array {X, FLAG, ITER, RELRES, RELARES,
 ANORM, ACOND, XNORM, AXNORM, RESVEC, ARESVEC} where:
 
 X is the solution
@@ -93,9 +84,7 @@ Convergence FLAG:
    yet exceed MAXXNORM, but would if further iterations were
    performed.
 
-The number of iterations performed, with ITER = MITER + QLPITER.
- MITER   is the number of conventional MINRES iterations.
- QLPITER is the number of MINRES-QLP iterations.
+ITER:  The number of iterations performed.
 
 The relative residuals for (A - SHIFT*I)X = B and the
 associated least-squares problem.  RELRES and RELARES are
@@ -208,15 +197,15 @@ COMMENTS?
 Email sctchoi@uchicago.edu and saunders@stanford.edu 
 *)
 
-minresqlp::usage = "MINRES-QLP solver for symmetric indefinte linear systems.  The matrix can be expressed as a pure function that acts on a vector.";
-minresqlp::indefinite = "`1` appears to be indefinite.";
-Options[minresqlp] = {rTolerance -> $MachineEpsilon, 
+minresqlp0::usage = "MINRES-QLP solver for symmetric indefinte linear systems.  The matrix can be expressed as a pure function that acts on a vector.";
+minresqlp0::indefinite = "`1` appears to be indefinite.";
+Options[minresqlp0] = {rTolerance -> $MachineEpsilon, 
    maxIterations -> Automatic, maxXNorm -> 10.0^7, aConditionLimit -> 10.0^15, 
-   tranCondition -> 10.0^7, printDetails -> False, returnVectors->True};
-minresqlp[A_?MatrixQ, rest__] := minresqlp[(A.#) &, rest];
-minresqlp[A_, b_, M_?MatrixQ, rest___] := 
-  minresqlp[A, b, LinearSolve[M], rest];
-minresqlp[A_Function, b_, M:(None|_Function|_LinearSolveFunction):None, 
+   printDetails -> False, returnVectors->True};
+minresqlp0[A_?MatrixQ, rest__] := minresqlp0[(A.#) &, rest];
+minresqlp0[A_, b_, M_?MatrixQ, rest___] := 
+  minresqlp0[A, b, LinearSolve[M], rest];
+minresqlp0[A_Function, b_, M:(None|_Function|_LinearSolveFunction):None, 
 	  shift:_?NumberQ:0, OptionsPattern[]] := 
 Module[{
     (* MATLAB constants *)
@@ -229,7 +218,6 @@ Module[{
     show = OptionValue[printDetails],
     rtol = OptionValue[rTolerance], maxxnorm = OptionValue[maxXNorm], 
     Acondlim = OptionValue[aConditionLimit],
-    TranCond = OptionValue[tranCondition],
     maxit = OptionValue[maxIterations],
 
     debug = False,
@@ -248,32 +236,31 @@ If[M =!= None,
    r3 = M[r2]; (* M*r3=b *)
    beta1 = Conjugate[r3].r2; (* beta1=b'*inv(M)*b *)
    If[beta1 < 0,
-      Message[minresqlp::indefinite, "M"];
+      Message[minresqlp0::indefinite, "M"];
       beta1 = $Failed,
       beta1 = Sqrt[beta1]]];
 
 (* Initialize other quantities. *)
 Block[{
 flag0 = -2, flag,
-iter = 0, QLPiter = 0,
+iter = 0,
 lines = 1, headlines = 20,
 beta = 0, tau = 0, taul = 0, phi = beta1, 
 betan = beta1, gmin = 0, cs = -1, sn = 0,
 cr1 = -1, sr1 = 0, cr2 = -1, sr2 = 0,
-dltan = 0, eplnn = 0, gama = 0, gamal = 0, 
+dltan = 0, eplnn, gama = 0, gamal = 0, 
 gamal2, eta = 0, etal = 0, etal2 = 0,
 vepln = 0, veplnl = 0, veplnl2 = 0, ul3 = 0,
 ul2 = 0, ul = 0, u, rnorm,
 xnorm = 0, xl2norm = 0, Axnorm = 0,
 Anorm = 0, Acond = 1,
-gamaQLP = 0, gamalQLP = 0, veplnQLP = 0, gminl = 0,
-uQLP = 0, ulQLP = 0, 
+gminl = 0,
 relres,
 relresl = 0,
 relAresl = 0,
 x, xl2, w, wl, wl2, r1,
-betal, alfa, pnorm, dlta, gbar, xnorml, taul2, epln,
-likeLS, Anorml, Acondl, rnorml, Arnorml, dltaQLP, gamaTmp, gamalTmp}, 
+betal, alfa, pnorm, dlta, gbar, xnorml, taul2,
+likeLS, Anorml, Acondl, rnorml, Arnorml}, 
 flag = flag0; rnorm = betan;
 relres = rnorm/(beta1 + 10.0^-50); (* Safeguard for beta1=0 *)
 x = zeros[n];
@@ -285,8 +272,8 @@ r1 = x;
 If[resvec =!= None, resvec[[1]] = Re[beta1]];
 
 (* print header if show *)
-Block[{first = "Enter minresqlp.  ",
-last = "Exit minresqlp.  ", 
+Block[{first = "Enter minresqlp0.  ",
+last = "Exit minresqlp0.  ", 
 msg = {
         " beta2=0.  b and x are eigenvectors                   ", (* -1 *)
         " beta1=0.  The exact solution is  x = 0               ", (* 0 *)
@@ -308,7 +295,7 @@ If[show,
 	 "   rtol=",rtol];
    Print["maxit=",maxit,"   maxxnorm=", If[NumberQ[maxxnorm],maxxnorm,
 					   "function"], 
-	 "   Acondlim=",Acondlim,"   TranCond=", TranCond];
+	 "   Acondlim=",Acondlim];
    Print[" ",head]];
 
 If[beta1 == 0, flag = 0]; (* b=0 => x=0. We will skip the main loop. *)
@@ -339,7 +326,7 @@ While[flag == flag0 && iter < maxit,
        r3 = M[r2]; betan = Conjugate[r2].r3;
        If[betan > 0,
 	  betan = Sqrt[betan], 
-          Message[minresqlp::indefinite, "M"];
+          Message[minresqlp0::indefinite, "M"];
           betan = $Failed]];
     If[iter <= 2,
        pnorm = Norm[{alfa, betan}], 
@@ -357,9 +344,9 @@ While[flag == flag0 && iter < maxit,
 
     (* Apply previous left reflection Q_{k-1} *)
     Block[{dbar = dltan},
-    dlta = cs*dbar + sn*alfa; epln = eplnn;
+    dlta = cs*dbar + sn*alfa;
     gbar = sn*dbar - cs*alfa; eplnn = sn*betan;
-    dltan = -cs*betan; dltaQLP = dlta;
+    dltan = -cs*betan;
 
     If[debug, 
        Print["Apply previous left reflection Q_{", iter-1, ",", iter, "}:"];
@@ -369,7 +356,7 @@ While[flag == flag0 && iter < maxit,
 
     (* Compute the current left reflection Q_k *)
     gamal2 = gamal; gamal = gama;
-    {cs, sn, gama} = SymOrtho[gbar, betan]; gamaTmp = gama;
+    {cs, sn, gama} = SymOrtho[gbar, betan];
     taul2 = taul; taul = tau; tau = cs*phi;
     Axnorm = Norm[{Axnorm, tau}]; phi = sn*phi;
 
@@ -424,35 +411,20 @@ While[flag == flag0 && iter < maxit,
     xl2norm = Norm[{xl2norm, ul2}];
     xnorm = Norm[{xl2norm, ul, u}]];
 
-    (* Update w. Update x except if it will become too big *)
-    If[Acond < TranCond && flag == flag0 && QLPiter == 0,
-       (* MINRES updates *)
-       wl2 = wl; wl = w;
-       w = (v - epln*wl2 - dltaQLP*wl)*(1/gamaTmp);
-       If[xnorm < maxxnorm,
-	  x = x + tau*w,
-	  flag = 6],
-
-       (* MINRES-QLP updates *)
-       QLPiter = QLPiter + 1;
-       If[QLPiter == 1,
+    (* Update w. Update x. *)
+    Which[iter == 1,
 	  xl2 = zeros[n];
-          If[iter > 1, (* construct w_{k-2}, w_{k-1} *)
-             If[iter > 2,
-		wl = gamalQLP*wl + veplnQLP*w]; (* w_{k-2} *)
-             w = gamaQLP*w; xl2 = x - wl*ulQLP - w*uQLP]];
-       Which[iter == 1,
-	     wl2 = wl; wl = v*sr1; w = -v*cr1,
-	     iter == 2, 
-             wl2 = wl;
-             wl = w*cr1 + v*sr1;
-             w = w*sr1 - v*cr1,
-             True,
-	     wl2 = wl; wl = w; w = wl2*sr2 - v*cr2;
-             wl2 = wl2*cr2 + v*sr2; v = wl*cr1 + w*sr1;
-             w = wl*sr1 - w*cr1; wl = v];
-       xl2 = xl2 + wl2*ul2;
-       x = xl2 + wl*ul + w*u];
+	  wl2 = wl; wl = v*sr1; w = -v*cr1,
+	  iter == 2, 
+          wl2 = wl;
+          wl = w*cr1 + v*sr1;
+          w = w*sr1 - v*cr1,
+          True,
+	  wl2 = wl; wl = w; w = wl2*sr2 - v*cr2;
+          wl2 = wl2*cr2 + v*sr2; v = wl*cr1 + w*sr1;
+          w = wl*sr1 - w*cr1; wl = v];
+    xl2 = xl2 + wl2*ul2;
+    x = xl2 + wl*ul + w*u;
 
     If[debug,
        Print["Update w:"];
@@ -465,12 +437,7 @@ While[flag == flag0 && iter < maxit,
        Print["  ||x_",iter, "|| = ", xnorm]];
 
     (* Compute the next right reflection P{k-1,k+1} *)
-    gamalTmp = gamal;
     {cr2, sr2, gamal} = SymOrtho[gamal, eplnn];
-
-    (* Store quantities for transfering from MINRES to MINRES-QLP *)
-    gamalQLP = gamalTmp; veplnQLP = vepln; gamaQLP = gama;
-    ulQLP = ul; uQLP = u;
 
     (* Estimate various norms *)
     Block[{gminl2, rootl, absGama},
@@ -534,16 +501,13 @@ If[disable && (iter<maxit),
 		lines = 10; headlines = 20*lines, 
 		iter == 1001,
 		lines = 100; headlines = 20*lines];
-          Print[If[QLPiter == 1, "P", " "],
-		{iter-1, rnorml, Arnorml, 
-		 relresl, relAresl, Anorml, Acondl, xnorml}];
+          Print[" ", {iter-1, rnorml, Arnorml, 
+		relresl, relAresl, Anorml, Acondl, xnorml}];
           If[iter > 1 && Mod[iter, headlines] == 1,
 	     Print[head]]]]];
 
 (* We have exited the main loop. *)
-Block[{Arnorm, relAres,
-       start = If[QLPiter == 1, "P", " "],
-       Miter = iter - QLPiter},
+Block[{Arnorm, relAres, start = " "},
 
 (* Compute final quantities directly. *)
 r1 = b - A[x] + shift*x; (* r1 is workspace for residual vector *)
@@ -565,14 +529,14 @@ If[show,
       Print[start, {iter, rnorm, Arnorm, relres, 0, Anorm, Acond, 
 		    xnorm}]]];
 Print[last, " flag=", flag, "   ", msg[[flag + 2]]];
-Print[last, " iter=",iter, "   (MINRES ",Miter,", MINRES-QLP ",QLPiter,")"];
+Print[last, " iter=",iter];
 Print[last, " rnorm=",rnorm,"   rnorm direct=",Norm[r1]];
 Print[last, "                   Arnorm direct=",Arnorm];
 Print[last, " xnorm=",xnorm,"   xnorm direct=",Norm[x]];
 Print[last, " Anorm=",Anorm,"   Acond=",Acond];
 
 (* Return values *)
-{x, flag, iter, Miter, QLPiter, relres, relAres, Anorm, Acond, xnorm, Axnorm, 
+{x, flag, iter, relres, relAres, Anorm, Acond, xnorm, Axnorm, 
  resvec, Aresvec}]]]];
 
 

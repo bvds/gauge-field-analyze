@@ -351,8 +351,7 @@ vepln    = 0;      veplnl   = 0;          veplnl2  = 0;      ul3      = 0;
 ul2      = 0;      ul       = 0;          rnorm    = betan;  % BvdS:  initial value of u overwritten     
 xnorm    = 0;      xl2norm  = 0;          Axnorm   = 0;
 Anorm    = 0;      Acond    = 1;
-gama_QLP = 0;      gamal_QLP= 0;         vepln_QLP = 0;      gminl    = 0;
-u_QLP    = 0;      ul_QLP   = 0;
+gminl    = 0;
 relres   = rnorm / (beta1 + 1e-50);       % Safeguard for beta1 = 0
 relresl  = 0;
 relAresl = 0;
@@ -552,10 +551,6 @@ while flag == flag0 && iter < maxit
 %% Compute the next right reflection P{k-1,k+1}
   gamal_tmp = gamal;
   [cr2,sr2,gamal] = SymOrtho(gamal,eplnn);
-
-%% Store quantities for transfering from MINRES to MINRES-QLP
-  gamal_QLP = gamal_tmp;     vepln_QLP = vepln;     gama_QLP = gama;
-  ul_QLP    = ul;            u_QLP     = u;
 
 %% Estimate various norms
   abs_gama = abs(gama);      Anorml = Anorm;

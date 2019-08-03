@@ -3,8 +3,8 @@
  
 Import MATLAB code from https://web.stanford.edu/group/SOL/software/minresqlp/
 The intention here is for the Mathematica code to match, as close as possible,
-the original MATLAB code.  Here, we rip out the QLP version.  This should match
-the original MINRES code.
+the original MATLAB code.  Here, we rip out the QLP code, leaving only
+the MINRES algorithm.
  
 function [x, flag, iter, relres, relAres, 
         Anorm, Acond, xnorm, Axnorm, resvec, Aresvec] =
@@ -33,17 +33,16 @@ least-squares problem if (A - SHIFT*I) is singular, where SHIFT is a
 real scalar.
 Default SHIFT = 0.
 
-rToleraance specifies a stopping tolerance.
+rTolerance specifies a stopping tolerance.
 Default rTolerance = machine epsilon.
 
 maxIterations specifies the maximum number of iterations.
 Default maxIterations = 4*N.
 
-maxXNorm and aConditionLimit are three parameters associated
+maxXNorm and aConditionLimit are parameters associated
 with singular or ill-conditioned systems (A - SHIFT*I)*X = B.
 
-maxXNorm is an upper bound on norm(X). Alternatively, maxXNorm may be
-a function that acts on x, returning True if the bound is met.
+maxXNorm is an upper bound on norm(X).
 Default maxXNorm = 10^7.
 
 aConditionLimit is an upper bound on ACOND, an estimate of condition(A).
@@ -200,9 +199,9 @@ Email sctchoi@uchicago.edu and saunders@stanford.edu
 
 minres1::usage = "MINRES-QLP solver for symmetric indefinte linear systems.  The matrix can be expressed as a pure function that acts on a vector.";
 minres1::indefinite = "`1` appears to be indefinite.";
-Options[minres1] = {rTolerance -> $MachineEpsilon, 
-   maxIterations -> Automatic, maxXNorm -> 10.0^7, aConditionLimit -> 10.0^15, 
-   printDetails -> False, returnVectors->True};
+Options[minres1] = {rTolerance -> $MachineEpsilon,
+    maxIterations -> Automatic, maxXNorm -> 10.0^7, aConditionLimit -> 10.0^15, 
+    printDetails -> False, returnVectors->True};
 minres1[A_?MatrixQ, rest__] := minres1[(A.#) &, rest];
 minres1[A_, b_, M_?MatrixQ, rest___] := 
   minres1[A, b, LinearSolve[M], rest];
@@ -255,8 +254,7 @@ vepln = 0, veplnl = 0, veplnl2 = 0, ul3 = 0,
 ul2 = 0, ul = 0, u, rnorm,
 xnorm = 0, xl2norm = 0, Axnorm = 0,
 Anorm = 0, Acond = 1,
-gamaQLP = 0, gamalQLP = 0, veplnQLP = 0, gminl = 0,
-uQLP = 0, ulQLP = 0, 
+gminl = 0,
 relres,
 relresl = 0,
 relAresl = 0,
@@ -434,10 +432,6 @@ While[flag == flag0 && iter < maxit,
     (* Compute the next right reflection P{k-1,k+1} *)
     gamalTmp = gamal;
     {cr2, sr2, gamal} = SymOrtho[gamal, eplnn];
-
-    (* Store quantities for transfering from MINRES to MINRES-QLP *)
-    gamalQLP = gamalTmp; veplnQLP = vepln; gamaQLP = gama;
-    ulQLP = ul; uQLP = u;
 
     (* Estimate various norms *)
     Block[{gminl2, rootl, absGama},

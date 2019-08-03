@@ -54,9 +54,9 @@ singular (or incompatible) linear systems.
 The MINRES-QLP algorithm can handle this case, however the associated [MATLAB
 code](https://www.mathworks.com/matlabcentral/fileexchange/42419-minres-qlp) contains some errors. Also, I cleaned up the code a bit:
 
-* Initialization error in `minresxxxM` (lines 746, 747)
-
 * Condition `flag != flag0` (line 543) means that MINRES is never called.
+
+* Initialization error in `minresxxxM` (lines 746, 747)
 
 * Replace `length(x)>0` with `~isempty(x)`
 
@@ -68,6 +68,23 @@ code](https://www.mathworks.com/matlabcentral/fileexchange/42419-minres-qlp) con
 
 * Added explicit `end` to each function.
 
-Modified versions:  [`matlab-lib/minresqlpFull.m`](matlab-lib/minresqlpFull.m)
-and [`matlab-lib/minresqlp0.m`](matlab-lib/minresqlp0.m) (no MINRES version).
-I used this mainly to validate my export of the code to Mathematica.
+MATLAB versions:
+
+* [`matlab-lib/minresqlp.m`](matlab-lib/minresqlp.m) Starts with MINRES
+  with switch to MINRES-QLP.
+
+* [`matlab-lib/minresqlp0.m`](matlab-lib/minresqlp0.m) Uses MINRES-QLP only.
+
+* [`matlab-lib/minres1.m`](matlab-lib/minres1.m) Uses MINRES only.  Should
+ be functionally equivalent to the [original MINRES function](https://web.stanford.edu/group/SOL/software/minres/).
+
+Mathematica versions:
+
+* [`mma-lib/minresqlp.m`](mma-lib/minresqlp.m) Starts with MINRES
+  with switch to MINRES-QLP.
+
+* [`mma-lib/minresqlp0.m`](mma-lib/minresqlp0.m) Uses MINRES-QLP only.
+
+* [`mma-lib/minres.m`](mma-lib/minres.m) Port of the [original MINRES function](https://web.stanford.edu/group/SOL/software/minres/).
+
+* [`mma-lib/minres1.m`](mma-lib/minres1.m) Version of MINRES-QLP with MINRES only.  Should be equivalent to [original MINRES function](https://web.stanford.edu/group/SOL/software/minres/).

@@ -228,11 +228,11 @@ minres[A_Function, b_,
 
       (* Update x. *)
       Block[{denom, w1},
-       denom = 1/gamma;
-       w1 = w2;
-       w2 = w;
-       w = (v - oldeps*w1 - delta*w2)*denom];
-       x = x + phi*w;
+      denom = 1/gamma;
+      w1 = w2;
+      w2 = w;
+      w = (v - oldeps*w1 - delta*w2)*denom];
+      x = x + phi*w;
 
       (* Go round again. *)
       gmax = Max[gmax, gamma];
