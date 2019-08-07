@@ -7,7 +7,7 @@ the original MATLAB code.
  
 function [ x, istop, itn, rnorm, Arnorm, Anorm, Acond, ynorm resvec] = ...
            minres( A, b, M, shift, printDetails, check, maxIterations,
-                   rTolerance, localSize )
+                   stepMonitor, rTolerance, localSize )
 
 minres solves the n x n system of linear equations Ax = b
 or the n x n least squares problem           min ||Ax - b||_2^2,
@@ -74,7 +74,7 @@ minres::usage =
   "MINRES solver for symmetric indefinte linear systems.  The matrix can be expressed as a pure function that acts on a vector.";
 Options[minres] := {printDetails -> False, check -> True,
     maxIterations -> Automatic, rTolerance -> $MachineEpsilon,
-    localSize -> 0};
+    localSize -> 0, stepMonitor -> None};
 minres[A_?MatrixQ, rest__] := minres[(A.#) &, rest];
 minres[A_, b_, M_?MatrixQ, rest___] := 
   minres[A, b, LinearSolve[M], rest];
@@ -234,6 +234,9 @@ minres[A_Function, b_,
       w = (v - oldeps*w1 - delta*w2)*denom];
       x = x + phi*w;
 
+      If[OptionValue[stepMonitor] =!= None,
+	 OptionValue[stepMonitor][itn, x, w, v]];
+
       (* Go round again. *)
       gmax = Max[gmax, gamma];
       gmin = Min[gmin, gamma];
@@ -302,7 +305,7 @@ minres[A_Function, b_,
          Print["Arnorm=", Arnorm, " True||Ar|| =", trueArnorm]]];
  
        If[istop != 0, Break[]]]]]]];
-  resvec = Take[resvec, {itn}];
+  resvec = If[itn>0,Take[resvec, {itn}],0];
 
   (* Display final status. *)
   If[show,

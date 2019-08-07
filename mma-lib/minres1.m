@@ -8,7 +8,7 @@ the MINRES algorithm.
  
 function [x, flag, iter, relres, relAres, 
         Anorm, Acond, xnorm, Axnorm, resvec, Aresvec] =
-    minres1(A, b, M, shift, rtol, maxit, maxxnorm, Acondlim, show)
+    minres1(A, b, M, shift, rtol, maxit, maxxnorm, stepMontor, Acondlim, show)
 
 MINRES1: min-length solution to symmetric (possibly singular) Ax=b or
 min||Ax-b||.
@@ -38,6 +38,10 @@ Default rTolerance = machine epsilon.
 
 maxIterations specifies the maximum number of iterations.
 Default maxIterations = 4*N.
+
+stepMonitor is a user-supplied function that is called
+directly after each x update.
+Default stepMonitor = None.
 
 maxXNorm and aConditionLimit are parameters associated
 with singular or ill-conditioned systems (A - SHIFT*I)*X = B.
@@ -200,7 +204,8 @@ Email sctchoi@uchicago.edu and saunders@stanford.edu
 minres1::usage = "MINRES-QLP solver for symmetric indefinte linear systems.  The matrix can be expressed as a pure function that acts on a vector.";
 minres1::indefinite = "`1` appears to be indefinite.";
 Options[minres1] = {rTolerance -> $MachineEpsilon,
-    maxIterations -> Automatic, maxXNorm -> 10.0^7, aConditionLimit -> 10.0^15, 
+    maxIterations -> Automatic, maxXNorm -> 10.0^7, stepMonitor -> None,
+    aConditionLimit -> 10.0^15,
     printDetails -> False, returnVectors->True};
 minres1[A_?MatrixQ, rest__] := minres1[(A.#) &, rest];
 minres1[A_, b_, M_?MatrixQ, rest___] := 
@@ -410,7 +415,7 @@ While[flag == flag0 && iter < maxit,
        u = 0; flag = 9];
     xl2norm = Norm[{xl2norm, ul2}];
     xnorm = Norm[{xl2norm, ul, u}]];
-
+    
     (* Update w. Update x except if it will become too big *)
     (* MINRES updates *)
     wl2 = wl; wl = w;
@@ -418,6 +423,9 @@ While[flag == flag0 && iter < maxit,
     If[xnorm < maxxnorm,
        x = x + tau*w,
        flag = 6];
+
+    If[OptionValue[stepMonitor] =!= None,
+       OptionValue[stepMonitor][iter, x, w, v]];
 
     If[debug,
        Print["Update w:"];

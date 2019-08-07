@@ -3,11 +3,12 @@
  
 Import MATLAB code from https://web.stanford.edu/group/SOL/software/minresqlp/
 The intention here is for the Mathematica code to match, as close as possible,
-the original MATLAB code.  This version does not use MINRES.
+the original MATLAB code.  This version does not use MINRES. Added stepMonitor.
  
 function [x, flag, iter, relres, relAres, 
         Anorm, Acond, xnorm, Axnorm, resvec, Aresvec] =
-    minresqlp0(A, b, M, shift, rtol, maxit, maxxnorm, Acondlim, show)
+    minresqlp0(A, b, M, shift, rtol, maxit, maxxnorm, Acondlim,
+        stepMonitor, printDetails)
 
 MINRESQLP0: min-length solution to symmetric (possibly singular) Ax=b or
 min||Ax-b||.
@@ -47,6 +48,9 @@ Default maxXNorm = 10^7.
 
 aConditionLimit is an upper bound on ACOND, an estimate of condition(A).
 Default aConditionLimit = 10^15.
+
+stepMonitor is a function to be called on every update of x.
+Default stepMonitor = None.
 
 printDetails specifies the printing option.
 If printDetails=True,  an iteration log will be output.
@@ -201,7 +205,7 @@ minresqlp0::usage = "MINRES-QLP solver for symmetric indefinte linear systems.  
 minresqlp0::indefinite = "`1` appears to be indefinite.";
 Options[minresqlp0] = {rTolerance -> $MachineEpsilon, 
    maxIterations -> Automatic, maxXNorm -> 10.0^7, aConditionLimit -> 10.0^15, 
-   printDetails -> False, returnVectors->True};
+   stepMonitor -> None, printDetails -> False, returnVectors->True};
 minresqlp0[A_?MatrixQ, rest__] := minresqlp0[(A.#) &, rest];
 minresqlp0[A_, b_, M_?MatrixQ, rest___] := 
   minresqlp0[A, b, LinearSolve[M], rest];
@@ -425,6 +429,9 @@ While[flag == flag0 && iter < maxit,
           w = wl*sr1 - w*cr1; wl = v];
     xl2 = xl2 + wl2*ul2;
     x = xl2 + wl*ul + w*u;
+
+    If[OptionValue[stepMonitor] =!= None,
+       OptionValue[stepMonitor][iter, x, w, v, u]];
 
     If[debug,
        Print["Update w:"];
