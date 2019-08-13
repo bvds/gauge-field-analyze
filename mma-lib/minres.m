@@ -74,7 +74,7 @@ minres::usage =
   "MINRES solver for symmetric indefinte linear systems.  The matrix can be expressed as a pure function that acts on a vector.";
 Options[minres] := {printDetails -> False, check -> True,
     maxIterations -> Automatic, rTolerance -> $MachineEpsilon,
-    localSize -> 0, stepMonitor -> None};
+    localSize -> 0, stepMonitor -> None, subspaceProjector -> None};
 minres[A_?MatrixQ, rest__] := minres[(A.#) &, rest];
 minres[A_, b_, M_?MatrixQ, rest___] := 
   minres[A, b, LinearSolve[M], rest];
@@ -192,7 +192,10 @@ minres[A_Function, b_,
      If[localOrtho,
 	(* v will be normalized through y later- this is explicit
 	 orthogonalizing versus the previous localSize lanczos vectors *)
-     y = localVOrtho[y]];
+	y = localVOrtho[y]];
+     (* Optionally, project into user-defined subspace. *)
+     If[OptionValue[subspaceProjector] =!= None,
+	y = OptionValue[subspaceProjector][y]];
      r1 = r2; (* r1 is unnormalized vold *)
      r2 = y; (* r2 is unnormalized v *)
      If[M =!= None, y = M[r2]];
