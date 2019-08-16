@@ -8,7 +8,7 @@ the MINRES algorithm.
  
 function [x, flag, iter, relres, relAres, 
         Anorm, Acond, xnorm, Axnorm, resvec, Aresvec] =
-    minres1(A, b, M, shift, rtol, maxit, maxxnorm, stepMontor, Acondlim, show)
+    minres1(A, b, M, shift, rtol, maxit, maxxnorm, stepMontor, Acondlim, printDetails)
 
 MINRES1: min-length solution to symmetric (possibly singular) Ax=b or
 min||Ax-b||.
@@ -220,7 +220,7 @@ Module[{
     (* Mimic MATLAB function *)
     zeros = Function[Array[0.0&, {##}]],
 
-    show = OptionValue[printDetails],
+    show = Replace[OptionValue[printDetails], {False -> 0, True -> 1}],
     rtol = OptionValue[rTolerance], maxxnorm = OptionValue[maxXNorm], 
     Acondlim = OptionValue[aConditionLimit],
     maxit = OptionValue[maxIterations],
@@ -293,15 +293,15 @@ msg = {
         " Least-squares problem but no converged solution yet    "}, (* 9 *)
 head = {"iter", "rnorm", "Arnorm", "Compatible", "LS",
 	"Anorm","Acond","xnorm"}},
-If[show,
+If[show > 1,
    Print[first];
    Print["Min-length solution of symmetric (A-sI)x = b or min ||(A-sI)x - b||"];
-   Print["n=",n, "   ||b||=",beta1,"   shift=",shift,
-	 "   rtol=",rtol];
-   Print["maxit=",maxit,"   maxxnorm=", If[NumberQ[maxxnorm],maxxnorm,
+   Print["n=", n, "   ||b||=", beta1, "   shift=", shift,
+	 "   rtol=", rtol];
+   Print["maxit=", maxit, "   maxxnorm=", If[NumberQ[maxxnorm], maxxnorm,
 					   "function"], 
-	 "   Acondlim=",Acondlim];
-   Print[" ",head]];
+	 "   Acondlim=", Acondlim];
+   Print[" ", head]];
 
 If[beta1 == 0, flag = 0]; (* b=0 => x=0. We will skip the main loop. *)
 
@@ -498,7 +498,7 @@ If[disable && (iter<maxit),
        If[resvec =!= None,
 	  resvec[[iter + 1]] = rnorm;
           Aresvec[[iter]] = Arnorml];
-       If[show && Mod[iter-1,lines] == 0, 
+       If[show > 1 && Mod[iter-1,lines] == 0, 
           Which[iter == 101,
 		lines = 10; headlines = 20*lines, 
 		iter == 1001,
@@ -526,18 +526,19 @@ If[Aresvec =!= None,
    Aresvec = Take[Aresvec,iter + 1]];
 If[resvec =!= None,
    resvec = Take[resvec,iter + 1]];
-If[show, 
+If[show > 1, 
    If[rnorm > realmin, 
       Print[start, {iter, rnorm, Arnorm, relres, relAres, Anorm, 
 		    Acond, xnorm}], 
       Print[start, {iter, rnorm, Arnorm, relres, 0, Anorm, Acond, 
 		    xnorm}]]];
-Print[last, " flag=", flag, "   ", msg[[flag + 2]]];
-Print[last, " iter=",iter];
-Print[last, " rnorm=",rnorm,"   rnorm direct=",Norm[r1]];
-Print[last, "                   Arnorm direct=",Arnorm];
-Print[last, " xnorm=",xnorm,"   xnorm direct=",Norm[x]];
-Print[last, " Anorm=",Anorm,"   Acond=",Acond];
+If[show > 0,
+   Print[last, " flag=", flag, "   ", msg[[flag + 2]]];
+   Print[last, " iter=", iter];
+   Print[last, " rnorm=", rnorm, "   rnorm direct=", Norm[r1]];
+   Print[last, "                   Arnorm direct=", Arnorm];
+   Print[last, " xnorm=", xnorm, "   xnorm direct=", Norm[x]];
+   Print[last, " Anorm=", Anorm, "   Acond=", Acond]];
 
 (* Return values *)
 {x, flag, iter, relres, relAres, Anorm, Acond, xnorm, Axnorm, 

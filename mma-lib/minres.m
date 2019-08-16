@@ -72,9 +72,9 @@ Known bugs:
 
 minres::usage = 
   "MINRES solver for symmetric indefinte linear systems.  The matrix can be expressed as a pure function that acts on a vector.";
-Options[minres] := {printDetails -> False, check -> True,
+Options[minres] := {printDetails -> 0, check -> True,
     maxIterations -> Automatic, rTolerance -> $MachineEpsilon,
-    localSize -> 0, stepMonitor -> None, subspaceProjector -> None};
+    localSize -> 0, stepMonitor -> None};
 minres[A_?MatrixQ, rest__] := minres[(A.#) &, rest];
 minres[A_, b_, M_?MatrixQ, rest___] := 
   minres[A, b, LinearSolve[M], rest];
@@ -87,6 +87,7 @@ minres[A_Function, b_,
    realmax = $MaxMachineNumber, (* Mimic MATLAB function *)
    zeros = Function[Array[0.0 &, {##}]],
    localOrtho, localVEnqueue, localVOrtho,
+   last = "Exit minres.  ", 
    msg = {"beta2=0. If M=I, b and x are eigenvectors", 
      "beta1=0. The exact solution is x=0", 
      "A solution to Ax=b was found, given rtol", 
@@ -100,11 +101,15 @@ minres[A_Function, b_,
 	  "M does not define a pos-def preconditioner"},
     n = Length[b],	 
    itnlim = OptionValue[maxIterations], rtol = OptionValue[rTolerance], 
-   show = OptionValue[printDetails], istop = 0, itn = 0, Anorm = 0, Acond = 0,
-    rnorm = 0, ynorm = 0, done = False, x, resvec, y, r1, beta1, 
-   Arnorm},
-   If[itnlim === Automatic, itnlim = 5 n]; (* Not in MATLAB code *)
-  If[show,
+   show = Replace[OptionValue[printDetails], {False -> 0, True -> 1}],
+   istop = 0, itn = 0, Anorm = 0, Acond = 0,
+   rnorm = 0, ynorm = 0, done = False, x, resvec, y, r1, beta1, Arnorm,
+   tinit = SessionTime[], ta = 0, tm = 0, tortho = 0,
+   addTime = Function[{timer, expr},
+     Block[{t1 = SessionTime[], result = expr}, 
+	   timer += SessionTime[] - t1; result], {HoldAll, SequenceHold}]},
+  If[itnlim === Automatic, itnlim = 5 n]; (* Not in MATLAB code *)
+  If[show > 1,
     Print["minres.m SOL, Stanford University Version of 2015"];
     Print["Solution of symmetric Ax=b or (A-shift*I)x=b"];
     Print["n=", n, " shift=", shift];
@@ -121,14 +126,14 @@ minres[A_Function, b_,
      v is really P^T v1. *)
   y = N[b];
   r1 = N[b]; (* initial guess x=0 initial residual *)
-  If[M =!= None, y = M[b]];
+  If[M =!= None, addTime[tm, y = M[b]]];
   beta1 = Conjugate[b].y;
 
   (* Test for an indefinite preconditioner.
   If b=0 exactly, stop with x=0. *)
 
-  If[beta1 < 0, istop = 9; show = True; done = True];
-  If[beta1 == 0, show = True; done = True];
+  If[beta1 < 0, istop = 9; show = 1; done = True];
+  If[beta1 == 0, show = 1; done = True];
   If[beta1 > 0,
    beta1 = Sqrt[beta1]; (* Normalize y to get v1 later.*)
 
@@ -140,7 +145,7 @@ minres[A_Function, b_,
      t    = r1.r2;
      z    = Abs[s - t];
      epsa = (s + eps)*eps^(1/3);
-     If[z > epsa, istop = 8; show = True; done = True]]];
+     If[z > epsa, istop = 8; show = 1; done = True]]];
 
    (* See if A is symmetric. *)
    If[OptionValue[check], 
@@ -151,7 +156,7 @@ minres[A_Function, b_,
      t    = y.r2;
      z    = Abs[s - t];
      epsa = (s + eps)*eps^(1/3);
-     If[ z > epsa, istop = 7; done = True; show = True]]]];
+     If[ z > epsa, istop = 7; done = True; show = 1]]]];
 
   (* Initialize other quantities. *)
   Block[{oldb = 0, beta = beta1, dbar = 0, epsln = 0, qrnorm = beta1, 
@@ -160,7 +165,7 @@ minres[A_Function, b_,
     w = zeros[n],
     w2 = zeros[n], 
     r2 = r1, alfa}, 
-   If[show,
+   If[show > 1,
       Print[{"Itn", "x(1)", "Compatible", "LS", "norm(A)", "cond(A)",
          "gbar/|A|" (* Check gbar *)}]];
 
@@ -183,8 +188,8 @@ minres[A_Function, b_,
 
      (* if localOrtho turned on store old v for local reorthogonaliztion of new v *)
      If[localOrtho,
-	localVEnqueue[v]];
-     y = A[v] - shift*v; (* shift is 0 otherwise solving A-shift*I *)
+	addTime[tortho, localVEnqueue[v]]];
+     addTime[ta, y = A[v] - shift*v]; (* shift is 0 otherwise solving A-shift*I *)
      If[itn >= 2,
 	y = y - (beta/oldb)*r1]; (* normalization is the division r1 by oldb *)
      alfa = v.y; (* alphak *)
@@ -192,13 +197,10 @@ minres[A_Function, b_,
      If[localOrtho,
 	(* v will be normalized through y later- this is explicit
 	 orthogonalizing versus the previous localSize lanczos vectors *)
-	y = localVOrtho[y]];
-     (* Optionally, project into user-defined subspace. *)
-     If[OptionValue[subspaceProjector] =!= None,
-	y = OptionValue[subspaceProjector][y]];
+	addTime[tortho, y = localVOrtho[y]]];
      r1 = r2; (* r1 is unnormalized vold *)
      r2 = y; (* r2 is unnormalized v *)
-     If[M =!= None, y = M[r2]];
+     If[M =!= None, addTime[tm, y = M[r2]]];
      oldb = beta; (* oldb=betak *)
      beta = r2.y; (* beta=betak+1^2 *)
      If[beta < 0, istop = 9; Break[]];
@@ -295,7 +297,7 @@ minres[A_Function, b_,
         If[qrnorm <= 10*epsr, prnt = True];
         If[Acond <= 10^-2/eps, prnt = True];
         If[istop != 0, prnt = True];
-        If[show && prnt,
+        If[show > 1 && prnt,
 	 If[Mod[itn, 10] == 0, Print[""]];
 	   Print[{itn, x[[1]], test1, test2, Anorm, Acond, gbar/Anorm}]];
 
@@ -311,12 +313,14 @@ minres[A_Function, b_,
   resvec = If[itn>0,Take[resvec, {itn}],0];
 
   (* Display final status. *)
-  If[show,
-   Print["istop=", istop, " itn=", itn];
-   Print["Anorm=", Anorm, " Acond=", Acond];
-   Print["rnorm=", rnorm, " ynorm=", ynorm];
-   Print["Arnorm=", Arnorm];
-   Print[msg[[istop + 2]]]];
+  If[show > 0,
+   Print[last, "istop=", istop, " itn=", itn];
+   Print[last, "Anorm=", Anorm, " Acond=", Acond];
+   Print[last, "rnorm=", rnorm, " ynorm=", ynorm];
+   Print[last, "Arnorm=", Arnorm];
+   Print[last, "time (seconds): M=", tm, ", A=", ta, ", orthogonalization=",
+	 tortho, ", total=", SessionTime[] - tinit];
+   Print[last, msg[[istop + 2]]]];
   {x, istop, itn, rnorm, Arnorm, Anorm, Acond, ynorm resvec}];
 (*  End function minres.m *)
 

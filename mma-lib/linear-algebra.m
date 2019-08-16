@@ -14,7 +14,7 @@ Eigensystem[] does not allow the Matrix to be passed as a function.
 Since the resulting eigenvectors have to be transformed
 back, all the Lanczos vectors must be stored.";
 Options[ersatzLanczos] := {maxIterations -> Automatic, 
-  printDetails -> False, initialVector -> Automatic, 
+  printDetails -> 0, initialVector -> Automatic, 
   eigenPairs -> All};
 (* This code is adapted from MINRES, file minres.m *)
 ersatzLanczos[A_?MatrixQ, rest___] := 
@@ -24,10 +24,12 @@ ersatzLanczos[A_Function, n_Integer, M_?MatrixQ, rest___] :=
 ersatzLanczos[A_Function, n_Integer, 
 	    M : (None | _Function | _LinearSolveFunction) : None, 
 	    shift : _?NumberQ : 0.0, OptionsPattern[]] := 
- Block[{debug = False, show=OptionValue[printDetails],
+  Block[{debug = False,
+   show = Replace[OptionValue[printDetails], {False->0, True->1}],
    itnlim = 
     If[OptionValue[maxIterations] === Automatic, 4 n, 
        OptionValue[maxIterations]],
+   last = "Exit ersatzLanczos.  ", 
    (* Maintain the message numbering used in MINRES.
       Some of these don't make sense for an eigensystem, *)
    msg = {"beta2=0. If M=I, b and x are eigenvectors", 
@@ -41,23 +43,27 @@ ersatzLanczos[A_Function, n_Integer,
      "A does not define a symmetric matrix", 
      "M does not define a symmetric matrix", 
      "M does not define a pos-def preconditioner"}, (* 9 *)
-   istop = 0, itn = 0, done = False, beta1, 
-   vv = {}, alpha = Array[Null&, {n}], beta = Array[Null&, {n + 1}],
+   tinit = SessionTime[], ta = 0, tm = 0, tortho = 0,
+   addTime = Function[{timer, expr},
+     Block[{t1 = SessionTime[], result = expr}, 
+	   timer += SessionTime[] - t1; result], {HoldAll, SequenceHold}],
+   istop = 0, itn = 0, done = False, beta1, vv = {},
+   alpha = Array[Null&, {n}], beta = Array[Null&, {n + 1}],
    (* Set up y and v for the first Lanczos vector 
    v1.y=beta1 P^T v1,
    where P=C**(-1).v is really P^T v1. *)  
-   y = If[OptionValue[initialVector] === Automatic, RandomReal[1, n] ,
-      OptionValue[initialVector]], r1, r2, s, v, Anorm = 0},
+   y = If[OptionValue[initialVector] === Automatic, RandomReal[1, n],
+	  OptionValue[initialVector]], r1, r2, s, v, Anorm = 0.0},
 
   r1 = y; (* initial guess x=0 initial residual *)
   
-  If[M =!= None, y = M[y]];
+  If[M =!= None, addTime[tm, y = M[y]]];
   beta1 = Conjugate[r1].y;
   
   (* Test for an indefinite preconditioner.
   If b=0 exactly, stop with x=0. *)
-  If[beta1 < 0, istop = 9; show = True; done = True];
-  If[beta1 == 0, show = True; done = True]; 
+  If[beta1 < 0, istop = 9; show = 1; done = True];
+  If[beta1 == 0, show = 1; done = True]; 
   If[beta1 > 0, beta1 = Sqrt[beta1]]; (* Normalize y to get v1 later. *)
 
   beta[[1]] = beta1;
@@ -72,11 +78,11 @@ ersatzLanczos[A_Function, n_Integer,
        beta2^2=q2^Tq2,
        v2=(1/beta2) q2.
    Again, y=betak P vk,where P=C**(-1). *)
-   s = 1/beta[[itn]]; (* Normalize previous vector (in y). *)
+   s = 1.0/beta[[itn]]; (* Normalize previous vector (in y). *)
    v = s*y; (* v=vk if P=I *)
  
-   AppendTo[vv, v];
-   y = A[v];
+   addTime[tortho, AppendTo[vv, v]];
+   addTime[ta, y = A[v]];
    If[shift != 0, y -= shift*v]; (* shift is 0 otherwise solving A-shift*I *)
    If[itn >= 2, 
     y = y - (beta[[itn]]/beta[[itn - 1]])*r1]; (* normalization is the division r1 by oldb *)
@@ -84,10 +90,11 @@ ersatzLanczos[A_Function, n_Integer,
    y = (-alpha[[itn]]/beta[[itn]])*r2 + y; (* normalization of r2/beta=v *)
 
    (* Orthogonalize versus the previous lanczos vectors*)
-   y = y - (vv.y).vv;
+   addTime[tortho, y = y - (vv.y).vv];
+
    r1 = r2; (* r1 is unnormalized vold *)
    r2 = y; (* r2 is unnormalized v *)
-   If[M =!= None, y = M[r2]];
+   If[M =!= None, addTime[tm, y = M[r2]]];
    beta[[itn + 1]] = r2.y; (* beta=betak+1^2 *)
    If[beta[[itn + 1]] < 0, istop = 9; Break[]];
    beta[[itn + 1]] = Sqrt[beta[[itn + 1]]];
@@ -112,10 +119,12 @@ ersatzLanczos[A_Function, n_Integer,
 	    Print["Norm vv:  ", Map[Norm, vv]]];
   
   (* Display final status. *)
-  If[show,
-   Print["istop=", istop, " itn=", itn];
-   Print["Anorm=", Anorm];
-   Print[msg[[istop + 2]]]];
+  If[show > 0,
+   Print[last, "istop=", istop, " itn=", itn];
+   Print[last, "Anorm=", Anorm];
+   Print[last, "time (seconds): M=", tm, ", A=", ta, ", orthogonalization=",
+	 tortho, ", total=", SessionTime[] - tinit];
+   Print[last, msg[[istop + 2]]]];
   
   Block[{
       tt = SparseArray[{
@@ -138,3 +147,30 @@ ersatzLanczos[A_Function, n_Integer,
 		"StartingVector" -> Table[If[i==1,1,0],{i,itn}]}]];
 	{vals, vecs.vv}]
  ];
+
+(*<<"minres.m"
+
+multiLinearSolve::usage = 
+  "Returns a function that solves a linear system for a given
+matrix A.  The method improves in speed with multiple solutions.";
+Options[multiLinearSolve] := {Tolerance -> 10^-7};
+multiLinearSolve[A_?MatrixQ, rest___] := 
+    multiLinearSolve[(A.#) &, Length[A], rest]; 
+multiLinearSolve[A_Function, _Integer, OptionsPattern[]] := 
+  Module[{xx = {}, bb={}},
+    Function[b, Block[{b1, x1, x2, y = bb.b, b1Norm},
+      (* First, project out already-calculated directions. *)      
+      b1 = b - y.bb;
+      x2 = y.xx;
+      b1Norm = Norm[b1];
+      If[b1Norm > OptionValue[Tolerance],
+	 (* Use MINRES because the Mathematica function LinearSystem[]
+	    cannot handle the matrix input as a function. *)
+	 x1 = minres[A, b1];
+	 (* Note that bb is orthonormal *)
+	 AppendTo[xx, x1/b1Norm];
+	 AppendTo[bb, b1/b1Norm];
+	 x1 + x2,
+	 x2
+      ]]]];
+ *)
