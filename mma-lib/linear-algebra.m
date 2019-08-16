@@ -53,8 +53,7 @@ ersatzLanczos[A_Function, n_Integer,
    v1.y=beta1 P^T v1,
    where P=C**(-1).v is really P^T v1. *)  
    y = If[OptionValue[initialVector] === Automatic, RandomReal[1, n],
-	  OptionValue[initialVector]], r1, r2, s, v, Anorm = 0.0},
-
+	  OptionValue[initialVector]], r1, r2, v, Anorm = 0.0},
   r1 = y; (* initial guess x=0 initial residual *)
   
   If[M =!= None, addTime[tm, y = M[y]]];
@@ -78,8 +77,8 @@ ersatzLanczos[A_Function, n_Integer,
        beta2^2=q2^Tq2,
        v2=(1/beta2) q2.
    Again, y=betak P vk,where P=C**(-1). *)
-   s = 1.0/beta[[itn]]; (* Normalize previous vector (in y). *)
-   v = s*y; (* v=vk if P=I *)
+   Block[{s = 1.0/beta[[itn]]}, (* Normalize previous vector (in y). *)
+	 v = s*y]; (* v=vk if P=I *)
  
    addTime[tortho, AppendTo[vv, v]];
    addTime[ta, y = A[v]];
@@ -146,31 +145,4 @@ ersatzLanczos[A_Function, n_Integer,
  	   Eigensystem[tt, eigenPairs, Method -> {"Arnoldi",
 		"StartingVector" -> Table[If[i==1,1,0],{i,itn}]}]];
 	{vals, vecs.vv}]
- ];
-
-(*<<"minres.m"
-
-multiLinearSolve::usage = 
-  "Returns a function that solves a linear system for a given
-matrix A.  The method improves in speed with multiple solutions.";
-Options[multiLinearSolve] := {Tolerance -> 10^-7};
-multiLinearSolve[A_?MatrixQ, rest___] := 
-    multiLinearSolve[(A.#) &, Length[A], rest]; 
-multiLinearSolve[A_Function, _Integer, OptionsPattern[]] := 
-  Module[{xx = {}, bb={}},
-    Function[b, Block[{b1, x1, x2, y = bb.b, b1Norm},
-      (* First, project out already-calculated directions. *)      
-      b1 = b - y.bb;
-      x2 = y.xx;
-      b1Norm = Norm[b1];
-      If[b1Norm > OptionValue[Tolerance],
-	 (* Use MINRES because the Mathematica function LinearSystem[]
-	    cannot handle the matrix input as a function. *)
-	 x1 = minres[A, b1];
-	 (* Note that bb is orthonormal *)
-	 AppendTo[xx, x1/b1Norm];
-	 AppendTo[bb, b1/b1Norm];
-	 x1 + x2,
-	 x2
-      ]]]];
- *)
+];

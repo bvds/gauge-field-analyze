@@ -164,7 +164,7 @@ minres[A_Function, b_,
     gmin = realmax, cs = -1, sn = 0,
     w = zeros[n],
     w2 = zeros[n], 
-    r2 = r1, alfa}, 
+    r2 = r1, alfa, v},
    If[show > 1,
       Print[{"Itn", "x(1)", "Compatible", "LS", "norm(A)", "cond(A)",
          "gbar/|A|" (* Check gbar *)}]];
@@ -183,8 +183,8 @@ minres[A_Function, b_,
          v2=(1/beta2) q2.
      Again, y=betak P vk, where P=C**(-1).
      ....more description needed. *)
-     s = 1/beta; (* Normalize previous vector (in y).*)
-     v = s*y; (* v=vk if P=I *)
+     Block[{s = 1/beta}, (* Normalize previous vector (in y).*)
+	   v = s*y]; (* v=vk if P=I *)
 
      (* if localOrtho turned on store old v for local reorthogonaliztion of new v *)
      If[localOrtho,

@@ -263,7 +263,7 @@ gminl = 0,
 relres,
 relresl = 0,
 relAresl = 0,
-x, xl2, w, wl, wl2, r1,
+v, x, xl2, w, wl, wl2, r1,
 betal, alfa, pnorm, dlta, gbar, xnorml, taul2,
 likeLS, Anorml, Acondl, rnorml, Arnorml}, 
 flag = flag0; rnorm = betan;
