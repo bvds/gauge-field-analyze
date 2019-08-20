@@ -1,10 +1,10 @@
 (*
                      MINRES linear system solver
- 
+
 Import MATLAB code from https://web.stanford.edu/group/SOL/software/minres/
 The intention here is for the Mathematica code to match, as close as possible,
 the original MATLAB code.
- 
+
 function [ x, istop, itn, rnorm, Arnorm, Anorm, Acond, ynorm resvec] = ...
            minres( A, b, M, shift, printDetails, check, maxIterations,
                    stepMonitor, rTolerance, localSize )
@@ -59,7 +59,7 @@ resvec returns a vector of the residual at each iteration
 Code author: Michael Saunders, SOL and ICME, Stanford University
 Contributors:Chris Paige, School of Computer Science, McGill University
              Sou-Cheng Choi, ICME, Stanford University
- 
+
 
 Known bugs:
   1. As Jeff Kline pointed out, Arnorm = ||A r_{k-1}|| lags behind
@@ -70,43 +70,43 @@ Known bugs:
      down the next iteration.  It would be better to keep x_{k-1}.
 *)
 
-minres::usage = 
+minres::usage =
   "MINRES solver for symmetric indefinte linear systems.  The matrix can be expressed as a pure function that acts on a vector.";
 Options[minres] := {printDetails -> 0, check -> True,
     maxIterations -> Automatic, rTolerance -> $MachineEpsilon,
     localSize -> 0, stepMonitor -> None};
-minres[A_?MatrixQ, rest__] := minres[(A.#) &, rest];
-minres[A_, b_, M_?MatrixQ, rest___] := 
+minres[A_?MatrixQ, rest__] := minres[(A.#)&, rest];
+minres[A_, b_, M_?MatrixQ, rest___] :=
   minres[A, b, LinearSolve[M], rest];
-minres[A_Function, b_, 
-  M:(None|_Function|_LinearSolveFunction):None, 
-  shift:_?NumberQ:0.0, OptionsPattern[]] := 
+minres[A_Function, b_,
+  M:(None|_Function|_LinearSolveFunction):None,
+  shift:_?NumberQ:0.0, OptionsPattern[]] :=
 
  (* Initialize *)
- Module[{(* MATLAB constants *) eps = $MachineEpsilon, 
+ Module[{(* MATLAB constants *) eps = $MachineEpsilon,
    realmax = $MaxMachineNumber, (* Mimic MATLAB function *)
-   zeros = Function[Array[0.0 &, {##}]],
+   zeros = Function[Array[0.0&, {##}]],
    localOrtho, localVEnqueue, localVOrtho,
-   last = "Exit minres.  ", 
-   msg = {"beta2=0. If M=I, b and x are eigenvectors", 
-     "beta1=0. The exact solution is x=0", 
-     "A solution to Ax=b was found, given rtol", 
-     "A least-squares solution was found, given rtol" , 
-     "Reasonable accuracy achieved, given machine epsilon", 
-     "x has converged to an eigenvector" , 
-     "acond has exceeded 0.1/machine epsilon", 
-     "The iteration limit was reached", 
-     "A does not define a symmetric matrix", 
-     "M does not define a symmetric matrix", 
+   last = "Exit minres.  ",
+   msg = {"beta2=0. If M=I, b and x are eigenvectors",
+     "beta1=0. The exact solution is x=0",
+     "A solution to Ax=b was found, given rtol",
+     "A least-squares solution was found, given rtol",
+     "Reasonable accuracy achieved, given machine epsilon",
+     "x has converged to an eigenvector",
+     "acond has exceeded 0.1/machine epsilon",
+     "The iteration limit was reached",
+     "A does not define a symmetric matrix",
+     "M does not define a symmetric matrix",
 	  "M does not define a pos-def preconditioner"},
-    n = Length[b],	 
-   itnlim = OptionValue[maxIterations], rtol = OptionValue[rTolerance], 
+    n = Length[b],	
+   itnlim = OptionValue[maxIterations], rtol = OptionValue[rTolerance],
    show = Replace[OptionValue[printDetails], {False -> 0, True -> 1}],
    istop = 0, itn = 0, Anorm = 0, Acond = 0,
    rnorm = 0, ynorm = 0, done = False, x, resvec, y, r1, beta1, Arnorm,
    tinit = SessionTime[], ta = 0, tm = 0, tortho = 0,
    addTime = Function[{timer, expr},
-     Block[{t1 = SessionTime[], result = expr}, 
+     Block[{t1 = SessionTime[], result = expr},
 	   timer += SessionTime[] - t1; result], {HoldAll, SequenceHold}]},
   If[itnlim === Automatic, itnlim = 5 n]; (* Not in MATLAB code *)
   If[show > 1,
@@ -118,7 +118,7 @@ minres[A_Function, b_,
   resvec = zeros[itnlim];
 
   (* Initialization for local reorthogonalization *)
-  {localOrtho, localVEnqueue, localVOrtho} = 
+  {localOrtho, localVEnqueue, localVOrtho} =
    makeOrtho[n, OptionValue[localSize]];
 
   (* Set up y and v for the first Lanczos vector v1.
@@ -138,7 +138,7 @@ minres[A_Function, b_,
    beta1 = Sqrt[beta1]; (* Normalize y to get v1 later.*)
 
    (* See if M is symmetric. *)
-   If[OptionValue[check] && M =!= None, 
+   If[OptionValue[check] && M =!= None,
     Block[{r2, s, t, z, epsa},
      r2   = M[y];
      s    = y.y;
@@ -148,7 +148,7 @@ minres[A_Function, b_,
      If[z > epsa, istop = 8; show = 1; done = True]]];
 
    (* See if A is symmetric. *)
-   If[OptionValue[check], 
+   If[OptionValue[check],
     Block[{r2, w, s, t, z, epsa},
      w    = A[y];
      r2   = A[w];
@@ -159,11 +159,11 @@ minres[A_Function, b_,
      If[ z > epsa, istop = 7; done = True; show = 1]]]];
 
   (* Initialize other quantities. *)
-  Block[{oldb = 0, beta = beta1, dbar = 0, epsln = 0, qrnorm = beta1, 
-    phibar = beta1, rhs1 = beta1, rhs2 = 0, tnorm2 = 0, gmax = 0, 
+  Block[{oldb = 0, beta = beta1, dbar = 0, epsln = 0, qrnorm = beta1,
+    phibar = beta1, rhs1 = beta1, rhs2 = 0, tnorm2 = 0, gmax = 0,
     gmin = realmax, cs = -1, sn = 0,
     w = zeros[n],
-    w2 = zeros[n], 
+    w2 = zeros[n],
     r2 = r1, alfa, v},
    If[show > 1,
       Print[{"Itn", "x(1)", "Compatible", "LS", "norm(A)", "cond(A)",
@@ -214,7 +214,7 @@ minres[A_Function, b_,
      (* Apply previous rotation Qk-1 to get
         [deltak epslnk+1]=[cs sn][dbark 0]
         [gbar k dbar k+1][sn-cs][alfak betak+1]. *)
-     Block[{oldeps, delta, gbar, root, gamma, phi, epsx, epsr}, 
+     Block[{oldeps, delta, gbar, root, gamma, phi, epsx, epsr},
       oldeps = epsln;
       delta = cs*dbar + sn*alfa; (* delta1=0 deltak *)
       gbar  = sn*dbar - cs*alfa; (* gbar 1=alfa1 gbar k *)
@@ -273,9 +273,9 @@ minres[A_Function, b_,
 	  extra row, beta(k+1) e_k^T. *)
        Acond = gmax/gmin;
 
-       (* See if any of the stopping criteria are satisfied. 
+       (* See if any of the stopping criteria are satisfied.
           In rare cases, istop is already -1 from above (Abar=const*I). *)
-       If[istop == 0, 
+       If[istop == 0,
         Block[{t1, t2},
 	 t1 = 1 + test1; (* These tests work if rtol<eps *)
 	 t2 = 1 + test2;
@@ -288,7 +288,7 @@ minres[A_Function, b_,
          If[test1 <= rtol, istop = 1]]];
 
        (* See if it is time to print something. *)
-       Block[{prnt = False, debug, ww, vv, trueArnorm}, 
+       Block[{prnt = False, debug, ww, vv, trueArnorm},
         If[n <= 40, prnt = True];
 	If[itn <= 10, prnt = True];
         If[itn >= itnlim - 10, prnt = True];
@@ -308,7 +308,7 @@ minres[A_Function, b_,
          ww = A[vv] - shift*vv; (*  ww=(A-shift*I)*vv="Ar" *)
          trueArnorm = Norm[ww];
          Print["Arnorm=", Arnorm, " True||Ar|| =", trueArnorm]]];
- 
+
        If[istop != 0, Break[]]]]]]];
   resvec = If[itn>0,Take[resvec, {itn}],0];
 
@@ -325,8 +325,8 @@ minres[A_Function, b_,
 (*  End function minres.m *)
 
 makrOrtho::usage = "Create instance of the orthogonalizer.";
-makeOrtho[n_, localSizeIn_] := 
- Module[{localPointer, localOrtho, localSize = localSizeIn, 
+makeOrtho[n_, localSizeIn_] :=
+ Module[{localPointer, localOrtho, localSize = localSizeIn,
    localVQueueFull, localV, localVEnqueue, localVOrtho},
    (* boolean to tell whether localReOrtho is on based on the value of localSize *)
   localOrtho = False;
@@ -336,11 +336,11 @@ makeOrtho[n_, localSizeIn_] :=
    localVQueueFull = False; (* boolean that tells whether we have stored all prior localSize lanczos vectors *)
    (* Allocate storage for the number of the latest v_k^T vectors. *)
    (* Can't store more than min dimension of the matrix, n *)
-   localV = Array[Null &, {n, Min[localSize, n]}]];
+   localV = Array[Null&, {n, Min[localSize, n]}]];
 
   (* This function stores v into the circular buffer localV *)
-  localVEnqueue = 
-   Function[v, 
+  localVEnqueue =
+   Function[v,
     If[localPointer < localSize, (* localPointer counts the number currently stored *)
      localPointer = localPointer + 1, (* not full yet *)
      localPointer = 1; (* Remain orthogonal to previous localSize, so erase first one and continue circularly. *);
@@ -348,10 +348,10 @@ makeOrtho[n_, localSizeIn_] :=
     localV[[localPointer]] = v]; (* Store v in the column corresponding to localPointer *)
 
   (*Perform local reorthogonalization of v *)
-  localVOrtho = 
-   Function[v, 
-    Block[{vOutput = v, localOrthoLimit}, 
-     If[localVQueueFull, 
+  localVOrtho =
+   Function[v,
+    Block[{vOutput = v, localOrthoLimit},
+     If[localVQueueFull,
       localOrthoLimit = localSize, (* calculate where to terminate loop *)
       localOrthoLimit = localPointer]; (* localPointer<localSize *)
      Do[ Block[{vtemp = localV[[localOrthoCount]]},
@@ -359,7 +359,7 @@ makeOrtho[n_, localSizeIn_] :=
        vOutput = vOutput - (vOutput.vtemp)*vtemp
        (* orthogonalize to each stored vector-
        note we don't have to normalize since it is explicitly done
-       in the code and so we don't need to redo it *)], 
+       in the code and so we don't need to redo it *)],
        {localOrthoCount, localOrthoLimit}];
      vOutput]];
   {localOrtho, localVEnqueue, localVOrtho}];

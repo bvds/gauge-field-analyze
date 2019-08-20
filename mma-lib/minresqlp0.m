@@ -1,11 +1,11 @@
 (*
                      MINRES-QLP linear system solver
- 
+
 Import MATLAB code from https://web.stanford.edu/group/SOL/software/minresqlp/
 The intention here is for the Mathematica code to match, as close as possible,
 the original MATLAB code.  This version does not use MINRES. Added stepMonitor.
- 
-function [x, flag, iter, relres, relAres, 
+
+function [x, flag, iter, relres, relAres,
         Anorm, Acond, xnorm, Axnorm, resvec, Aresvec] =
     minresqlp0(A, b, M, shift, rtol, maxit, maxxnorm, Acondlim,
         stepMonitor, printDetails)
@@ -114,7 +114,7 @@ Also MINRES, SYMMLQ, LSQR, CGLS downloadable from
 http://www.stanford.edu/group/SOL/software.html
 
 REFERENCES:
-Sou-Cheng T. Choi and Michael A. Saunders, 
+Sou-Cheng T. Choi and Michael A. Saunders,
 ALGORITHM: MINRES-QLP for Singular Symmetric and Hermitian Linear
 Equations and Least-Squares Problems, to appear in ACM Transactions on
 Mathematical Software.
@@ -128,13 +128,13 @@ Sou-Cheng T. Choi's PhD Dissertation, Stanford University, 2006:
 http://www.stanford.edu/group/SOL/dissertations.html
 
  CURRENT / FUTURE RELEASES of minresqlp:
-Version 2:  
+Version 2: 
    http://code.google.com/p/minres-qlp/
    http://www.mathworks.com/matlabcentral/fileexchange
-Version 1:  
+Version 1: 
    http://code.google.com/p/minres-qlp/
    http://www.stanford.edu/group/SOL/download.html
-Other implementations in Fortran 90/95, Python: 
+Other implementations in Fortran 90/95, Python:
    http://code.google.com/p/minres-qlp/
 
 
@@ -142,7 +142,7 @@ MODIFICATION HISTORY:
 28 Jun 2013: Second version for MATLAB Central.
 27 Jun 2013: (1) Fixed iteration log:
              (a) The heading came out ok every 20 lines initially, but
-             stopped after itn 80. 
+             stopped after itn 80.
              (b) Subsequent output was for itns 109, 119, ... rather
              than 110, 120,...
              (2) Introduced local variable "likeLS", which is true if
@@ -199,41 +199,41 @@ specific request to saunders@stanford.edu and scchoi@stanford.edu.
 
 COMMENTS?
 
-Email sctchoi@uchicago.edu and saunders@stanford.edu 
+Email sctchoi@uchicago.edu and saunders@stanford.edu
 *)
 
 minresqlp0::usage = "MINRES-QLP solver for symmetric indefinte linear systems.  The matrix can be expressed as a pure function that acts on a vector.";
 minresqlp0::indefinite = "`1` appears to be indefinite.";
-Options[minresqlp0] = {rTolerance -> $MachineEpsilon, 
-   maxIterations -> Automatic, maxXNorm -> 10.0^7, aConditionLimit -> 10.0^15, 
+Options[minresqlp0] = {rTolerance -> $MachineEpsilon,
+   maxIterations -> Automatic, maxXNorm -> 10.0^7, aConditionLimit -> 10.0^15,
    stepMonitor -> None, printDetails -> False, returnVectors->True};
-minresqlp0[A_?MatrixQ, rest__] := minresqlp0[(A.#) &, rest];
-minresqlp0[A_, b_, M_?MatrixQ, rest___] := 
+minresqlp0[A_?MatrixQ, rest__] := minresqlp0[(A.#)&, rest];
+minresqlp0[A_, b_, M_?MatrixQ, rest___] :=
   minresqlp0[A, b, LinearSolve[M], rest];
-minresqlp0[A_Function, b_, M:(None|_Function|_LinearSolveFunction):None, 
-	  shift:_?NumberQ:0, OptionsPattern[]] := 
+minresqlp0[A_Function, b_, M:(None|_Function|_LinearSolveFunction):None,
+	  shift:_?NumberQ:0, OptionsPattern[]] :=
 Module[{
     (* MATLAB constants *)
-    eps = $MachineEpsilon, 
-    realmax = $MaxMachineNumber, 
+    eps = $MachineEpsilon,
+    realmax = $MaxMachineNumber,
     realmin = $MinMachineNumber,
     (* Mimic MATLAB function *)
     zeros = Function[Array[0.0&, {##}]],
 
     show = Replace[OptionValue[printDetails], {False -> 0, True -> 1}],
-    rtol = OptionValue[rTolerance], maxxnorm = OptionValue[maxXNorm], 
+    rtol = OptionValue[rTolerance], maxxnorm = OptionValue[maxXNorm],
     Acondlim = OptionValue[aConditionLimit],
     maxit = OptionValue[maxIterations],
 
     debug = False,
-    n = Length[b], 
-    resvec = None, Aresvec = None, r2, r3, beta1}, 
+    n = Length[b],
+    resvec = None, Aresvec = None, r2, r3, beta1},
 If[maxit === Automatic, maxit = 4 n];
-If[OptionValue[returnVectors],       
+If[OptionValue[returnVectors],      
    resvec = zeros[maxit + 1];
    Aresvec = zeros[maxit + 1]];
 
-(* Set up {beta1,p,v} for the first Lanczos vector v1. *) 
+(* Set up {beta1,p,v} for the first Lanczos vector v1. *)
 r2 = N[b];        (* r2=b *)
 r3 = r2;          (* r3=b *)
 beta1 = Norm[r2]; (* beta1=norm(b) *)
@@ -250,10 +250,10 @@ Block[{
 flag0 = -2, flag,
 iter = 0,
 lines = 1, headlines = 20,
-beta = 0, tau = 0, taul = 0, phi = beta1, 
+beta = 0, tau = 0, taul = 0, phi = beta1,
 betan = beta1, gmin = 0, cs = -1, sn = 0,
 cr1 = -1, sr1 = 0, cr2 = -1, sr2 = 0,
-dltan = 0, eplnn, gama = 0, gamal = 0, 
+dltan = 0, eplnn, gama = 0, gamal = 0,
 gamal2, eta = 0, etal = 0, etal2 = 0,
 vepln = 0, veplnl = 0, veplnl2 = 0, ul3 = 0,
 ul2 = 0, ul = 0, u, rnorm,
@@ -265,7 +265,7 @@ relresl = 0,
 relAresl = 0,
 v, x, xl2, w, wl, wl2, r1,
 betal, alfa, pnorm, dlta, gbar, xnorml, taul2,
-likeLS, Anorml, Acondl, rnorml, Arnorml}, 
+likeLS, Anorml, Acondl, rnorml, Arnorml},
 flag = flag0; rnorm = betan;
 relres = rnorm/(beta1 + 10.0^-50); (* Safeguard for beta1=0 *)
 x = zeros[n];
@@ -278,7 +278,7 @@ If[resvec =!= None, resvec[[1]] = Re[beta1]];
 
 (* print header if show *)
 Block[{first = "Enter minresqlp0.  ",
-last = "Exit minresqlp0.  ", 
+last = "Exit minresqlp0.  ",
 msg = {
         " beta2=0.  b and x are eigenvectors                   ", (* -1 *)
         " beta1=0.  The exact solution is  x = 0               ", (* 0 *)
@@ -299,7 +299,7 @@ If[show > 1,
    Print["n=", n, "   ||b||=", beta1, "   shift=", shift,
 	 "   rtol=", rtol];
    Print["maxit=", maxit, "   maxxnorm=", If[NumberQ[maxxnorm], maxxnorm,
-					   "function"], 
+					   "function"],
 	 "   Acondlim=", Acondlim];
    Print[" ", head]];
 
@@ -330,11 +330,11 @@ While[flag == flag0 && iter < maxit,
 		Break[]]]],
        r3 = M[r2]; betan = Conjugate[r2].r3;
        If[betan > 0,
-	  betan = Sqrt[betan], 
+	  betan = Sqrt[betan],
           Message[minresqlp0::indefinite, "M"];
           betan = $Failed]];
     If[iter <= 2,
-       pnorm = Norm[{alfa, betan}], 
+       pnorm = Norm[{alfa, betan}],
        pnorm = Norm[{betal, alfa, betan}]];
 
     If[debug,
@@ -343,8 +343,8 @@ While[flag == flag0 && iter < maxit,
        Print["  r1_", iter, "    = ", Take[r1, Min[n, 5]]];
        Print["  r2_", iter, "    = ", Take[r2, Min[n, 5]]];
        Print["  r3_", iter, "    = ", Take[r3, Min[n, 5]]];
-       Print["  alpha_", iter, " = ", alfa, ", beta_", iter, " = ", 
-             beta, ", beta_", iter + 1, " = ", betan, " pnorm_", iter, 
+       Print["  alpha_", iter, " = ", alfa, ", beta_", iter, " = ",
+             beta, ", beta_", iter + 1, " = ", betan, " pnorm_", iter,
              " = ", pnorm]];
 
     (* Apply previous left reflection Q_{k-1} *)
@@ -353,7 +353,7 @@ While[flag == flag0 && iter < maxit,
     gbar = sn*dbar - cs*alfa; eplnn = sn*betan;
     dltan = -cs*betan;
 
-    If[debug, 
+    If[debug,
        Print["Apply previous left reflection Q_{", iter-1, ",", iter, "}:"];
        Print["  c_", iter-1, "     = ", cs,", s_", iter-1,"    = ",sn];
        Print["  dlta_", iter, " = ", dlta, ", gbar_", iter, " = ", gbar];
@@ -365,7 +365,7 @@ While[flag == flag0 && iter < maxit,
     taul2 = taul; taul = tau; tau = cs*phi;
     Axnorm = Norm[{Axnorm, tau}]; phi = sn*phi;
 
-    If[debug, 
+    If[debug,
        Print["Compute the current left reflection Q_{",iter,",",iter+1,"}:"];
        Print["  c_",iter, "     = ",cs, ", s_",iter,"    = ",sn];
        Print["  tau_",iter,"   = ",tau,", phi_",iter,"  = ",phi];
@@ -379,12 +379,12 @@ While[flag == flag0 && iter < maxit,
        veplnl = cr2*vepln + sr2*dlta;
        dlta = dltaTmp; eta = sr2*gama; gama = -cr2*gama;
 
-       If[debug, 
+       If[debug,
           Print["Apply the previous right reflection P_{",iter-2,",",iter,"}:"];
           Print["  cr2_",iter, "   = ",cr2,", sr2_",iter, "    = ",sr2];
           Print["  gama_",iter-2, " = ", gamal2, ", gama_",iter-1,
           "  = ",gamal,", gama_",iter," = ",gama];
-          Print["  dlta_",iter, " = ", dlta, ", vepln_",iter-1, 
+          Print["  dlta_",iter, " = ", dlta, ", vepln_",iter-1,
 		" = ",veplnl, ", eta_",iter,"   = ", eta]]]];
 
     (* Compute the current right reflection P{k-1,k}, P_12, P_23, ... *)
@@ -393,10 +393,10 @@ While[flag == flag0 && iter < maxit,
        vepln = sr1*gama;
        gama = -cr1*gama;
 
-       If[debug, 
+       If[debug,
           Print["Compute the second current right reflections P_{",iter-1,",",iter,"}:"];
           Print["  cr1_",iter, "   = ", cr1, ", sr1_",iter,"   = " sr1];
-          Print["  gama_",iter-1, " = ", gamal, ", gama_",iter, 
+          Print["  gama_",iter-1, " = ", gamal, ", gama_",iter,
 		" = ", gama, ", vepln_",iter, " = ", vepln]]];
 
     (* Update xnorm *)
@@ -408,7 +408,7 @@ While[flag == flag0 && iter < maxit,
        ul = (taul - etal*ul3 - veplnl*ul2)/gamal];
     xnormTmp = Norm[{xl2norm, ul2, ul}];
     likeLS = (relresl >= relAresl);
-    If[Abs[gama] > realmin && xnormTmp < maxxnorm, 
+    If[Abs[gama] > realmin && xnormTmp < maxxnorm,
        u = (tau - eta*ul2 - vepln*ul)/gama;
        If[Norm[{xnormTmp, u}] > maxxnorm && likeLS,
 	  u = 0; flag = 6],
@@ -420,7 +420,7 @@ While[flag == flag0 && iter < maxit,
     Which[iter == 1,
 	  xl2 = zeros[n];
 	  wl2 = wl; wl = v*sr1; w = -v*cr1,
-	  iter == 2, 
+	  iter == 2,
           wl2 = wl;
           wl = w*cr1 + v*sr1;
           w = w*sr1 - v*cr1,
@@ -439,7 +439,7 @@ While[flag == flag0 && iter < maxit,
        Print["  w_",iter, "     = ", Take[wl, Min[n, 5]]];
        Print["  w_",iter, "     = ", Take[w, Min[n, 5]]];
        Print["Update u, x and xnorm:"];
-       Print["  u_",iter - 2, "     = ", ul2, ", u_",iter - 1, 
+       Print["  u_",iter - 2, "     = ", ul2, ", u_",iter - 1,
              "     = ", ul, ", u_",iter, "     = ", u];
        Print["  x_",iter, "     = ", Take[x, Min[n, 5]]];
        Print["  ||x_",iter, "|| = ", xnorm]];
@@ -453,7 +453,7 @@ While[flag == flag0 && iter < maxit,
     Anorm = Max[{Anorm, gamal, absGama, pnorm}];
     Which[iter == 1,
 	  gmin = gama; gminl = gmin,
-	  iter > 1, 
+	  iter > 1,
           gminl2 = gminl; gminl = gmin; gmin = Min[{gminl2, gamal, absGama}]];
     Acondl = Acond; Acond = Anorm/gmin;
     rnorml = rnorm; relresl = relres;
@@ -500,16 +500,16 @@ If[disable && (iter<maxit),
 
     If[flag == 2 || flag == 4 || (flag == 6 && likeLS) || flag == 7, (* Possibly singular *)
        iter = iter - 1;
-       Acond = Acondl; rnorm = rnorml; relres = relresl, 
+       Acond = Acondl; rnorm = rnorml; relres = relresl,
        If[resvec =!= None,
 	  resvec[[iter + 1]] = rnorm;
           Aresvec[[iter]] = Arnorml];
-       If[show > 1 && Mod[iter-1,lines] == 0, 
+       If[show > 1 && Mod[iter-1,lines] == 0,
           Which[iter == 101,
-		lines = 10; headlines = 20*lines, 
+		lines = 10; headlines = 20*lines,
 		iter == 1001,
 		lines = 100; headlines = 20*lines];
-          Print[" ", {iter-1, rnorml, Arnorml, 
+          Print[" ", {iter-1, rnorml, Arnorml,
 		relresl, relAresl, Anorml, Acondl, xnorml}];
           If[iter > 1 && Mod[iter, headlines] == 1,
 	     Print[head]]]]];
@@ -530,11 +530,11 @@ If[Aresvec =!= None,
    Aresvec = Take[Aresvec,iter + 1]];
 If[resvec =!= None,
    resvec = Take[resvec,iter + 1]];
-If[show > 1, 
-   If[rnorm > realmin, 
-      Print[start, {iter, rnorm, Arnorm, relres, relAres, Anorm, 
-		    Acond, xnorm}], 
-      Print[start, {iter, rnorm, Arnorm, relres, 0, Anorm, Acond, 
+If[show > 1,
+   If[rnorm > realmin,
+      Print[start, {iter, rnorm, Arnorm, relres, relAres, Anorm,
+		    Acond, xnorm}],
+      Print[start, {iter, rnorm, Arnorm, relres, 0, Anorm, Acond,
 		    xnorm}]]];
 If[show > 0,
    Print[last, " flag=", flag, "   ", msg[[flag + 2]]];
@@ -545,29 +545,29 @@ If[show > 0,
    Print[last, " Anorm=", Anorm,"   Acond=", Acond]];
 
 (* Return values *)
-{x, flag, iter, relres, relAres, Anorm, Acond, xnorm, Axnorm, 
+{x, flag, iter, relres, relAres, Anorm, Acond, xnorm, Axnorm,
  resvec, Aresvec}]]]];
 
 
-(*  
-  SymOrtho: Stable Symmetric Householder reflection 
+(* 
+  SymOrtho: Stable Symmetric Householder reflection
 
 INPUTS:
- a      first element of a two-vector  (a, b)      
- b      second element of a two-vector (a, b) 
+ a      first element of a two-vector  (a, b)     
+ b      second element of a two-vector (a, b)
 
 OUTPUTS:
  c      cosine(theta), where theta is the implicit angle of rotation
         (counter-clockwise) in a plane-rotation
  s      sine(theta)
  r      two-norm of (a, b)
-  
+ 
 DESCRIPTION:
-  Stable symmetric Householder reflection that gives c and s such that 
+  Stable symmetric Householder reflection that gives c and s such that
      ( c  s )(a) = (d),
-     ( s -c )(b) = (0)  
+     ( s -c )(b) = (0) 
   where d = two-norm of vector (a, b),
-     c = a / sqrt(a^2 + b^2) = a / d, 
+     c = a / sqrt(a^2 + b^2) = a / d,
      s = b / sqrt(a^2 + b^2) = b / d.
   The implementation guards against overlow in computing sqrt(a^2 + b^2).
 
@@ -575,23 +575,23 @@ EXAMPLE:
    description
 
 SEE ALSO:
-  TESTSYMGIVENS.m, 
-  PLANEROT (MATLAB's function) --- 4 divisions while 2 would be enough, 
+  TESTSYMGIVENS.m,
+  PLANEROT (MATLAB's function) --- 4 divisions while 2 would be enough,
   though not too time-consuming on modern machines
-  
+ 
 REFERENCES:
  Algorithm 4.9, stable *unsymmetric* Givens rotations in
-  Golub and van Loan's book Matrix Computations, 3rd edition. 
+  Golub and van Loan's book Matrix Computations, 3rd edition.
 
 MODIFICATION HISTORY:
- 10/06/2004: Replace d = norm([a,b]) by 
+ 10/06/2004: Replace d = norm([a,b]) by
                      d = a/c if |b| < |a| or b/s otherwise.
- 10/07/2004: First two cases (either b or a == 0) rewritten to make sure 
-             (1) d >= 0 
-             (2) if [a,b] = 0, then c = 1 and s = 0 but not c = s = 0. 
+ 10/07/2004: First two cases (either b or a == 0) rewritten to make sure
+             (1) d >= 0
+             (2) if [a,b] = 0, then c = 1 and s = 0 but not c = s = 0.
  09/27/2011: Change filename from SYMGIVENS2 to SYMORTHO.
  01/16/2012: Change file from SYMORTHO to SYMREFL.
-  
+ 
 
 KNOWN BUGS:
   MM/DD/2004: description
@@ -603,20 +603,20 @@ CREATION DATE: 09/28/2004
 *)
 
 SymOrtho[a_, b_] := Block[{
-    
+   
 absa = Abs[a],
 absb = Abs[b],
-signa = Sign[a], 
+signa = Sign[a],
 signb = Sign[b],
 t,c,s,r},
 
-If[ Im[a]==0 && Im[b]==0,  
+If[ Im[a]==0 && Im[b]==0, 
     (* Both a and b are real numbers *)
 
     (* Special cases: a or b is 0 *)
     Which[b == 0,
 	  If[a == 0,
-	     c = 1.0, 
+	     c = 1.0,
 	     c = signa]; (* NOTE: Sign(0) = 0 in Mathematica *)
 	  s = 0;
 	  r = absa,
