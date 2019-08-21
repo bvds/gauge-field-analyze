@@ -14,7 +14,7 @@ Eigensystem[] does not allow the Matrix to be passed as a function.
 Since the resulting eigenvectors have to be transformed
 back, all the Lanczos vectors must be stored.";
 Options[ersatzLanczos] := {maxIterations -> Automatic,
-  printDetails -> 0, initialVector -> Automatic,
+  printDetails -> 0, printsPerDecade -> 10, initialVector -> Automatic,
   innerInterval -> 1, rTolerance -> $MachineEpsilon,
   eigenPairs -> All, orthoSubspace -> None};
 (* This code is adapted from MINRES, file minres.m *)
@@ -29,6 +29,9 @@ ersatzLanczos[A_Function, n_Integer,
    show = Replace[OptionValue[printDetails], {False->0, True->1}],
    (* Since we perform full reorthogonalization, limit to n steps. *)
    itnlim = Min[n, Replace[OptionValue[maxIterations], Automatic -> n]],
+   (* Choose integers so that they are evenly spaced on a log scale,
+     making sure we hit powers of 10. *)
+   valuesPerDecade = Floor[10^(Floor[0.5 + Log[10, #1] #2]/#2) + 0.5]&,
    first = "Enter ersatzLanczos. ",
    middlePrompt = "esatzLanczos ", 
    last = "Exit ersatzLanczos.  ",
@@ -49,17 +52,18 @@ ersatzLanczos[A_Function, n_Integer,
    addTime = Function[{timer, expr},
      Block[{t1 = SessionTime[], result = expr},
 	   timer += SessionTime[] - t1; result], {HoldAll, SequenceHold}],
-   istop = 0, itn = 0, done = False, beta1, vv = {}, alpha, beta,
+   istop = 0, itn = 0, done = False, vv = {}, alpha, beta,
    (* Set up y and v for the first Lanczos vector
    v1.y=beta1 P^T v1,
    where P=C**(-1).v is really P^T v1. *)
-   y = If[OptionValue[initialVector] === Automatic, RandomReal[1, n],
-	  OptionValue[initialVector]], r1, r2, v, Anorm = 0.0,
-   maxRnorm = Null, vals = Null, vecs = Null, beigen,
+   y = If[OptionValue[initialVector] === Automatic,
+	  RandomReal[1.0, n], OptionValue[initialVector]],
+   r1 = Null, r2, v, Anorm = 0.0,
+   rnorm = Null, vals = Null, vecs = Null, beigen,
    take = Replace[OptionValue[eigenPairs], All -> n]},
   alpha = Array[Null&, {itnlim}];
   beta = Array[Null&, {itnlim + 1}];
-  r1 = y; (* initial guess x=0 initial residual *)
+  r2 = y; (* initial guess x=0 initial residual *)
 
   beigen = Function[Block[{
       tt = SparseArray[{
@@ -76,16 +80,15 @@ ersatzLanczos[A_Function, n_Integer,
 	   " rTolerance=", OptionValue[rTolerance]]];
 
   If[M =!= None, addTime[tm, y = M[y]]];
-  beta1 = Conjugate[r1].y;
+  beta[[1]] = Conjugate[r2].y;
 
   (* Test for an indefinite preconditioner.
   If b=0 exactly, stop with x=0. *)
-  If[beta1 < 0, istop = 9; show = 1; done = True];
-  If[beta1 == 0, show = 1; done = True];
-  If[beta1 > 0, beta1 = Sqrt[beta1]]; (* Normalize y to get v1 later. *)
+  If[beta[[1]] < 0, istop = 9; show = 1; done = True];
+  If[beta[[1]] == 0, show = 1; done = True];
+  If[beta[[1]] > 0,
+     beta[[1]] = Sqrt[beta[[1]]]]; (* Normalize y to get v1 later. *)
 
-  beta[[1]] = beta1;
-  r2 = r1;
   While[itn < itnlim && istop == 0, (* max num of iter *)
  
    itn = itn + 1;
@@ -103,12 +106,14 @@ ersatzLanczos[A_Function, n_Integer,
    addTime[ta, y = A[v]];
    If[shift != 0, y -= shift*v]; (* shift is 0 otherwise solving A-shift*I *)
    If[itn >= 2,
-    y = y - (beta[[itn]]/beta[[itn - 1]])*r1]; (* normalization is the division r1 by oldb *)
+      y = y - (beta[[itn]]/beta[[itn - 1]])*r1]; (* normalization is the division r1 by oldb *)
    alpha[[itn]] = v.y; (* alphak *)
-   y = (-alpha[[itn]]/beta[[itn]])*r2 + y; (* normalization of r2/beta=v *)
+   y = y - (alpha[[itn]]/beta[[itn]])*r2; (* normalization of r2/beta=v *)
 
-   (* Orthogonalize versus the previous lanczos vectors*)
-   addTime[tortho, y = y - (vv.y).vv];
+   (* Orthogonalize versus the previous lanczos vectors
+    using modified Gram-Schmidt.
+    Using Scan[...] is much slower than Do[...]. *)
+   addTime[tortho, Do[y = y - (vv[[i]].y) vv[[i]], {i, Length[vv]}]];
 
    (* Optionally orthogonalize with respect to some subspace. *)
    If[OptionValue[orthoSubspace] =!= None,
@@ -123,13 +128,13 @@ ersatzLanczos[A_Function, n_Integer,
 
    (* Periodically solve inner eigenvalue problem so we can
       estimate convergence. *)
-   If[itn >= Abs[take] && Mod[itn, OptionValue[innerInterval]] == 0,
-      addTime[tinner,
-	      {vals, vecs} = beigen[itn];
+   If[itn >= Abs[take] &&
+      Mod[itn - Abs[take], OptionValue[innerInterval]] == 0,
+      addTime[tinner, {vals, vecs} = beigen[itn];
       (* Convergence test from
           http://www.netlib.org/utk/people/JackDongarra/etemplates/node103.html *)
-      maxRnorm = Max[Abs[beta[[itn + 1]] Map[Last, vecs]]];
-      If[maxRnorm <= OptionValue[rTolerance],
+      rnorm = Abs[beta[[itn + 1]] Map[Last, vecs]];
+      If[Max[rnorm] <= OptionValue[rTolerance],
 	 istop = 1]],
       {vals, vecs} = {Null, Null}];
 
@@ -147,8 +152,9 @@ ersatzLanczos[A_Function, n_Integer,
      If[itn >= itnlim, istop = 6];
      If[epsx >= beta[[itn + 1]], istop = 3]]];
 
-   If[show > 1 && Divisible[itn, 10^Floor[Log[10, itn]]],
-      Print[middlePrompt, " itn=", itn, " max rnorm=", maxRnorm,
+   If[show > 1 && itn == valuesPerDecade[itn, OptionValue[printsPerDecade]],
+      Print[middlePrompt, " itn=", itn,
+	    " rnorm=", {Min[rnorm], Max[rnorm]},
 	    " time=", SessionTime[] - tinit]]
 
   ];  (* end of main loop *)
@@ -160,12 +166,12 @@ ersatzLanczos[A_Function, n_Integer,
 
   If[vals === Null,
      {vals, vecs} = beigen[itn];
-     maxRnorm = Max[Abs[beta[[itn + 1]] Map[Last, vecs]]]];
+     rnorm = Abs[beta[[itn + 1]] Map[Last, vecs]]];
 
   (* Display final status. *)
   If[show > 0,
    Print[last, "istop=", istop, " itn=", itn];
-   Print[last, "Anorm=", Anorm, " Max rnorm=", maxRnorm];
+   Print[last, "Anorm=", Anorm, " rnorm=", {Min[rnorm], Max[rnorm]}];
    Print[last, "time (seconds): M=", tm, ", A=", ta, ", orthogonalization=",
 	 tortho, " inner system=", tinner, ", total=", SessionTime[] - tinit];
    Print[last, msg[[istop + 2]]]];
