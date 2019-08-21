@@ -34,16 +34,16 @@ latticeIndex[coords_List, dimensions_] :=
    delta *= dimensions[[k]], {k, Length[dimensions]}]; i];
 
 shift::usage = "Wrap-around, assuming periodic boundary conditions.";
-shift[dir_, coordIn_List, size_: 1] :=
+shift[dir_, coordIn_List, size_:1] :=
   Block[{cc = coordIn},
-   cc[[dir]] =
-    1 + Mod[cc[[dir]] + size - 1, latticeDimensions[[dir]]]; cc];
+	cc[[dir]] = 1 + Mod[cc[[dir]] + size - 1, latticeDimensions[[dir]]];
+	cc];
 
 plaquette[dir1_, dir2_, coords_List] := Re[Tr[
-    getLink[dir1, coords].getLink[dir2,
-      shift[dir1, coords]].ConjugateTranspose[
-      getLink[dir1, shift[dir2, coords]]].ConjugateTranspose[
-      getLink[dir2, coords]]]];
+    getLink[dir1, coords].
+    getLink[dir2, shift[dir1, coords]].
+    ConjugateTranspose[getLink[dir1, shift[dir2, coords]]].
+    ConjugateTranspose[getLink[dir2, coords]]]];
 averagePlaquette[] :=
     Chop[Sum[Re[plaquette[dir1, dir2, latticeCoordinates[k]]],
 	     {k, latticeVolume[]}, {dir1, 2, nd},
@@ -60,8 +60,8 @@ makeTrivialLattice[
    Table[If[OptionValue[randomPerturbation] > 0,
      MatrixExp[
       I Table[RandomReal[
-          OptionValue[randomPerturbation]], {nc^2 -
-           1}] .suGenerators[]],
+          OptionValue[randomPerturbation]],
+	      {nc^2 - 1}] .suGenerators[]],
      IdentityMatrix[nc]], {nd}, {latticeVolume[]}];
   Clear[linearSiteIndex];
   Do[linearSiteIndex[latticeCoordinates[i]] = i,
@@ -70,8 +70,9 @@ makeTrivialLattice[
    Do[Block[{coords = latticeCoordinates[i], u = randomSUMatrix[]},
      Do[setLink[dir, coords, u.getLink[dir, coords]];
       setLink[dir, shift[dir, coords, -1],
-       getLink[dir, shift[dir, coords, -1]].ConjugateTranspose[
-           u]], {dir, nd}]], {i, latticeVolume[]}]]);
+	      getLink[dir, shift[dir, coords, -1]].
+		     ConjugateTranspose[u]], {dir, nd}]],
+      {i, latticeVolume[]}]]);
 
 polyakovLoop[dir_, anchor_] :=
   (* Simple loop. *)
@@ -137,8 +138,8 @@ polyakovLoopAdd[tallies_, dir0_, dir1_] :=
       lt = Lookup[tallies, Norm[dx], {0, 0, 0}]; lt[[1]] += 1;
       (* Imaginary part cancels out when averaging over face *)
       z = Re[pp[[k1]] Conjugate[pp[[k2]]]]; lt[[2]] += z;
-      lt[[3]] += z^2; tallies[Norm[dx]] = lt]]], {k1, nf - 1},
-     {k2, k1 + 1, nf}]];
+      lt[[3]] += z^2; tallies[Norm[dx]] = lt]]],
+     {k1, nf - 1}, {k2, k1 + 1, nf}]];
 polyakovLoopAdd[tallies_, dir_] :=
  Block[{face = latticeDimensions, pp, nf}, face[[dir]] = 1;
   nf = Apply[Times, face];

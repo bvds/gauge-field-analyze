@@ -306,6 +306,18 @@ dynamicPart[gaugeTransformShifts_, OptionsPattern[]] :=
 
 (* Find saddle point *)
 
+(*
+   Find the solution to an eigensystem subject to a
+   linear constraint.
+
+   This is the computational task discussed in:
+   "Large sparse symmetric eigenvalue problems
+   with homogeneous linear constraints: the
+   Lanczos process with inner–outer iterations"
+   Gene H. Golub, Zhenyue Zhang, Hongyuan Zha
+   https://core.ac.uk/download/pdf/81957508.pdf
+ *)
+
 findDelta::usage = "Given a Hessian matrix and a gradient, find the
 associated shifts using either dense or sparse matrix techniques.";
 findDelta::lastPairs = "Mathematica orders eigenvalues/vectors in
@@ -313,7 +325,7 @@ order of decreasing magnitude.  Thus, for large shifts, one must find
 the last eigenvalues/vectors.";
 Options[findDelta] = {dynamicPartMethod -> Automatic,
   Method -> Automatic, rescaleCutoff -> 1, dampingFactor -> 1,
-  storePairs -> False, largeShiftOptions -> {},
+  storePairs -> False, storeHess -> False, largeShiftOptions -> {},
   storeBB -> False, debugProj -> False, largeShiftCutoff -> 2,
   (* Roughly speaking, the relative error in the matrix norm of
      the link goes as Norm[shift]^3/48. *)
@@ -337,14 +349,13 @@ findDelta[hessIn_, gradIn_, gaugeTransformShifts_, OptionsPattern[]] :=
     {values, oo} = Eigensystem[Normal[hess]];
     shifts = applyCutoff3[values, oo.grad, oo.proj,
 	OptionValue[largeShiftCutoff], zzz].oo.proj;
-    Print["shifts norms and rescale:  ", {shiftNorm[shifts],
-	Norm[shifts], shifts.hessIn.shifts/shifts.gradIn}];
+    Print["shifts norms and rescale:  ",
+	  {shiftNorm[shifts], Norm[shifts],
+	   shifts.hessIn.shifts/shifts.gradIn}];
+    If[OptionValue[storeHess],
+       hess0 = hess; grad0 = grad; proj0 = proj; oo0 = oo];
     If[OptionValue[storePairs],
-       hess0 = hess;
-       grad0 = grad;
-       oo0 = oo;
        pairs0 = Transpose[{values, oo.grad}];
-       proj0 = proj;
        shifts0 = shifts];
     -damping applyCutoff2[shifts, cutoff, zzz]] /;
   OptionValue[Method] === Automatic || OptionValue[Method] === "Dense";
@@ -408,9 +419,10 @@ findDelta[hess_, grad_, gaugeTransformShifts_, opts:OptionsPattern[]] :=
    Print["findDelta time (seconds):  dynamic part=", tdp,
     ", small shifts=", tsp, ", A=", tdot, ", total=",
     SessionTime[] - tinit];
+   If[OptionValue[storeHess],
+      hess0 = hess; grad0 = grad; proj0 = Null; oo0 = Null];
    If[OptionValue[storePairs],
-      hess0 = hess; grad0 = grad; oo0 = None;
-      pairs0 = None; proj0 = None;
+      pairs0 = Null;
       shifts0 = shifts];
    -damping applyCutoff2[shifts, cutoff, zzz]] /;
  KeyExistsQ[minresLabels, methodName[OptionValue[Method]]];

@@ -15,7 +15,8 @@ Since the resulting eigenvectors have to be transformed
 back, all the Lanczos vectors must be stored.";
 Options[ersatzLanczos] := {maxIterations -> Automatic,
   printDetails -> 0, initialVector -> Automatic,
-  eigenPairs -> Automatic, orthoSubspace -> None};
+  innerInterval -> 1, rTolerance -> $MachineEpsilon,
+  eigenPairs -> All, orthoSubspace -> None};
 (* This code is adapted from MINRES, file minres.m *)
 ersatzLanczos[A_?MatrixQ, rest___] :=
     ersatzLanczos[(A.#)&, Length[A], rest];
@@ -27,18 +28,15 @@ ersatzLanczos[A_Function, n_Integer,
   Block[{debug = False,
    show = Replace[OptionValue[printDetails], {False->0, True->1}],
    (* Since we perform full reorthogonalization, limit to n steps. *)
-   itnlim = Min[n, If[OptionValue[maxIterations] === Automatic,
-		      If[NumberQ[OptionValue[eigenPairs]],
-			 (* Ad Hoc, based on nc=3, 6^3 lattice example. *)
-			 20 Abs[OptionValue[eigenPairs]],
-			 n],
-		      OptionValue[maxIterations]]],
+   itnlim = Min[n, Replace[OptionValue[maxIterations], Automatic -> n]],
+   first = "Enter ersatzLanczos. ",
+   middlePrompt = "esatzLanczos ", 
    last = "Exit ersatzLanczos.  ",
    (* Maintain the message numbering used in MINRES.
       Some of these don't make sense for an eigensystem, *)
    msg = {"beta2=0. If M=I, b and x are eigenvectors",
      "beta1=0.", (* 0 *)
-     "A solution to Ax=b was found, given rtol",
+     "Requested eigenpairs were found, given rtol",
      "A least-squares solution was found, given rtol",
      "Reasonable accuracy achieved, given machine epsilon", (* 3 *)
      "x has converged to an eigenvector",
@@ -47,7 +45,7 @@ ersatzLanczos[A_Function, n_Integer,
      "A does not define a symmetric matrix",
      "M does not define a symmetric matrix",
      "M does not define a pos-def preconditioner"}, (* 9 *)
-   tinit = SessionTime[], ta = 0, tm = 0, tortho = 0,
+   tinit = SessionTime[], ta = 0, tm = 0, tortho = 0, tinner = 0,
    addTime = Function[{timer, expr},
      Block[{t1 = SessionTime[], result = expr},
 	   timer += SessionTime[] - t1; result], {HoldAll, SequenceHold}],
@@ -56,10 +54,26 @@ ersatzLanczos[A_Function, n_Integer,
    v1.y=beta1 P^T v1,
    where P=C**(-1).v is really P^T v1. *)
    y = If[OptionValue[initialVector] === Automatic, RandomReal[1, n],
-	  OptionValue[initialVector]], r1, r2, v, Anorm = 0.0},
+	  OptionValue[initialVector]], r1, r2, v, Anorm = 0.0,
+   maxRnorm = Null, vals = Null, vecs = Null, beigen,
+   take = Replace[OptionValue[eigenPairs], All -> n]},
   alpha = Array[Null&, {itnlim}];
   beta = Array[Null&, {itnlim + 1}];
   r1 = y; (* initial guess x=0 initial residual *)
+
+  beigen = Function[Block[{
+      tt = SparseArray[{
+	  Band[{1, 1}] -> Take[alpha, #],
+	  Band[{2, 1}] -> Take[beta, {2, #}],
+	  Band[{1, 2}] -> Take[beta, {2, #}]}, {#, #}]},
+	If[debug,
+	   Print["T:  ", MatrixForm[tt]];
+	   Print["A:  ", MatrixForm[Transpose[vv].tt.vv]]];
+	Eigensystem[tt, take, Method -> "Banded"]]];
+
+  If[show>0,
+     Print[first,"n=",n," itnlim=", itnlim,
+	   " rTolerance=", OptionValue[rTolerance]]];
 
   If[M =!= None, addTime[tm, y = M[y]]];
   beta1 = Conjugate[r1].y;
@@ -106,7 +120,19 @@ ersatzLanczos[A_Function, n_Integer,
    beta[[itn + 1]] = r2.y; (* beta=betak+1^2 *)
    If[beta[[itn + 1]] < 0, istop = 9; Break[]];
    beta[[itn + 1]] = Sqrt[beta[[itn + 1]]];
- 
+
+   (* Periodically solve inner eigenvalue problem so we can
+      estimate convergence. *)
+   If[itn >= Abs[take] && Mod[itn, OptionValue[innerInterval]] == 0,
+      addTime[tinner,
+	      {vals, vecs} = beigen[itn];
+      (* Convergence test from
+          http://www.netlib.org/utk/people/JackDongarra/etemplates/node103.html *)
+      maxRnorm = Max[Abs[beta[[itn + 1]] Map[Last, vecs]]];
+      If[maxRnorm <= OptionValue[rTolerance],
+	 istop = 1]],
+      {vals, vecs} = {Null, Null}];
+
    (* Estimate various norms. *)
    (* This estimate of Anorm was borrowed from minres1.m *)
    Block[{pnorm =
@@ -116,34 +142,33 @@ ersatzLanczos[A_Function, n_Integer,
     epsx = Anorm*eps;
   
     (* See if any of the stopping criteria are satisfied.
-       In rare cases, istop is already-1 from above (Abar=const*I). *)
+       In rare cases, istop is already -1 from above (Abar=const*I). *)
     If[istop == 0,
      If[itn >= itnlim, istop = 6];
-     If[epsx >= beta[[itn + 1]], istop = 3]]]
-  ];
+     If[epsx >= beta[[itn + 1]], istop = 3]]];
+
+   If[show > 1 && Divisible[itn, 10^Floor[Log[10, itn]]],
+      Print[middlePrompt, " itn=", itn, " max rnorm=", maxRnorm,
+	    " time=", SessionTime[] - tinit]]
+
+  ];  (* end of main loop *)
+
   If[debug, Print["alpha:  ", alpha];
 	    Print["beta:  ", beta];
 	    Print["vv: ", MatrixForm[vv]];
 	    Print["Norm vv:  ", Map[Norm, vv]]];
 
+  If[vals === Null,
+     {vals, vecs} = beigen[itn];
+     maxRnorm = Max[Abs[beta[[itn + 1]] Map[Last, vecs]]]];
+
   (* Display final status. *)
   If[show > 0,
    Print[last, "istop=", istop, " itn=", itn];
-   Print[last, "Anorm=", Anorm];
+   Print[last, "Anorm=", Anorm, " Max rnorm=", maxRnorm];
    Print[last, "time (seconds): M=", tm, ", A=", ta, ", orthogonalization=",
-	 tortho, ", total=", SessionTime[] - tinit];
+	 tortho, " inner system=", tinner, ", total=", SessionTime[] - tinit];
    Print[last, msg[[istop + 2]]]];
 
-  Block[{
-      tt = SparseArray[{
-	  Band[{1, 1}] -> Take[alpha, itn],
-	  Band[{2, 1}] -> Take[beta, {2, itn}],
-	  Band[{1, 2}] -> Take[beta, {2, itn}]}, {itn, itn}],
-      take = Replace[OptionValue[eigenPairs], Automatic -> itn],
-      vals, vecs},
-	If[debug,
-	   Print["T:  ", MatrixForm[tt]];
-	   Print["A:  ", MatrixForm[Transpose[vv].tt.vv]]];
-	{vals, vecs} = Eigensystem[tt, take, Method -> "Banded"];
-	{vals, vecs.vv}]
+  {vals, vecs.vv}
 ];
