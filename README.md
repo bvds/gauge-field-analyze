@@ -88,3 +88,16 @@ Mathematica versions:
 * [`mma-lib/minres.m`](mma-lib/minres.m) Port of the [original MINRES function](https://web.stanford.edu/group/SOL/software/minres/).
 
 * [`mma-lib/minres1.m`](mma-lib/minres1.m) Version of MINRES-QLP with MINRES only.  Should be equivalent to [original MINRES function](https://web.stanford.edu/group/SOL/software/minres/).
+
+# TR-LAN #
+
+Need Lanczos routine with restarting and the ability to supply the
+matrix as a function (which cannot be done in Mathematica).
+See [TRLan software package](https://sdm.lbl.gov/~kewu/trlan.html)
+
+*  install `gfortran  libblas-dev liblapack-dev`
+
+*  `make lib`  (To compile and run example program `simplec` in
+`examples/SUN/`, comment out Sun-specific compiler flags in `Makefile`.)
+
+*  Add compiler flag `-fPIC` to `Make.inc`
