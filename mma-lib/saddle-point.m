@@ -446,7 +446,7 @@ correct method.  Can apply this to both dense and sparse systems.";
 https://mathematica.stackexchange.com/questions/353/functions-with-options/ *)
 Options[latticeSaddlePointStep] =
  Join[Options[findDelta], Options[latticeHessian]];
-latticeSaddlePointStep[opts : OptionsPattern[]] :=
+latticeSaddlePointStep[opts:OptionsPattern[]] :=
  Block[{hess, grad, delta, tmpGaugeField = makeRootLattice[],
 	t0 = SessionTime[], t1, t2, t3},
   {hess, grad} = latticeHessian[getLink[tmpGaugeField],
