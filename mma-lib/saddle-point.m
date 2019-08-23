@@ -428,7 +428,7 @@ findDelta[hess_, grad_, gaugeTransformShifts_, opts:OptionsPattern[]] :=
  KeyExistsQ[minresLabels, methodName[OptionValue[Method]]];
 
 (* External version.
-   As a first attempt, dump to file and run program.
+   As a first attempt, dump to files and run program.
    Later, maybe try LibraryLink or MathLink/WSTP.
 
 https://mathematica.stackexchange.com/questions/199925/can-we-link-mathematica-and-fortran-with-wstp
@@ -449,7 +449,7 @@ findDelta[hess_, grad_, gaugeTransformShifts_, opts:OptionsPattern[]] :=
     sparseExport = Function[MapThread[
 	Append,
 	{#["NonzeroPositions"], #["NonzeroValues"]}]],
-	symbolString = (a_Symbol -> b_) :> SymbolName[a] -> b,
+    symbolString = (a_Symbol -> b_) :> SymbolName[a] -> b,
     outFile = "hess-grad-gauge.json"},
    (* Dump dimensions, constants, and options into JSON file.
       Dump matrices and vectors: 
