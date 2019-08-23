@@ -4974,8 +4974,10 @@ Cell[BoxData[
   "averagePlaquette", "[", 
    "]"}]}]], "Input",ExpressionUUID->"5c707a37-26ce-461e-ac1e-dea684f9a683"],
 
-Cell[BoxData["0.14778270666034146`"], \
-"Output",ExpressionUUID->"c2df88a6-b4f7-4c2a-907b-53cc9c841228"]
+Cell[BoxData[
+ RowBox[{"-", 
+  "0.003918338671699323`"}]], \
+"Output",ExpressionUUID->"6aa33d8b-020a-43c7-b25f-cd8ecb41c667"]
 }, Open  ]],
 
 Cell[CellGroupData[{
@@ -5010,7 +5012,7 @@ Cell[BoxData[
   SequenceForm[
   "applyCutoff3:  ", 14, " of ", 1024, " zeros, between ", {994, 1024}],
   Editable->
-   False]], "Print",ExpressionUUID->"7cabd1e0-e2cb-4249-a495-7f4b154f3ed6"],
+   False]], "Print",ExpressionUUID->"52ad3997-7be0-4371-9b45-31b3ce06354e"],
 
 Cell[BoxData[
  InterpretationBox[
@@ -5023,7 +5025,7 @@ Cell[BoxData[
   "shifts norms and rescale:  ", {8.320151887931159, 58.5590236105344, 
    0.9999999999998886}],
   Editable->
-   False]], "Print",ExpressionUUID->"dd010750-d17b-4813-8dd6-525fb5f26c6a"],
+   False]], "Print",ExpressionUUID->"26ba2717-bde6-44c4-9c56-d3dbed17e8b1"],
 
 Cell[BoxData[
  InterpretationBox[
@@ -5032,22 +5034,22 @@ Cell[BoxData[
    "\[InvisibleSpace]", "2"}],
   SequenceForm["applyCutoff2: rescale maxNorm ", 8.320151887931159, " to ", 2],
   Editable->
-   False]], "Print",ExpressionUUID->"ed941867-9b29-4a6a-b7b7-3bd415c66393"],
+   False]], "Print",ExpressionUUID->"bd4216f7-7225-440b-90c5-62d191cde153"],
 
 Cell[BoxData[
  InterpretationBox[
   RowBox[{"\<\"latticeSaddlePointStep times:  \"\>", "\[InvisibleSpace]", 
    RowBox[{"{", 
     RowBox[{
-    "2.7940840000000000002`3.410363240531721", ",", 
-     "3.284944`6.667042968166671", ",", "1.767956`6.39798645014084", ",", 
-     "0.028041`4.598308495241372"}], "}"}]}],
+    "2.2492790000000000003`3.316167110691426", ",", 
+     "2.662623`6.575824676997072", ",", "3.487307`6.693005179374041", ",", 
+     "0.019821`4.447640559359974"}], "}"}]}],
   SequenceForm[
   "latticeSaddlePointStep times:  ", {
-   2.7940840000000000002`3.410363240531721, 3.284944`6.667042968166671, 
-    1.767956`6.39798645014084, 0.028041`4.598308495241372}],
+   2.2492790000000000003`3.316167110691426, 2.662623`6.575824676997072, 
+    3.487307`6.693005179374041, 0.019821`4.447640559359974}],
   Editable->
-   False]], "Print",ExpressionUUID->"1d59070a-325e-4c99-a4bd-1a991a6b3d46"]
+   False]], "Print",ExpressionUUID->"a733a6d7-ef10-40f9-bb90-811613ef8320"]
 }, Open  ]]
 }, Open  ]],
 
@@ -5060,7 +5062,7 @@ Cell[BoxData[
     RowBox[{
      RowBox[{"storePairs", "\[Rule]", "True"}], ",", 
      RowBox[{"fixedDir", "\[Rule]", "0"}], ",", 
-     RowBox[{"Method", "\[Rule]", "\"\<MINRES\>\""}], ",", 
+     RowBox[{"Method", "\[Rule]", "\"\<External\>\""}], ",", 
      RowBox[{"largeShiftOptions", "\[Rule]", 
       RowBox[{"{", 
        RowBox[{
@@ -5073,7 +5075,7 @@ Cell[BoxData[
           RowBox[{"-", "7"}]}]}], ",", 
         RowBox[{"printDetails", "\[Rule]", "2"}], ",", " ", 
         RowBox[{"printsPerDecade", " ", "\[Rule]", " ", "10"}], ",", 
-        RowBox[{"restartLanczos", "\[Rule]", "True"}]}], "}"}]}], ",", 
+        RowBox[{"restartLanczos", "\[Rule]", "False"}]}], "}"}]}], ",", 
      RowBox[{"dynamicPartMethod", "\[Rule]", 
       RowBox[{"{", 
        RowBox[{"\"\<MINRES\>\"", ",", 
@@ -5085,29 +5087,8 @@ Cell[BoxData[
   RowBox[{"shiftsDynamicMinres", "=", "shifts0"}], 
   ";"}]], "Input",ExpressionUUID->"4ae56d15-6f51-4241-a723-7323eb2d6ff8"],
 
-Cell[BoxData[
- InterpretationBox[
-  RowBox[{"\<\"dynamicPart memory:  \"\>", "\[InvisibleSpace]", 
-   TagBox[
-    InterpretationBox["\<\"0.\"\>",
-     0.,
-     AutoDelete->True],
-    EngineeringForm[#, 3]& ], 
-   "\[InvisibleSpace]", "\<\", gaugeTransform shifts \"\>", 
-   "\[InvisibleSpace]", 
-   TagBox[
-    InterpretationBox[
-     RowBox[{"\<\"399.\"\>", "\[Times]", 
-      SuperscriptBox["10", "\<\"3\"\>"]}],
-     398576.,
-     AutoDelete->True],
-    EngineeringForm[#, 3]& ], "\[InvisibleSpace]", "\<\" (bytes) for \"\>", 
-   "\[InvisibleSpace]", "\<\"MINRES\"\>"}],
-  SequenceForm["dynamicPart memory:  ", 
-   EngineeringForm[0., 3], ", gaugeTransform shifts ", 
-   EngineeringForm[398576., 3], " (bytes) for ", "MINRES"],
-  Editable->
-   False]], "Print",ExpressionUUID->"e1e81781-b8e3-4a55-a4d7-ba0d6329202f"]
+Cell[BoxData["$Aborted"], \
+"Output",ExpressionUUID->"c2496526-a212-4537-99a9-64612d48c058"]
 }, Open  ]],
 
 Cell[CellGroupData[{
@@ -5121,11 +5102,11 @@ Cell[BoxData[
  RowBox[{"{", 
   RowBox[{
    RowBox[{"{", 
-    RowBox[{"8.320151887931159`", ",", "8.320151650861392`"}], "}"}], ",", 
+    RowBox[{"8.320151887931159`", ",", "8.32015188806674`"}], "}"}], ",", 
    RowBox[{"{", 
-    RowBox[{"58.5590236105344`", ",", "58.55902301751811`"}], "}"}], ",", 
-   "0.9999999999999871`"}], 
-  "}"}]], "Output",ExpressionUUID->"bf256b7c-3299-4040-a216-70ab28817201"]
+    RowBox[{"58.5590236105344`", ",", "58.559023609164996`"}], "}"}], ",", 
+   "1.`"}], "}"}]], \
+"Output",ExpressionUUID->"afe8599d-758b-4648-b2cb-ce40aed5a199"]
 }, Open  ]],
 
 Cell[CellGroupData[{
@@ -5136,8 +5117,8 @@ Cell[BoxData[
    RowBox[{"gaugeFieldDynamicDense", "-", "gaugeFieldDynamicMinres"}], "]"}], 
   "]"}]], "Input",ExpressionUUID->"16db756a-07de-47c7-ba3f-6bc41f9ee440"],
 
-Cell[BoxData["1.5387134659737737`*^-8"], \
-"Output",ExpressionUUID->"87dd2d7e-75f6-4aab-a669-bcd32df1862f"]
+Cell[BoxData["8.506105841906953`*^-7"], \
+"Output",ExpressionUUID->"9e530920-1fa2-4699-90af-6dab9e41090c"]
 }, Open  ]]
 }, Open  ]],
 
@@ -8087,8 +8068,8 @@ Cell[BoxData[
      RowBox[{"dynamicPart", "[", 
       RowBox[{"sh", ",", 
        RowBox[{"Method", "\[Rule]", "\"\<LinearSolve\>\""}]}], "]"}]}], ")"}],
-    ";"}], "]"}]], \
-"Input",ExpressionUUID->"b61c9e0b-0df1-4376-ba15-4044a3d0b078"],
+    ";"}], 
+  "]"}]], "Input",ExpressionUUID->"b61c9e0b-0df1-4376-ba15-4044a3d0b078"],
 
 Cell[BoxData[
  InterpretationBox[
@@ -8855,8 +8836,8 @@ Cell[BoxData[
              RowBox[{"u", ".", "u"}], "]"}], ".", "#2"}], "]"}]}], "&"}], ",", 
         RowBox[{"suGenerators", "[", "]"}], ",", 
         RowBox[{"suGenerators", "[", "]"}], ",", "1"}], "]"}], "]"}]}], 
-    ";"}]}], 
-  "]"}]], "Input",ExpressionUUID->"5b02f108-95f0-46fb-a5b3-5d2c9795d535"],
+    ";"}]}], "]"}]], \
+"Input",ExpressionUUID->"5b02f108-95f0-46fb-a5b3-5d2c9795d535"],
 
 Cell[CellGroupData[{
 

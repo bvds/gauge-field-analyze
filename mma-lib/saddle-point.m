@@ -329,7 +329,7 @@ Options[findDelta] = {dynamicPartMethod -> Automatic,
   storeBB -> False, debugProj -> False, largeShiftCutoff -> 2,
   (* Roughly speaking, the relative error in the matrix norm of
      the link goes as Norm[shift]^3/48. *)
-		      cutoffValue -> 2};
+  cutoffValue -> 2};
 
 (* Dense matrix version (default) *)
 findDelta[hessIn_, gradIn_, gaugeTransformShifts_, OptionsPattern[]] :=
@@ -426,6 +426,66 @@ findDelta[hess_, grad_, gaugeTransformShifts_, opts:OptionsPattern[]] :=
       shifts0 = shifts];
    -damping applyCutoff2[shifts, cutoff, zzz]] /;
  KeyExistsQ[minresLabels, methodName[OptionValue[Method]]];
+
+(* External version.
+   As a first attempt, dump to file and run program.
+   Later, maybe try LibraryLink or MathLink/WSTP.
+
+https://mathematica.stackexchange.com/questions/199925/can-we-link-mathematica-and-fortran-with-wstp
+https://mathematica.stackexchange.com/questions/6325/mathematica-library-link-how-to-use-non-standard-mint-e-g-unsigned-int-or
+https://stackoverflow.com/questions/6537457/gcc-installed-mathematica-still-wont-compile-to-c
+https://mathematica.stackexchange.com/questions/31545/returning-multiple-results-from-a-librarylink-function
+https://mathematica.stackexchange.com/questions/8438/minimal-effort-method-for-integrating-c-functions-into-mathematica
+
+https://reference.wolfram.com/language/LibraryLink/ref/callback/AbortQ.html
+
+https://github.com/DaveGamble/cJSON
+ *)
+findDelta[hess_, grad_, gaugeTransformShifts_, opts:OptionsPattern[]] :=
+ Block[{zzz = OptionValue[rescaleCutoff],
+    cutoff = OptionValue[cutoffValue],
+    damping = OptionValue[dampingFactor], shifts,
+    tinit = SessionTime[],
+    sparseExport = Function[MapThread[
+	Append,
+	{#["NonzeroPositions"], #["NonzeroValues"]}]],
+	symbolString = (a_Symbol -> b_) :> SymbolName[a] -> b,
+    outFile = "hess-grad-gauge.json"},
+   (* Dump dimensions, constants, and options into JSON file.
+      Dump matrices and vectors: 
+        hess, grad, gaugtransformationShifts
+      The methods themselves will be chosen at compile time,
+      since we can always compare with the mathematica value.
+    *)
+   Export[outFile, {
+       "nc" -> nc,
+       "n" -> Length[grad],
+       "rescaleCutoff" -> zzz,
+       "largeShiftCutoff" ->
+	     OptionValue[largeShiftCutoff]/.Infinity -> 10.0^20,
+       "linearSolveOptions" ->
+	    {methodOptions[OptionValue[Method]]}/.symbolString,
+       "dynamicPartOptions" ->
+            {methodOptions[OptionValue[dynamicPartMethod]]}/.symbolString,
+       "largeShiftOptions" -> OptionValue[largeShiftOptions]/.symbolString,
+       "hessElements" -> Length[hess["NonzeroValues"]],
+       "gaugeElements" -> Length[gaugeTransformShifts["NonzeroValues"]],
+       "gaugeDimension" -> Length[gaugeTransformShifts]}];
+   Export["hess.dat", sparseExport[hess]];
+   Export["grad.dat", grad];
+   Export["gauge.dat", sparseExport[gaugeTransformShifts]];
+   (* Run external program *)
+   Abort[]; Run["find-shifts"];
+   (* Read shifts from external file *)
+   shifts = ReadList["shifts.dat"];
+   Print["findDelta time (seconds):  total=", SessionTime[] - tinit];
+   If[OptionValue[storeHess],
+      hess0 = Null; grad0 = Null; proj0 = Null; oo0 = Null];
+   If[OptionValue[storePairs],
+      pairs0 = Null;
+      shifts0 = shifts];
+   -damping applyCutoff2[shifts, cutoff, zzz]] /;
+methodName[OptionValue[Method]] === "External";
 
 SetAttributes[applyDelta, HoldFirst];
 applyDelta[tgf_, delta_, fixed_] :=
