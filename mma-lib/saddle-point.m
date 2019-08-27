@@ -1,4 +1,4 @@
-(*
+2(*
   Define a basis of lattice degrees of freedom.
 
   Define operators on that basis for infinitesimal
@@ -448,7 +448,8 @@ findDelta[hess_, grad_, gaugeTransformShifts_, opts:OptionsPattern[]] :=
     tinit = SessionTime[],
     sparseExport = Function[MapThread[
 	Append,
-	{#["NonzeroPositions"], #["NonzeroValues"]}]],
+	(* Switch to zero-based array indexing *)
+	{#["NonzeroPositions"] - 1, #["NonzeroValues"]}]],
     symbolString = (a_Symbol -> b_) :> SymbolName[a] -> b,
     outFile = "hess-grad-gauge.json"},
    (* Dump dimensions, constants, and options into JSON file.

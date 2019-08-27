@@ -4,9 +4,9 @@
 
     Example usage:
     ./shifts ../hess-grad-gauge.json ../hess.dat ../grad.dat ../gauge.dat ../shifts.dat
+    Valgrind debugging example:
+    valgrind -v --tool=memcheck --leak-check=yes --show-reachable=yes --num-callers=20 --track-fds=yes ./shifts ...
 
-    Use https://github.com/DaveGamble/cJSON
-    installed locally.
 */
 
 #include <stdio.h>
@@ -14,6 +14,7 @@
 #include <string.h>
 #include <assert.h>
 #include <cjson/cJSON.h>
+#include "shifts.h"
 
 char *readFile(char *filename) {
     FILE *f = fopen(filename, "rt");
@@ -28,21 +29,18 @@ char *readFile(char *filename) {
     return buffer;
 }
 
-struct SparseRow {
-  unsigned int i;
-  unsigned int j;
-  double value;
-};
-
 int main(int argc, char **argv){
   char *options;
   cJSON *jopts, *tmp;
-  unsigned int n, nc;
+  unsigned int n, nc, itnlim;
   double rtol1;
-  int i;
+  unsigned int i;
+  int k;
   FILE *fp;
 
   /* Read JSON file and use options */
+  if(argc <5)
+    exit(-1);
   printf("Opening file %s\n", argv[1]);
   options = readFile(argv[1]);
   jopts = cJSON_Parse(options);
@@ -55,38 +53,55 @@ int main(int argc, char **argv){
   printf("rtol1=%e\n", rtol1);
 
   /* Read in arrays */
-  int hessElements = cJSON_GetObjectItemCaseSensitive(jopts,
+  unsigned int hessElements = cJSON_GetObjectItemCaseSensitive(jopts,
 				"hessElements")->valueint;
-  struct SparseRow *hess = malloc(hessElements * sizeof(struct SparseRow));
-  printf("Opening file %s\n", argv[2]);
+  SparseRow *hess = malloc(hessElements * sizeof(SparseRow));
+  printf("Opening file %s for %i elements\n", argv[2], hessElements);
   fp = fopen(argv[2], "r"); 
   for(i=0; i<hessElements; i++){
-    fscanf(fp, "%i %i %le", &(hess[i].i), &(hess[i].j), &(hess[i].value));
+    k = fscanf(fp, "%u%u%le", &(hess[i].i), &(hess[i].j), &(hess[i].value));
+    if(k < 3) {
+      printf("Error reading %s on line %i\n", argv[2], i);
+      break;
+    }
   }
   fclose(fp);
   double *grad = malloc(n * sizeof(double));
-  printf("Opening file %s\n", argv[3]);
+  printf("Opening file %s for %i elements\n", argv[3], n);
   fp = fopen(argv[3], "r"); 
   for(i=0; i<n; i++){
-    fscanf(fp, "%le", grad+i);
+    k = fscanf(fp, "%le", grad+i);
+    if(k < 1) {
+      printf("Error reading %s on line %i\n", argv[3], i);
+      break;
+    }
   }
   fclose(fp);
-  int gaugeElements = cJSON_GetObjectItemCaseSensitive(jopts,
+  unsigned int gaugeElements = cJSON_GetObjectItemCaseSensitive(jopts,
 				"gaugeElements")->valueint;
-  struct SparseRow *gauge = malloc(gaugeElements * sizeof(struct SparseRow));
-  printf("Opening file %s\n", argv[4]);
+  unsigned int gaugeDimension = cJSON_GetObjectItemCaseSensitive(jopts,
+				"gaugeDimension")->valueint;
+  SparseRow *gauge = malloc(gaugeElements * sizeof(SparseRow));
+  printf("Opening file %s for %i elements\n", argv[4], gaugeElements);
   fp = fopen(argv[4], "r"); 
   for(i=0; i<gaugeElements; i++){
-    fscanf(fp, "%i %i %le", &(gauge[i].i), &(gauge[i].j), &(gauge[i].value));
+    k = fscanf(fp, "%u%u%lf", &(gauge[i].i), &(gauge[i].j), &(gauge[i].value));
+    if(k < 3) {
+      printf("Error reading %s on line %i\n", argv[4], i);
+      break;
+    }
   }
   fclose(fp);
 
   /* Solve it!  */
 
+  /* dummy case where we project gauge out of grad.
+     Next example would be to project gauge out of hess.grad.  */
+  itnlim = 4*n;
+  rtol1 = 1.0e-7;
   double *shifts = malloc(n * sizeof(double));
-  for(i=0; i<n; i++){
-    shifts[i] = 0.5;
-  }
+  dynamic(n, gauge, gaugeDimension, gaugeElements, grad,
+	  itnlim, rtol1, shifts);
   
   /* output result */
   printf("Opening file %s\n", argv[5]);
@@ -97,6 +112,7 @@ int main(int argc, char **argv){
   fclose(fp);  
 
   free(hess); free(grad); free(gauge);
+  free(shifts);
   cJSON_Delete(jopts);
   free(options);
   return 0;
