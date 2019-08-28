@@ -1,5 +1,7 @@
 #include <stdlib.h>
 #include <stdio.h>
+#include <string.h>
+#include <assert.h>
 #include "shifts.h"
 /*
     Project out infinitesimal gauge transforms from
@@ -7,64 +9,80 @@
 */
 
 struct {
+  unsigned int n;
   SparseRow *matrix;
+  integer matrixDimension;
   unsigned int matrixElements;
-  unsigned int matrixDimension;
+  integer itnlim;
+  doublereal rtol;
   doublereal *z;
-}  gaugeProductData;
+} gaugeData;
 
-void dynamic(integer n, SparseRow *gauge, integer gaugeDimension,
-	     integer gaugeElements, double *in,
-	     integer itnlim, doublereal rtol,
-	     double *out) {
-  int i;
-  doublereal *b = malloc(gaugeDimension*sizeof(double));
-  doublereal *x = malloc(gaugeDimension*sizeof(double));
-  doublereal *z = malloc(n*sizeof(doublereal));
+void dynamicInit(unsigned int n, SparseRow *gauge,
+		 unsigned int gaugeDimension, unsigned int gaugeElements,
+		 integer itnlim, doublereal rtol) {
+  gaugeData.n = n;
+  gaugeData.matrix = gauge;
+  gaugeData.matrixDimension = gaugeDimension;
+  gaugeData.matrixElements = gaugeElements;
+  gaugeData.itnlim = itnlim;
+  gaugeData.rtol = rtol;
+}
+
+/* "in" and "out" may overlap */
+void dynamicProject(unsigned int n, double *in, double *out) {
+  unsigned int i;
+  doublereal *b = malloc(gaugeData.matrixDimension*sizeof(double));
+  doublereal *x = malloc(gaugeData.matrixDimension*sizeof(double));
   doublereal shift = 0.0, maxxnorm = 1.0e4;
   doublereal trancond, acondlim = 1.0e15;
   logical disable = 0;
   integer nout = 6, istop, itn;
+  integer itnlim = gaugeData.itnlim;
   doublereal rnorm, arnorm, xnorm, anorm, acond;
-  gaugeProductData.matrix = gauge;
-  gaugeProductData.matrixElements = gaugeElements;
-  gaugeProductData.matrixDimension = n;
-  gaugeProductData.z = z;
+  doublereal rtol = gaugeData.rtol;
   
-  matrixVector(gaugeDimension, gauge, gaugeElements, in, b);
+  assert(n == gaugeData.n);
+  gaugeData.z = malloc(n*sizeof(doublereal));
 
+  matrixVector(gaugeData.matrixDimension, gaugeData.matrix,
+	       gaugeData.matrixElements, in, b);
+
+  /* Verify that supplying NULL or ((void *)0) as argument is 
+     interpreted by Fortran as not supplying an argument. */
+  
   trancond = acondlim; // Always use MINRES
   MINRESQLP(
-    &gaugeDimension, gaugeProduct, b, &shift, ((void *)0), &disable, &nout,
-    &itnlim, &rtol, &maxxnorm, &trancond, &acondlim,
+    &gaugeData.matrixDimension, gaugeProduct, b, &shift, ((void *)0),
+    &disable, &nout, &itnlim, &rtol, &maxxnorm, &trancond, &acondlim,
     x, &istop, &itn, &rnorm, &arnorm, &xnorm, &anorm, &acond);
 
-  vectorMatrix(n, gauge, gaugeElements, x, z);
+  vectorMatrix(n, gaugeData.matrix,
+	       gaugeData.matrixElements, x, gaugeData.z);
 
   for(i=0; i<n; i++) {
-    out[i] = in[i] - z[i];
+    out[i] = in[i] - gaugeData.z[i];
   }
-  
-  free(z);
+
+  free(gaugeData.z); gaugeData.z = NULL;
   free(b);
   free(x);
 }
 
-int gaugeProduct(integer *n, doublereal *x, doublereal *y) {
-  vectorMatrix(gaugeProductData.matrixDimension, gaugeProductData.matrix,
-	       gaugeProductData.matrixElements,
-	       x, gaugeProductData.z);
-  matrixVector(*n, gaugeProductData.matrix, gaugeProductData.matrixElements,
-	       gaugeProductData.z, y);
+int gaugeProduct(integer *vectorLength, doublereal *x, doublereal *y) {
+  assert(*vectorLength == gaugeData.matrixDimension);
+  vectorMatrix(gaugeData.n, gaugeData.matrix,
+	       gaugeData.matrixElements,
+	       x, gaugeData.z);
+  matrixVector(*vectorLength, gaugeData.matrix, gaugeData.matrixElements,
+	       gaugeData.z, y);
   return 0;
 }
 
 /* in and out must be distinct */
 void matrixVector(int n, SparseRow *a, int na, double *in, double *out) {
   int k;
-  for(k=0; k<n; k++) {
-    out[k] = 0.0;
-  }
+  memset(out, 0, n*sizeof(double));
   for(k=0; k<na; k++) {
     /* printf("Step:  %i %i %i %i %e %e %e\n", n, k, a[k].i, a[k].j, 
        a[k].value, in[a[k].j], out[a[k].i]);
@@ -75,9 +93,7 @@ void matrixVector(int n, SparseRow *a, int na, double *in, double *out) {
 
 void vectorMatrix(int n, SparseRow *a, int na, double *in, double *out) {
   int k;
-  for(k=0; k<n; k++) {
-    out[k] = 0.0;
-  }
+  memset(out, 0, n*sizeof(double));
   for(k=0; k<na; k++) {
     out[a[k].j] += a[k].value * in[a[k].i];
   }

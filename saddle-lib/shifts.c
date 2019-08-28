@@ -96,13 +96,14 @@ int main(int argc, char **argv){
   /* Solve it!  */
 
   /* dummy case where we project gauge out of grad.
-     Next example would be to project gauge out of hess.grad.  */
+     Also, for setting parameters, may just want to pass through
+     the associated JSON.  */
   itnlim = 4*n;
   rtol1 = 1.0e-7;
   double *shifts = malloc(n * sizeof(double));
-  dynamic(n, gauge, gaugeDimension, gaugeElements, grad,
-	  itnlim, rtol1, shifts);
-  
+  dynamicInit(n, gauge, gaugeDimension, gaugeElements, itnlim, rtol1); 
+  dynamicProject(n, grad, shifts);
+
   /* output result */
   printf("Opening file %s\n", argv[5]);
   fp = fopen(argv[5], "w"); 

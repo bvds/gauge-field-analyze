@@ -8,6 +8,7 @@ typedef struct {
 void matrixVector(int n, SparseRow *a, int na, double *in, double *out);
 void vectorMatrix(int n, SparseRow *a, int na, double *in, double *out);
 
+
 /* FORTRAN to C data type matching */
 typedef double doublereal;
 typedef int integer;
@@ -29,9 +30,10 @@ extern int MINRESQLP(
     doublereal *arnorm, doublereal *xnorm, doublereal *anorm,
     doublereal *acond);
 
-int gaugeProduct(integer *n, doublereal *x, doublereal *y);
 
-void dynamic(integer n, SparseRow *gauge, integer gaugeDimension,
-	     integer gaugeElements, double *in,
-	     integer itnlim, doublereal rtol,
-	     double *out);
+void dynamicInit(unsigned int n, SparseRow *gauge,
+		 unsigned int gaugeDimension, unsigned int gaugeElements,
+		 integer itnlim, doublereal rtol);
+void dynamicProject(unsigned int n, double *in, double *out);
+int gaugeProduct(integer *vectorLength, doublereal *x, doublereal *y);
+
