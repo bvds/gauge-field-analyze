@@ -3,14 +3,14 @@
 #
 MINRESDIR = ../../linear-algebra/minresqlp_f90_ver27
 TRLANDIR = ../../linear-algebra/nutrlan-0.2
-CFLAGS = -fPIC -Wall -g -Wextra -pedantic -std=gnu11
+CFLAGS = -fPIC -Wall -g -Wextra -pedantic -std=gnu11 -I$(TRLANDIR)/INC
 
 MINRESOBJS = $(MINRESDIR)/minresqlpModule.o $(MINRESDIR)/minresqlpDataModule.o  $(MINRESDIR)/minresqlpBlasModule.o
 
-shifts: shifts.o dynamic.o
-	$(CC) $(CFLAGS) -o shifts shifts.o dynamic.o $(MINRESOBJS) -I$(TRLANDIR)/INC -L$(TRLANDIR) -L/usr/local/lib -lnutrlan -lgfortran -lm -lcjson
+shifts: shifts.o dynamic.o eigensystem.o
+	$(CC) $(CFLAGS) -o shifts shifts.o dynamic.o eigensystem.o $(MINRESOBJS) -L$(TRLANDIR) -L/usr/local/lib -lnutrlan -lgfortran -llapack -lblas -lm -lcjson
 
-%.o: %.c
+%.o: %.c shifts.h
 	$(CC) -c -o $@ $< $(CFLAGS)
 
 clean:

@@ -1,12 +1,13 @@
+#include <cjson/cJSON.h>
 
 typedef struct {
-  unsigned int i;
-  unsigned int j;
-  double value;
+    unsigned int i;
+    unsigned int j;
+    double value;
 } SparseRow;
 
-void matrixVector(int n, SparseRow *a, int na, double *in, double *out);
-void vectorMatrix(int n, SparseRow *a, int na, double *in, double *out);
+void matrixVector(int n, SparseRow *a, int na, const double *in, double *out);
+void vectorMatrix(int n, SparseRow *a, int na, const double *in, double *out);
 
 
 /* FORTRAN to C data type matching */
@@ -33,7 +34,12 @@ extern int MINRESQLP(
 
 void dynamicInit(unsigned int n, SparseRow *gauge,
 		 unsigned int gaugeDimension, unsigned int gaugeElements,
-		 integer itnlim, doublereal rtol);
+		 cJSON *options);
 void dynamicProject(unsigned int n, double *in, double *out);
 int gaugeProduct(integer *vectorLength, doublereal *x, doublereal *y);
 
+void hessInit(unsigned int n, SparseRow *hess, unsigned int hessElements);
+void hessOp(const int nrow, const int ncol, const double *xin, const int ldx,
+	    double *yout, const int ldy, void* mvparam);
+void largeShifts(int n, double *initialVector, cJSON *options,
+		 double **vals, double **vecs, unsigned int *nvals);
