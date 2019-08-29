@@ -43,3 +43,7 @@ void hessOp(const int nrow, const int ncol, const double *xin, const int ldx,
 	    double *yout, const int ldy, void* mvparam);
 void largeShifts(int n, double *initialVector, cJSON *options,
 		 double **vals, double **vecs, unsigned int *nvals);
+
+void cutoffNullspace(unsigned int n, unsigned int nvals, cJSON *options,
+                     double *grad,
+                     double *vals, double*vecs, unsigned int *nLargeShifts);

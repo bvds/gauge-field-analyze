@@ -31,8 +31,9 @@ char *readFile(char *filename) {
 int main(int argc, char **argv){
     char *options;
     cJSON *jopts, *tmp;
-    unsigned int n, nc;
+    unsigned int n;
     unsigned int i;
+    unsigned int nLargeShifts;
     int k;
     FILE *fp;
 
@@ -43,8 +44,6 @@ int main(int argc, char **argv){
     options = readFile(argv[1]);
     jopts = cJSON_Parse(options);
     n = cJSON_GetObjectItemCaseSensitive(jopts, "n")->valueint;
-    nc = cJSON_GetObjectItemCaseSensitive(jopts, "nc")->valueint;
-    printf("n=%i Nc = %i\n", n, nc);
 
     /* Read in arrays */
     unsigned int hessElements = cJSON_GetObjectItemCaseSensitive(
@@ -93,14 +92,17 @@ int main(int argc, char **argv){
     double *shifts = malloc(n * sizeof(double));
     double *vals, *vecs;
     unsigned int nvals;
-    tmp = cJSON_GetObjectItemCaseSensitive(jopts, "largeShiftOptions");
+    tmp = cJSON_GetObjectItemCaseSensitive(jopts, "dynamicPartOptions");
     assert(tmp != NULL);
     dynamicInit(n, gauge, gaugeDimension, gaugeElements, tmp);
     hessInit(n, hess, hessElements);
-    tmp = cJSON_GetObjectItemCaseSensitive(jopts, "dynamicPartOptions");
+    tmp = cJSON_GetObjectItemCaseSensitive(jopts, "largeShiftOptions");
     assert(tmp != NULL);
     largeShifts(n, grad, tmp, &vals, &vecs, &nvals);
-    // Use first eigenvector, just to fill the matrix
+    cutoffNullspace(n, nvals, jopts, grad, vals, vecs, &nLargeShifts);
+
+    // Apply filter 
+    // Use first eigenvector, just to fill the output array
     for(i=0; i<n; i++){
         shifts[i] = vecs[i];
     }

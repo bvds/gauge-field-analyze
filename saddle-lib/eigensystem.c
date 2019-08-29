@@ -11,7 +11,6 @@
 
 #include "shifts.h"
 #include "trlan.h"
-// #include "trl_map.h"
 #include "trl_comm_i.h"
 
 struct {
@@ -61,6 +60,7 @@ void largeShifts(int n, double *initialVector, cJSON *options,
         "printsPerDecade": 10,
         "restartLanczos": false
     */
+    // Would need a separate flag for the lohi == 0 case.
     tmp  = cJSON_GetObjectItemCaseSensitive(options, "eigenPairs");
     if(cJSON_IsNumber(tmp)) {
         mev = abs(tmp->valueint);
@@ -83,29 +83,31 @@ void largeShifts(int n, double *initialVector, cJSON *options,
     }
 
     assert(n == hessData.n);
+    assert(eval != NULL);
+    assert(evec != NULL);
 
-    *eval = malloc(mev*sizeof(double));
-    *evec = malloc(mev*nrow*sizeof(double));
+    *eval = (double *) malloc(mev*sizeof(double));
+    *evec = (double *) malloc(mev*nrow*sizeof(double));
     // initialize info -- tell TRLAN to compute NEV smallest eigenvalues
     // of the diag_op
     lwrk=maxlan*(maxlan+10);
     if( lwrk > 0 ) {
-	wrk = malloc(lwrk*sizeof(double));
+	wrk = (double *) malloc(lwrk*sizeof(double));
     }
     ned = mev; // BvdS:  not sure what the difference is
     maxmv = ned*nrow;  // BvdS:  max number of matrix multiplies.
     trl_init_info(&info, nrow, maxlan, lohi, ned, rtol, 1, maxmv, 0);
     trl_set_iguess(&info, 0, 1, 0, NULL);
     // The Lanczos recurrence is set to start with initial guess
-    memset(eval, 0, mev*sizeof(double));
+    memset(*eval, 0, mev*sizeof(double));
     for( i=0; i<nrow; i++ ) {
-        *evec[i] = initialVector==NULL?1.0:initialVector[i];
+        (*evec)[i] = initialVector==NULL?1.0:initialVector[i];
     }
     //info.verbose =  8;
     // call TRLAN to compute the eigenvalues
     trlan(hessOp, &info, nrow, mev, *eval, *evec, nrow, lwrk, wrk);
     trl_print_info(&info, 3*nrow);
-    *nvals = 0;
+    *nvals = mev;
 
     if( lwrk > 0 ) {
 	free(wrk);
