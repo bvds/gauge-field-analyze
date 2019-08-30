@@ -83,7 +83,8 @@ void dynamicProject(unsigned int n, double *in, double *out) {
     free(x);
 }
 
-int gaugeProduct(integer *vectorLength, doublereal *x, doublereal *y) {
+int gaugeProduct(const integer *vectorLength, const doublereal *x,
+                 doublereal *y) {
     assert(*vectorLength == gaugeData.matrixDimension);
     vectorMatrix(gaugeData.n, gaugeData.matrix,
                  gaugeData.matrixElements,
@@ -94,7 +95,8 @@ int gaugeProduct(integer *vectorLength, doublereal *x, doublereal *y) {
 }
 
 /* in and out must be distinct */
-void matrixVector(int n, SparseRow *a, int na, const double *in, double *out) {
+void matrixVector(const int n, const SparseRow *a, const int na,
+                  const double *in, double *out) {
     int k;
     memset(out, 0, n*sizeof(double));
     for(k=0; k<na; k++) {
@@ -105,7 +107,8 @@ void matrixVector(int n, SparseRow *a, int na, const double *in, double *out) {
     }
 }
 
-void vectorMatrix(int n, SparseRow *a, int na, const double *in, double *out) {
+void vectorMatrix(const int n, const SparseRow *a, const int na,
+                  const double *in, double *out) {
     int k;
     memset(out, 0, n*sizeof(double));
     for(k=0; k<na; k++) {

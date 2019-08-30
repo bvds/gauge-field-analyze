@@ -100,12 +100,10 @@ int main(int argc, char **argv){
     assert(tmp != NULL);
     largeShifts(n, grad, tmp, &vals, &vecs, &nvals);
     cutoffNullspace(n, nvals, jopts, grad, vals, vecs, &nLargeShifts);
-
-    // Apply filter 
-    // Use first eigenvector, just to fill the output array
-    for(i=0; i<n; i++){
-        shifts[i] = vecs[i];
-    }
+    linearInit(n, hess, hessElements, vecs, nLargeShifts);
+    /* This won't work until we introduce reorthogonalization 
+       against gauge transform shifts and large shifts in MINRES */
+    linearSolve(n, grad, jopts, shifts);
   
     /* output result */
     printf("Opening file %s\n", argv[5]);

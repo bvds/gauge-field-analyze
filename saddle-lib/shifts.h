@@ -6,8 +6,10 @@ typedef struct {
     double value;
 } SparseRow;
 
-void matrixVector(int n, SparseRow *a, int na, const double *in, double *out);
-void vectorMatrix(int n, SparseRow *a, int na, const double *in, double *out);
+void matrixVector(const int n, const SparseRow *a, const int na,
+                  const double *in, double *out);
+void vectorMatrix(const int n, const SparseRow *a, const int na,
+                  const double *in, double *out);
 
 
 /* FORTRAN to C data type matching */
@@ -21,22 +23,30 @@ typedef integer ftnlen;
 typedef integer logical;
 /* Used "nm minresqlpModule.o" to determine this */
 #define MINRESQLP __minresqlpmodule_MOD_minresqlp
+#define DGEMV dgemv_
 
 extern int MINRESQLP(
-    integer *n, S_fp aprod, doublereal *b, doublereal *shift, S_fp msolve,
-    logical *disable,  integer *nout,
-    integer *itnlim, doublereal *rtol, doublereal *maxxnorm,
-    doublereal *trancond, doublereal *acondLim,
+    const integer *n, S_fp aprod, const doublereal *b,
+    const doublereal *shift, S_fp msolve, const logical *disable,
+    const integer *nout, const integer *itnlim, const doublereal *rtol,
+    const doublereal *maxxnorm, const doublereal *trancond,
+    const doublereal *acondLim,
     doublereal *x, integer *istop, integer *itn, doublereal *rnorm,
     doublereal *arnorm, doublereal *xnorm, doublereal *anorm,
     doublereal *acond);
-
+// BLAS2 routine
+extern int DGEMV(const char *, const integer *, const integer *,
+                 const doublereal *, const doublereal *, const integer *,
+                 const doublereal *, const integer *, const doublereal *,
+                 doublereal *, const integer *);
 
 void dynamicInit(unsigned int n, SparseRow *gauge,
 		 unsigned int gaugeDimension, unsigned int gaugeElements,
 		 cJSON *options);
 void dynamicProject(unsigned int n, double *in, double *out);
-int gaugeProduct(integer *vectorLength, doublereal *x, doublereal *y);
+int gaugeProduct(const integer *vectorLength, const doublereal *x,
+                 doublereal *y);
+
 
 void hessInit(unsigned int n, SparseRow *hess, unsigned int hessElements);
 void hessOp(const int nrow, const int ncol, const double *xin, const int ldx,
@@ -44,6 +54,14 @@ void hessOp(const int nrow, const int ncol, const double *xin, const int ldx,
 void largeShifts(int n, double *initialVector, cJSON *options,
 		 double **vals, double **vecs, unsigned int *nvals);
 
+
 void cutoffNullspace(unsigned int n, unsigned int nvals, cJSON *options,
                      double *grad,
-                     double *vals, double*vecs, unsigned int *nLargeShifts);
+                     double *vals, double *vecs, unsigned int *nLargeShifts);
+
+
+void linearInit(unsigned int n, SparseRow *hess, int hessElements,
+                double *vecs, int nvecs);
+int hessProduct(integer *vectorLength, doublereal *x, doublereal *y);
+void linearSolve(integer n, double *b, cJSON *options, double *x);
+void largeShiftProject(integer n, double *y);

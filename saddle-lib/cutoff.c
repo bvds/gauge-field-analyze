@@ -51,6 +51,8 @@ void cutoffNullspace(unsigned int n, unsigned int nvals, cJSON *options,
                 norm2 = 0;
             }
         }
+        /* If eigenvectors are normalized, then vecnorm2
+           is not needed. */
         if(zzz>0.0 && zzz * rescale * fabs(vals[i]) * vecnorm2 <=
            fabs(vecdotgrad) * sqrt(maxnorm2)) {
             if(firstValue < 0)
@@ -60,7 +62,7 @@ void cutoffNullspace(unsigned int n, unsigned int nvals, cJSON *options,
                 vals[*nLargeShifts] = vals[i];
                 memcpy(vecs+(*nLargeShifts)*n, vecs+i*n, n*sizeof(double));
             }
-            nLargeShifts += 1;
+            *nLargeShifts += 1;
         }
     }
     printf("cutoffNullSpace:  %u of %u zeros between [%i, %i]\n",
