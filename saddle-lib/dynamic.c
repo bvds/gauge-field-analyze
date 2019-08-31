@@ -61,13 +61,10 @@ void dynamicProject(unsigned int n, double *in, double *out) {
 
     matrixVector(gaugeData.matrixDimension, gaugeData.matrix,
                  gaugeData.matrixElements, in, b);
-
-    /* Verify that supplying NULL or ((void *)0) as argument is 
-       interpreted by Fortran as not supplying an argument. */
   
     trancond = acondlim; // Always use MINRES
     MINRESQLP(
-              &gaugeData.matrixDimension, gaugeProduct, b, &shift, NULL,
+              &gaugeData.matrixDimension, gaugeProduct, b, &shift, NULL, NULL,
               &disable, &nout, &itnlim, &rtol, &maxxnorm, &trancond, &acondlim,
               x, &istop, &itn, &rnorm, &arnorm, &xnorm, &anorm, &acond);
 

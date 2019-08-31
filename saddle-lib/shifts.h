@@ -27,7 +27,7 @@ typedef integer logical;
 
 extern int MINRESQLP(
     const integer *n, S_fp aprod, const doublereal *b,
-    const doublereal *shift, S_fp msolve, const logical *disable,
+    const doublereal *shift, S_fp msolve, S_fp userOrtho, const logical *disable,
     const integer *nout, const integer *itnlim, const doublereal *rtol,
     const doublereal *maxxnorm, const doublereal *trancond,
     const doublereal *acondLim,
@@ -64,4 +64,5 @@ void linearInit(unsigned int n, SparseRow *hess, int hessElements,
                 double *vecs, int nvecs);
 int hessProduct(integer *vectorLength, doublereal *x, doublereal *y);
 void linearSolve(integer n, double *b, cJSON *options, double *x);
+void userOrtho(char *action, integer *n, double *y);
 void largeShiftProject(integer n, double *y);

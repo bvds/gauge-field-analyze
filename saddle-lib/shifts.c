@@ -98,11 +98,11 @@ int main(int argc, char **argv){
     hessInit(n, hess, hessElements);
     tmp = cJSON_GetObjectItemCaseSensitive(jopts, "largeShiftOptions");
     assert(tmp != NULL);
+    /* This won' twork until we introduce reorthogonalization against
+       gauge shifts in TrLAN */
     largeShifts(n, grad, tmp, &vals, &vecs, &nvals);
     cutoffNullspace(n, nvals, jopts, grad, vals, vecs, &nLargeShifts);
     linearInit(n, hess, hessElements, vecs, nLargeShifts);
-    /* This won't work until we introduce reorthogonalization 
-       against gauge transform shifts and large shifts in MINRES */
     linearSolve(n, grad, jopts, shifts);
   
     /* output result */

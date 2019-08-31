@@ -21,11 +21,22 @@ I had trouble with the runtime finding library in `/usr/local/lib` and
 ran `sudo ldconfig` to update the linker cache.
 
 Download source code:
-
-* [MINRES](https://web.stanford.edu/group/SOL/software/minres/) and
-  [MINRES-QLP](https://web.stanford.edu/group/SOL/software/minresqlp/)
+* <https://github.com/bvds/minres-qlp> is a customized version
+  of [MINRES-QLP](https://web.stanford.edu/group/SOL/software/minresqlp/)
   from Stanford U.
+* <https://github.com/bvds/nutrlan> is a customized version
+  [nuTRLan-0.2](https://codeforge.lbl.gov/projects/trlan/) from LBL.
 
-* [nutrlan](https://codeforge.lbl.gov/projects/trlan/) from LBL.
+After downloading these, you will need to compile the
+associated libraries.
 
-and Make the libraries.  Modify `Makefile` to point to these libraries.
+* In `minres-qlp`, specify the user-suppied
+orthogonalizer ...
+
+* For `nutrlan`, you will need to specify
+the name of the user-supplied orthogonalizer
+by adding the flag `-DUSER_ORTHO=dynamicProject` to `OPT`
+in `Make.inc`.
+
+Finally, modify `Makefile` to point to these libraries.
+

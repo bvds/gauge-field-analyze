@@ -1,8 +1,8 @@
 #
 #   Stand-alone program, maybe called from Mathematica
 #
-MINRESDIR = ../../linear-algebra/minresqlp_f90_ver27
-TRLANDIR = ../../linear-algebra/nutrlan-0.2
+MINRESDIR = ../../linear-algebra/minres-qlp
+TRLANDIR = ../../linear-algebra/nutrlan
 CFLAGS = -fPIC -Wall -g -Wextra -pedantic -std=gnu11 -I$(TRLANDIR)/INC
 
 MINRESOBJS = $(MINRESDIR)/minresqlpModule.o $(MINRESDIR)/minresqlpDataModule.o  $(MINRESDIR)/minresqlpBlasModule.o
