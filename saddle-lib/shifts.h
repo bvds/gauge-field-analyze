@@ -46,6 +46,7 @@ void dynamicInit(unsigned int n, SparseRow *gauge,
 void dynamicProject(const int n, double *in, double *out);
 int gaugeProduct(const integer *vectorLength, const doublereal *x,
                  doublereal *y);
+void printDynamicStats();
 
 
 void hessInit(unsigned int n, SparseRow *hess, unsigned int hessElements);

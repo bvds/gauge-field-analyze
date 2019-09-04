@@ -38,6 +38,11 @@ void largeShifts(int n, double *initialVector, cJSON *options,
     trl_info info;
     int i, printDetails = 1;
     cJSON *tmp;
+    clock_t t1;
+    time_t t2, tf;
+
+    t1 = clock();
+    time(&t2);
 
     // Would need a separate flag for the lohi == 0 case.
     tmp  = cJSON_GetObjectItemCaseSensitive(options, "eigenPairs");
@@ -101,6 +106,10 @@ void largeShifts(int n, double *initialVector, cJSON *options,
     } else if(printDetails > 0) {
         trl_terse_info(&info, stdout);
     }
+
+    time(&tf);
+    printf("largeShifts in %.2f sec (%li wall)\n",
+           (clock()-t1)/(float) CLOCKS_PER_SEC, tf-t2);
 
     if(info.stat < 0 || info.nec < info.ned) {
         printf("trlan exit with stat=%i, finding %i of %i eigenpairs.\n",

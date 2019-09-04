@@ -2,6 +2,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <assert.h>
+#include <time.h>
 #include "shifts.h"
 /*
   Project out infinitesimal gauge transforms from
@@ -15,6 +16,9 @@ struct {
     unsigned int matrixElements;
     cJSON *options;
     doublereal *z;
+    unsigned long int tcpu;
+    unsigned long int twall;
+    unsigned int count;
 } gaugeData;
 
 void dynamicInit(unsigned int n, SparseRow *gauge,
@@ -25,6 +29,9 @@ void dynamicInit(unsigned int n, SparseRow *gauge,
     gaugeData.matrixDimension = gaugeDimension;
     gaugeData.matrixElements = gaugeElements;
     gaugeData.options = options;
+    gaugeData.tcpu = 0;
+    gaugeData.twall = 0;
+    gaugeData.count = 0;
 }
 
 /* "in" and "out" may overlap */
@@ -40,6 +47,11 @@ void dynamicProject(const int n, double *in, double *out) {
     cJSON *tmp;
     doublereal rnorm, arnorm, xnorm, anorm, acond,
         rtol, *rtolp = NULL;
+    clock_t t1;
+    time_t t2, tf;
+
+    t1 = clock();
+    time(&t2);
 
     tmp  = cJSON_GetObjectItemCaseSensitive(gaugeData.options, "maxIterations");
     if(cJSON_IsNumber(tmp)){
@@ -88,10 +100,21 @@ void dynamicProject(const int n, double *in, double *out) {
     free(b);
     free(x);
 
+    time(&tf);
+    gaugeData.tcpu += clock()-t1;
+    gaugeData.twall += tf - t2; 
+    gaugeData.count += 1;
+
     if(istop >= 7) {
         printf("MINRES returned with istop=%i in %s, exiting.\n", istop, __FILE__);
         exit(7);
     }
+}
+
+void printDynamicStats() {
+    printf("dynamicProject %i calls in %.2f sec (%li wall)\n",
+           gaugeData.count, gaugeData.tcpu/(float) CLOCKS_PER_SEC,
+           gaugeData.twall);
 }
 
 int gaugeProduct(const integer *vectorLength, const doublereal *x,

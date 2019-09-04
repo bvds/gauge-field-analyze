@@ -2,6 +2,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <assert.h>
+#include <time.h>
 #include "shifts.h"
 /*
   Project out infinitesimal gauge transforms from
@@ -42,6 +43,11 @@ void linearSolve(integer n, double *b, cJSON *options, double *x) {
     cJSON *tmp;
     doublereal rnorm, arnorm, xnorm, anorm, acond,
         rtol, *rtolp = NULL;
+    clock_t t1;
+    time_t t2, tf;
+
+    t1 = clock();
+    time(&t2);
 
     tmp  = cJSON_GetObjectItemCaseSensitive(options, "maxIterations");
     if(cJSON_IsNumber(tmp)) {
@@ -82,6 +88,10 @@ void linearSolve(integer n, double *b, cJSON *options, double *x) {
     free(minresOrtho.z);
     minresOrtho.vecs = realloc(minresOrtho.vecs, 0);
     minresOrtho.nvecs = 0;
+
+    time(&tf);
+    printf("linearSolve in %.2f sec (%li wall)\n",
+           (clock()-t1)/(float) CLOCKS_PER_SEC, tf-t2);
 
     if(istop >= 7) {
         printf("MINRES returned with istop=%i in %s, exiting.\n", istop, __FILE__);

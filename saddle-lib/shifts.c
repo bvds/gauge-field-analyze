@@ -13,6 +13,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <assert.h>
+#include <time.h>
 #include "shifts.h"
 
 char *readFile(char *filename) {
@@ -36,6 +37,12 @@ int main(int argc, char **argv){
     unsigned int nLargeShifts;
     int k;
     FILE *fp;
+    long int twall = 0, tcpu = 0;
+    clock_t t1, tt1;
+    time_t t2, tt2, tf;
+
+    t1 = clock(); tt1 = t1;
+    time(&t2); tt2 = t2;
 
     /* Read JSON file and use options */
     if(argc <5)
@@ -85,6 +92,9 @@ int main(int argc, char **argv){
         }
     }
     fclose(fp);
+    time(&tf);
+    tcpu += clock()-t1;
+    twall += tf - t2; 
 
     /* Solve it!  */
 
@@ -110,14 +120,24 @@ int main(int argc, char **argv){
     tmp = cJSON_GetObjectItemCaseSensitive(jopts, "linearSolveOptions");
     assert(tmp != NULL);
     linearSolve(n, grad, tmp, shifts);
+    printDynamicStats();
   
     /* output result */
+    t1 = clock();
+    time(&t2);
     printf("Opening file %s\n", argv[5]);
     fp = fopen(argv[5], "w"); 
     for(i=0; i<n; i++){
         fprintf(fp, "%.15e\n", shifts[i]);
     }
     fclose(fp);  
+    time(&tf);
+    tcpu += clock()-t1;
+    twall += tf - t2;
+    printf("%s:  input/output in %.2f sec (%li wall)\n",
+           __FILE__, tcpu/(float) CLOCKS_PER_SEC, twall);
+    printf("%s:  overall time %.2f sec (%li wall)\n",
+           __FILE__, (clock()-tt1)/(float) CLOCKS_PER_SEC, tf-tt2);
 
     free(hess); free(grad); free(gauge);
     free(vals); free(vecs); free(shifts);
