@@ -34,12 +34,14 @@ void linearInit(unsigned int n, SparseRow *hess, int hessElements,
 
 /* "in" and "out" may overlap */
 void linearSolve(integer n, double *b, cJSON *options, double *x) {
-    doublereal shift = 0.0, maxxnorm = 1.0e4;
+    doublereal shift = 0.0, *maxxnormp = NULL;
+    // Explicit value for these, so we can force MINRES alogrithm.
     doublereal trancond, acondlim = 1.0e15;
-    logical disable = 0;
-    integer nout = 6, istop, itn, itnlim;
+    logical *disablep = NULL;
+    integer nout, *noutp = NULL, istop, itn, itnlim;
     cJSON *tmp;
-    doublereal rnorm, arnorm, xnorm, anorm, acond, rtol;
+    doublereal rnorm, arnorm, xnorm, anorm, acond,
+        rtol, *rtolp = NULL;
 
     tmp  = cJSON_GetObjectItemCaseSensitive(options, "maxIterations");
     if(cJSON_IsNumber(tmp)) {
@@ -50,8 +52,13 @@ void linearSolve(integer n, double *b, cJSON *options, double *x) {
     tmp  = cJSON_GetObjectItemCaseSensitive(options, "rTolerance");
     if(cJSON_IsNumber(tmp)) {
         rtol = tmp->valuedouble;
-    } else {
-        rtol = 1.6e-15;  // Try pointer to NULL or explicit Machine Epsilon?
+        rtolp = &rtol;
+    }
+    tmp  = cJSON_GetObjectItemCaseSensitive(options, "printDetails");
+    if((cJSON_IsNumber(tmp) && tmp->valueint>0) || cJSON_IsTrue(tmp)) {
+        nout = 6;  // Write to stdout
+        noutp = &nout;
+        printf("linearSolve writing to stdout\n");
     }
 
     assert(n == hessData.n);
@@ -68,13 +75,18 @@ void linearSolve(integer n, double *b, cJSON *options, double *x) {
     trancond = acondlim; // Always use MINRES
     MINRESQLP(
               &n, hessProduct, b, &shift, NULL, (S_fp) userOrtho,
-              &disable, &nout, &itnlim, &rtol, &maxxnorm, &trancond, &acondlim,
+              disablep, noutp, &itnlim, rtolp, maxxnormp, &trancond, &acondlim,
               x, &istop, &itn, &rnorm, &arnorm, &xnorm, &anorm, &acond);
 
     free(hessData.z);
     free(minresOrtho.z);
     minresOrtho.vecs = realloc(minresOrtho.vecs, 0);
     minresOrtho.nvecs = 0;
+
+    if(istop >= 7) {
+        printf("MINRES returned with istop=%i in %s, exiting.\n", istop, __FILE__);
+        exit(14);
+    }
 }
 
 int hessProduct(integer *n, doublereal *x, doublereal *y) {
@@ -133,12 +145,6 @@ void largeShiftProject(integer n, double *y) {
     DGEMV(&trans, &n, &hessData.nvecs, &one,
           hessData.vecs, &n, y, &inc, &zero,
           hessData.z, &inc);
-#if 0
-    int i;
-    for(i=0; i<hessData.nvecs; i++){
-        printf("z(%i)=%lf\n", i, hessData.z[i]);
-    }
-#endif
     DGEMV(&normal, &n, &hessData.nvecs, &minusone,
           hessData.vecs, &n, hessData.z, &inc, &one,
           y, &inc);

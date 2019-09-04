@@ -107,7 +107,9 @@ int main(int argc, char **argv){
     largeShifts(n, grad, tmp, &vals, &vecs, &nvals);
     cutoffNullspace(n, nvals, jopts, grad, vals, vecs, &nLargeShifts);
     linearInit(n, hess, hessElements, vecs, nLargeShifts);
-    linearSolve(n, grad, jopts, shifts);
+    tmp = cJSON_GetObjectItemCaseSensitive(jopts, "linearSolveOptions");
+    assert(tmp != NULL);
+    linearSolve(n, grad, tmp, shifts);
   
     /* output result */
     printf("Opening file %s\n", argv[5]);

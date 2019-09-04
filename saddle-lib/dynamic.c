@@ -45,8 +45,8 @@ void dynamicProject(const int n, double *in, double *out) {
     if(cJSON_IsNumber(tmp)){
         itnlim = tmp->valueint;
     } else {
-        // Appropriate for no reorthogonalization
-        itnlim = 4*n;
+        // Appropriate for reorthogonalization
+        itnlim = n;
     }
     /* 
        We may want to adjust rtol in cases where norm(b) is very small,

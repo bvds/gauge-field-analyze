@@ -72,5 +72,5 @@ void cutoffNullspace(unsigned int n, unsigned int nvals, cJSON *options,
         }
     }
     printf("cutoffNullSpace:  %u of %u zeros between [%i, %i]\n",
-           *nLargeShifts, n, firstValue, lastValue);
+           *nLargeShifts, nvals, firstValue, lastValue);
 }

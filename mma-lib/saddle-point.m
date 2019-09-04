@@ -324,7 +324,7 @@ findDelta::lastPairs = "Mathematica orders eigenvalues/vectors in
 order of decreasing magnitude.  Thus, for large shifts, one must find
 the last eigenvalues/vectors.";
 findDelta::external = "Error in external program; see `1` for details.";
-Options[findDelta] = {dynamicPartMethod -> Automatic,
+Options[findDelta] = {dynamicPartMethod -> Automatic, printDetails -> False,
   Method -> Automatic, rescaleCutoff -> 1, dampingFactor -> 1,
   storePairs -> False, storeHess -> False, largeShiftOptions -> {},
   storeBB -> False, debugProj -> False, largeShiftCutoff -> 2,
@@ -450,27 +450,27 @@ findDelta[hess_, grad_, gaugeTransformShifts_, opts:OptionsPattern[]] :=
     damping = OptionValue[dampingFactor], shifts,
     tinit = SessionTime[],
     sparseExport = Function[MapThread[
-	Append,
-	(* Switch to zero-based array indexing *)
-	{#["NonzeroPositions"] - 1, #["NonzeroValues"]}]],
+        Append,
+        (* Switch to zero-based array indexing *)
+        {#["NonzeroPositions"] - 1, #["NonzeroValues"]}]],
     symbolString = (a_Symbol -> b_) :> SymbolName[a] -> b,
     outFile = "hess-grad-gauge.json", out, logFile = "shifts.log"},
    (* Dump dimensions, constants, and options into JSON file.
-      Dump matrices and vectors: 
-        hess, grad, gaugtransformationShifts
-      The methods themselves will be chosen at compile time,
-      since we can always compare with the mathematica value.
+     Dump matrices and vectors: 
+         hess, grad, gaugtransformationShifts
+     The methods themselves will be chosen at compile time,
+     since we can always compare with the mathematica value.
     *)
    Export[outFile, {
        "nc" -> nc,
        "n" -> Length[grad],
        "rescaleCutoff" -> zzz,
        "largeShiftCutoff" ->
-	     OptionValue[largeShiftCutoff]/.Infinity -> 10.0^20,
+           OptionValue[largeShiftCutoff]/.Infinity -> 10.0^20,
        "linearSolveOptions" ->
-	    {methodOptions[OptionValue[Method]]}/.symbolString,
+	   {methodOptions[OptionValue[Method]]}/.symbolString,
        "dynamicPartOptions" ->
-            {methodOptions[OptionValue[dynamicPartMethod]]}/.symbolString,
+           {methodOptions[OptionValue[dynamicPartMethod]]}/.symbolString,
        "largeShiftOptions" -> OptionValue[largeShiftOptions]/.symbolString,
        "hessElements" -> Length[hess["NonzeroValues"]],
        "gaugeElements" -> Length[gaugeTransformShifts["NonzeroValues"]],
