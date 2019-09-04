@@ -96,6 +96,10 @@ int main(int argc, char **argv){
     assert(tmp != NULL);
     dynamicInit(n, gauge, gaugeDimension, gaugeElements, tmp);
     hessInit(n, hess, hessElements);
+    // Debug print:
+#if 0
+    testOp(n, grad);
+#endif
     tmp = cJSON_GetObjectItemCaseSensitive(jopts, "largeShiftOptions");
     assert(tmp != NULL);
     /* This won' twork until we introduce reorthogonalization against

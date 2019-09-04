@@ -35,6 +35,12 @@ void cutoffNullspace(unsigned int n, unsigned int nvals, cJSON *options,
     rescale = cJSON_IsNumber(tmp)?tmp->valuedouble:1.0;
 
     *nLargeShifts = 0;
+#if 0  // Debug print
+    printf("cutoffNullSpace for n=%i, nvals=%i\nEigenvalues:\n", n, nvals);
+    for(i=0; i<nvals; i++) {
+        printf("  %le\n", vals[i]);
+    }
+#endif
     for(i=0; i<nvals; i++) {
         maxnorm2 = 0.0;
         vecnorm2 = 0.0;

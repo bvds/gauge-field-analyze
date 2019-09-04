@@ -79,9 +79,7 @@ void linearSolve(integer n, double *b, cJSON *options, double *x) {
 
 int hessProduct(integer *n, doublereal *x, doublereal *y) {
     assert(*n == hessData.n);
-    matrixVector(*n, hessData.matrix, hessData.matrixElements, x, y);
-    // Use the fact that "in" and "out" can overlap.
-    dynamicProject(*n, y, y);
+    hessOp(*n, 1, x, *n, y, *n, NULL);
     largeShiftProject(*n, y);
     return 0;
 }
@@ -92,17 +90,17 @@ void userOrtho(char *action, integer *n, double *y) {
     const char trans='T', normal='N';
     const double one=1.0, zero=0.0, minusone=-1.0;
     const integer inc=1;
-    integer dn = *n * sizeof(double);
+    const integer dn = *n * sizeof(double),
+        offset = minresOrtho.nvecs * *n;
 
-    printf("userOrtho n=%i hessData.n=%i\n", *n, hessData.n);
     assert(*n == hessData.n);
 
     if(*action=='a') {
         /* add vector to ortho list */
-        minresOrtho.vecs = realloc(minresOrtho.vecs, (minresOrtho.nvecs+1) * dn);
-        minresOrtho.z = realloc(minresOrtho.z, (minresOrtho.nvecs + 1) * sizeof(double));
-        memcpy(y, minresOrtho.vecs + minresOrtho.nvecs * dn, dn);
         minresOrtho.nvecs += 1;
+        minresOrtho.vecs = realloc(minresOrtho.vecs, minresOrtho.nvecs * dn);
+        memcpy(minresOrtho.vecs + offset, y, dn);
+        minresOrtho.z = realloc(minresOrtho.z, minresOrtho.nvecs * sizeof(double));
     } else if(*action=='o') {
         /* orthogonalize vector against previous
            vectors, gauge transforms, and large shifts 
@@ -111,7 +109,6 @@ void userOrtho(char *action, integer *n, double *y) {
            the three orthogonalizations.
         */
 
-        // BvdS:  dimensions/transposes are all screwed up.
         DGEMV(&trans, n, &minresOrtho.nvecs, &one,
               minresOrtho.vecs, n, y, &inc, &zero,
               minresOrtho.z, &inc);
@@ -133,7 +130,6 @@ void largeShiftProject(integer n, double *y) {
     const double one=1.0, zero=0.0, minusone=-1.0;
     const integer inc=1;
 
-    // BvdS:  dimensions/transposes are all screwed up.
     DGEMV(&trans, &n, &hessData.nvecs, &one,
           hessData.vecs, &n, y, &inc, &zero,
           hessData.z, &inc);

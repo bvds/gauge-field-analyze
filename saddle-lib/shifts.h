@@ -43,7 +43,7 @@ extern int DGEMV(const char *, const integer *, const integer *,
 void dynamicInit(unsigned int n, SparseRow *gauge,
 		 unsigned int gaugeDimension, unsigned int gaugeElements,
 		 cJSON *options);
-void dynamicProject(unsigned int n, double *in, double *out);
+void dynamicProject(const int n, double *in, double *out);
 int gaugeProduct(const integer *vectorLength, const doublereal *x,
                  doublereal *y);
 
@@ -53,6 +53,7 @@ void hessOp(const int nrow, const int ncol, const double *xin, const int ldx,
 	    double *yout, const int ldy, void* mvparam);
 void largeShifts(int n, double *initialVector, cJSON *options,
 		 double **vals, double **vecs, unsigned int *nvals);
+void testOp(const int n, double *grad);
 
 
 void cutoffNullspace(unsigned int n, unsigned int nvals, cJSON *options,

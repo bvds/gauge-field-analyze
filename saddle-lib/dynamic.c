@@ -9,7 +9,7 @@
 */
 
 struct {
-    unsigned int n;
+    int n;
     SparseRow *matrix;
     integer matrixDimension;
     unsigned int matrixElements;
@@ -28,32 +28,42 @@ void dynamicInit(unsigned int n, SparseRow *gauge,
 }
 
 /* "in" and "out" may overlap */
-void dynamicProject(unsigned int n, double *in, double *out) {
-    unsigned int i;
+void dynamicProject(const int n, double *in, double *out) {
+    int i;
     doublereal *b = malloc(gaugeData.matrixDimension*sizeof(double));
     doublereal *x = malloc(gaugeData.matrixDimension*sizeof(double));
-    doublereal shift = 0.0, maxxnorm = 1.0e4;
+    doublereal shift = 0.0, *maxxnormp = NULL;
+    // Explicit value for these, so we can force MINRES alogrithm.
     doublereal trancond, acondlim = 1.0e15;
-    logical disable = 0;
-    integer nout = 6, istop, itn, itnlim;
+    logical *disablep = NULL;
+    integer nout, *noutp = NULL, istop, itn, itnlim;
     cJSON *tmp;
-    doublereal rnorm, arnorm, xnorm, anorm, acond, rtol;
+    doublereal rnorm, arnorm, xnorm, anorm, acond,
+        rtol, *rtolp = NULL;
 
-    /* Currently:
-       "rTolerance": 1e-12,
-       "printDetails": false
-     */
     tmp  = cJSON_GetObjectItemCaseSensitive(gaugeData.options, "maxIterations");
-    if(cJSON_IsNumber(tmp)) {
+    if(cJSON_IsNumber(tmp)){
         itnlim = tmp->valueint;
     } else {
-        itnlim = 4*n;  // Assuming no reorthogonalization
+        // Appropriate for no reorthogonalization
+        itnlim = 4*n;
     }
+    /* 
+       We may want to adjust rtol in cases where norm(b) is very small,
+       since this is often just removing roundoff error.
+
+       In any case, the gauge configurations are single precision,
+       so rtol is normally about 1e-7.
+    */
     tmp  = cJSON_GetObjectItemCaseSensitive(gaugeData.options, "rTolerance");
     if(cJSON_IsNumber(tmp)) {
         rtol = tmp->valuedouble;
-    } else {
-        rtol = 1.6e-15;  // Try pointer to NULL or explicit Machine Epsilon?
+        rtolp = &rtol;
+    }
+    tmp  = cJSON_GetObjectItemCaseSensitive(gaugeData.options, "printDetails");
+    if((cJSON_IsNumber(tmp) && tmp->valueint>0) || cJSON_IsTrue(tmp)) {
+        nout = 6;  // Write to stdout
+        noutp = &nout;
     }
 
     assert(n == gaugeData.n);
@@ -63,9 +73,8 @@ void dynamicProject(unsigned int n, double *in, double *out) {
                  gaugeData.matrixElements, in, b);
   
     trancond = acondlim; // Always use MINRES
-    MINRESQLP(
-              &gaugeData.matrixDimension, gaugeProduct, b, &shift, NULL, NULL,
-              &disable, &nout, &itnlim, &rtol, &maxxnorm, &trancond, &acondlim,
+    MINRESQLP(&gaugeData.matrixDimension, gaugeProduct, b, &shift, NULL, NULL,
+              disablep, noutp, &itnlim, rtolp, maxxnormp, &trancond, &acondlim,
               x, &istop, &itn, &rnorm, &arnorm, &xnorm, &anorm, &acond);
 
     vectorMatrix(n, gaugeData.matrix,
@@ -78,6 +87,11 @@ void dynamicProject(unsigned int n, double *in, double *out) {
     free(gaugeData.z); gaugeData.z = NULL;
     free(b);
     free(x);
+
+    if(istop >= 7) {
+        printf("MINRES returned with istop=%i in %s, exiting.\n", istop, __FILE__);
+        exit(7);
+    }
 }
 
 int gaugeProduct(const integer *vectorLength, const doublereal *x,

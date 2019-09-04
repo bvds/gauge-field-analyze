@@ -64,10 +64,12 @@ void largeShifts(int n, double *initialVector, cJSON *options,
     tmp  = cJSON_GetObjectItemCaseSensitive(options, "eigenPairs");
     if(cJSON_IsNumber(tmp)) {
         mev = abs(tmp->valueint);
-        lohi = tmp->valueint;
+        /* In the source code, lohi=-2 sorts by distance from 
+           info -> ref (which is set to zero). */
+        lohi = tmp->valueint<0?-2:1;
     } else {
         mev = 1;
-        lohi = -1;
+        lohi = -2;
     }
     tmp  = cJSON_GetObjectItemCaseSensitive(options, "maxIterations");
     if(cJSON_IsNumber(tmp)) {
@@ -97,6 +99,7 @@ void largeShifts(int n, double *initialVector, cJSON *options,
     ned = mev; // BvdS:  not sure what the difference is
     maxmv = ned*nrow;  // BvdS:  max number of matrix multiplies.
     trl_init_info(&info, nrow, maxlan, lohi, ned, rtol, 1, maxmv, 0);
+    // argument 3:  User supplies initial vector.
     trl_set_iguess(&info, 0, 1, 0, NULL);
     // The Lanczos recurrence is set to start with initial guess
     memset(*eval, 0, mev*sizeof(double));
@@ -105,11 +108,23 @@ void largeShifts(int n, double *initialVector, cJSON *options,
     }
     //info.verbose =  8;
     // call TRLAN to compute the eigenvalues
-    trlan(hessOp, &info, nrow, mev, *eval, *evec, nrow, lwrk, wrk);
+    trlan(hessOp, dynamicProject, &info, nrow, mev, *eval, *evec, nrow, lwrk, wrk);
     trl_print_info(&info, 3*nrow);
     *nvals = mev;
 
     if( lwrk > 0 ) {
 	free(wrk);
+    }
+}
+
+// Debug print of dynamic part of hess.grad
+void testOp(const int n, double *grad) {
+    double *y;
+    int i;
+    y = malloc(n*sizeof(double));
+    hessOp(n, 1, grad, 1, y, 1, NULL);
+    printf("Dynamic part of hess.grad\n");
+    for(i=0; i<n; i++) {
+        printf("  %le\n", y[i]);
     }
 }

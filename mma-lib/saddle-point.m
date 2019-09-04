@@ -146,7 +146,7 @@ gaugeTransformShifts::usage =
   "Return a matrix containing shifts associated with all possible \
 infinitesimal gauge transformations.  The result is returned as a \
 SparseArray.";
-gaugeTransformShifts::axial = "Not Axial gauge."; \
+gaugeTransformShifts::axial = "Not Axial gauge.";
 SetAttributes[gaugeTransformShifts, HoldFirst];
 gaugeTransformShifts[rootGaugeField_, fixed_: - 1] :=
  ParallelSum[
@@ -323,6 +323,7 @@ associated shifts using either dense or sparse matrix techniques.";
 findDelta::lastPairs = "Mathematica orders eigenvalues/vectors in
 order of decreasing magnitude.  Thus, for large shifts, one must find
 the last eigenvalues/vectors.";
+findDelta::external = "Error in external program; see `1` for details.";
 Options[findDelta] = {dynamicPartMethod -> Automatic,
   Method -> Automatic, rescaleCutoff -> 1, dampingFactor -> 1,
   storePairs -> False, storeHess -> False, largeShiftOptions -> {},
@@ -342,10 +343,11 @@ findDelta[hessIn_, gradIn_, gaugeTransformShifts_, OptionsPattern[]] :=
        proj = NullSpace[gaugeTransformShifts];
        hess = proj.hessIn.Transpose[proj];
        grad = proj.gradIn,
-       (* Normal case: no projection onto the subspace. *)
+       (* Alternatively, no projection onto the subspace. *)
        proj = IdentityMatrix[Length[hessIn], SparseArray];
        hess = hessIn;
        grad = gradIn];
+    If[False, Print["Dynamic hess.grad: ",(hess.grad).proj]];
     {values, oo} = Eigensystem[Normal[hess]];
     shifts = applyCutoff3[values, oo.grad, oo.proj,
 	OptionValue[largeShiftCutoff], zzz].oo.proj;
@@ -372,6 +374,7 @@ findDelta[hess_, grad_, gaugeTransformShifts_, opts:OptionsPattern[]] :=
 	    dynamicPart[gaugeTransformShifts,
 			Method -> OptionValue[dynamicPartMethod]],
 	    Identity];
+    If[False, Print["Dynamic hess.grad: ", dp0[hess.grad]]];
    Clear[bb0]; bb0 = {};
    dp = ((If[OptionValue[storeBB] == True, AppendTo[bb0, #]];
 	 addTime[tdp, dp0[#]])&);
@@ -381,7 +384,7 @@ findDelta[hess_, grad_, gaugeTransformShifts_, opts:OptionsPattern[]] :=
        projDense = Transpose[projDense].projDense;
        dp = (Block[{p0=projDense.#, p1=dp0[#]},
 	 If[Norm[p0-p1]>10^-10,
-	     Print["** Dp discrepency: ", Norm[p0-p1]];Abort[]]; p1]&)]];
+	     Print["** Dp discrepency: ", Norm[p0-p1]]; Abort[]]; p1]&)]];
    (* Calculate eigenvectors associated with shifts that are too
      large.  Since, the Mma routine Eigensystem[...] doesn't allow
      the matrix to be given as a function, we use ersatzLanczos[]
@@ -451,7 +454,7 @@ findDelta[hess_, grad_, gaugeTransformShifts_, opts:OptionsPattern[]] :=
 	(* Switch to zero-based array indexing *)
 	{#["NonzeroPositions"] - 1, #["NonzeroValues"]}]],
     symbolString = (a_Symbol -> b_) :> SymbolName[a] -> b,
-    outFile = "hess-grad-gauge.json"},
+    outFile = "hess-grad-gauge.json", out, logFile = "shifts.log"},
    (* Dump dimensions, constants, and options into JSON file.
       Dump matrices and vectors: 
         hess, grad, gaugtransformationShifts
@@ -476,9 +479,12 @@ findDelta[hess_, grad_, gaugeTransformShifts_, opts:OptionsPattern[]] :=
    Export["grad.dat", grad];
    Export["gauge.dat", sparseExport[gaugeTransformShifts]];
    (* Run external program *)
-   Abort[]; Run["find-shifts"];
+   out = Run["saddle-lib/shifts",
+             "hess-grad-gauge.json hess.dat grad.dat gauge.dat shifts.dat",
+             ">", logFile];
+   If[out != 0, Message[findDelta::external, logFile]; Return[$Failed]];
    (* Read shifts from external file *)
-   shifts = ReadList["shifts.dat"];
+   shifts = ReadList["shifts.dat", Number];
    Print["findDelta time (seconds):  total=", SessionTime[] - tinit];
    If[OptionValue[storeHess],
       hess0 = Null; grad0 = Null; proj0 = Null; oo0 = Null];
