@@ -19,6 +19,7 @@ struct {
     unsigned long int tcpu;
     unsigned long int twall;
     unsigned int count;
+    unsigned int matVec;
 } gaugeData;
 
 void dynamicInit(unsigned int n, SparseRow *gauge,
@@ -32,6 +33,7 @@ void dynamicInit(unsigned int n, SparseRow *gauge,
     gaugeData.tcpu = 0;
     gaugeData.twall = 0;
     gaugeData.count = 0;
+    gaugeData.matVec = 0;
 }
 
 /* "in" and "out" may overlap */
@@ -104,6 +106,7 @@ void dynamicProject(const int n, double *in, double *out) {
     gaugeData.tcpu += clock()-t1;
     gaugeData.twall += tf - t2; 
     gaugeData.count += 1;
+    gaugeData.matVec += itn;
 
     if(istop >= 7) {
         printf("MINRES returned with istop=%i in %s, exiting.\n", istop, __FILE__);
@@ -112,9 +115,9 @@ void dynamicProject(const int n, double *in, double *out) {
 }
 
 void printDynamicStats() {
-    printf("dynamicProject %i calls in %.2f sec (%li wall)\n",
-           gaugeData.count, gaugeData.tcpu/(float) CLOCKS_PER_SEC,
-           gaugeData.twall);
+    printf("dynamicProject %i calls (%i iterations) in %.2f sec (%li wall)\n",
+           gaugeData.count, gaugeData.matVec,
+           gaugeData.tcpu/(float) CLOCKS_PER_SEC, gaugeData.twall);
 }
 
 int gaugeProduct(const integer *vectorLength, const doublereal *x,
@@ -131,21 +134,65 @@ int gaugeProduct(const integer *vectorLength, const doublereal *x,
 /* in and out must be distinct */
 void matrixVector(const int n, const SparseRow *a, const int na,
                   const double *in, double *out) {
+#ifdef USE_LIBRSB
+    const rsb_trans_t trans = RSB_TRANSPOSITION_N;
+    const double zero = 0.0, one = 1.0;
+    int errval;
+
+    // Sanity test
+    int nna;
+    rsb_mtx_get_info(a, RSB_MIF_MATRIX_ROWS__TO__RSB_COO_INDEX_T, &nna);
+    assert(n == nna);
+    rsb_mtx_get_info(a, RSB_MIF_MATRIX_NNZ__TO__RSB_NNZ_INDEX_T, &nna);
+    // Only one triangle of a symmetric matrix is stored.
+    assert(na == 2*nna-n || na == nna);
+
+    if((errval = rsb_spmv(trans, &one, a, in, 1, &zero, out, 1))
+       != RSB_ERR_NO_ERROR) {
+        fprintf(stderr, "rsb_spmv error 0x%x, exiting\n", errval);
+        exit(121);
+    }
+#if 0  // Debug print
+    double norm;
+    int k;
+    if((errval = rsb_mtx_get_nrm(a, &norm, RSB_EXTF_NORM_TWO))
+       != RSB_ERR_NO_ERROR) {
+        fprintf(stderr, "rsb_mtx_get_nrm error 0x%x, exiting\n", errval);
+        exit(121);
+    }
+    printf("== matrixVector for %i %i norm=%lf\n", n, nna, norm);
+    for(k=0; k<n; k++) {
+        printf("==   %le %le\n", in[k], out[k]);
+    }
+#endif
+#else
     int k;
     memset(out, 0, n*sizeof(double));
     for(k=0; k<na; k++) {
-        /* printf("Step:  %i %i %i %i %e %e %e\n", n, k, a[k].i, a[k].j, 
-           a[k].value, in[a[k].j], out[a[k].i]);
-           fflush(stdout); fflush(stderr); */
         out[a[k].i] += a[k].value * in[a[k].j];
     }
+#endif
 }
 
 void vectorMatrix(const int n, const SparseRow *a, const int na,
                   const double *in, double *out) {
+#ifdef USE_LIBRSB
+    const rsb_trans_t trans = RSB_TRANSPOSITION_T;
+    const double zero = 0.0, one = 1.0;
+
+    // Sanity test
+    int nna;
+    rsb_mtx_get_info(a, RSB_MIF_MATRIX_COLS__TO__RSB_COO_INDEX_T , &nna);
+    assert(n == nna);
+    rsb_mtx_get_info(a, RSB_MIF_MATRIX_NNZ__TO__RSB_NNZ_INDEX_T, &nna);
+    assert(na == nna);
+
+    rsb_spmv(trans, &one, a, in, 1, &zero, out, 1);
+#else
     int k;
     memset(out, 0, n*sizeof(double));
     for(k=0; k<na; k++) {
         out[a[k].j] += a[k].value * in[a[k].i];
     }
+#endif
 }

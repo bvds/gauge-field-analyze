@@ -17,7 +17,7 @@ methodOptions[x_] := Apply[Sequence,
 SetAttributes[addTime, {HoldAll, SequenceHold}];
 addTime[timer_, expr_] :=
  Block[{t1 = SessionTime[], result = expr},
-  timer += SessionTime[] - t1; result];
+  timer += SessionTime[] - t1; result]; 
 printMemory[n_] := EngineeringForm[N[ByteCount[n]], 3];
 
 
@@ -42,8 +42,10 @@ applyCutoff1[hess_?VectorQ, grad_, cutoff_: 1, zzz_: 1] :=
     Norm[shift] < cutoff  zzz, shift,
     True, (cutoff/Norm[shift]) shift ]]];
 shiftNorm[shifts_] := Max[Map[Norm, Partition[shifts, nc^2 - 1]]];
-compareVectors[a_, b_] := {{shiftNorm[a], shiftNorm[b]}, {Norm[a], Norm[b]},
-  a.b/(Norm[a] Norm[b])};
+compareVectors[a_, b_] := {{(shiftNorm[a]+shiftNorm[b])/2, 1-shiftNorm[a]/shiftNorm[b]},
+                           {(Norm[a]+Norm[b])/2, 1-Norm[a]/Norm[b]},
+                           Block[{cos = a.b/(Norm[a] Norm[b])},
+                                 {cos, Sqrt[(1+cos) (1-cos)]}]};
 applyCutoff2::usage = "Rescale shifts on an entire lattice so that \
 the largest norm of a shift on a link is less than the cutoff.";
 applyCutoff2[shifts_?ArrayQ, cutoff_: 1, zzz_: 1] :=
@@ -257,6 +259,7 @@ dynamicPart::usage = "Dynamic (non gauge shift) part of a shift vector.
 This returns a function that can be applied to a shift vector.";
 dynamicPart::method = "Unknown method.";
 Options[dynamicPart] = {Method -> "MINRES", printDetails -> True};
+dynamicPartCounter = 0;
 dynamicPart[gaugeTransformShifts_, OptionsPattern[]] :=
  Block[{
     printer = If[OptionValue[printDetails],
@@ -297,7 +300,7 @@ dynamicPart[gaugeTransformShifts_, OptionsPattern[]] :=
 	   minresFun = minresLabels[methodName[OptionValue[Method]]]},
       printer[Null];
       Function[x, x - First[minresFun[
-          (gaugeTransformShifts.(#.gaugeTransformShifts))&,
+          (dynamicPartCounter++; gaugeTransformShifts.(#.gaugeTransformShifts))&,
 	  gaugeTransformShifts.x, Apply[Sequence, opts]]].
 			   gaugeTransformShifts]],
    True,
@@ -347,6 +350,7 @@ findDelta[hessIn_, gradIn_, gaugeTransformShifts_, OptionsPattern[]] :=
        proj = IdentityMatrix[Length[hessIn], SparseArray];
        hess = hessIn;
        grad = gradIn];
+    (* Debug print to compare with call to testOp(...) in shifts.c *)
     If[False, Print["Dynamic hess.grad: ",(hess.grad).proj]];
     {values, oo} = Eigensystem[Normal[hess]];
     shifts = applyCutoff3[values, oo.grad, oo.proj,
@@ -369,7 +373,8 @@ findDelta[hess_, grad_, gaugeTransformShifts_, opts:OptionsPattern[]] :=
     cutoff = OptionValue[cutoffValue],
     damping = OptionValue[dampingFactor], result, shifts, dp, dp0,
     smallProj, smallProj0, tinit = SessionTime[],
-    tdp = 0, tsp = 0, tdot = 0},
+        tdp = 0, tsp = 0, tdot = 0, countdp = 0, countdot = 0, countsp = 0,
+        countGauge = dynamicPartCounter},
    dp0 = If[MatrixQ[gaugeTransformShifts],
 	    dynamicPart[gaugeTransformShifts,
 			Method -> OptionValue[dynamicPartMethod]],
@@ -377,7 +382,7 @@ findDelta[hess_, grad_, gaugeTransformShifts_, opts:OptionsPattern[]] :=
     If[False, Print["Dynamic hess.grad: ", dp0[hess.grad]]];
    Clear[bb0]; bb0 = {};
    dp = ((If[OptionValue[storeBB] == True, AppendTo[bb0, #]];
-	 addTime[tdp, dp0[#]])&);
+	  addTime[tdp, countdp++; dp0[#]])&);
    (* Compare sparse strategy against dense projection. *)
    If[OptionValue[debugProj],
      Module[{projDense = Nullspace[gaugeTransformShifts]},
@@ -395,7 +400,7 @@ findDelta[hess_, grad_, gaugeTransformShifts_, opts:OptionsPattern[]] :=
      If[NumberQ[eigenPairs/.options] && (eigenPairs/.options)>0,
 	Message[findDelta::lastPairs]; Return[$Failed]];
      {vals, vecs} = ersatzLanczos[
-	 dp[addTime[tdot, hess.#]]&, Length[grad],
+	 dp[addTime[tdot, countdot++; hess.#]]&, Length[grad],
 	 Apply[Sequence, options],
 	 (* Need to determine a reasonable estimate for this. *)
 	 eigenPairs -> -Min[120, Length[grad]],
@@ -405,10 +410,10 @@ findDelta[hess_, grad_, gaugeTransformShifts_, opts:OptionsPattern[]] :=
          OptionValue[largeShiftCutoff], OptionValue[rescaleCutoff]]},
 	    If[Length[largeShiftSpace] > 0,
 	       (# - (largeShiftSpace.#).largeShiftSpace)&, Identity]]];
-   smallProj = (addTime[tsp, smallProj0[#]]&);
+   smallProj = (addTime[tsp, countsp++; smallProj0[#]]&);
    (* Call the appropriate MINRES routine, setting some default values. *)
    result =
-    minresFun[smallProj[dp[addTime[tdot, hess.#]]]&,
+    minresFun[smallProj[dp[addTime[tdot, countdot++; hess.#]]]&,
      smallProj[dp[grad]], methodOptions[OptionValue[Method]],
      Apply[Sequence,
       FilterRules[{localSize -> 5000, printDetails -> 1},
@@ -420,8 +425,11 @@ findDelta[hess_, grad_, gaugeTransformShifts_, opts:OptionsPattern[]] :=
 	    {shifts.smallProj[shifts], shifts.dp[shifts],
 	     shifts.smallProj[dp[shifts]]}/shifts.shifts]];
    Print["findDelta time (seconds):  dynamic part=", tdp,
-    ", small shifts=", tsp, ", A=", tdot, ", total=",
-    SessionTime[] - tinit];
+         ", small shifts=", tsp, ", A=", tdot, ", total=",
+         SessionTime[] - tinit];
+   Print["findDelta counts:  dynamic part=", countdp,
+         " (gauge transform=", dynamicPartCounter - countGauge,
+         "), small shifts=", countsp, ", A=", countdot];
    If[OptionValue[storeHess],
       hess0 = hess; grad0 = grad; proj0 = Null; oo0 = Null];
    If[OptionValue[storePairs],
@@ -476,13 +484,18 @@ findDelta[hess_, grad_, gaugeTransformShifts_, opts:OptionsPattern[]] :=
        "gaugeElements" -> Length[gaugeTransformShifts["NonzeroValues"]],
        "gaugeDimension" -> Length[gaugeTransformShifts]}];
    Export["hess.dat", sparseExport[hess]];
+   Export["hess.mtx", hess];
    Export["grad.dat", grad];
    Export["gauge.dat", sparseExport[gaugeTransformShifts]];
+   Export["gauge.mtx", gaugeTransformShifts];
    (* Run external program *)
-   out = Run["saddle-lib/shifts",
-             "hess-grad-gauge.json hess.dat grad.dat gauge.dat shifts.dat",
-             ">", logFile];
-   If[out != 0, Message[findDelta::external, logFile]; Return[$Failed]];
+   out = RunProcess[{"saddle-lib/shifts",
+                     "hess-grad-gauge.json", "hess.dat",
+                     "grad.dat", "gauge.dat", "shifts.dat"}];
+   Print[Style[out["StandardOutput"],FontColor -> Blue]];
+   If[Length[out["StandardError"]]>0,
+      Print[Style[out["StandardError"], FontColor -> Red]]];
+   If[out["ExitCode"] != 0, Message[findDelta::external, logFile]; Return[$Failed]];
    (* Read shifts from external file *)
    shifts = ReadList["shifts.dat", Number];
    Print["findDelta time (seconds):  total=", SessionTime[] - tinit];

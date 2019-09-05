@@ -1,10 +1,15 @@
 #include <cjson/cJSON.h>
 
+#ifdef USE_LIBRSB
+#include <rsb.h>         /* for rsb_lib_init */
+typedef struct rsb_mtx_t SparseRow;
+#else
 typedef struct {
     unsigned int i;
     unsigned int j;
     double value;
 } SparseRow;
+#endif
 
 void matrixVector(const int n, const SparseRow *a, const int na,
                   const double *in, double *out);

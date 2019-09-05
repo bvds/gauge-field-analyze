@@ -36,7 +36,7 @@ void largeShifts(int n, double *initialVector, cJSON *options,
     double tol = -1.0; // Use default tolerance: sqrt(machine epsilon)
     int nrow = n; // number of rows on this processor
     trl_info info;
-    int i, printDetails = 1;
+    int i, printDetails = 1, restart = 1;
     cJSON *tmp;
     clock_t t1;
     time_t t2, tf;
@@ -71,6 +71,10 @@ void largeShifts(int n, double *initialVector, cJSON *options,
     } else {
         maxlan = n;  // Since we do reorthogonalization.
     }
+    tmp  = cJSON_GetObjectItemCaseSensitive(options, "restartStrategy");
+    if(cJSON_IsNumber(tmp)) {
+        restart = tmp->valuedouble;
+    }
     tmp  = cJSON_GetObjectItemCaseSensitive(options, "rTolerance");
     if(cJSON_IsNumber(tmp)) {
         tol = tmp->valuedouble;
@@ -89,7 +93,7 @@ void largeShifts(int n, double *initialVector, cJSON *options,
     mev = ned; // Allocate memory for the number of requested eigenpairs
     *eval = (double *) malloc(mev*sizeof(double));
     *evec = (double *) malloc(mev*nrow*sizeof(double));
-    trl_init_info(&info, nrow, maxlan, lohi, ned, tol, 1, maxmv, 0);
+    trl_init_info(&info, nrow, maxlan, lohi, ned, tol, restart, maxmv, 0);
     trl_set_iguess(&info, 0, iguess, 0, NULL);
     memset(*eval, 0, mev*sizeof(double));
     // Provide the initial vector
@@ -143,4 +147,5 @@ void testOp(const int n, double *grad) {
     for(i=0; i<n; i++) {
         printf("  %le\n", y[i]);
     }
+    free(y);
 }

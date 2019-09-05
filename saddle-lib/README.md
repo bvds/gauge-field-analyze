@@ -40,3 +40,10 @@ in `Make.inc`.
 
 Finally, modify `Makefile` to point to these libraries.
 
+One can use the sparse matrix library (`librsb`)[http://librsb.sourceforge.net/]
+for the hessian and the gauge transform shifts. 
+* Install the library.  On Ubuntu:  `sudo apt install librsb-dev`.
+* In `Makefile`, add the compiler flag `-DUSE_LIBRSB`.
+* In `../mma-lib/saddle-point.m`, point `RunProcess[...]` to `hess.mtx` and
+  `gauge.mtx`.  Currently, there is some issue with `RunProcess` hanging
+  even when `./shifts` runs correctly.

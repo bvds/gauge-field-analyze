@@ -90,8 +90,8 @@ void linearSolve(integer n, double *b, cJSON *options, double *x) {
     minresOrtho.nvecs = 0;
 
     time(&tf);
-    printf("linearSolve in %.2f sec (%li wall)\n",
-           (clock()-t1)/(float) CLOCKS_PER_SEC, tf-t2);
+    printf("linearSolve %i iterations in %.2f sec (%li wall)\n",
+           itn, (clock()-t1)/(float) CLOCKS_PER_SEC, tf-t2);
 
     if(istop >= 7) {
         printf("MINRES returned with istop=%i in %s, exiting.\n", istop, __FILE__);

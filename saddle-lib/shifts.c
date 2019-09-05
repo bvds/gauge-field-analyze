@@ -37,12 +37,25 @@ int main(int argc, char **argv){
     unsigned int nLargeShifts;
     int k;
     FILE *fp;
+#ifdef USE_LIBRSB
+    char ib[1000];
+    rsb_err_t errval = RSB_ERR_NO_ERROR;
+    rsb_flags_t flagsA = RSB_FLAG_NOFLAGS;
+    rsb_type_t typecode = RSB_NUMERICAL_TYPE_DEFAULT;
+#endif
     long int twall = 0, tcpu = 0;
     clock_t t1, tt1;
     time_t t2, tt2, tf;
 
     t1 = clock(); tt1 = t1;
     time(&t2); tt2 = t2;
+
+#ifdef USE_LIBRSB
+    if((errval = rsb_lib_init(RSB_NULL_INIT_OPTIONS)) != RSB_ERR_NO_ERROR) {
+        fprintf(stderr, "rsb_lib_init error 0x%x, exiting\n", errval);
+        exit(111);
+    }
+#endif
 
     /* Read JSON file and use options */
     if(argc <5)
@@ -55,7 +68,20 @@ int main(int argc, char **argv){
     /* Read in arrays */
     unsigned int hessElements = cJSON_GetObjectItemCaseSensitive(
              jopts, "hessElements")->valueint;
-    SparseRow *hess = malloc(hessElements * sizeof(SparseRow));
+    SparseRow *hess;
+#ifdef USE_LIBRSB
+    printf("Opening file %s\n", argv[2]);
+    hess = rsb_file_mtx_load(argv[2], flagsA, typecode, &errval);
+    if(errval != RSB_ERR_NO_ERROR) {
+        fprintf(stderr, "rsb_file_mtx_load error 0x%x, exiting\n", errval);
+        exit(113);
+    }
+    /* print out the matrix summary information  */
+    rsb_mtx_get_info_str(hess, "RSB_MIF_MATRIX_INFO__TO__CHAR_P",
+                         ib, sizeof(ib));
+    printf("%s\n",ib);
+#else
+    hess = malloc(hessElements * sizeof(SparseRow));
     printf("Opening file %s for %i elements\n", argv[2], hessElements);
     fp = fopen(argv[2], "r"); 
     for(i=0; i<hessElements; i++){
@@ -66,6 +92,8 @@ int main(int argc, char **argv){
         }
     }
     fclose(fp);
+#endif
+
     double *grad = malloc(n * sizeof(double));
     printf("Opening file %s for %i elements\n", argv[3], n);
     fp = fopen(argv[3], "r"); 
@@ -81,7 +109,20 @@ int main(int argc, char **argv){
              jopts, "gaugeElements")->valueint;
     unsigned int gaugeDimension = cJSON_GetObjectItemCaseSensitive(
              jopts, "gaugeDimension")->valueint;
-    SparseRow *gauge = malloc(gaugeElements * sizeof(SparseRow));
+    SparseRow *gauge;
+#ifdef USE_LIBRSB
+    printf("Opening file %s\n", argv[4]);
+    gauge = rsb_file_mtx_load(argv[4], flagsA, typecode, &errval);
+    if(errval != RSB_ERR_NO_ERROR) {
+        fprintf(stderr, "rsb_file_mtx_load error 0x%x, exiting\n", errval);
+        exit(113);
+    }
+    /* print out the matrix summary information  */
+    rsb_mtx_get_info_str(gauge, "RSB_MIF_MATRIX_INFO__TO__CHAR_P",
+                         ib, sizeof(ib));
+    printf("%s\n",ib);
+#else
+    gauge = malloc(gaugeElements * sizeof(SparseRow));
     printf("Opening file %s for %i elements\n", argv[4], gaugeElements);
     fp = fopen(argv[4], "r"); 
     for(i=0; i<gaugeElements; i++){
@@ -92,6 +133,7 @@ int main(int argc, char **argv){
         }
     }
     fclose(fp);
+#endif
     time(&tf);
     tcpu += clock()-t1;
     twall += tf - t2; 
@@ -139,8 +181,15 @@ int main(int argc, char **argv){
     printf("%s:  overall time %.2f sec (%li wall)\n",
            __FILE__, (clock()-tt1)/(float) CLOCKS_PER_SEC, tf-tt2);
 
-    free(hess); free(grad); free(gauge);
-    free(vals); free(vecs); free(shifts);
+#ifdef USE_LIBRSB
+    printf("rsb_mtx_free: deallocating hess and gauge.\n");
+    rsb_mtx_free(hess);
+    rsb_mtx_free(gauge); 
+    rsb_lib_exit(RSB_NULL_EXIT_OPTIONS);
+#else
+    free(hess); free(gauge);
+#endif
+    free(vals); free(vecs); free(shifts); free(grad);
     cJSON_Delete(jopts);
     free(options);
     return 0;
