@@ -10,9 +10,7 @@
 */
 
 struct {
-    integer n;
-    SparseRow *matrix;
-    unsigned int matrixElements;
+    SparseMatrix *matrix;
     doublereal *vecs;
     integer nvecs;
     doublereal *z;
@@ -24,11 +22,8 @@ struct {
     integer nvecs;    
 } minresOrtho;
 
-void linearInit(unsigned int n, SparseRow *hess, int hessElements,
-                double *vecs, int nvecs) {
-    hessData.n = n;
+void linearInit(SparseMatrix *hess, double *vecs, int nvecs) {
     hessData.matrix = hess;
-    hessData.matrixElements = hessElements;
     hessData.vecs = vecs;
     hessData.nvecs = nvecs;
 }
@@ -42,7 +37,7 @@ void linearSolve(integer n, double *b, cJSON *options, double *x) {
     integer nout, *noutp = NULL, istop, itn, itnlim;
     cJSON *tmp;
     doublereal rnorm, arnorm, xnorm, anorm, acond,
-        rtol, *rtolp = NULL;
+        rtol, *rtolp = NULL, *abstolp = NULL;
     clock_t t1;
     time_t t2, tf;
 
@@ -67,7 +62,8 @@ void linearSolve(integer n, double *b, cJSON *options, double *x) {
         printf("linearSolve writing to stdout\n");
     }
 
-    assert(n == hessData.n);
+    assert(n == hessData.matrix->columns);
+    assert(n == hessData.matrix->rows);
     hessData.z = malloc(hessData.nvecs*sizeof(doublereal));
     minresOrtho.z = malloc(itnlim*sizeof(doublereal));
     minresOrtho.vecs = NULL; minresOrtho.nvecs = 0;
@@ -81,7 +77,7 @@ void linearSolve(integer n, double *b, cJSON *options, double *x) {
     trancond = acondlim; // Always use MINRES
     MINRESQLP(
               &n, hessProduct, b, &shift, NULL, (S_fp) userOrtho,
-              disablep, noutp, &itnlim, rtolp, maxxnormp, &trancond, &acondlim,
+              disablep, noutp, &itnlim, rtolp, abstolp, maxxnormp, &trancond, &acondlim,
               x, &istop, &itn, &rnorm, &arnorm, &xnorm, &anorm, &acond);
 
     free(hessData.z);
@@ -100,7 +96,8 @@ void linearSolve(integer n, double *b, cJSON *options, double *x) {
 }
 
 int hessProduct(integer *n, doublereal *x, doublereal *y) {
-    assert(*n == hessData.n);
+    assert(*n == hessData.matrix->rows);
+    assert(*n == hessData.matrix->columns);
     hessOp(*n, 1, x, *n, y, *n, NULL);
     largeShiftProject(*n, y);
     return 0;
@@ -115,7 +112,8 @@ void userOrtho(char *action, integer *n, double *y) {
     const integer dn = *n * sizeof(double),
         offset = minresOrtho.nvecs * *n;
 
-    assert(*n == hessData.n);
+    assert(*n == hessData.matrix->rows);
+    assert(*n == hessData.matrix->columns);
 
     if(*action=='a') {
         /* add vector to ortho list */

@@ -13,16 +13,10 @@
 #include "trlan.h"
 #include "trl_comm_i.h"
 
-struct {
-    int n;
-    SparseRow *matrix;
-    unsigned int matrixElements;
-} hessData;
+SparseMatrix *hessData;
 
-void hessInit(unsigned int n, SparseRow *hess, unsigned int hessElements) {
-    hessData.n = n;
-    hessData.matrix = hess;
-    hessData.matrixElements = hessElements;
+void hessInit(SparseMatrix *hess) {
+    hessData = hess;
 }
 
 
@@ -86,7 +80,8 @@ void largeShifts(int n, double *initialVector, cJSON *options,
         printDetails = cJSON_IsTrue(tmp)?1:0;
     }
 
-    assert(n == hessData.n);
+    assert(n == hessData->columns);
+    assert(n == hessData->rows);
     assert(eval != NULL);
     assert(evec != NULL);
 
@@ -106,7 +101,7 @@ void largeShifts(int n, double *initialVector, cJSON *options,
     *nvals = info.nec;
     if(printDetails > 1) {
         // This estimate of flops doesn't include dynamicProject() call. 
-        trl_print_info(&info, hessData.matrixElements);
+        trl_print_info(&info, hessData->nonzeros);
     } else if(printDetails > 0) {
         trl_terse_info(&info, stdout);
     }
@@ -125,13 +120,13 @@ void largeShifts(int n, double *initialVector, cJSON *options,
 /* The extra parameter mvparam is not used in this case. */
 void hessOp(const int nrow, const int ncol, const double *xin, const int ldx,
 	    double *yout, const int ldy, void* mvparam) {
-    assert(hessData.n == nrow);
+    assert(hessData->columns == nrow);
+    assert(hessData->rows == nrow);
     assert(mvparam == NULL);
     int k;
 
     for(k=0; k<ncol; k++) {
-        matrixVector(nrow, hessData.matrix,
-                     hessData.matrixElements, xin+k*ldx, yout+k*ldy);
+        matrixVector(hessData, xin+k*ldx, yout+k*ldy);
         // Use the fact that "in" and "out" can overlap.
         dynamicProject(nrow, yout+k*ldy, yout+k*ldy);
     }

@@ -3,6 +3,7 @@
 #include <string.h>
 #include <assert.h>
 #include <time.h>
+#include <math.h>
 #include "shifts.h"
 /*
   Project out infinitesimal gauge transforms from
@@ -10,10 +11,7 @@
 */
 
 struct {
-    int n;
-    SparseRow *matrix;
-    integer matrixDimension;
-    unsigned int matrixElements;
+    SparseMatrix *matrix;
     cJSON *options;
     doublereal *z;
     unsigned long int tcpu;
@@ -22,25 +20,25 @@ struct {
     unsigned int matVec;
 } gaugeData;
 
-void dynamicInit(unsigned int n, SparseRow *gauge,
-		 unsigned int gaugeDimension, unsigned int gaugeElements,
-		 cJSON *options) {
-    gaugeData.n = n;
+void dynamicInit(SparseMatrix *gauge, cJSON *options) {
     gaugeData.matrix = gauge;
-    gaugeData.matrixDimension = gaugeDimension;
-    gaugeData.matrixElements = gaugeElements;
     gaugeData.options = options;
     gaugeData.tcpu = 0;
     gaugeData.twall = 0;
     gaugeData.count = 0;
     gaugeData.matVec = 0;
+
+    /* Calculate the largest and smallest eigenvalues
+       of gaugeProduct.  These will inform the stopping condition
+       for MINRES. */
+    
 }
 
 /* "in" and "out" may overlap */
 void dynamicProject(const int n, double *in, double *out) {
     int i;
-    doublereal *b = malloc(gaugeData.matrixDimension*sizeof(double));
-    doublereal *x = malloc(gaugeData.matrixDimension*sizeof(double));
+    doublereal *b = malloc(gaugeData.matrix->rows * sizeof(double));
+    doublereal *x = malloc(gaugeData.matrix->rows * sizeof(double));
     doublereal shift = 0.0, *maxxnormp = NULL;
     // Explicit value for these, so we can force MINRES alogrithm.
     doublereal trancond, acondlim = 1.0e15;
@@ -48,7 +46,7 @@ void dynamicProject(const int n, double *in, double *out) {
     integer nout, *noutp = NULL, istop, itn, itnlim;
     cJSON *tmp;
     doublereal rnorm, arnorm, xnorm, anorm, acond,
-        rtol, *rtolp = NULL;
+        rtol, *rtolp = NULL, *abstolp = NULL;
     clock_t t1;
     time_t t2, tf;
 
@@ -80,23 +78,36 @@ void dynamicProject(const int n, double *in, double *out) {
         noutp = &nout;
     }
 
-    assert(n == gaugeData.n);
+    assert(n == gaugeData.matrix -> columns);
     gaugeData.z = malloc(n*sizeof(doublereal));
 
-    matrixVector(gaugeData.matrixDimension, gaugeData.matrix,
-                 gaugeData.matrixElements, in, b);
+    matrixVector(gaugeData.matrix, in, b);
   
     trancond = acondlim; // Always use MINRES
-    MINRESQLP(&gaugeData.matrixDimension, gaugeProduct, b, &shift, NULL, NULL,
-              disablep, noutp, &itnlim, rtolp, maxxnormp, &trancond, &acondlim,
+    MINRESQLP(&(gaugeData.matrix->rows), gaugeProduct, b, &shift, NULL, NULL,
+              disablep, noutp, &itnlim, rtolp, abstolp, maxxnormp, &trancond, &acondlim,
               x, &istop, &itn, &rnorm, &arnorm, &xnorm, &anorm, &acond);
 
-    vectorMatrix(n, gaugeData.matrix,
-                 gaugeData.matrixElements, x, gaugeData.z);
-
+    vectorMatrix(gaugeData.matrix, x, gaugeData.z);
+    // This could be combined with the matrix product, BLAS style.
     for(i=0; i<n; i++) {
         out[i] = in[i] - gaugeData.z[i];
     }
+
+    double norm2x = 0.0, norm2z = 0.0, norm2b = 0.0; //, indotout = 0.0; 
+    for(i=0; i<n; i++) {
+        norm2x += out[i]*out[i];
+        norm2z += gaugeData.z[i]*gaugeData.z[i];
+        // indotout += out[i]*gaugeData.z[i];
+    }
+    for(i=0; i<gaugeData.matrix->rows; i++) {
+        norm2b += b[i]*b[i];
+    }
+#if 0
+    printf("** dynamicProject norm(x)=%le shift ratio=%le norm(b)=%le itn=%i\n",
+           sqrt(norm2x), sqrt(norm2z/norm2x), sqrt(norm2b), itn);
+           //indotout/sqrt(norm2x*norm2z));
+#endif
 
     free(gaugeData.z); gaugeData.z = NULL;
     free(b);
@@ -122,77 +133,55 @@ void printDynamicStats() {
 
 int gaugeProduct(const integer *vectorLength, const doublereal *x,
                  doublereal *y) {
-    assert(*vectorLength == gaugeData.matrixDimension);
-    vectorMatrix(gaugeData.n, gaugeData.matrix,
-                 gaugeData.matrixElements,
-                 x, gaugeData.z);
-    matrixVector(*vectorLength, gaugeData.matrix, gaugeData.matrixElements,
-                 gaugeData.z, y);
+    assert(*vectorLength == gaugeData.matrix->rows);
+    vectorMatrix(gaugeData.matrix, x, gaugeData.z);
+    matrixVector(gaugeData.matrix, gaugeData.z, y);
     return 0;
 }
 
 /* in and out must be distinct */
-void matrixVector(const int n, const SparseRow *a, const int na,
+void matrixVector(const SparseMatrix *a,
                   const double *in, double *out) {
 #ifdef USE_LIBRSB
     const rsb_trans_t trans = RSB_TRANSPOSITION_N;
     const double zero = 0.0, one = 1.0;
     int errval;
 
-    // Sanity test
-    int nna;
-    rsb_mtx_get_info(a, RSB_MIF_MATRIX_ROWS__TO__RSB_COO_INDEX_T, &nna);
-    assert(n == nna);
-    rsb_mtx_get_info(a, RSB_MIF_MATRIX_NNZ__TO__RSB_NNZ_INDEX_T, &nna);
-    // Only one triangle of a symmetric matrix is stored.
-    assert(na == 2*nna-n || na == nna);
+    if((errval = rsb_spmv(trans, &one, a, in, 1, &zero, out, 1))
+       != RSB_ERR_NO_ERROR) {
+        fprintf(stderr, "rsb_spmv error 0x%x, exiting\n", errval);
+        exit(121);
+    }
+#else
+    unsigned int k;
+    SparseRow *row;
+    memset(out, 0, a->rows * sizeof(double));
+    for(k=0; k<a->nonzeros; k++) {
+        row = a->data+k;
+        out[row->i] += row->value * in[row->j];
+    }
+#endif
+}
+
+void vectorMatrix(const SparseMatrix *a,
+                  const double *in, double *out) {
+#ifdef USE_LIBRSB
+    const rsb_trans_t trans = RSB_TRANSPOSITION_T;
+    const double zero = 0.0, one = 1.0;
+    int errval;
 
     if((errval = rsb_spmv(trans, &one, a, in, 1, &zero, out, 1))
        != RSB_ERR_NO_ERROR) {
         fprintf(stderr, "rsb_spmv error 0x%x, exiting\n", errval);
         exit(121);
     }
-#if 0  // Debug print
-    double norm;
-    int k;
-    if((errval = rsb_mtx_get_nrm(a, &norm, RSB_EXTF_NORM_TWO))
-       != RSB_ERR_NO_ERROR) {
-        fprintf(stderr, "rsb_mtx_get_nrm error 0x%x, exiting\n", errval);
-        exit(121);
-    }
-    printf("== matrixVector for %i %i norm=%lf\n", n, nna, norm);
-    for(k=0; k<n; k++) {
-        printf("==   %le %le\n", in[k], out[k]);
-    }
-#endif
 #else
-    int k;
-    memset(out, 0, n*sizeof(double));
-    for(k=0; k<na; k++) {
-        out[a[k].i] += a[k].value * in[a[k].j];
-    }
-#endif
-}
-
-void vectorMatrix(const int n, const SparseRow *a, const int na,
-                  const double *in, double *out) {
-#ifdef USE_LIBRSB
-    const rsb_trans_t trans = RSB_TRANSPOSITION_T;
-    const double zero = 0.0, one = 1.0;
-
-    // Sanity test
-    int nna;
-    rsb_mtx_get_info(a, RSB_MIF_MATRIX_COLS__TO__RSB_COO_INDEX_T , &nna);
-    assert(n == nna);
-    rsb_mtx_get_info(a, RSB_MIF_MATRIX_NNZ__TO__RSB_NNZ_INDEX_T, &nna);
-    assert(na == nna);
-
-    rsb_spmv(trans, &one, a, in, 1, &zero, out, 1);
-#else
-    int k;
-    memset(out, 0, n*sizeof(double));
-    for(k=0; k<na; k++) {
-        out[a[k].j] += a[k].value * in[a[k].i];
+    unsigned int k;
+    SparseRow *row;
+    memset(out, 0, a->columns * sizeof(double));
+    for(k=0; k<a->nonzeros; k++) {
+        row = a->data+k;
+        out[row->j] += row->value * in[row->i];
     }
 #endif
 }

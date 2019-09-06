@@ -326,7 +326,8 @@ associated shifts using either dense or sparse matrix techniques.";
 findDelta::lastPairs = "Mathematica orders eigenvalues/vectors in
 order of decreasing magnitude.  Thus, for large shifts, one must find
 the last eigenvalues/vectors.";
-findDelta::external = "Error in external program; see `1` for details.";
+findDelta::external = "Error in external program.";
+findDelta::dynamicPartMethod = "Only dynamicPartMethod = Automatic is supported.";
 Options[findDelta] = {dynamicPartMethod -> Automatic, printDetails -> False,
   Method -> Automatic, rescaleCutoff -> 1, dampingFactor -> 1,
   storePairs -> False, storeHess -> False, largeShiftOptions -> {},
@@ -462,13 +463,15 @@ findDelta[hess_, grad_, gaugeTransformShifts_, opts:OptionsPattern[]] :=
         (* Switch to zero-based array indexing *)
         {#["NonzeroPositions"] - 1, #["NonzeroValues"]}]],
     symbolString = (a_Symbol -> b_) :> SymbolName[a] -> b,
-    outFile = "hess-grad-gauge.json", out, logFile = "shifts.log"},
+    outFile = "hess-grad-gauge.json", out},
    (* Dump dimensions, constants, and options into JSON file.
      Dump matrices and vectors: 
          hess, grad, gaugtransformationShifts
      The methods themselves will be chosen at compile time,
      since we can always compare with the mathematica value.
     *)
+   If[methodName[OptionValue[dynamicPartMethod]] =!= Automatic,
+      Message[findDelta::dynamicPartMethod]; Return[$Failed]];
    Export[outFile, {
        "nc" -> nc,
        "n" -> Length[grad],
@@ -495,7 +498,7 @@ findDelta[hess_, grad_, gaugeTransformShifts_, opts:OptionsPattern[]] :=
    Print[Style[out["StandardOutput"],FontColor -> Blue]];
    If[Length[out["StandardError"]]>0,
       Print[Style[out["StandardError"], FontColor -> Red]]];
-   If[out["ExitCode"] != 0, Message[findDelta::external, logFile]; Return[$Failed]];
+   If[out["ExitCode"] != 0, Message[findDelta::external]; Return[$Failed]];
    (* Read shifts from external file *)
    shifts = ReadList["shifts.dat", Number];
    Print["findDelta time (seconds):  total=", SessionTime[] - tinit];
@@ -534,19 +537,19 @@ latticeSaddlePointStep[opts:OptionsPattern[]] :=
   t1 = SessionTime[];
   (* Debug prints *)
   Which[False,
-   Print["hessian difference:  ", Chop[Normal[hess] - hess0]];
-   Print["gradient difference:  ", Chop[grad - gradient0]],
-   False,
-   Print["hessian:", Normal[hess]];
-   Print["gradient:  ", grad],
-   False,
-   Print["hessian, first link:  ",
-    Normal[Take[hess, nc^2 - 1, nc^2 - 1]]];
-   Print["gradient, first link:  ", Take[grad, nc^2 - 1]]];
+        Print["hessian difference:  ", Chop[Normal[hess] - hess0]];
+        Print["gradient difference:  ", Chop[grad - gradient0]],
+        False,
+        Print["hessian:", Normal[hess]];
+        Print["gradient:  ", grad],
+        False,
+        Print["hessian, first link:  ",
+              Normal[Take[hess, nc^2 - 1, nc^2 - 1]]];
+        Print["gradient, first link:  ", Take[grad, nc^2 - 1]]];
   delta = findDelta[hess, grad,
-    If[OptionValue[fixedDir] > -1,
-       gaugeTransformShifts[tmpGaugeField, OptionValue[fixedDir]],
-       None],
+     If[OptionValue[fixedDir] > -1,
+        gaugeTransformShifts[tmpGaugeField, OptionValue[fixedDir]],
+        None],
     Apply[Sequence, FilterRules[{opts}, Options[findDelta]]]];
   (* Debug prints *)
   Which[

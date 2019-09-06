@@ -2,18 +2,25 @@
 
 #ifdef USE_LIBRSB
 #include <rsb.h>         /* for rsb_lib_init */
-typedef struct rsb_mtx_t SparseRow;
+typedef struct rsb_mtx_t SparseMatrix;
 #else
 typedef struct {
     unsigned int i;
     unsigned int j;
     double value;
 } SparseRow;
+
+typedef struct {
+    SparseRow *data;
+    unsigned int nonzeros;
+    int rows;
+    int columns;
+} SparseMatrix;
 #endif
 
-void matrixVector(const int n, const SparseRow *a, const int na,
+void matrixVector(const SparseMatrix *a,
                   const double *in, double *out);
-void vectorMatrix(const int n, const SparseRow *a, const int na,
+void vectorMatrix(const SparseMatrix *a,
                   const double *in, double *out);
 
 
@@ -34,6 +41,7 @@ extern int MINRESQLP(
     const integer *n, S_fp aprod, const doublereal *b,
     const doublereal *shift, S_fp msolve, S_fp userOrtho, const logical *disable,
     const integer *nout, const integer *itnlim, const doublereal *rtol,
+    const doublereal *abstol,
     const doublereal *maxxnorm, const doublereal *trancond,
     const doublereal *acondLim,
     doublereal *x, integer *istop, integer *itn, doublereal *rnorm,
@@ -45,16 +53,14 @@ extern int DGEMV(const char *, const integer *, const integer *,
                  const doublereal *, const integer *, const doublereal *,
                  doublereal *, const integer *);
 
-void dynamicInit(unsigned int n, SparseRow *gauge,
-		 unsigned int gaugeDimension, unsigned int gaugeElements,
-		 cJSON *options);
+void dynamicInit(SparseMatrix *gauge, cJSON *options);
 void dynamicProject(const int n, double *in, double *out);
 int gaugeProduct(const integer *vectorLength, const doublereal *x,
                  doublereal *y);
 void printDynamicStats();
 
 
-void hessInit(unsigned int n, SparseRow *hess, unsigned int hessElements);
+void hessInit(SparseMatrix *hess);
 void hessOp(const int nrow, const int ncol, const double *xin, const int ldx,
 	    double *yout, const int ldy, void* mvparam);
 void largeShifts(int n, double *initialVector, cJSON *options,
@@ -67,8 +73,7 @@ void cutoffNullspace(unsigned int n, unsigned int nvals, cJSON *options,
                      double *vals, double *vecs, unsigned int *nLargeShifts);
 
 
-void linearInit(unsigned int n, SparseRow *hess, int hessElements,
-                double *vecs, int nvecs);
+void linearInit(SparseMatrix *hess, double *vecs, int nvecs);
 int hessProduct(integer *vectorLength, doublereal *x, doublereal *y);
 void linearSolve(integer n, double *b, cJSON *options, double *x);
 void userOrtho(char *action, integer *n, double *y);

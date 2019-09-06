@@ -42,6 +42,8 @@ int main(int argc, char **argv){
     rsb_err_t errval = RSB_ERR_NO_ERROR;
     rsb_flags_t flagsA = RSB_FLAG_NOFLAGS;
     rsb_type_t typecode = RSB_NUMERICAL_TYPE_DEFAULT;
+#else
+    SparseRow *row;
 #endif
     long int twall = 0, tcpu = 0;
     clock_t t1, tt1;
@@ -66,9 +68,7 @@ int main(int argc, char **argv){
     n = cJSON_GetObjectItemCaseSensitive(jopts, "n")->valueint;
 
     /* Read in arrays */
-    unsigned int hessElements = cJSON_GetObjectItemCaseSensitive(
-             jopts, "hessElements")->valueint;
-    SparseRow *hess;
+    SparseMatrix hess;
 #ifdef USE_LIBRSB
     printf("Opening file %s\n", argv[2]);
     hess = rsb_file_mtx_load(argv[2], flagsA, typecode, &errval);
@@ -81,11 +81,16 @@ int main(int argc, char **argv){
                          ib, sizeof(ib));
     printf("%s\n",ib);
 #else
-    hess = malloc(hessElements * sizeof(SparseRow));
-    printf("Opening file %s for %i elements\n", argv[2], hessElements);
+    hess.nonzeros = cJSON_GetObjectItemCaseSensitive(
+             jopts, "hessElements")->valueint;
+    hess.rows = n;
+    hess.columns = n;
+    hess.data = malloc(hess.nonzeros * sizeof(SparseRow));
+    printf("Opening file %s for %i elements\n", argv[2], hess.nonzeros);
     fp = fopen(argv[2], "r"); 
-    for(i=0; i<hessElements; i++){
-        k = fscanf(fp, "%u%u%le", &(hess[i].i), &(hess[i].j), &(hess[i].value));
+    for(i=0; i<hess.nonzeros; i++){
+        row = hess.data+i;
+        k = fscanf(fp, "%u%u%le", &(row->i), &(row->j), &(row->value));
         if(k < 3) {
             printf("Error reading %s on line %i\n", argv[2], i);
             break;
@@ -105,11 +110,7 @@ int main(int argc, char **argv){
         }
     }
     fclose(fp);
-    unsigned int gaugeElements = cJSON_GetObjectItemCaseSensitive(
-             jopts, "gaugeElements")->valueint;
-    unsigned int gaugeDimension = cJSON_GetObjectItemCaseSensitive(
-             jopts, "gaugeDimension")->valueint;
-    SparseRow *gauge;
+    SparseMatrix gauge;
 #ifdef USE_LIBRSB
     printf("Opening file %s\n", argv[4]);
     gauge = rsb_file_mtx_load(argv[4], flagsA, typecode, &errval);
@@ -122,11 +123,17 @@ int main(int argc, char **argv){
                          ib, sizeof(ib));
     printf("%s\n",ib);
 #else
-    gauge = malloc(gaugeElements * sizeof(SparseRow));
-    printf("Opening file %s for %i elements\n", argv[4], gaugeElements);
+    gauge.nonzeros = cJSON_GetObjectItemCaseSensitive(
+             jopts, "gaugeElements")->valueint;
+    gauge.rows = cJSON_GetObjectItemCaseSensitive(
+             jopts, "gaugeDimension")->valueint;
+    gauge.columns = n;
+    gauge.data = malloc(gauge.nonzeros * sizeof(SparseRow));
+    printf("Opening file %s for %i elements\n", argv[4], gauge.nonzeros);
     fp = fopen(argv[4], "r"); 
-    for(i=0; i<gaugeElements; i++){
-        k = fscanf(fp, "%u%u%lf", &(gauge[i].i), &(gauge[i].j), &(gauge[i].value));
+    for(i=0; i<gauge.nonzeros; i++){
+        row = gauge.data+i;
+        k = fscanf(fp, "%u%u%lf", &(row->i), &(row->j), &(row->value));
         if(k < 3) {
             printf("Error reading %s on line %i\n", argv[4], i);
             break;
@@ -146,8 +153,8 @@ int main(int argc, char **argv){
     unsigned int nvals;
     tmp = cJSON_GetObjectItemCaseSensitive(jopts, "dynamicPartOptions");
     assert(tmp != NULL);
-    dynamicInit(n, gauge, gaugeDimension, gaugeElements, tmp);
-    hessInit(n, hess, hessElements);
+    dynamicInit(&gauge, tmp);
+    hessInit(&hess);
     // Debug print:
 #if 0
     testOp(n, grad);
@@ -158,7 +165,7 @@ int main(int argc, char **argv){
        gauge shifts in TrLAN */
     largeShifts(n, grad, tmp, &vals, &vecs, &nvals);
     cutoffNullspace(n, nvals, jopts, grad, vals, vecs, &nLargeShifts);
-    linearInit(n, hess, hessElements, vecs, nLargeShifts);
+    linearInit(&hess, vecs, nLargeShifts);
     tmp = cJSON_GetObjectItemCaseSensitive(jopts, "linearSolveOptions");
     assert(tmp != NULL);
     linearSolve(n, grad, tmp, shifts);
@@ -187,7 +194,7 @@ int main(int argc, char **argv){
     rsb_mtx_free(gauge); 
     rsb_lib_exit(RSB_NULL_EXIT_OPTIONS);
 #else
-    free(hess); free(gauge);
+    free(hess.data); free(gauge.data);
 #endif
     free(vals); free(vecs); free(shifts); free(grad);
     cJSON_Delete(jopts);
