@@ -36,6 +36,7 @@ typedef integer logical;
 /* Used "nm minresqlpModule.o" to determine this */
 #define MINRESQLP __minresqlpmodule_MOD_minresqlp
 #define DGEMV dgemv_
+#define DNRM2 dnrm2_
 
 extern int MINRESQLP(
     const integer *n, S_fp aprod, const doublereal *b,
@@ -52,9 +53,12 @@ extern int DGEMV(const char *, const integer *, const integer *,
                  const doublereal *, const doublereal *, const integer *,
                  const doublereal *, const integer *, const doublereal *,
                  doublereal *, const integer *);
+extern doublereal DNRM2(const integer *, const doublereal *, const integer *);
 
 void dynamicInit(SparseMatrix *gauge, cJSON *options);
 void dynamicProject(const int n, double *in, double *out);
+void gaugeOp(const int nrow, const int ncol, const double *xin, const int ldx,
+             double *yout, const int ldy, void* mvparam);
 int gaugeProduct(const integer *vectorLength, const doublereal *x,
                  doublereal *y);
 void printDynamicStats();

@@ -5,6 +5,9 @@
 #include <time.h>
 #include <math.h>
 #include "shifts.h"
+#include "trlan.h"
+#include "trl_comm_i.h"
+
 /*
   Project out infinitesimal gauge transforms from
   the shifts using MINRES/MINRES-QLP
@@ -17,21 +20,85 @@ struct {
     unsigned long int tcpu;
     unsigned long int twall;
     unsigned int count;
+    unsigned int usertol;
     unsigned int matVec;
+    int printDetails;
+    doublereal minEigenvalue;
+    doublereal maxEigenvalue;
 } gaugeData;
 
 void dynamicInit(SparseMatrix *gauge, cJSON *options) {
+    // Let trlan figure out the work array allocation.
+    const int lwrk = 0; double *wrk = NULL;
+    int mev, maxlan, lohi, ned, maxmv;
+    double tol = -1.0; // Use default tolerance: sqrt(machine epsilon)
+    double *eval, *evec;
+    int nrow; // number of rows on this processor
+    int restart = 7; // restart strategy
+    trl_info info;
+    cJSON *tmp;
+    int i;
+
     gaugeData.matrix = gauge;
     gaugeData.options = options;
     gaugeData.tcpu = 0;
     gaugeData.twall = 0;
     gaugeData.count = 0;
+    gaugeData.usertol = 0;
     gaugeData.matVec = 0;
+    gaugeData.printDetails = 0;
+
+    tmp  = cJSON_GetObjectItemCaseSensitive(options, "printDetails");
+    if(cJSON_IsNumber(tmp)) {
+        gaugeData.printDetails = tmp->valueint;
+    } else if(cJSON_IsBool(tmp)) {
+        gaugeData.printDetails = cJSON_IsTrue(tmp)?1:0;
+    }
 
     /* Calculate the largest and smallest eigenvalues
        of gaugeProduct.  These will inform the stopping condition
        for MINRES. */
-    
+    nrow = gaugeData.matrix->rows;
+    ned = 4;  // In principle, 2 should be enough.
+    lohi = 0;
+    tmp  = cJSON_GetObjectItemCaseSensitive(gaugeData.options, "maxIterations");
+    maxmv = cJSON_IsNumber(tmp)?tmp->valueint:ned*nrow;
+    tmp  = cJSON_GetObjectItemCaseSensitive(gaugeData.options, "maxLanczos");
+    maxlan = cJSON_IsNumber(tmp)?tmp->valueint:nrow;
+    mev = ned; // Allocate memory for the number of requested eigenpairs
+    eval = malloc(mev*sizeof(double));
+    evec = malloc(mev*nrow*sizeof(double));
+    trl_init_info(&info, nrow, maxlan, lohi, ned, tol, restart, maxmv, 0);
+    memset(eval, 0, mev*sizeof(double));
+
+    gaugeData.z = malloc(gaugeData.matrix->columns * sizeof(doublereal));
+
+    // call TRLAN to compute the eigenvalues
+    trlan(gaugeOp, NULL, &info, nrow, mev, eval, evec, nrow, lwrk, wrk);
+    if(gaugeData.printDetails > 1) {
+        // This estimate of flops doesn't include dynamicProject() call. 
+        trl_print_info(&info, (gaugeData.matrix -> nonzeros)*2);
+    } else if(gaugeData.printDetails > 0) {
+        trl_terse_info(&info, stdout);
+    }
+    if(gaugeData.printDetails > 0) {
+        printf("Eigenvalues found:\n");
+        for(i=0; i<info.nec; i++) {
+            printf("  %le\n", eval[i]);
+        }
+    }
+
+    if(info.nec>=2 && info.stat==0) {
+        gaugeData.minEigenvalue = eval[0];
+        gaugeData.maxEigenvalue = eval[info.nec-1];
+    } else {
+        printf("trlan exit with stat=%i, finding %i of %i eigenpairs.\n",
+               info.stat, info.nec, info.ned);
+        exit(8);
+    }
+
+    free(eval); free(evec);
+    free(gaugeData.z);
 }
 
 /* "in" and "out" may overlap */
@@ -46,7 +113,9 @@ void dynamicProject(const int n, double *in, double *out) {
     integer nout, *noutp = NULL, istop, itn, itnlim;
     cJSON *tmp;
     doublereal rnorm, arnorm, xnorm, anorm, acond,
-        rtol, *rtolp = NULL, *abstolp = NULL;
+        rtol, *rtolp = NULL, abstol, *abstolp = NULL;
+    doublereal normin;
+    const integer one=1;
     clock_t t1;
     time_t t2, tf;
 
@@ -61,10 +130,7 @@ void dynamicProject(const int n, double *in, double *out) {
         itnlim = n;
     }
     /* 
-       We may want to adjust rtol in cases where norm(b) is very small,
-       since this is often just removing roundoff error.
-
-       In any case, the gauge configurations are single precision,
+       The gauge configurations are single precision,
        so rtol is normally about 1e-7.
     */
     tmp  = cJSON_GetObjectItemCaseSensitive(gaugeData.options, "rTolerance");
@@ -72,8 +138,20 @@ void dynamicProject(const int n, double *in, double *out) {
         rtol = tmp->valuedouble;
         rtolp = &rtol;
     }
-    tmp  = cJSON_GetObjectItemCaseSensitive(gaugeData.options, "printDetails");
-    if((cJSON_IsNumber(tmp) && tmp->valueint>0) || cJSON_IsTrue(tmp)) {
+    /*
+      Tolerance of the projection relative to the initial vector.
+      For now, tie this to rTolerance.  May want separate flag?
+    */
+    if(rtolp != NULL) {
+        normin = DNRM2(&n, in, &one);
+        abstol = rtol*normin*sqrt(gaugeData.minEigenvalue);
+        abstolp = &abstol;
+#if 0
+        printf("Setting abstolp=%le normin=%le val=%le sqrt=%le\n",
+               abstol, normin, gaugeData.minEigenvalue, sqrt(gaugeData.minEigenvalue));
+#endif
+    }
+    if(gaugeData.printDetails > 2) {
         nout = 6;  // Write to stdout
         noutp = &nout;
     }
@@ -94,21 +172,6 @@ void dynamicProject(const int n, double *in, double *out) {
         out[i] = in[i] - gaugeData.z[i];
     }
 
-    double norm2x = 0.0, norm2z = 0.0, norm2b = 0.0; //, indotout = 0.0; 
-    for(i=0; i<n; i++) {
-        norm2x += out[i]*out[i];
-        norm2z += gaugeData.z[i]*gaugeData.z[i];
-        // indotout += out[i]*gaugeData.z[i];
-    }
-    for(i=0; i<gaugeData.matrix->rows; i++) {
-        norm2b += b[i]*b[i];
-    }
-#if 0
-    printf("** dynamicProject norm(x)=%le shift ratio=%le norm(b)=%le itn=%i\n",
-           sqrt(norm2x), sqrt(norm2z/norm2x), sqrt(norm2b), itn);
-           //indotout/sqrt(norm2x*norm2z));
-#endif
-
     free(gaugeData.z); gaugeData.z = NULL;
     free(b);
     free(x);
@@ -118,17 +181,33 @@ void dynamicProject(const int n, double *in, double *out) {
     gaugeData.twall += tf - t2; 
     gaugeData.count += 1;
     gaugeData.matVec += itn;
+    if(istop == 8) {
+        gaugeData.usertol += 1;
+    }
 
-    if(istop >= 7) {
+    if(istop >= 9) {
         printf("MINRES returned with istop=%i in %s, exiting.\n", istop, __FILE__);
         exit(7);
     }
 }
 
 void printDynamicStats() {
-    printf("dynamicProject %i calls (%i iterations) in %.2f sec (%li wall)\n",
-           gaugeData.count, gaugeData.matVec,
+    printf("dynamicProject %i calls, %i iterations, %i usertol, in %.2f sec (%li wall)\n",
+           gaugeData.count, gaugeData.matVec, gaugeData.usertol,
            gaugeData.tcpu/(float) CLOCKS_PER_SEC, gaugeData.twall);
+}
+
+/* Interface for Trlan.
+   The extra parameter mvparam is not used in this case. */
+void gaugeOp(const int nrow, const int ncol, const double *xin, const int ldx,
+	    double *yout, const int ldy, void* mvparam) {
+    assert(gaugeData.matrix->rows == nrow);
+    assert(mvparam == NULL);
+    int k;
+
+    for(k=0; k<ncol; k++) {
+        gaugeProduct(&(gaugeData.matrix->rows), xin+k*ldx, yout+k*ldy);
+    }
 }
 
 int gaugeProduct(const integer *vectorLength, const doublereal *x,
