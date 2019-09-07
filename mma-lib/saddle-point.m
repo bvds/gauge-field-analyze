@@ -95,7 +95,7 @@ cutoffNullspace[hess_, grad_, proj_, cutoff_:Pi, zzz_:1] :=
 
 
 (*
-Define basis for describing lattice-wide shifts.   The parameter "fixed"
+Define basis for describing lattice-wide shifts.  The parameter "fixed"
 describes the type of shift:
     fixed == -1:  All possible shifts, including those associated with
                   gauge transformations.
@@ -252,6 +252,7 @@ latticeHessian[getRootLink_, OptionsPattern[]] :=
       {dir1, nd - 1}, {dir2, dir1 + 1, nd}, {i, latticeVolume[]}];
    {SparseArray[Normal[hess]], grad}]];
 
+
 minresLabels = Association["MINRES" -> minres, "MINRES1" -> minres1,
   "MINRES-QLP" -> minresqlp0, "MINRES-QLP0" -> minresqlp0];
 
@@ -333,7 +334,7 @@ Options[findDelta] = {dynamicPartMethod -> Automatic, printDetails -> False,
   storePairs -> False, storeHess -> False, largeShiftOptions -> {},
   storeBB -> False, debugProj -> False, largeShiftCutoff -> 2,
   (* Roughly speaking, the relative error in the matrix norm of
-     the link goes as Norm[shift]^3/48. *)
+     one link goes as Norm[shift]^3/48. *)
   cutoffValue -> 2};
 
 (* Dense matrix version (default) *)
@@ -367,7 +368,8 @@ findDelta[hessIn_, gradIn_, gaugeTransformShifts_, OptionsPattern[]] :=
     -damping applyCutoff2[shifts, cutoff, zzz]] /;
   OptionValue[Method] === Automatic || OptionValue[Method] === "Dense";
 
-(* MINRES/MINRES-QLP version. *)
+(* Version using mathematica versions of MINRES/MINRES-QLP
+   and Lanczos eigensystem solvers. *)
 findDelta[hess_, grad_, gaugeTransformShifts_, opts:OptionsPattern[]] :=
  Block[{zzz = OptionValue[rescaleCutoff],
     minresFun = minresLabels[methodName[OptionValue[Method]]],
@@ -417,7 +419,7 @@ findDelta[hess_, grad_, gaugeTransformShifts_, opts:OptionsPattern[]] :=
     minresFun[smallProj[dp[addTime[tdot, countdot++; hess.#]]]&,
      smallProj[dp[grad]], methodOptions[OptionValue[Method]],
      Apply[Sequence,
-      FilterRules[{localSize -> 5000, printDetails -> 1},
+      FilterRules[{maxLanczosVecs -> 5000, printDetails -> 1},
        Options[minresFun]]]]; shifts = result[[1]];
    (* Verify result is in the subspace *)
    If[False,

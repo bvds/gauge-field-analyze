@@ -17,6 +17,8 @@ struct {
     SparseMatrix *matrix;
     cJSON *options;
     doublereal *z;
+    doublereal *x;
+    doublereal *b;
     unsigned long int tcpu;
     unsigned long int twall;
     unsigned int count;
@@ -55,6 +57,11 @@ void dynamicInit(SparseMatrix *gauge, cJSON *options) {
         gaugeData.printDetails = cJSON_IsTrue(tmp)?1:0;
     }
 
+    gaugeData.z = malloc(gaugeData.matrix -> columns * sizeof(doublereal));
+    gaugeData.b = malloc(gaugeData.matrix->rows * sizeof(double));
+    gaugeData.x = malloc(gaugeData.matrix->rows * sizeof(double));
+
+
     /* Calculate the largest and smallest eigenvalues
        of gaugeProduct.  These will inform the stopping condition
        for MINRES. */
@@ -63,26 +70,25 @@ void dynamicInit(SparseMatrix *gauge, cJSON *options) {
     lohi = 0;
     tmp  = cJSON_GetObjectItemCaseSensitive(gaugeData.options, "maxIterations");
     maxmv = cJSON_IsNumber(tmp)?tmp->valueint:ned*nrow;
-    tmp  = cJSON_GetObjectItemCaseSensitive(gaugeData.options, "maxLanczos");
+    tmp  = cJSON_GetObjectItemCaseSensitive(gaugeData.options, "maxLanczosVecs");
     maxlan = cJSON_IsNumber(tmp)?tmp->valueint:nrow;
+
     mev = ned; // Allocate memory for the number of requested eigenpairs
     eval = malloc(mev*sizeof(double));
     evec = malloc(mev*nrow*sizeof(double));
     trl_init_info(&info, nrow, maxlan, lohi, ned, tol, restart, maxmv, 0);
     memset(eval, 0, mev*sizeof(double));
 
-    gaugeData.z = malloc(gaugeData.matrix->columns * sizeof(doublereal));
-
     // call TRLAN to compute the eigenvalues
     trlan(gaugeOp, NULL, &info, nrow, mev, eval, evec, nrow, lwrk, wrk);
     if(gaugeData.printDetails > 1) {
-        // This estimate of flops doesn't include dynamicProject() call. 
-        trl_print_info(&info, (gaugeData.matrix -> nonzeros)*2);
+        // 2 matrix multplies, with 1 add and 1 multiply per nonzero element.
+        trl_print_info(&info, 4*(gaugeData.matrix -> nonzeros));
     } else if(gaugeData.printDetails > 0) {
         trl_terse_info(&info, stdout);
     }
     if(gaugeData.printDetails > 0) {
-        printf("Eigenvalues found:\n");
+        printf("Gauge matrix extreme eigenvalues found:\n");
         for(i=0; i<info.nec; i++) {
             printf("  %le\n", eval[i]);
         }
@@ -98,14 +104,11 @@ void dynamicInit(SparseMatrix *gauge, cJSON *options) {
     }
 
     free(eval); free(evec);
-    free(gaugeData.z);
 }
 
 /* "in" and "out" may overlap */
 void dynamicProject(const int n, double *in, double *out) {
     int i;
-    doublereal *b = malloc(gaugeData.matrix->rows * sizeof(double));
-    doublereal *x = malloc(gaugeData.matrix->rows * sizeof(double));
     doublereal shift = 0.0, *maxxnormp = NULL;
     // Explicit value for these, so we can force MINRES alogrithm.
     doublereal trancond, acondlim = 1.0e15;
@@ -156,25 +159,23 @@ void dynamicProject(const int n, double *in, double *out) {
         noutp = &nout;
     }
 
+    // Sanity test for gaugeData.z
     assert(n == gaugeData.matrix -> columns);
-    gaugeData.z = malloc(n*sizeof(doublereal));
 
-    matrixVector(gaugeData.matrix, in, b);
+    matrixVector(gaugeData.matrix, in, gaugeData.b);
   
     trancond = acondlim; // Always use MINRES
-    MINRESQLP(&(gaugeData.matrix->rows), gaugeProduct, b, &shift, NULL, NULL,
-              disablep, noutp, &itnlim, rtolp, abstolp, maxxnormp, &trancond, &acondlim,
-              x, &istop, &itn, &rnorm, &arnorm, &xnorm, &anorm, &acond);
+    MINRESQLP(&(gaugeData.matrix->rows), gaugeProduct, gaugeData.b,
+              &shift, NULL, NULL, disablep, noutp, &itnlim,
+              rtolp, abstolp, maxxnormp, &trancond, &acondlim,
+              gaugeData.x, &istop, &itn, &rnorm, &arnorm,
+              &xnorm, &anorm, &acond);
 
-    vectorMatrix(gaugeData.matrix, x, gaugeData.z);
+    vectorMatrix(gaugeData.matrix, gaugeData.x, gaugeData.z);
     // This could be combined with the matrix product, BLAS style.
     for(i=0; i<n; i++) {
         out[i] = in[i] - gaugeData.z[i];
     }
-
-    free(gaugeData.z); gaugeData.z = NULL;
-    free(b);
-    free(x);
 
     time(&tf);
     gaugeData.tcpu += clock()-t1;
@@ -186,15 +187,24 @@ void dynamicProject(const int n, double *in, double *out) {
     }
 
     if(istop >= 9) {
-        printf("MINRES returned with istop=%i in %s, exiting.\n", istop, __FILE__);
+        printf("MINRES returned with istop=%i in %s, exiting.\n",
+               istop, __FILE__);
         exit(7);
     }
 }
 
-void printDynamicStats() {
-    printf("dynamicProject %i calls, %i iterations, %i usertol, in %.2f sec (%li wall)\n",
-           gaugeData.count, gaugeData.matVec, gaugeData.usertol,
-           gaugeData.tcpu/(float) CLOCKS_PER_SEC, gaugeData.twall);
+void dynamicClose() {
+    if(gaugeData.printDetails > 0){
+        printf("dynamicProject:  %i calls (%i usertol), "
+               "%i matrix-vector ops,\n"
+               "                 in %.2f sec (%li wall)\n",
+               gaugeData.count, gaugeData.usertol, gaugeData.matVec, 
+               gaugeData.tcpu/(float) CLOCKS_PER_SEC, gaugeData.twall);
+    }
+
+    free(gaugeData.z); gaugeData.z = NULL;
+    free(gaugeData.b);
+    free(gaugeData.x);
 }
 
 /* Interface for Trlan.

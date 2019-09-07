@@ -19,7 +19,8 @@ struct {
 struct {
     doublereal *z;
     doublereal *vecs;
-    integer nvecs;    
+    integer nvecs;
+    int count;
 } minresOrtho;
 
 void linearInit(SparseMatrix *hess, double *vecs, int nvecs) {
@@ -38,6 +39,7 @@ void linearSolve(integer n, double *b, cJSON *options, double *x) {
     cJSON *tmp;
     doublereal rnorm, arnorm, xnorm, anorm, acond,
         rtol, *rtolp = NULL, *abstolp = NULL;
+    int printDetails = 0;
     clock_t t1;
     time_t t2, tf;
 
@@ -56,7 +58,12 @@ void linearSolve(integer n, double *b, cJSON *options, double *x) {
         rtolp = &rtol;
     }
     tmp  = cJSON_GetObjectItemCaseSensitive(options, "printDetails");
-    if((cJSON_IsNumber(tmp) && tmp->valueint>0) || cJSON_IsTrue(tmp)) {
+    if(cJSON_IsNumber(tmp)) {
+        printDetails = tmp->valueint;
+    } else if(cJSON_IsBool(tmp)) {
+        printDetails = cJSON_IsTrue(tmp)?1:0;
+    }
+    if(printDetails>1) {
         nout = 6;  // Write to stdout
         noutp = &nout;
         printf("linearSolve writing to stdout\n");
@@ -67,6 +74,7 @@ void linearSolve(integer n, double *b, cJSON *options, double *x) {
     hessData.z = malloc(hessData.nvecs*sizeof(doublereal));
     minresOrtho.z = malloc(itnlim*sizeof(doublereal));
     minresOrtho.vecs = NULL; minresOrtho.nvecs = 0;
+    minresOrtho.count = 0;
 
     /* grad may have components in the large shift direction */
     largeShiftProject(n, b);
@@ -86,8 +94,12 @@ void linearSolve(integer n, double *b, cJSON *options, double *x) {
     minresOrtho.nvecs = 0;
 
     time(&tf);
-    printf("linearSolve %i iterations in %.2f sec (%li wall)\n",
-           itn, (clock()-t1)/(float) CLOCKS_PER_SEC, tf-t2);
+    if(printDetails > 0) {
+        printf("linearSolve:  %i iterations, %i reorthogonalizations "
+               "in %.2f sec (%li wall)\n",
+               itn, minresOrtho.count,
+               (clock()-t1)/(float) CLOCKS_PER_SEC, tf-t2);
+    }
 
     if(istop >= 7) {
         printf("MINRES returned with istop=%i in %s, exiting.\n", istop, __FILE__);
@@ -128,6 +140,7 @@ void userOrtho(char *action, integer *n, double *y) {
            Need to figure out the best order for
            the three orthogonalizations.
         */
+        minresOrtho.count += 1;
 
         DGEMV(&trans, n, &minresOrtho.nvecs, &one,
               minresOrtho.vecs, n, y, &inc, &zero,

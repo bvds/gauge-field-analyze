@@ -7,7 +7,7 @@ the original MATLAB code.
 
 function [ x, istop, itn, rnorm, Arnorm, Anorm, Acond, ynorm resvec] = ...
            minres( A, b, M, shift, printDetails, check, maxIterations,
-                   stepMonitor, rTolerance, localSize )
+                   stepMonitor, rTolerance, maxLanczosVecs )
 
 minres solves the n x n system of linear equations Ax = b
 or the n x n least squares problem           min ||Ax - b||_2^2,
@@ -74,7 +74,7 @@ minres::usage =
   "MINRES solver for symmetric indefinte linear systems.  The matrix can be expressed as a pure function that acts on a vector.";
 Options[minres] := {printDetails -> 0, check -> True,
     maxIterations -> Automatic, rTolerance -> $MachineEpsilon,
-    localSize -> 0, stepMonitor -> None};
+    maxLanczosVecs -> 0, stepMonitor -> None};
 minres[A_?MatrixQ, rest__] := minres[(A.#)&, rest];
 minres[A_, b_, M_?MatrixQ, rest___] :=
   minres[A, b, LinearSolve[M], rest];
@@ -119,7 +119,7 @@ minres[A_Function, b_,
 
   (* Initialization for local reorthogonalization *)
   {localOrtho, localVEnqueue, localVOrtho} =
-   makeOrtho[n, OptionValue[localSize]];
+   makeOrtho[n, OptionValue[maxLanczosVecs]];
 
   (* Set up y and v for the first Lanczos vector v1.
      y=beta1 P^T v1, where P=C**(-1).
@@ -196,7 +196,7 @@ minres[A_Function, b_,
      y = (-alfa/beta)*r2 + y; (* normalization of r2/beta=v *)
      If[localOrtho,
 	(* v will be normalized through y later- this is explicit
-	 orthogonalizing versus the previous localSize lanczos vectors *)
+	 orthogonalizing versus the previous maxLanczosVecs lanczos vectors *)
 	addTime[tortho, y = localVOrtho[y]]];
      r1 = r2; (* r1 is unnormalized vold *)
      r2 = y; (* r2 is unnormalized v *)
@@ -325,25 +325,25 @@ minres[A_Function, b_,
 (*  End function minres.m *)
 
 makrOrtho::usage = "Create instance of the orthogonalizer.";
-makeOrtho[n_, localSizeIn_] :=
- Module[{localPointer, localOrtho, localSize = localSizeIn,
+makeOrtho[n_, maxLanczosVecsIn_] :=
+ Module[{localPointer, localOrtho, maxLanczosVecs = maxLanczosVecsIn,
    localVQueueFull, localV, localVEnqueue, localVOrtho},
-   (* boolean to tell whether localReOrtho is on based on the value of localSize *)
+   (* boolean to tell whether localReOrtho is on based on the value of maxLanczosVecs *)
   localOrtho = False;
-  If[localSize > 0,
+  If[maxLanczosVecs > 0,
    localPointer = 0; (* tells number of prior Lanczos vectors stored *)
    localOrtho = True; (* turn on local reorthogonalization *)
-   localVQueueFull = False; (* boolean that tells whether we have stored all prior localSize lanczos vectors *)
+   localVQueueFull = False; (* boolean that tells whether we have stored all prior maxLanczosVecs lanczos vectors *)
    (* Allocate storage for the number of the latest v_k^T vectors. *)
    (* Can't store more than min dimension of the matrix, n *)
-   localV = Array[Null&, {n, Min[localSize, n]}]];
+   localV = Array[Null&, {n, Min[maxLanczosVecs, n]}]];
 
   (* This function stores v into the circular buffer localV *)
   localVEnqueue =
    Function[v,
-    If[localPointer < localSize, (* localPointer counts the number currently stored *)
+    If[localPointer < maxLanczosVecs, (* localPointer counts the number currently stored *)
      localPointer = localPointer + 1, (* not full yet *)
-     localPointer = 1; (* Remain orthogonal to previous localSize, so erase first one and continue circularly. *);
+     localPointer = 1; (* Remain orthogonal to previous maxLanczosVecs, so erase first one and continue circularly. *);
      localVQueueFull = True]; (* Set boolean to true for being full *)
     localV[[localPointer]] = v]; (* Store v in the column corresponding to localPointer *)
 
@@ -352,8 +352,8 @@ makeOrtho[n_, localSizeIn_] :=
    Function[v,
     Block[{vOutput = v, localOrthoLimit},
      If[localVQueueFull,
-      localOrthoLimit = localSize, (* calculate where to terminate loop *)
-      localOrthoLimit = localPointer]; (* localPointer<localSize *)
+      localOrthoLimit = maxLanczosVecs, (* calculate where to terminate loop *)
+      localOrthoLimit = localPointer]; (* localPointer<maxLanczosVecs *)
      Do[ Block[{vtemp = localV[[localOrthoCount]]},
        (* reorthogonalize 1 by 1 *)
        vOutput = vOutput - (vOutput.vtemp)*vtemp

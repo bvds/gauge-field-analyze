@@ -61,15 +61,14 @@ void gaugeOp(const int nrow, const int ncol, const double *xin, const int ldx,
              double *yout, const int ldy, void* mvparam);
 int gaugeProduct(const integer *vectorLength, const doublereal *x,
                  doublereal *y);
-void printDynamicStats();
+void dynamicClose();
 
 
-void hessInit(SparseMatrix *hess);
 void hessOp(const int nrow, const int ncol, const double *xin, const int ldx,
 	    double *yout, const int ldy, void* mvparam);
-void largeShifts(int n, double *initialVector, cJSON *options,
+void largeShifts(SparseMatrix *, double *initialVector, cJSON *options,
 		 double **vals, double **vecs, unsigned int *nvals);
-void testOp(const int n, double *grad);
+void testOp(SparseMatrix *hess, double *grad);
 
 
 void cutoffNullspace(unsigned int n, unsigned int nvals, cJSON *options,

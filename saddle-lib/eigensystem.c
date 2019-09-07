@@ -13,14 +13,11 @@
 #include "trlan.h"
 #include "trl_comm_i.h"
 
-SparseMatrix *hessData;
+struct {
+    SparseMatrix *matrix;
+} eigenData;
 
-void hessInit(SparseMatrix *hess) {
-    hessData = hess;
-}
-
-
-void largeShifts(int n, double *initialVector, cJSON *options,
+void largeShifts(SparseMatrix *hess, double *initialVector, cJSON *options,
 		 double **eval, double **evec, unsigned int *nvals) {
     // Let trlan figure out the work array allocation.
     const int lwrk = 0;
@@ -28,7 +25,7 @@ void largeShifts(int n, double *initialVector, cJSON *options,
     double *wrk = NULL;
     int mev, maxlan, lohi, ned, maxmv;
     double tol = -1.0; // Use default tolerance: sqrt(machine epsilon)
-    int nrow = n; // number of rows on this processor
+    int nrow = hess->rows; // number of rows on this processor
     trl_info info;
     int i, printDetails = 1, restart = 1;
     cJSON *tmp;
@@ -37,6 +34,9 @@ void largeShifts(int n, double *initialVector, cJSON *options,
 
     t1 = clock();
     time(&t2);
+
+    // Used by HessOp
+    eigenData.matrix = hess;
 
     // Would need a separate flag for the lohi == 0 case.
     tmp  = cJSON_GetObjectItemCaseSensitive(options, "eigenPairs");
@@ -55,15 +55,16 @@ void largeShifts(int n, double *initialVector, cJSON *options,
     if(cJSON_IsNumber(tmp)) {
         maxmv = tmp->valueint;
     } else {
-        maxmv = n*ned;  // Documented efault (maxmv<0) seems to be broken.
+        // Documented default (maxmv<0) seems to be broken?
+        maxmv = hess->rows * ned;  
     }
-    /* maxLanczos is maximum number of Lanczos vectors to use.
+    /* maxLanczosVecs is maximum number of Lanczos vectors to use.
        This sets an upper bound on the memory used. */
-    tmp  = cJSON_GetObjectItemCaseSensitive(options, "maxLanczos");
+    tmp  = cJSON_GetObjectItemCaseSensitive(options, "maxLanczosVecs");
     if(cJSON_IsNumber(tmp)) {
         maxlan = tmp->valueint;
     } else {
-        maxlan = n;  // Since we do reorthogonalization.
+        maxlan = hess->rows;  // Since we do reorthogonalization.
     }
     tmp  = cJSON_GetObjectItemCaseSensitive(options, "restartStrategy");
     if(cJSON_IsNumber(tmp)) {
@@ -80,8 +81,7 @@ void largeShifts(int n, double *initialVector, cJSON *options,
         printDetails = cJSON_IsTrue(tmp)?1:0;
     }
 
-    assert(n == hessData->columns);
-    assert(n == hessData->rows);
+    assert(hess->columns == hess->rows);
     assert(eval != NULL);
     assert(evec != NULL);
 
@@ -97,18 +97,24 @@ void largeShifts(int n, double *initialVector, cJSON *options,
     }
 
     // call TRLAN to compute the eigenvalues
-    trlan(hessOp, dynamicProject, &info, nrow, mev, *eval, *evec, nrow, lwrk, wrk);
+    trlan(hessOp, dynamicProject, &info, nrow, mev, *eval, *evec,
+          nrow, lwrk, wrk);
     *nvals = info.nec;
     if(printDetails > 1) {
-        // This estimate of flops doesn't include dynamicProject() call. 
-        trl_print_info(&info, hessData->nonzeros);
+        /* This estimate of flops doesn't include dynamicProject() call. 
+           Assuming 1 addition and 1 multiply per nonzero element. */
+        trl_print_info(&info, 2*hess->nonzeros);
     } else if(printDetails > 0) {
         trl_terse_info(&info, stdout);
     }
 
     time(&tf);
-    printf("largeShifts in %.2f sec (%li wall)\n",
-           (clock()-t1)/(float) CLOCKS_PER_SEC, tf-t2);
+    if(printDetails > 0) {
+        printf("largeShifts: %i matrix-vector ops, "
+               "%i reorthogonalizations in %.2f sec (%li wall)\n",
+               info.matvec, info.north,
+               (clock()-t1)/(float) CLOCKS_PER_SEC, tf-t2);
+    }
 
     if(info.stat < 0 || info.nec < info.ned) {
         printf("trlan exit with stat=%i, finding %i of %i eigenpairs.\n",
@@ -120,26 +126,29 @@ void largeShifts(int n, double *initialVector, cJSON *options,
 /* The extra parameter mvparam is not used in this case. */
 void hessOp(const int nrow, const int ncol, const double *xin, const int ldx,
 	    double *yout, const int ldy, void* mvparam) {
-    assert(hessData->columns == nrow);
-    assert(hessData->rows == nrow);
+    assert(eigenData.matrix->columns == nrow);
+    assert(eigenData.matrix->rows == nrow);
     assert(mvparam == NULL);
     int k;
 
     for(k=0; k<ncol; k++) {
-        matrixVector(hessData, xin+k*ldx, yout+k*ldy);
+        matrixVector(eigenData.matrix, xin+k*ldx, yout+k*ldy);
         // Use the fact that "in" and "out" can overlap.
         dynamicProject(nrow, yout+k*ldy, yout+k*ldy);
     }
 }
 
 // Debug print of dynamic part of hess.grad
-void testOp(const int n, double *grad) {
+void testOp(SparseMatrix *hess, double *grad) {
     double *y;
     int i;
-    y = malloc(n*sizeof(double));
-    hessOp(n, 1, grad, 1, y, 1, NULL);
+
+    eigenData.matrix = hess;
+
+    y = malloc(hess->rows * sizeof(double));
+    hessOp(hess->rows, 1, grad, 1, y, 1, NULL);
     printf("Dynamic part of hess.grad\n");
-    for(i=0; i<n; i++) {
+    for(i=0; i<hess->rows; i++) {
         printf("  %le\n", y[i]);
     }
     free(y);

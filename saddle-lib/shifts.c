@@ -154,27 +154,26 @@ int main(int argc, char **argv){
     tmp = cJSON_GetObjectItemCaseSensitive(jopts, "dynamicPartOptions");
     assert(tmp != NULL);
     dynamicInit(&gauge, tmp);
-    hessInit(&hess);
     // Debug print:
 #if 0
-    testOp(n, grad);
+    testOp(&hess, grad);
 #endif
     tmp = cJSON_GetObjectItemCaseSensitive(jopts, "largeShiftOptions");
     assert(tmp != NULL);
     /* This won' twork until we introduce reorthogonalization against
        gauge shifts in TrLAN */
-    largeShifts(n, grad, tmp, &vals, &vecs, &nvals);
+    largeShifts(&hess, grad, tmp, &vals, &vecs, &nvals);
     cutoffNullspace(n, nvals, jopts, grad, vals, vecs, &nLargeShifts);
     linearInit(&hess, vecs, nLargeShifts);
     tmp = cJSON_GetObjectItemCaseSensitive(jopts, "linearSolveOptions");
     assert(tmp != NULL);
     linearSolve(n, grad, tmp, shifts);
-    printDynamicStats();
+    dynamicClose();
   
     /* output result */
     t1 = clock();
     time(&t2);
-    printf("Opening file %s\n", argv[5]);
+    printf("Opening output file %s\n", argv[5]);
     fp = fopen(argv[5], "w"); 
     for(i=0; i<n; i++){
         fprintf(fp, "%.15e\n", shifts[i]);
