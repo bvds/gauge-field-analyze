@@ -57,6 +57,17 @@ int main(int argc, char **argv){
         fprintf(stderr, "rsb_lib_init error 0x%x, exiting\n", errval);
         exit(111);
     }
+    /* Doesn't seem to work:  always uses full number of threads,
+       However, specifying on the command line works:
+             OMP_NUM_THREADS=4 ./shifts ...
+       But we see only one CPU fully utilized.  Even a second goes down
+       to 50%.  */
+    int tn = 2;
+    if((errval = rsb_lib_set_opt(RSB_IO_WANT_EXECUTING_THREADS, &tn))
+        != RSB_ERR_NO_ERROR) {
+        fprintf(stderr, "rsb_lib_set_opt error 0x%x, exiting\n", errval);
+        exit(222);
+    }
 #endif
 
     /* Read JSON file and use options */
@@ -68,19 +79,20 @@ int main(int argc, char **argv){
     n = cJSON_GetObjectItemCaseSensitive(jopts, "n")->valueint;
 
     /* Read in arrays */
-    SparseMatrix hess;
 #ifdef USE_LIBRSB
+    SparseMatrix *hessp;
     printf("Opening file %s\n", argv[2]);
-    hess = rsb_file_mtx_load(argv[2], flagsA, typecode, &errval);
+    hessp = rsb_file_mtx_load(argv[2], flagsA, typecode, &errval);
     if(errval != RSB_ERR_NO_ERROR) {
         fprintf(stderr, "rsb_file_mtx_load error 0x%x, exiting\n", errval);
         exit(113);
     }
     /* print out the matrix summary information  */
-    rsb_mtx_get_info_str(hess, "RSB_MIF_MATRIX_INFO__TO__CHAR_P",
+    rsb_mtx_get_info_str(hessp, "RSB_MIF_MATRIX_INFO__TO__CHAR_P",
                          ib, sizeof(ib));
     printf("%s\n",ib);
 #else
+    SparseMatrix hess, *hessp = &hess;
     hess.nonzeros = cJSON_GetObjectItemCaseSensitive(
              jopts, "hessElements")->valueint;
     hess.rows = n;
@@ -110,19 +122,20 @@ int main(int argc, char **argv){
         }
     }
     fclose(fp);
-    SparseMatrix gauge;
 #ifdef USE_LIBRSB
+    SparseMatrix *gaugep;
     printf("Opening file %s\n", argv[4]);
-    gauge = rsb_file_mtx_load(argv[4], flagsA, typecode, &errval);
+    gaugep = rsb_file_mtx_load(argv[4], flagsA, typecode, &errval);
     if(errval != RSB_ERR_NO_ERROR) {
         fprintf(stderr, "rsb_file_mtx_load error 0x%x, exiting\n", errval);
         exit(113);
     }
     /* print out the matrix summary information  */
-    rsb_mtx_get_info_str(gauge, "RSB_MIF_MATRIX_INFO__TO__CHAR_P",
+    rsb_mtx_get_info_str(gaugep, "RSB_MIF_MATRIX_INFO__TO__CHAR_P",
                          ib, sizeof(ib));
     printf("%s\n",ib);
 #else
+    SparseMatrix gauge, *gaugep = &gauge;
     gauge.nonzeros = cJSON_GetObjectItemCaseSensitive(
              jopts, "gaugeElements")->valueint;
     gauge.rows = cJSON_GetObjectItemCaseSensitive(
@@ -153,18 +166,18 @@ int main(int argc, char **argv){
     unsigned int nvals;
     tmp = cJSON_GetObjectItemCaseSensitive(jopts, "dynamicPartOptions");
     assert(tmp != NULL);
-    dynamicInit(&gauge, tmp);
+    dynamicInit(gaugep, tmp);
     // Debug print:
 #if 0
-    testOp(&hess, grad);
+    testOp(hessp, grad);
 #endif
     tmp = cJSON_GetObjectItemCaseSensitive(jopts, "largeShiftOptions");
     assert(tmp != NULL);
     /* This won' twork until we introduce reorthogonalization against
        gauge shifts in TrLAN */
-    largeShifts(&hess, grad, tmp, &vals, &vecs, &nvals);
+    largeShifts(hessp, grad, tmp, &vals, &vecs, &nvals);
     cutoffNullspace(n, nvals, jopts, grad, vals, vecs, &nLargeShifts);
-    linearInit(&hess, vecs, nLargeShifts);
+    linearInit(hessp, vecs, nLargeShifts);
     tmp = cJSON_GetObjectItemCaseSensitive(jopts, "linearSolveOptions");
     assert(tmp != NULL);
     linearSolve(n, grad, tmp, shifts);
@@ -189,8 +202,8 @@ int main(int argc, char **argv){
 
 #ifdef USE_LIBRSB
     printf("rsb_mtx_free: deallocating hess and gauge.\n");
-    rsb_mtx_free(hess);
-    rsb_mtx_free(gauge); 
+    rsb_mtx_free(hessp);
+    rsb_mtx_free(gaugep); 
     rsb_lib_exit(RSB_NULL_EXIT_OPTIONS);
 #else
     free(hess.data); free(gauge.data);
@@ -200,3 +213,24 @@ int main(int argc, char **argv){
     free(options);
     return 0;
 }
+
+#ifdef USE_LIBRSB
+int rows(SparseMatrix *matrix){
+    int value;
+    rsb_mtx_get_info(matrix,
+                     RSB_MIF_MATRIX_ROWS__TO__RSB_COO_INDEX_T, &value);
+    return value;
+}
+int columns(SparseMatrix *matrix){
+    int value;
+    rsb_mtx_get_info(matrix,
+                     RSB_MIF_MATRIX_COLS__TO__RSB_COO_INDEX_T, &value);
+    return value;
+}
+int nonzeros(SparseMatrix *matrix){
+    int value;
+    rsb_mtx_get_info(matrix,
+                     RSB_MIF_MATRIX_NNZ__TO__RSB_NNZ_INDEX_T, &value);
+    return value;
+}
+#endif

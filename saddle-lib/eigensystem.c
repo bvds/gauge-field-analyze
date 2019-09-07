@@ -25,7 +25,7 @@ void largeShifts(SparseMatrix *hess, double *initialVector, cJSON *options,
     double *wrk = NULL;
     int mev, maxlan, lohi, ned, maxmv;
     double tol = -1.0; // Use default tolerance: sqrt(machine epsilon)
-    int nrow = hess->rows; // number of rows on this processor
+    int nrow = rows(hess); // number of rows on this processor
     trl_info info;
     int i, printDetails = 1, restart = 1;
     cJSON *tmp;
@@ -56,7 +56,7 @@ void largeShifts(SparseMatrix *hess, double *initialVector, cJSON *options,
         maxmv = tmp->valueint;
     } else {
         // Documented default (maxmv<0) seems to be broken?
-        maxmv = hess->rows * ned;  
+        maxmv = rows(hess) * ned;  
     }
     /* maxLanczosVecs is maximum number of Lanczos vectors to use.
        This sets an upper bound on the memory used. */
@@ -64,7 +64,7 @@ void largeShifts(SparseMatrix *hess, double *initialVector, cJSON *options,
     if(cJSON_IsNumber(tmp)) {
         maxlan = tmp->valueint;
     } else {
-        maxlan = hess->rows;  // Since we do reorthogonalization.
+        maxlan = rows(hess);  // Since we do reorthogonalization.
     }
     tmp  = cJSON_GetObjectItemCaseSensitive(options, "restartStrategy");
     if(cJSON_IsNumber(tmp)) {
@@ -81,7 +81,7 @@ void largeShifts(SparseMatrix *hess, double *initialVector, cJSON *options,
         printDetails = cJSON_IsTrue(tmp)?1:0;
     }
 
-    assert(hess->columns == hess->rows);
+    assert(columns(hess) == rows(hess));
     assert(eval != NULL);
     assert(evec != NULL);
 
@@ -103,7 +103,7 @@ void largeShifts(SparseMatrix *hess, double *initialVector, cJSON *options,
     if(printDetails > 1) {
         /* This estimate of flops doesn't include dynamicProject() call. 
            Assuming 1 addition and 1 multiply per nonzero element. */
-        trl_print_info(&info, 2*hess->nonzeros);
+        trl_print_info(&info, 2*nonzeros(hess));
     } else if(printDetails > 0) {
         trl_terse_info(&info, stdout);
     }
@@ -126,8 +126,8 @@ void largeShifts(SparseMatrix *hess, double *initialVector, cJSON *options,
 /* The extra parameter mvparam is not used in this case. */
 void hessOp(const int nrow, const int ncol, const double *xin, const int ldx,
 	    double *yout, const int ldy, void* mvparam) {
-    assert(eigenData.matrix->columns == nrow);
-    assert(eigenData.matrix->rows == nrow);
+    assert(columns(eigenData.matrix) == nrow);
+    assert(rows(eigenData.matrix) == nrow);
     assert(mvparam == NULL);
     int k;
 
@@ -145,10 +145,10 @@ void testOp(SparseMatrix *hess, double *grad) {
 
     eigenData.matrix = hess;
 
-    y = malloc(hess->rows * sizeof(double));
-    hessOp(hess->rows, 1, grad, 1, y, 1, NULL);
+    y = malloc(rows(hess) * sizeof(double));
+    hessOp(rows(hess), 1, grad, 1, y, 1, NULL);
     printf("Dynamic part of hess.grad\n");
-    for(i=0; i<hess->rows; i++) {
+    for(i=0; i<rows(hess); i++) {
         printf("  %le\n", y[i]);
     }
     free(y);

@@ -29,6 +29,8 @@ struct {
     doublereal maxEigenvalue;
 } gaugeData;
 
+
+
 void dynamicInit(SparseMatrix *gauge, cJSON *options) {
     // Let trlan figure out the work array allocation.
     const int lwrk = 0; double *wrk = NULL;
@@ -57,15 +59,15 @@ void dynamicInit(SparseMatrix *gauge, cJSON *options) {
         gaugeData.printDetails = cJSON_IsTrue(tmp)?1:0;
     }
 
-    gaugeData.z = malloc(gaugeData.matrix -> columns * sizeof(doublereal));
-    gaugeData.b = malloc(gaugeData.matrix->rows * sizeof(double));
-    gaugeData.x = malloc(gaugeData.matrix->rows * sizeof(double));
+    gaugeData.b = malloc(rows(gauge)*sizeof(double));
+    gaugeData.x = malloc(rows(gauge)*sizeof(double));
+    gaugeData.z = malloc(columns(gauge)*sizeof(doublereal));
 
 
     /* Calculate the largest and smallest eigenvalues
        of gaugeProduct.  These will inform the stopping condition
        for MINRES. */
-    nrow = gaugeData.matrix->rows;
+    nrow = rows(gauge);
     ned = 4;  // In principle, 2 should be enough.
     lohi = 0;
     tmp  = cJSON_GetObjectItemCaseSensitive(gaugeData.options, "maxIterations");
@@ -83,7 +85,7 @@ void dynamicInit(SparseMatrix *gauge, cJSON *options) {
     trlan(gaugeOp, NULL, &info, nrow, mev, eval, evec, nrow, lwrk, wrk);
     if(gaugeData.printDetails > 1) {
         // 2 matrix multplies, with 1 add and 1 multiply per nonzero element.
-        trl_print_info(&info, 4*(gaugeData.matrix -> nonzeros));
+        trl_print_info(&info, 4*nonzeros(gauge));
     } else if(gaugeData.printDetails > 0) {
         trl_terse_info(&info, stdout);
     }
@@ -108,7 +110,7 @@ void dynamicInit(SparseMatrix *gauge, cJSON *options) {
 
 /* "in" and "out" may overlap */
 void dynamicProject(const int n, double *in, double *out) {
-    int i;
+    int i, rr;
     doublereal shift = 0.0, *maxxnormp = NULL;
     // Explicit value for these, so we can force MINRES alogrithm.
     doublereal trancond, acondlim = 1.0e15;
@@ -160,12 +162,13 @@ void dynamicProject(const int n, double *in, double *out) {
     }
 
     // Sanity test for gaugeData.z
-    assert(n == gaugeData.matrix -> columns);
+    assert(n == columns(gaugeData.matrix));
 
     matrixVector(gaugeData.matrix, in, gaugeData.b);
   
     trancond = acondlim; // Always use MINRES
-    MINRESQLP(&(gaugeData.matrix->rows), gaugeProduct, gaugeData.b,
+    rr = rows(gaugeData.matrix);
+    MINRESQLP(&rr, gaugeProduct, gaugeData.b,
               &shift, NULL, NULL, disablep, noutp, &itnlim,
               rtolp, abstolp, maxxnormp, &trancond, &acondlim,
               gaugeData.x, &istop, &itn, &rnorm, &arnorm,
@@ -211,18 +214,18 @@ void dynamicClose() {
    The extra parameter mvparam is not used in this case. */
 void gaugeOp(const int nrow, const int ncol, const double *xin, const int ldx,
 	    double *yout, const int ldy, void* mvparam) {
-    assert(gaugeData.matrix->rows == nrow);
+    assert(rows(gaugeData.matrix) == nrow);
     assert(mvparam == NULL);
     int k;
 
     for(k=0; k<ncol; k++) {
-        gaugeProduct(&(gaugeData.matrix->rows), xin+k*ldx, yout+k*ldy);
+        gaugeProduct(&nrow, xin+k*ldx, yout+k*ldy);
     }
 }
 
 int gaugeProduct(const integer *vectorLength, const doublereal *x,
                  doublereal *y) {
-    assert(*vectorLength == gaugeData.matrix->rows);
+    assert(*vectorLength == rows(gaugeData.matrix));
     vectorMatrix(gaugeData.matrix, x, gaugeData.z);
     matrixVector(gaugeData.matrix, gaugeData.z, y);
     return 0;

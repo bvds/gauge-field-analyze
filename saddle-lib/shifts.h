@@ -18,6 +18,17 @@ typedef struct {
 } SparseMatrix;
 #endif
 
+#ifdef USE_LIBRSB
+int rows(SparseMatrix *matrix);
+int columns(SparseMatrix *matrix);
+int nonzeros(SparseMatrix *matrix);
+#else
+#define rows(A) A->rows
+#define columns(A) A->columns
+#define nonzeros(A) A->nonzeros
+#endif
+
+
 void matrixVector(const SparseMatrix *a,
                   const double *in, double *out);
 void vectorMatrix(const SparseMatrix *a,
