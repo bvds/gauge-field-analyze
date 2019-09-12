@@ -48,6 +48,7 @@ typedef integer logical;
 #define MINRESQLP __minresqlpmodule_MOD_minresqlp
 #define DGEMV dgemv_
 #define DNRM2 dnrm2_
+#define DAXPY daxpy_
 
 extern int MINRESQLP(
     const integer *n, S_fp aprod, const doublereal *b,
@@ -65,9 +66,12 @@ extern int DGEMV(const char *, const integer *, const integer *,
                  const doublereal *, const integer *, const doublereal *,
                  doublereal *, const integer *);
 extern doublereal DNRM2(const integer *, const doublereal *, const integer *);
+extern int DAXPY(const integer *n,  const doublereal *alpha,
+                 const doublereal *x, const integer *incx,
+                 const doublereal *y, const integer *incy); 
 
 void dynamicInit(SparseMatrix *gauge, cJSON *options);
-void dynamicProject(const int n, double *in, double *out);
+void dynamicProject(const int n, double *v, double *normDiff);
 void gaugeOp(const int nrow, const int ncol, const double *xin, const int ldx,
              double *yout, const int ldy, void* mvparam);
 int gaugeProduct(const integer *vectorLength, const doublereal *x,
@@ -77,6 +81,8 @@ void dynamicClose();
 
 void hessOp(const int nrow, const int ncol, const double *xin, const int ldx,
 	    double *yout, const int ldy, void* mvparam);
+void hessOp2(const int nrow, const int ncol, const double *xin, const int ldx,
+             double *yout, const int ldy, void* mvparam);
 void largeShifts(SparseMatrix *, double *initialVector, cJSON *options,
 		 double **vals, double **vecs, unsigned int *nvals);
 void testOp(SparseMatrix *hess, double *grad);

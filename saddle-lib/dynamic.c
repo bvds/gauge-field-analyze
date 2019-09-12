@@ -10,7 +10,21 @@
 
 /*
   Project out infinitesimal gauge transforms from
-  the shifts using MINRES/MINRES-QLP
+  the shifts using MINRES/MINRES-QLP applied to the
+  square of the infinitesimal gauge transform shift matrix:
+
+      v <- v - o^T.x
+
+   where
+
+      A.x = b, A = o.o^T, b = o.x
+
+  In principle, one could apply a linear least squares
+  solver to o itself.  However, A is pretty well conditioned
+  so the Conjugate gradient solution is relatively fast.
+
+  Also, we terminate the Conjugate Gradient solver based
+  the upper limit of norm(o^T.x) relative to norm(v).
 */
 
 struct {
@@ -68,8 +82,9 @@ void dynamicInit(SparseMatrix *gauge, cJSON *options) {
        of gaugeProduct.  These will inform the stopping condition
        for MINRES. */
     nrow = rows(gauge);
-    ned = 4;  // In principle, 2 should be enough.
+    ned = 5;  // In principle, 2 should be enough.
     lohi = 0;
+    // Uses same maxIterations as MINRES.
     tmp  = cJSON_GetObjectItemCaseSensitive(gaugeData.options, "maxIterations");
     maxmv = cJSON_IsNumber(tmp)?tmp->valueint:ned*nrow;
     tmp  = cJSON_GetObjectItemCaseSensitive(gaugeData.options, "maxLanczosVecs");
@@ -109,18 +124,18 @@ void dynamicInit(SparseMatrix *gauge, cJSON *options) {
 }
 
 /* "in" and "out" may overlap */
-void dynamicProject(const int n, double *in, double *out) {
-    int i, rr;
+void dynamicProject(const int n, double *v, double *normDiff) {
     doublereal shift = 0.0, *maxxnormp = NULL;
     // Explicit value for these, so we can force MINRES alogrithm.
     doublereal trancond, acondlim = 1.0e15;
     logical *disablep = NULL;
-    integer nout, *noutp = NULL, istop, itn, itnlim;
+    integer rr, nout, *noutp = NULL, istop, itn, itnlim;
     cJSON *tmp;
     doublereal rnorm, arnorm, xnorm, anorm, acond,
         rtol, *rtolp = NULL, abstol, *abstolp = NULL;
-    doublereal normin;
+    doublereal normv;
     const integer one=1;
+    const doublereal minusone = -1.0;
     clock_t t1;
     time_t t2, tf;
 
@@ -148,12 +163,13 @@ void dynamicProject(const int n, double *in, double *out) {
       For now, tie this to rTolerance.  May want separate flag?
     */
     if(rtolp != NULL) {
-        normin = DNRM2(&n, in, &one);
-        abstol = rtol*normin*sqrt(gaugeData.minEigenvalue);
+        normv = DNRM2(&n, v, &one);
+        abstol = rtol*normv*sqrt(gaugeData.minEigenvalue);
         abstolp = &abstol;
 #if 0
         printf("Setting abstolp=%le normin=%le val=%le sqrt=%le\n",
-               abstol, normin, gaugeData.minEigenvalue, sqrt(gaugeData.minEigenvalue));
+               abstol, normin, gaugeData.minEigenvalue,
+               sqrt(gaugeData.minEigenvalue));
 #endif
     }
     if(gaugeData.printDetails > 2) {
@@ -164,8 +180,8 @@ void dynamicProject(const int n, double *in, double *out) {
     // Sanity test for gaugeData.z
     assert(n == columns(gaugeData.matrix));
 
-    matrixVector(gaugeData.matrix, in, gaugeData.b);
-  
+    matrixVector(gaugeData.matrix, v, gaugeData.b);
+
     trancond = acondlim; // Always use MINRES
     rr = rows(gaugeData.matrix);
     MINRESQLP(&rr, gaugeProduct, gaugeData.b,
@@ -175,14 +191,15 @@ void dynamicProject(const int n, double *in, double *out) {
               &xnorm, &anorm, &acond);
 
     vectorMatrix(gaugeData.matrix, gaugeData.x, gaugeData.z);
-    // This could be combined with the matrix product, BLAS style.
-    for(i=0; i<n; i++) {
-        out[i] = in[i] - gaugeData.z[i];
+    // This could be combined with the above matrix product, BLAS style.
+    DAXPY(&n, &minusone, gaugeData.z, &one, v, &one);
+    if(normDiff != NULL){
+        *normDiff = DNRM2(&n, gaugeData.z, &one);
     }
 
     time(&tf);
     gaugeData.tcpu += clock()-t1;
-    gaugeData.twall += tf - t2; 
+    gaugeData.twall += tf - t2;
     gaugeData.count += 1;
     gaugeData.matVec += itn;
     if(istop == 8) {

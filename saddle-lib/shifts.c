@@ -1,6 +1,6 @@
 /*
     Find shifts in link fields for one step 
-    in saddle-point search.
+    of a saddle-point search.
 
     Example usage:
     ./shifts ../hess-grad-gauge.json ../hess.dat ../grad.dat ../gauge.dat ../shifts.dat
@@ -112,7 +112,7 @@ int main(int argc, char **argv){
 #endif
 
     double *grad = malloc(n * sizeof(double));
-    printf("Opening file %s for %i elements\n", argv[3], n);
+    printf("Opening file %s for a vector of length %i\n", argv[3], n);
     fp = fopen(argv[3], "r"); 
     for(i=0; i<n; i++){
         k = fscanf(fp, "%le", grad+i);
@@ -122,6 +122,7 @@ int main(int argc, char **argv){
         }
     }
     fclose(fp);
+
 #ifdef USE_LIBRSB
     SparseMatrix *gaugep;
     printf("Opening file %s\n", argv[4]);
@@ -142,7 +143,8 @@ int main(int argc, char **argv){
              jopts, "gaugeDimension")->valueint;
     gauge.columns = n;
     gauge.data = malloc(gauge.nonzeros * sizeof(SparseRow));
-    printf("Opening file %s for %i elements\n", argv[4], gauge.nonzeros);
+    printf("Opening file %s for %i elements, dimesions (%i, %i)\n",
+           argv[4], gauge.nonzeros, gauge.rows, gauge.columns);
     fp = fopen(argv[4], "r"); 
     for(i=0; i<gauge.nonzeros; i++){
         row = gauge.data+i;
@@ -162,7 +164,7 @@ int main(int argc, char **argv){
 
     /* Find lowest eigenpairs, but do nothing with them. */
     double *shifts = malloc(n * sizeof(double));
-    double *vals, *vecs;
+    double *absVals, *vecs;
     unsigned int nvals;
     tmp = cJSON_GetObjectItemCaseSensitive(jopts, "dynamicPartOptions");
     assert(tmp != NULL);
@@ -173,10 +175,8 @@ int main(int argc, char **argv){
 #endif
     tmp = cJSON_GetObjectItemCaseSensitive(jopts, "largeShiftOptions");
     assert(tmp != NULL);
-    /* This won' twork until we introduce reorthogonalization against
-       gauge shifts in TrLAN */
-    largeShifts(hessp, grad, tmp, &vals, &vecs, &nvals);
-    cutoffNullspace(n, nvals, jopts, grad, vals, vecs, &nLargeShifts);
+    largeShifts(hessp, grad, tmp, &absVals, &vecs, &nvals);
+    cutoffNullspace(n, nvals, jopts, grad, absVals, vecs, &nLargeShifts);
     linearInit(hessp, vecs, nLargeShifts);
     tmp = cJSON_GetObjectItemCaseSensitive(jopts, "linearSolveOptions");
     assert(tmp != NULL);
@@ -208,7 +208,7 @@ int main(int argc, char **argv){
 #else
     free(hess.data); free(gauge.data);
 #endif
-    free(vals); free(vecs); free(shifts); free(grad);
+    free(absVals); free(vecs); free(shifts); free(grad);
     cJSON_Delete(jopts);
     free(options);
     return 0;

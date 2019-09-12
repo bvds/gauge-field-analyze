@@ -152,7 +152,7 @@ void userOrtho(char *action, integer *n, double *y) {
 
         largeShiftProject(*n, y);
         
-        dynamicProject(*n, y, y);
+        dynamicProject(*n, y, NULL);
     } else {
         printf("Bad value %s\n", action);
         exit(1);

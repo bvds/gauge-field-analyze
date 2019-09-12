@@ -403,13 +403,15 @@ findDelta[hess_, grad_, gaugeTransformShifts_, opts:OptionsPattern[]] :=
      If[NumberQ[eigenPairs/.options] && (eigenPairs/.options)>0,
 	Message[findDelta::lastPairs]; Return[$Failed]];
      {vals, vecs} = ersatzLanczos[
-	 dp[addTime[tdot, countdot++; hess.#]]&, Length[grad],
+         Block[{y = dp[addTime[tdot, countdot++; hess.#]]},
+               dp[addTime[tdot, countdot++; hess.y]]]&,
+         Length[grad],
 	 Apply[Sequence, options],
 	 (* Need to determine a reasonable estimate for this. *)
 	 eigenPairs -> -Min[120, Length[grad]],
          orthoSubspace -> dp,
 	 initialVector -> grad, printDetails -> 1];
-     Module[{largeShiftSpace = cutoffNullspace[vals, vecs.grad, vecs,
+     Module[{largeShiftSpace = cutoffNullspace[Sqrt[vals], vecs.grad, vecs,
          OptionValue[largeShiftCutoff], OptionValue[rescaleCutoff]]},
 	    If[Length[largeShiftSpace] > 0,
 	       (# - (largeShiftSpace.#).largeShiftSpace)&, Identity]]];
