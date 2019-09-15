@@ -162,7 +162,6 @@ int main(int argc, char **argv){
 
     /* Solve it!  */
 
-    /* Find lowest eigenpairs, but do nothing with them. */
     double *shifts = malloc(n * sizeof(double));
     double *absVals, *vecs;
     unsigned int nvals;
@@ -182,8 +181,10 @@ int main(int argc, char **argv){
     assert(tmp != NULL);
     linearSolve(n, grad, tmp, shifts);
     dynamicClose();
-  
+
+
     /* output result */
+
     t1 = clock();
     time(&t2);
     printf("Opening output file %s\n", argv[5]);
@@ -199,6 +200,7 @@ int main(int argc, char **argv){
            __FILE__, tcpu/(float) CLOCKS_PER_SEC, twall);
     printf("%s:  overall time %.2f sec (%li wall)\n",
            __FILE__, (clock()-tt1)/(float) CLOCKS_PER_SEC, tf-tt2);
+
 
 #ifdef USE_LIBRSB
     printf("rsb_mtx_free: deallocating hess and gauge.\n");

@@ -40,7 +40,7 @@ struct {
     unsigned int matVec;
     int printDetails;
     doublereal minEigenvalue;
-    doublereal maxEigenvalue;
+    // doublereal maxEigenvalue;
 } gaugeData;
 
 
@@ -52,7 +52,7 @@ void dynamicInit(SparseMatrix *gauge, cJSON *options) {
     double tol = -1.0; // Use default tolerance: sqrt(machine epsilon)
     double *eval, *evec;
     int nrow; // number of rows on this processor
-    int restart = 7; // restart strategy
+    int restart = 3; // restart strategy
     trl_info info;
     cJSON *tmp;
     int i;
@@ -78,12 +78,15 @@ void dynamicInit(SparseMatrix *gauge, cJSON *options) {
     gaugeData.z = malloc(columns(gauge)*sizeof(doublereal));
 
 
-    /* Calculate the largest and smallest eigenvalues
-       of gaugeProduct.  These will inform the stopping condition
-       for MINRES. */
+    /* Calculate the smallest eigenvalue of gaugeProduct.  
+       This will inform the stopping condition for MINRES.
+
+       Tried finding both the smallest and largest eigenvalues,
+       but had very slow convergence for large matrices.
+    */
+    lohi = -1;
     nrow = rows(gauge);
-    ned = 5;  // In principle, 2 should be enough.
-    lohi = 0;
+    ned = 1;
     // Uses same maxIterations as MINRES.
     tmp  = cJSON_GetObjectItemCaseSensitive(gaugeData.options, "maxIterations");
     maxmv = cJSON_IsNumber(tmp)?tmp->valueint:ned*nrow;
@@ -111,9 +114,9 @@ void dynamicInit(SparseMatrix *gauge, cJSON *options) {
         }
     }
 
-    if(info.nec>=2 && info.stat==0) {
+    if(info.nec>0 && info.stat==0) {
         gaugeData.minEigenvalue = eval[0];
-        gaugeData.maxEigenvalue = eval[info.nec-1];
+        // gaugeData.maxEigenvalue = eval[info.nec-1];
     } else {
         printf("trlan exit with stat=%i, finding %i of %i eigenpairs.\n",
                info.stat, info.nec, info.ned);
