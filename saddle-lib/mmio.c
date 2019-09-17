@@ -20,7 +20,7 @@ int mm_read_unsymmetric_sparse(const char *fname, int *M_, int *N_, int *nz_,
     FILE *f;
     MM_typecode matcode;
     int M, N;
-    unsigned int i, nz;
+    int i, nz;
     double *val;
     int *I, *J;
  
@@ -178,7 +178,7 @@ int mm_read_banner(FILE *f, MM_typecode *matcode)
     return 0;
 }
 
-int mm_write_mtx_crd_size(FILE *f, int M, int N, unsigned int nz)
+int mm_write_mtx_crd_size(FILE *f, int M, int N, int nz)
 {
     if (fprintf(f, "%d %d %d\n", M, N, nz) != 3)
         return MM_COULD_NOT_WRITE_FILE;
@@ -186,7 +186,7 @@ int mm_write_mtx_crd_size(FILE *f, int M, int N, unsigned int nz)
         return 0;
 }
 
-int mm_read_mtx_crd_size(FILE *f, int *M, int *N, unsigned int *nz )
+int mm_read_mtx_crd_size(FILE *f, int *M, int *N, int *nz )
 {
     char line[MM_MAX_LINE_LENGTH];
     int num_items_read;
@@ -202,13 +202,13 @@ int mm_read_mtx_crd_size(FILE *f, int *M, int *N, unsigned int *nz )
     }while (line[0] == '%');
 
     /* line[] is either blank or has M,N, nz */
-    if (sscanf(line, "%d %d %u", M, N, nz) == 3)
+    if (sscanf(line, "%d %d %d", M, N, nz) == 3)
         return 0;
         
     else
     do
     { 
-        num_items_read = fscanf(f, "%d %d %u", M, N, nz); 
+        num_items_read = fscanf(f, "%d %d %d", M, N, nz); 
         if (num_items_read == EOF) return MM_PREMATURE_EOF;
     }
     while (num_items_read != 3);
@@ -262,10 +262,10 @@ int mm_write_mtx_array_size(FILE *f, int M, int N)
 /* use when I[], J[], and val[]J, and val[] are already allocated */
 /******************************************************************/
 
-int mm_read_mtx_crd_data(FILE *f, unsigned int nz, int I[], int J[],
+int mm_read_mtx_crd_data(FILE *f, int nz, int I[], int J[],
         double val[], MM_typecode matcode)
 {
-    unsigned int i;
+    int i;
     if (mm_is_complex(matcode))
     {
         for (i=0; i<nz; i++)
@@ -330,7 +330,7 @@ int mm_read_mtx_crd_entry(FILE *f, int *I, int *J,
                             (nz pairs of real/imaginary values)
 ************************************************************************/
 
-int mm_read_mtx_crd(char *fname, int *M, int *N, unsigned int *nz,
+int mm_read_mtx_crd(char *fname, int *M, int *N, int *nz,
                     int **I, int **J, 
         double **val, MM_typecode *matcode)
 {
@@ -397,12 +397,12 @@ int mm_write_banner(FILE *f, MM_typecode matcode)
         return 0;
 }
 
-int mm_write_mtx_crd(char fname[], int M, int N, unsigned int nz,
+int mm_write_mtx_crd(char fname[], int M, int N, int nz,
                      int I[], int J[],
         double val[], MM_typecode matcode)
 {
     FILE *f;
-    unsigned int i;
+    int i;
 
     if (strcmp(fname, "stdout") == 0) 
         f = stdout;
