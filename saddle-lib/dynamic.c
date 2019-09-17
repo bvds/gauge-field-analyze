@@ -264,8 +264,9 @@ void matrixVector(const char type, const SparseMatrix *a,
         fprintf(stderr, "rsb_spmv error 0x%x, exiting\n", errval);
         exit(121);
     }
+#elif defined(USE_MKL)
 #else
-    unsigned int k;
+    int k;
     SparseRow *row;
     memset(out, 0, a->rows * sizeof(double));
     for(k=0; k<a->nonzeros; k++) {
@@ -290,8 +291,9 @@ void vectorMatrix(const char type, const SparseMatrix *a,
         fprintf(stderr, "rsb_spmv error 0x%x, exiting\n", errval);
         exit(121);
     }
+#elif defined(USE_MKL)
 #else
-    unsigned int k;
+    int k;
     SparseRow *row;
     memset(out, 0, a->columns * sizeof(double));
     for(k=0; k<a->nonzeros; k++) {

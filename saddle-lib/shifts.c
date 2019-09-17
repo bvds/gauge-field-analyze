@@ -3,7 +3,7 @@
     of a saddle-point search.
 
     Example usage:
-    ./shifts ../hess-grad-gauge.json ../hess.dat ../grad.dat ../gauge.dat ../shifts.dat
+    ./shifts ../hess-grad-gauge.json ../hess.mtx ../grad.dat ../gauge.mtx ../shifts.dat
     Valgrind debugging example:
     valgrind --tool=memcheck --leak-check=yes --show-reachable=yes --num-callers=20 --track-fds=yes ./shifts ...
 
@@ -34,7 +34,7 @@ int main(int argc, char **argv){
     char *options;
     cJSON *jopts, *tmp;
     int i, k, n;
-    unsigned int j, nLargeShifts;
+    unsigned int nLargeShifts;
     FILE *fp;
 #ifdef USE_LIBRSB
     char ib[1000];
@@ -43,7 +43,12 @@ int main(int argc, char **argv){
     rsb_type_t typecode = RSB_NUMERICAL_TYPE_DEFAULT;
 #else
     MM_typecode matcode;
+    int j;
+#ifdef USE_MKL
+    const int align = 64;
+#else
     SparseRow *row;
+#endif
 #endif
     long int twall = 0, tcpu = 0;
     clock_t t1, tt1;
@@ -112,17 +117,39 @@ int main(int argc, char **argv){
     }
     assert(hess.rows == n);
     assert(hess.columns == n);
+#ifdef USE_MKL
+    hess.value = mkl_malloc(hess.nonzeros * sizeof(double), align);
+    hess.row = mkl_malloc(hess.nonzeros * sizeof(int), align);
+    hess.column = mkl_malloc(hess.nonzeros * sizeof(int), align);
+#else
     hess.data = malloc(hess.nonzeros * sizeof(SparseRow));
+#endif
     for(j=0; j<hess.nonzeros; j++){
+#ifdef USE_MKL
+        k = fscanf(fp, "%d%d%le", hess.row+j, hess.column+j, hess.value+j); 
+#else
         row = hess.data+j;
         k = fscanf(fp, "%u%u%le", &(row->i), &(row->j), &(row->value));
         row->i -= 1; row->j -= 1; // switch to zero-based indexing
+#endif
         if(k < 3) {
             printf("Error reading %s, element %i\n", argv[2], j);
             break;
         }
     }
     fclose(fp);
+#ifdef USE_MKL
+    /* Create MKL data structure */
+    if(mkl_sparse_d_create_coo(&hess.a, SPARSE_INDEX_BASE_ONE,
+              hess.rows, hess.columns, hess.nonzeros,
+              hess.row, hess.column, hess.value) != SPARSE_STATUS_SUCCESS) {
+        printf("failed\n");
+        exit(55);
+    }
+
+    
+    mkl_free(hess.row); mkl_free(hess.column); mkl_free(hess.value);
+#endif
 #endif
 
     double *grad = malloc(n * sizeof(double));
@@ -169,17 +196,38 @@ int main(int argc, char **argv){
         exit(703);
     }
     assert(gauge.columns == n);
+#ifdef USE_MKL
+    gauge.value = mkl_malloc(gauge.nonzeros * sizeof(double), align);
+    gauge.row = mkl_malloc(gauge.nonzeros * sizeof(int), align);
+    gauge.column = mkl_malloc(gauge.nonzeros * sizeof(int), align);
+#else
     gauge.data = malloc(gauge.nonzeros * sizeof(SparseRow));
+#endif
     for(j=0; j<gauge.nonzeros; j++){
+#ifdef USE_MKL
+        k = fscanf(fp, "%d%d%le", gauge.row+j, gauge.column+j, gauge.value+j); 
+#else
         row = gauge.data+j;
         k = fscanf(fp, "%u%u%lf", &(row->i), &(row->j), &(row->value));
         row->i -= 1; row->j -= 1; // switch to zero-based indexing
+#endif
         if(k < 3) {
             printf("Error reading %s, element %i\n", argv[4], j);
             break;
         }
     }
     fclose(fp);
+#ifdef USE_MKL
+    /* Create MKL data structure */
+    if(mkl_sparse_d_create_coo(&gauge.a, SPARSE_INDEX_BASE_ONE,
+              gauge.rows, gauge.columns, gauge.nonzeros,
+              gauge.row, gauge.column, gauge.value) != SPARSE_STATUS_SUCCESS) {
+        printf("failed\n");
+        exit(55);
+    }
+    
+    mkl_free(gauge.row); mkl_free(gauge.column); mkl_free(gauge.value);
+#endif
 #endif
     time(&tf);
     tcpu += clock()-t1;
@@ -232,6 +280,8 @@ int main(int argc, char **argv){
     rsb_mtx_free(hessp);
     rsb_mtx_free(gaugep); 
     rsb_lib_exit(RSB_NULL_EXIT_OPTIONS);
+#elif defined(USE_MKL)
+    mkl_sparse_destroy(hess.a); mkl_sparse_destroy(gauge.a);
 #else
     free(hess.data); free(gauge.data);
 #endif

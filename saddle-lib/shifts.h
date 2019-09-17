@@ -3,6 +3,17 @@
 #ifdef USE_LIBRSB
 #include <rsb.h>         /* for rsb_lib_init */
 typedef struct rsb_mtx_t SparseMatrix;
+#elif defined(USE_MKL)
+#include "mkl.h"
+typedef struct {
+    sparse_matrix_t a;
+    double *value;
+    MKL_INT *row;
+    MKL_INT *column;
+    MKL_INT rows;
+    MKL_INT columns;
+    MKL_INT nonzeros;
+} SparseMatrix;
 #else
 typedef struct {
     unsigned int i;
@@ -12,7 +23,7 @@ typedef struct {
 
 typedef struct {
     SparseRow *data;
-    unsigned int nonzeros;
+    int nonzeros;
     int rows;
     int columns;
 } SparseMatrix;

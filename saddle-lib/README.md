@@ -29,21 +29,24 @@ Download source code:
 
 After downloading these, you will need to compile the
 associated libraries.
+Then modify `Makefile` to point to these libraries.
 
-* In `minres-qlp`, specify the user-suppied
-orthogonalizer ...
+### Intel MKL
 
-* For `nutrlan`, you will need to specify
-the name of the user-supplied orthogonalizer
-by adding the flag `-DUSER_ORTHO=dynamicProject` to `OPT`
-in `Make.inc`.
+One can link to the Intel Math Kernel Library
+for the sparse matrix-vector multiplications.
+*  I installed the library in `/usr/local`
+*  The dynamic linker needs to find the library:
+   *  Create file `/etc/ld.so.conf.d/mkl.conf`
+      containing `/usr/local/intel/mkl/lib/intel64`
+   *  run `sudo ldconfig`
 
-Finally, modify `Makefile` to point to these libraries.
+### LibRSB
 
-One can use the sparse matrix library (`librsb`)[http://librsb.sourceforge.net/]
+Note:  This didn't perform very well, and I abandoned the effort.  
+One can use the sparse matrix library [`librsb`](http://librsb.sourceforge.net)
 for the hessian and the gauge transform shifts. 
 * Install the library.  On Ubuntu:  `sudo apt install librsb-dev`.
 * In `Makefile`, add the compiler flag `-DUSE_LIBRSB`.
-* In `../mma-lib/saddle-point.m`, point `RunProcess[...]` to `hess.mtx` and
-  `gauge.mtx`.  Currently, there is some issue with `RunProcess` hanging
+* Currently, there is some issue with `RunProcess` hanging
   even when `./shifts` runs correctly.
