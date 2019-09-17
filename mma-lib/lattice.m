@@ -48,7 +48,7 @@ averagePlaquette[] :=
     Chop[Sum[Re[plaquette[dir1, dir2, latticeCoordinates[k]]],
 	     {k, latticeVolume[]}, {dir1, 2, nd},
 	     {dir2, dir1 - 1}]*2/(latticeVolume[]*nc*nd*(nd - 1))];
-makeRootLattice[] := Map[SUPower[#, 0.5]&, gaugeField, {2}];
+makeRootLattice[] := ParallelMap[SUPower[#, 0.5]&, gaugeField, {2}];
 
 makeTrivialLattice::usage =
   "All links identity for a given nd,nc,latticeDimensions.

@@ -193,6 +193,7 @@ latticeHessian[getRootLink_, OptionsPattern[]] :=
     https://mathematica.stackexchange.com/questions/777/efficient-by-element-updates-to-sparsearrays.
     Instead, we accumulate Array elements in an Association and create a
     SparseArray at the end. *)
+ ParallelSum[
   Block[{hess = Association[], grad = Array[0.0&, nGrad[fixed]],
     gen = suGenerators[] + 0.0 I,
     sym = 0.5*Outer[(#1.#2 + #2.#1)&, suGenerators[], suGenerators[], 1] +
@@ -249,8 +250,10 @@ latticeHessian[getRootLink_, OptionsPattern[]] :=
           symAdd[hess, g1, gg2, -reTrDot[vv0110, gen[[ca2]]]]]],
 	  {ca2, nc^2 - 1}]; innerLoopTime += SessionTime[] - t0],
 	{ca1, nc^2 - 1}]],
-      {dir1, nd - 1}, {dir2, dir1 + 1, nd}, {i, latticeVolume[]}];
-   {SparseArray[Normal[hess]], grad}]];
+      {dir1, nd - 1}, {dir2, dir1 + 1, nd},
+      {i, kernel, latticeVolume[], $KernelCount}];
+   {SparseArray[Normal[hess], {nGrad[fixed], nGrad[fixed]}], grad}],
+  {kernel, $KernelCount}]];
 
 
 minresLabels = Association["MINRES" -> minres, "MINRES1" -> minres1,
@@ -332,45 +335,46 @@ findDelta::dynamicPartMethod = "Only dynamicPartMethod = Automatic is supported.
 Options[findDelta] = {dynamicPartMethod -> Automatic, printDetails -> False,
   Method -> Automatic, rescaleCutoff -> 1, dampingFactor -> 1,
   storePairs -> False, storeHess -> False, largeShiftOptions -> {},
-  storeBB -> False, debugProj -> False, largeShiftCutoff -> 2,
+  storeBB -> False, debugProj -> False, externalAction -> Automatic, 
   (* Roughly speaking, the relative error in the matrix norm of
      one link goes as Norm[shift]^3/48. *)
-  cutoffValue -> 2};
+  largeShiftCutoff -> 2, cutoffValue -> 2};
+SetAttributes[findDelta, HoldFirst];
 
 (* Dense matrix version (default) *)
-findDelta[hessIn_, gradIn_, gaugeTransformShifts_, OptionsPattern[]] :=
-  Block[{hess, grad, zzz = OptionValue[rescaleCutoff],
+findDelta[{hess_, grad_, gauge_}, OptionsPattern[]] :=
+  Block[{hessp, gradp, zzz = OptionValue[rescaleCutoff],
     cutoff = OptionValue[cutoffValue],
     damping = OptionValue[dampingFactor], values, oo, proj, shifts},
-    If[MatrixQ[gaugeTransformShifts],
+    If[MatrixQ[gauge],
        (* Find projection onto subspace orthogonal to all gauge transforms.
        proj is dense. *)
-       proj = NullSpace[gaugeTransformShifts];
-       hess = proj.hessIn.Transpose[proj];
-       grad = proj.gradIn,
+       proj = NullSpace[gauge];
+       hessp = proj.hess.Transpose[proj];
+       gradp = proj.grad,
        (* Alternatively, no projection onto the subspace. *)
-       proj = IdentityMatrix[Length[hessIn], SparseArray];
-       hess = hessIn;
-       grad = gradIn];
+       proj = IdentityMatrix[Length[hess], SparseArray];
+       hessp = hess;
+       gradp = grad];
     (* Debug print to compare with call to testOp(...) in shifts.c *)
-    If[False, Print["Dynamic hess.grad: ",(hess.grad).proj]];
-    {values, oo} = Eigensystem[Normal[hess]];
-    shifts = applyCutoff3[values, oo.grad, oo.proj,
+    If[False, Print["Dynamic hess.grad: ", hess.grad]];
+    {values, oo} = Eigensystem[Normal[hessp]];
+    shifts = applyCutoff3[values, oo.gradp, oo.proj,
 	OptionValue[largeShiftCutoff], zzz].oo.proj;
     Print["shifts norms and rescale:  ",
 	  {shiftNorm[shifts], Norm[shifts],
-	   shifts.hessIn.shifts/shifts.gradIn}];
+	   shifts.hess.shifts/shifts.grad}];
     If[OptionValue[storeHess],
        hess0 = hess; grad0 = grad; proj0 = proj; oo0 = oo];
     If[OptionValue[storePairs],
-       pairs0 = Transpose[{values, oo.grad}];
+       pairs0 = Transpose[{values, oo.gradp}];
        shifts0 = shifts];
     -damping applyCutoff2[shifts, cutoff, zzz]] /;
   OptionValue[Method] === Automatic || OptionValue[Method] === "Dense";
 
 (* Version using mathematica versions of MINRES/MINRES-QLP
    and Lanczos eigensystem solvers. *)
-findDelta[hess_, grad_, gaugeTransformShifts_, opts:OptionsPattern[]] :=
+findDelta[{hess_, grad_, gauge_}, opts:OptionsPattern[]] :=
  Block[{zzz = OptionValue[rescaleCutoff],
     minresFun = minresLabels[methodName[OptionValue[Method]]],
     cutoff = OptionValue[cutoffValue],
@@ -378,17 +382,17 @@ findDelta[hess_, grad_, gaugeTransformShifts_, opts:OptionsPattern[]] :=
     smallProj, smallProj0, tinit = SessionTime[],
         tdp = 0, tsp = 0, tdot = 0, countdp = 0, countdot = 0, countsp = 0,
         countGauge = dynamicPartCounter},
-   dp0 = If[MatrixQ[gaugeTransformShifts],
-	    dynamicPart[gaugeTransformShifts,
+   dp0 = If[MatrixQ[gauge],
+	    dynamicPart[gauge,
 			Method -> OptionValue[dynamicPartMethod]],
 	    Identity];
-    If[False, Print["Dynamic hess.grad: ", dp0[hess.grad]]];
+   If[False, Print["Dynamic hess.grad: ", dp0[hess.grad]]];
    Clear[bb0]; bb0 = {};
    dp = ((If[OptionValue[storeBB] == True, AppendTo[bb0, #]];
 	  addTime[tdp, countdp++; dp0[#]])&);
    (* Compare sparse strategy against dense projection. *)
    If[OptionValue[debugProj],
-     Module[{projDense = Nullspace[gaugeTransformShifts]},
+     Module[{projDense = Nullspace[gauge]},
        projDense = Transpose[projDense].projDense;
        dp = (Block[{p0=projDense.#, p1=dp0[#]},
 	 If[Norm[p0-p1]>10^-10,
@@ -444,75 +448,70 @@ findDelta[hess_, grad_, gaugeTransformShifts_, opts:OptionsPattern[]] :=
  KeyExistsQ[minresLabels, methodName[OptionValue[Method]]];
 
 (* External version.
-   As a first attempt, dump to files and run program.
-   Later, maybe try LibraryLink or MathLink/WSTP.
-
-https://mathematica.stackexchange.com/questions/199925/can-we-link-mathematica-and-fortran-with-wstp
-https://mathematica.stackexchange.com/questions/6325/mathematica-library-link-how-to-use-non-standard-mint-e-g-unsigned-int-or
-https://stackoverflow.com/questions/6537457/gcc-installed-mathematica-still-wont-compile-to-c
-https://mathematica.stackexchange.com/questions/31545/returning-multiple-results-from-a-librarylink-function
-https://mathematica.stackexchange.com/questions/8438/minimal-effort-method-for-integrating-c-functions-into-mathematica
-
-https://reference.wolfram.com/language/LibraryLink/ref/callback/AbortQ.html
-
-https://github.com/DaveGamble/cJSON
+  https://github.com/DaveGamble/cJSON
  *)
-findDelta[hess_, grad_, gaugeTransformShifts_, opts:OptionsPattern[]] :=
- Block[{zzz = OptionValue[rescaleCutoff],
+findDelta[data:{hess_, grad_, gauge_}, opts:OptionsPattern[]] :=
+    Block[{(*hess, grad, gauge,*) zzz = OptionValue[rescaleCutoff],
     cutoff = OptionValue[cutoffValue],
     damping = OptionValue[dampingFactor], shifts,
+    action = OptionValue[externalAction],
     tinit = SessionTime[],
-    sparseExport = Function[MapThread[
-        Append,
-        (* Switch to zero-based array indexing *)
-        {#["NonzeroPositions"] - 1, #["NonzeroValues"]}]],
     symbolString = (a_Symbol -> b_) :> SymbolName[a] -> b,
-    outFile = "hess-grad-gauge.json", out},
+        outFile = "hess-grad-gauge.json", out},
+          (* {hess, grad, gauge} = data;*)
    (* Dump dimensions, constants, and options into JSON file.
      Dump matrices and vectors: 
          hess, grad, gaugtransformationShifts
-     The methods themselves will be chosen at compile time,
-     since we can always compare with the mathematica value.
+     The methods themselves will be chosen at compile time
+     and we can always compare with the mathematica value.
     *)
    If[methodName[OptionValue[dynamicPartMethod]] =!= Automatic,
       Message[findDelta::dynamicPartMethod]; Return[$Failed]];
-   Export[outFile, {
-       "nc" -> nc,
-       "n" -> Length[grad],
-       "rescaleCutoff" -> zzz,
-       "largeShiftCutoff" ->
-           OptionValue[largeShiftCutoff]/.Infinity -> 10.0^20,
-       "linearSolveOptions" ->
-	   {methodOptions[OptionValue[Method]]}/.symbolString,
-       "dynamicPartOptions" ->
-           {methodOptions[OptionValue[dynamicPartMethod]]}/.symbolString,
-       "largeShiftOptions" -> OptionValue[largeShiftOptions]/.symbolString,
-       "hessElements" -> Length[hess["NonzeroValues"]],
-       "gaugeElements" -> Length[gaugeTransformShifts["NonzeroValues"]],
-       "gaugeDimension" -> Length[gaugeTransformShifts]}];
-   Export["hess.dat", sparseExport[hess]];
-   Export["hess.mtx", hess];
-   Export["grad.dat", grad];
-   Export["gauge.dat", sparseExport[gaugeTransformShifts]];
-   Export["gauge.mtx", gaugeTransformShifts];
+   If[action =!= "read",
+      Export[outFile, {
+          "nc" -> nc,
+          "n" -> Length[grad],
+          "rescaleCutoff" -> zzz,
+          "largeShiftCutoff" ->
+              OptionValue[largeShiftCutoff]/.Infinity -> 10.0^20,
+          "linearSolveOptions" ->
+	      {methodOptions[OptionValue[Method]]}/.symbolString,
+          "dynamicPartOptions" ->
+               {methodOptions[OptionValue[dynamicPartMethod]]}/.symbolString,
+          "largeShiftOptions" -> OptionValue[largeShiftOptions]/.symbolString,
+          "hessElements" -> Length[hess["NonzeroValues"]],
+          "gaugeElements" -> Length[gauge["NonzeroValues"]],
+          "gaugeDimension" -> Length[gauge]}];
+      Export["hess.mtx", hess];
+      Export["grad.dat", grad];
+      Export["gauge.mtx", gauge];
+      Apply[Clear, Unevaluated[data]]];
    (* Run external program *)
-   out = RunProcess[{"saddle-lib/shifts",
-                     "hess-grad-gauge.json", "hess.dat",
-                     "grad.dat", "gauge.dat", "shifts.dat"}];
-   Print[Style[out["StandardOutput"],FontColor -> Blue]];
-   If[Length[out["StandardError"]]>0,
-      Print[Style[out["StandardError"], FontColor -> Red]]];
-   If[out["ExitCode"] != 0, Message[findDelta::external]; Return[$Failed]];
+   If[action =!= "read",
+      Run["rm -f shifts.log shifts.dat"]];
+   If[action =!= "read" && action =!= "write",
+      out = RunProcess[{"saddle-lib/shifts",
+                        "hess-grad-gauge.json", "hess.mtx",
+                        "grad.dat", "gauge.mtx", "shifts.dat"}];
+      Print[Style[out["StandardOutput"], FontColor -> Blue]];
+      If[Length[out["StandardError"]]>0,
+         Print[Style[out["StandardError"], FontColor -> Red]]];
+      If[out["ExitCode"] != 0,
+         Message[findDelta::external]; Return[$Failed]]];
+   If[action === "write",
+      Print["Starting up and detaching."];
+      Run["(saddle-lib/shifts hess-grad-gauge.json hess.mtx grad.dat gauge.mtx shifts.dat > shifts.log&); echo \"started\""]]
+   If[action === "read",
+      Print[Style[ReadString["shifts.log"], FontColor -> Blue]]];
+   Print["findDelta shifts time (seconds):  total=", SessionTime[] - tinit];
    (* Read shifts from external file *)
-   shifts = ReadList["shifts.dat", Number];
-   Print["findDelta time (seconds):  total=", SessionTime[] - tinit];
-   If[OptionValue[storeHess],
-      hess0 = Null; grad0 = Null; proj0 = Null; oo0 = Null];
-   If[OptionValue[storePairs],
-      pairs0 = Null;
-      shifts0 = shifts];
-   -damping applyCutoff2[shifts, cutoff, zzz]] /;
-methodName[OptionValue[Method]] === "External";
+   If[action =!= "write",
+      shifts = ReadList["shifts.dat", Number];
+      If[OptionValue[storePairs],
+         pairs0 = Null;
+         shifts0 = shifts];
+      -damping applyCutoff2[shifts, cutoff, zzz], Null]] /;
+ methodName[OptionValue[Method]] === "External";
 
 SetAttributes[applyDelta, HoldFirst];
 applyDelta[tgf_, delta_, fixed_] :=
@@ -534,10 +533,19 @@ https://mathematica.stackexchange.com/questions/353/functions-with-options/ *)
 Options[latticeSaddlePointStep] =
  Join[Options[findDelta], Options[latticeHessian]];
 latticeSaddlePointStep[opts:OptionsPattern[]] :=
- Block[{hess, grad, delta, tmpGaugeField = makeRootLattice[],
-	t0 = SessionTime[], t1, t2, t3},
-  {hess, grad} = latticeHessian[getLink[tmpGaugeField],
-	Apply[Sequence, FilterRules[{opts}, Options[latticeHessian]]]];
+ Block[{hess, grad, gauge, delta, tmpGaugeField,
+	t0 = SessionTime[], t1, t2, t3,
+        action = OptionValue[externalAction]},
+  tmpGaugeField = makeRootLattice[];
+  If[action =!= "read",
+     {hess, grad} = latticeHessian[
+         getLink[tmpGaugeField],
+         Apply[Sequence, FilterRules[{opts}, Options[latticeHessian]]]];
+     Print["Constructed hess, grad"];
+     gauge = If[OptionValue[fixedDir] > -1,
+                gaugeTransformShifts[
+                    tmpGaugeField, OptionValue[fixedDir]], None];
+     Print["Constructed gauge"]];
   t1 = SessionTime[];
   (* Debug prints *)
   Which[False,
@@ -550,19 +558,19 @@ latticeSaddlePointStep[opts:OptionsPattern[]] :=
         Print["hessian, first link:  ",
               Normal[Take[hess, nc^2 - 1, nc^2 - 1]]];
         Print["gradient, first link:  ", Take[grad, nc^2 - 1]]];
-  delta = findDelta[hess, grad,
-     If[OptionValue[fixedDir] > -1,
-        gaugeTransformShifts[tmpGaugeField, OptionValue[fixedDir]],
-        None],
-    Apply[Sequence, FilterRules[{opts}, Options[findDelta]]]];
+  delta = findDelta[
+      {hess, grad, gauge},
+      Apply[Sequence, FilterRules[{opts}, Options[findDelta]]]];
   (* Debug prints *)
   Which[
       False, Print["delta difference:  ", Chop[delta - delta0]],
       False, Print["delta:  ", delta],
       False, Print["delta, first link:  ", Take[delta, nc^2 - 1]]];
   t2 = SessionTime[];
-  applyDelta[tmpGaugeField, delta, OptionValue[fixedDir]];
+  If[action =!= "write",
+     applyDelta[tmpGaugeField, delta, OptionValue[fixedDir]]];
   t3 = SessionTime[];
   Print["latticeSaddlePointStep times:  ",
 	{innerLoopTime, t1 - t0, t2 - t1, t3 - t2}];
   tmpGaugeField];
+
