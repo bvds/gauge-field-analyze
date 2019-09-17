@@ -15,6 +15,7 @@
 #include <assert.h>
 #include <time.h>
 #include "shifts.h"
+#include "mmio.h"
 
 char *readFile(char *filename) {
     FILE *f = fopen(filename, "rt");
@@ -32,10 +33,8 @@ char *readFile(char *filename) {
 int main(int argc, char **argv){
     char *options;
     cJSON *jopts, *tmp;
-    unsigned int n;
-    unsigned int i;
-    unsigned int nLargeShifts;
-    int k;
+    int i, k, n;
+    unsigned int j, nLargeShifts;
     FILE *fp;
 #ifdef USE_LIBRSB
     char ib[1000];
@@ -43,6 +42,7 @@ int main(int argc, char **argv){
     rsb_flags_t flagsA = RSB_FLAG_NOFLAGS;
     rsb_type_t typecode = RSB_NUMERICAL_TYPE_DEFAULT;
 #else
+    MM_typecode matcode;
     SparseRow *row;
 #endif
     long int twall = 0, tcpu = 0;
@@ -93,18 +93,32 @@ int main(int argc, char **argv){
     printf("%s\n",ib);
 #else
     SparseMatrix hess, *hessp = &hess;
-    hess.nonzeros = cJSON_GetObjectItemCaseSensitive(
-             jopts, "hessElements")->valueint;
-    hess.rows = n;
-    hess.columns = n;
-    hess.data = malloc(hess.nonzeros * sizeof(SparseRow));
-    printf("Opening file %s for %i elements\n", argv[2], hess.nonzeros);
+    printf("Opening file %s\n", argv[2]);
     fp = fopen(argv[2], "r"); 
-    for(i=0; i<hess.nonzeros; i++){
-        row = hess.data+i;
+    if (mm_read_banner(fp, &matcode) != 0) {
+        printf("Could not process Matrix Market banner.\n");
+        exit(701);
+    }
+    if(!(mm_is_real(matcode) && mm_is_matrix(matcode) && 
+         mm_is_coordinate(matcode) && mm_is_general(matcode))) {
+        printf("Hessian should be real, general, coordinate.\n");
+        printf("Market Market type: [%s]\n", mm_typecode_to_str(matcode));
+        exit(702);
+    }
+    if (mm_read_mtx_crd_size(fp, &(hess.rows), &(hess.columns),
+                             &(hess.nonzeros)) !=0) {
+        printf("Cannot read dimensions\n");
+        exit(703);
+    }
+    assert(hess.rows == n);
+    assert(hess.columns == n);
+    hess.data = malloc(hess.nonzeros * sizeof(SparseRow));
+    for(j=0; j<hess.nonzeros; j++){
+        row = hess.data+j;
         k = fscanf(fp, "%u%u%le", &(row->i), &(row->j), &(row->value));
+        row->i -= 1; row->j -= 1; // switch to zero-based indexing
         if(k < 3) {
-            printf("Error reading %s on line %i\n", argv[2], i);
+            printf("Error reading %s, element %i\n", argv[2], j);
             break;
         }
     }
@@ -137,20 +151,31 @@ int main(int argc, char **argv){
     printf("%s\n",ib);
 #else
     SparseMatrix gauge, *gaugep = &gauge;
-    gauge.nonzeros = cJSON_GetObjectItemCaseSensitive(
-             jopts, "gaugeElements")->valueint;
-    gauge.rows = cJSON_GetObjectItemCaseSensitive(
-             jopts, "gaugeDimension")->valueint;
-    gauge.columns = n;
-    gauge.data = malloc(gauge.nonzeros * sizeof(SparseRow));
-    printf("Opening file %s for %i elements, dimesions (%i, %i)\n",
-           argv[4], gauge.nonzeros, gauge.rows, gauge.columns);
+    printf("Opening file %s\n", argv[4]);
     fp = fopen(argv[4], "r"); 
-    for(i=0; i<gauge.nonzeros; i++){
-        row = gauge.data+i;
+    if (mm_read_banner(fp, &matcode) != 0) {
+        printf("Could not process Matrix Market banner.\n");
+        exit(701);
+    }
+    if(!(mm_is_real(matcode) && mm_is_matrix(matcode) && 
+         mm_is_coordinate(matcode) && mm_is_general(matcode))) {
+        printf("Gauge matrix should be real, general, coordinate.\n");
+        printf("Market Market type: [%s]\n", mm_typecode_to_str(matcode));
+        exit(702);
+    }
+    if (mm_read_mtx_crd_size(fp, &(gauge.rows), &(gauge.columns),
+                             &(gauge.nonzeros)) !=0) {
+        printf("Cannot read dimensions\n");
+        exit(703);
+    }
+    assert(gauge.columns == n);
+    gauge.data = malloc(gauge.nonzeros * sizeof(SparseRow));
+    for(j=0; j<gauge.nonzeros; j++){
+        row = gauge.data+j;
         k = fscanf(fp, "%u%u%lf", &(row->i), &(row->j), &(row->value));
+        row->i -= 1; row->j -= 1; // switch to zero-based indexing
         if(k < 3) {
-            printf("Error reading %s on line %i\n", argv[4], i);
+            printf("Error reading %s, element %i\n", argv[4], j);
             break;
         }
     }

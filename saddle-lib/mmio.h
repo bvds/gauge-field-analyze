@@ -18,11 +18,11 @@ typedef char MM_typecode[4];
 char *mm_typecode_to_str(MM_typecode matcode);
 
 int mm_read_banner(FILE *f, MM_typecode *matcode);
-int mm_read_mtx_crd_size(FILE *f, int *M, int *N, int *nz);
+int mm_read_mtx_crd_size(FILE *f, int *M, int *N, unsigned int *nz);
 int mm_read_mtx_array_size(FILE *f, int *M, int *N);
 
 int mm_write_banner(FILE *f, MM_typecode matcode);
-int mm_write_mtx_crd_size(FILE *f, int M, int N, int nz);
+int mm_write_mtx_crd_size(FILE *f, int M, int N, unsigned int nz);
 int mm_write_mtx_array_size(FILE *f, int M, int N);
 
 
@@ -118,9 +118,10 @@ int mm_is_valid(MM_typecode matcode);		/* too complex for a macro */
 
 /*  high level routines */
 
-int mm_write_mtx_crd(char fname[], int M, int N, int nz, int I[], int J[],
+int mm_write_mtx_crd(char fname[], int M, int N, unsigned int nz,
+                     int I[], int J[],
 		 double val[], MM_typecode matcode);
-int mm_read_mtx_crd_data(FILE *f, int M, int N, int nz, int I[], int J[],
+int mm_read_mtx_crd_data(FILE *f, unsigned int nz, int I[], int J[],
 		double val[], MM_typecode matcode);
 int mm_read_mtx_crd_entry(FILE *f, int *I, int *J, double *real, double *img,
 			MM_typecode matcode);

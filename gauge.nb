@@ -5011,11 +5011,11 @@ Cell[BoxData[
 
 Cell[CellGroupData[{
 
-Cell[BoxData["\<\"Starting hess, grad\"\>"], \
-"Print",ExpressionUUID->"5a9ced34-dca8-40bd-b1bb-1ac4fbc8965f"],
+Cell[BoxData["\<\"Constructed hess, grad\"\>"], \
+"Print",ExpressionUUID->"18b8fd91-5795-4a65-9db9-fe729bfe6344"],
 
-Cell[BoxData["\<\"Starting gaugeTransformShifts\"\>"], \
-"Print",ExpressionUUID->"60a1f8b9-80e7-4d71-9a87-dbc5560736c3"],
+Cell[BoxData["\<\"Constructed gauge\"\>"], \
+"Print",ExpressionUUID->"d7445b88-1e13-4200-b69e-d8c5a0941c00"],
 
 Cell[BoxData[
  InterpretationBox[
@@ -5027,44 +5027,44 @@ Cell[BoxData[
   SequenceForm[
   "applyCutoff3:  ", 14, " of ", 1024, " zeros, between ", {994, 1024}],
   Editable->
-   False]], "Print",ExpressionUUID->"e8ca4ed0-acee-43ea-a960-d64b9d401936"],
+   False]], "Print",ExpressionUUID->"f7610f80-a1ff-4f02-8108-43d6ffea32a7"],
 
 Cell[BoxData[
  InterpretationBox[
   RowBox[{"\<\"shifts norms and rescale:  \"\>", "\[InvisibleSpace]", 
    RowBox[{"{", 
     RowBox[{
-    "8.320151887930377`", ",", "58.55902361052917`", ",", 
-     "1.0000000000003126`"}], "}"}]}],
+    "8.320151887930411`", ",", "58.55902361053649`", ",", 
+     "0.9999999999999899`"}], "}"}]}],
   SequenceForm[
-  "shifts norms and rescale:  ", {8.320151887930377, 58.55902361052917, 
-   1.0000000000003126`}],
+  "shifts norms and rescale:  ", {8.320151887930411, 58.55902361053649, 
+   0.9999999999999899}],
   Editable->
-   False]], "Print",ExpressionUUID->"d7a65d52-9aaa-4faf-9dc7-5b720936c8f4"],
+   False]], "Print",ExpressionUUID->"a66de302-4ce9-4279-9692-6e4caa885084"],
 
 Cell[BoxData[
  InterpretationBox[
   RowBox[{"\<\"applyCutoff2: rescale maxNorm \"\>", "\[InvisibleSpace]", 
-   "8.320151887930377`", "\[InvisibleSpace]", "\<\" to \"\>", 
+   "8.320151887930411`", "\[InvisibleSpace]", "\<\" to \"\>", 
    "\[InvisibleSpace]", "2"}],
-  SequenceForm["applyCutoff2: rescale maxNorm ", 8.320151887930377, " to ", 2],
+  SequenceForm["applyCutoff2: rescale maxNorm ", 8.320151887930411, " to ", 2],
   Editable->
-   False]], "Print",ExpressionUUID->"96036a41-77d3-424a-84bf-d1ef7fa990f7"],
+   False]], "Print",ExpressionUUID->"25cce35b-f1a9-43c3-8ec9-913d8206a734"],
 
 Cell[BoxData[
  InterpretationBox[
   RowBox[{"\<\"latticeSaddlePointStep times:  \"\>", "\[InvisibleSpace]", 
    RowBox[{"{", 
     RowBox[{
-    "innerLoopTime", ",", "3.309143`6.670230532827756", ",", 
-     "1.001343`6.1510978640140985", ",", "0.02138`4.480522698704753"}], 
+    "innerLoopTime", ",", "1.057929`6.174971520027482", ",", 
+     "0.943345`6.125185549736576", ",", "0.015453`4.339527802432236"}], 
     "}"}]}],
   SequenceForm[
   "latticeSaddlePointStep times:  ", {$CellContext`innerLoopTime, 
-    3.309143`6.670230532827756, 1.001343`6.1510978640140985, 
-    0.02138`4.480522698704753}],
+    1.057929`6.174971520027482, 0.943345`6.125185549736576, 
+    0.015453`4.339527802432236}],
   Editable->
-   False]], "Print",ExpressionUUID->"a02771f8-ac2f-49ce-9cf2-01cc62af130c"]
+   False]], "Print",ExpressionUUID->"9ecebb56-a2fb-43d6-a844-fbe81bf73866"]
 }, Open  ]]
 }, Open  ]],
 
@@ -5104,11 +5104,11 @@ Cell[BoxData[
 
 Cell[CellGroupData[{
 
-Cell[BoxData["\<\"Starting hess, grad\"\>"], \
-"Print",ExpressionUUID->"0310969a-1f49-458e-9d3e-812089934da0"],
+Cell[BoxData["\<\"Constructed hess, grad\"\>"], \
+"Print",ExpressionUUID->"b4992a71-33e6-4510-9d7f-0c76f88485d8"],
 
-Cell[BoxData["\<\"Starting gaugeTransformShifts\"\>"], \
-"Print",ExpressionUUID->"e2363439-679e-4414-b7e0-3ea4118b7283"],
+Cell[BoxData["\<\"Constructed gauge\"\>"], \
+"Print",ExpressionUUID->"0b3a00b5-d6eb-49d7-916b-ef579b5e8905"],
 
 Cell[BoxData[
  InterpretationBox[
@@ -5132,7 +5132,7 @@ Cell[BoxData[
    EngineeringForm[0., 3], ", gaugeTransform shifts ", 
    EngineeringForm[398576., 3], " (bytes) for ", "MINRES"],
   Editable->
-   False]], "Print",ExpressionUUID->"c4c56d8a-c637-4f5d-a16e-9585e2ca1440"],
+   False]], "Print",ExpressionUUID->"d5c64ec8-d806-4d2f-856b-067773d1547f"],
 
 Cell[BoxData[
  InterpretationBox[
@@ -5144,7 +5144,7 @@ Cell[BoxData[
   "Enter ersatzLanczos. ", "n=", 1536, " itnlim=", 1536, " rTolerance=", 
    1.*^-7],
   Editable->
-   False]], "Print",ExpressionUUID->"efdbe7b6-2be4-4d20-82bd-fa349e5ece38"],
+   False]], "Print",ExpressionUUID->"19122b7e-9723-4e4a-86a1-948fadb2de94"],
 
 Cell[BoxData[
  InterpretationBox[
@@ -5154,12 +5154,12 @@ Cell[BoxData[
    RowBox[{"{", 
     RowBox[{"Null", ",", "Null"}], "}"}], 
    "\[InvisibleSpace]", "\<\" time=\"\>", "\[InvisibleSpace]", 
-   "0.023092`4.513976546658588"}],
+   "0.021284`4.478568248084679"}],
   SequenceForm[
   "esatzLanczos ", " itn=", 1, " rnorm=", {Null, Null}, " time=", 
-   0.023092`4.513976546658588],
+   0.021284`4.478568248084679],
   Editable->
-   False]], "Print",ExpressionUUID->"4a6a40f6-b36f-4152-bb87-2126b341e374"],
+   False]], "Print",ExpressionUUID->"6b97cc86-aaae-48a8-b513-204530941b29"],
 
 Cell[BoxData[
  InterpretationBox[
@@ -5169,12 +5169,12 @@ Cell[BoxData[
    RowBox[{"{", 
     RowBox[{"Null", ",", "Null"}], "}"}], 
    "\[InvisibleSpace]", "\<\" time=\"\>", "\[InvisibleSpace]", 
-   "0.03758`4.725471773596501"}],
+   "0.036107`4.708106403800494"}],
   SequenceForm[
   "esatzLanczos ", " itn=", 2, " rnorm=", {Null, Null}, " time=", 
-   0.03758`4.725471773596501],
+   0.036107`4.708106403800494],
   Editable->
-   False]], "Print",ExpressionUUID->"4ad93e80-2066-40f2-bf20-6b580b901c16"],
+   False]], "Print",ExpressionUUID->"6cab9acd-1de3-469d-93ae-05a5beded1e1"],
 
 Cell[BoxData[
  InterpretationBox[
@@ -5184,12 +5184,12 @@ Cell[BoxData[
    RowBox[{"{", 
     RowBox[{"Null", ",", "Null"}], "}"}], 
    "\[InvisibleSpace]", "\<\" time=\"\>", "\[InvisibleSpace]", 
-   "0.053555`4.879315021478672"}],
+   "0.050513`4.853918160142709"}],
   SequenceForm[
   "esatzLanczos ", " itn=", 3, " rnorm=", {Null, Null}, " time=", 
-   0.053555`4.879315021478672],
+   0.050513`4.853918160142709],
   Editable->
-   False]], "Print",ExpressionUUID->"45b1923e-4e9c-451b-9155-6496d0388783"],
+   False]], "Print",ExpressionUUID->"743d89bd-cc3b-4de6-aa48-4ca134e609a9"],
 
 Cell[BoxData[
  InterpretationBox[
@@ -5199,12 +5199,12 @@ Cell[BoxData[
    RowBox[{"{", 
     RowBox[{"Null", ",", "Null"}], "}"}], 
    "\[InvisibleSpace]", "\<\" time=\"\>", "\[InvisibleSpace]", 
-   "0.067485`4.979722250053243"}],
+   "0.065202`4.964775915276218"}],
   SequenceForm[
   "esatzLanczos ", " itn=", 4, " rnorm=", {Null, Null}, " time=", 
-   0.067485`4.979722250053243],
+   0.065202`4.964775915276218],
   Editable->
-   False]], "Print",ExpressionUUID->"60d90910-fed3-43fa-8de3-6d7402c794cc"],
+   False]], "Print",ExpressionUUID->"e95f2964-d3d0-4220-995d-be016d34b947"],
 
 Cell[BoxData[
  InterpretationBox[
@@ -5214,12 +5214,12 @@ Cell[BoxData[
    RowBox[{"{", 
     RowBox[{"Null", ",", "Null"}], "}"}], 
    "\[InvisibleSpace]", "\<\" time=\"\>", "\[InvisibleSpace]", 
-   "0.081402`5.0611500732162"}],
+   "0.078639`5.046152980056338"}],
   SequenceForm[
   "esatzLanczos ", " itn=", 5, " rnorm=", {Null, Null}, " time=", 
-   0.081402`5.0611500732162],
+   0.078639`5.046152980056338],
   Editable->
-   False]], "Print",ExpressionUUID->"1754aa32-e10e-4bee-9203-ac03d3a7505c"],
+   False]], "Print",ExpressionUUID->"3d2c2b76-a584-4f4f-a55b-3a252df6c2d5"],
 
 Cell[BoxData[
  InterpretationBox[
@@ -5229,12 +5229,12 @@ Cell[BoxData[
    RowBox[{"{", 
     RowBox[{"Null", ",", "Null"}], "}"}], 
    "\[InvisibleSpace]", "\<\" time=\"\>", "\[InvisibleSpace]", 
-   "0.097327`5.138748334753807"}],
+   "0.093317`5.1204757662693074"}],
   SequenceForm[
   "esatzLanczos ", " itn=", 6, " rnorm=", {Null, Null}, " time=", 
-   0.097327`5.138748334753807],
+   0.093317`5.1204757662693074],
   Editable->
-   False]], "Print",ExpressionUUID->"920eb015-037f-451d-b7d1-9bb0604e08da"],
+   False]], "Print",ExpressionUUID->"8427be86-b30c-49bf-b2a2-48be367925de"],
 
 Cell[BoxData[
  InterpretationBox[
@@ -5244,12 +5244,12 @@ Cell[BoxData[
    RowBox[{"{", 
     RowBox[{"Null", ",", "Null"}], "}"}], 
    "\[InvisibleSpace]", "\<\" time=\"\>", "\[InvisibleSpace]", 
-   "0.128718`5.26015428097617"}],
+   "0.122213`5.237632402821803"}],
   SequenceForm[
   "esatzLanczos ", " itn=", 8, " rnorm=", {Null, Null}, " time=", 
-   0.128718`5.26015428097617],
+   0.122213`5.237632402821803],
   Editable->
-   False]], "Print",ExpressionUUID->"8badd2bb-dd0e-49b4-9d51-40a151ddd7b5"],
+   False]], "Print",ExpressionUUID->"913026b9-1f1a-4a01-a0e2-a6a7429394b7"],
 
 Cell[BoxData[
  InterpretationBox[
@@ -5259,12 +5259,12 @@ Cell[BoxData[
    RowBox[{"{", 
     RowBox[{"Null", ",", "Null"}], "}"}], 
    "\[InvisibleSpace]", "\<\" time=\"\>", "\[InvisibleSpace]", 
-   "0.161341`5.358259742227312"}],
+   "0.149506`5.325173620021561"}],
   SequenceForm[
   "esatzLanczos ", " itn=", 10, " rnorm=", {Null, Null}, " time=", 
-   0.161341`5.358259742227312],
+   0.149506`5.325173620021561],
   Editable->
-   False]], "Print",ExpressionUUID->"183cade8-f78c-4d75-8080-5a0675c2886d"],
+   False]], "Print",ExpressionUUID->"ea142b8c-d3a2-44f0-832d-e1590eab133f"],
 
 Cell[BoxData[
  InterpretationBox[
@@ -5274,12 +5274,12 @@ Cell[BoxData[
    RowBox[{"{", 
     RowBox[{"Null", ",", "Null"}], "}"}], 
    "\[InvisibleSpace]", "\<\" time=\"\>", "\[InvisibleSpace]", 
-   "0.207102`5.466699290761032"}],
+   "0.190803`5.4311001966759775"}],
   SequenceForm[
   "esatzLanczos ", " itn=", 13, " rnorm=", {Null, Null}, " time=", 
-   0.207102`5.466699290761032],
+   0.190803`5.4311001966759775],
   Editable->
-   False]], "Print",ExpressionUUID->"a47cd09e-9d3c-46cc-b90f-ce72a44ab3d3"],
+   False]], "Print",ExpressionUUID->"95e53a3e-eae3-4218-80f7-8a16cb4cb7e2"],
 
 Cell[BoxData[
  InterpretationBox[
@@ -5289,12 +5289,12 @@ Cell[BoxData[
    RowBox[{"{", 
     RowBox[{"Null", ",", "Null"}], "}"}], 
    "\[InvisibleSpace]", "\<\" time=\"\>", "\[InvisibleSpace]", 
-   "0.252772`5.553243962541336"}],
+   "0.23224`5.516452020655612"}],
   SequenceForm[
   "esatzLanczos ", " itn=", 16, " rnorm=", {Null, Null}, " time=", 
-   0.252772`5.553243962541336],
+   0.23224`5.516452020655612],
   Editable->
-   False]], "Print",ExpressionUUID->"540b23e7-929e-4d85-adbc-e2f60f147835"],
+   False]], "Print",ExpressionUUID->"893f0e2a-1eb4-440b-aecc-6628ca1b6fe7"],
 
 Cell[BoxData[
  InterpretationBox[
@@ -5304,12 +5304,12 @@ Cell[BoxData[
    RowBox[{"{", 
     RowBox[{"Null", ",", "Null"}], "}"}], 
    "\[InvisibleSpace]", "\<\" time=\"\>", "\[InvisibleSpace]", 
-   "0.309759`5.641538931422642"}],
+   "0.289144`5.611629182561086"}],
   SequenceForm[
   "esatzLanczos ", " itn=", 20, " rnorm=", {Null, Null}, " time=", 
-   0.309759`5.641538931422642],
+   0.289144`5.611629182561086],
   Editable->
-   False]], "Print",ExpressionUUID->"5ea5971f-539b-4d87-b21c-e3c6ef0de496"],
+   False]], "Print",ExpressionUUID->"8cd716d3-8a4a-45c8-9044-0b2944bf9f3d"],
 
 Cell[BoxData[
  InterpretationBox[
@@ -5319,12 +5319,12 @@ Cell[BoxData[
    RowBox[{"{", 
     RowBox[{"Null", ",", "Null"}], "}"}], 
    "\[InvisibleSpace]", "\<\" time=\"\>", "\[InvisibleSpace]", 
-   "0.378214`5.728252598518207"}],
+   "0.358538`5.705050189399908"}],
   SequenceForm[
   "esatzLanczos ", " itn=", 25, " rnorm=", {Null, Null}, " time=", 
-   0.378214`5.728252598518207],
+   0.358538`5.705050189399908],
   Editable->
-   False]], "Print",ExpressionUUID->"af0df6cf-4eb6-473c-a4a2-773c4ba77483"],
+   False]], "Print",ExpressionUUID->"ad4bd8c5-ca17-4a2b-937d-82b5e8b8b539"],
 
 Cell[BoxData[
  InterpretationBox[
@@ -5334,12 +5334,12 @@ Cell[BoxData[
    RowBox[{"{", 
     RowBox[{"Null", ",", "Null"}], "}"}], 
    "\[InvisibleSpace]", "\<\" time=\"\>", "\[InvisibleSpace]", 
-   "0.470562`5.823131850853366"}],
+   "0.457252`5.810670611569435"}],
   SequenceForm[
   "esatzLanczos ", " itn=", 32, " rnorm=", {Null, Null}, " time=", 
-   0.470562`5.823131850853366],
+   0.457252`5.810670611569435],
   Editable->
-   False]], "Print",ExpressionUUID->"ab76205f-298f-4f5e-a7b6-eb1c41bcd644"],
+   False]], "Print",ExpressionUUID->"5f141629-4aa3-42c0-ab41-121625e3922a"],
 
 Cell[BoxData[
  InterpretationBox[
@@ -5349,12 +5349,12 @@ Cell[BoxData[
    RowBox[{"{", 
     RowBox[{"0.04311228531424306`", ",", "1.1931596685998778`"}], "}"}], 
    "\[InvisibleSpace]", "\<\" time=\"\>", "\[InvisibleSpace]", 
-   "0.574298`5.909652301679804"}],
+   "0.570837`5.907027112896625"}],
   SequenceForm[
   "esatzLanczos ", " itn=", 40, " rnorm=", {0.04311228531424306, 
-   1.1931596685998778`}, " time=", 0.574298`5.909652301679804],
+   1.1931596685998778`}, " time=", 0.570837`5.907027112896625],
   Editable->
-   False]], "Print",ExpressionUUID->"97f478c7-a7c8-41cc-8380-637523b1407d"],
+   False]], "Print",ExpressionUUID->"5029058b-df17-4786-a386-d994bf0a1d1d"],
 
 Cell[BoxData[
  InterpretationBox[
@@ -5364,12 +5364,12 @@ Cell[BoxData[
    RowBox[{"{", 
     RowBox[{"0.026362776447638795`", ",", "1.039748862178436`"}], "}"}], 
    "\[InvisibleSpace]", "\<\" time=\"\>", "\[InvisibleSpace]", 
-   "0.703572`5.997823545377707"}],
+   "0.712553`6.003332170725159"}],
   SequenceForm[
   "esatzLanczos ", " itn=", 50, " rnorm=", {0.026362776447638795`, 
-   1.039748862178436}, " time=", 0.703572`5.997823545377707],
+   1.039748862178436}, " time=", 0.712553`6.003332170725159],
   Editable->
-   False]], "Print",ExpressionUUID->"2fe35207-0de5-46f4-abe6-e47ef864da39"],
+   False]], "Print",ExpressionUUID->"2a7f63f5-7706-44e6-8b51-b6b6571bfd94"],
 
 Cell[BoxData[
  InterpretationBox[
@@ -5379,12 +5379,12 @@ Cell[BoxData[
    RowBox[{"{", 
     RowBox[{"0.01881582660684865`", ",", "0.9546311380322441`"}], "}"}], 
    "\[InvisibleSpace]", "\<\" time=\"\>", "\[InvisibleSpace]", 
-   "0.878646`6.0943289340970725"}],
+   "0.893583`6.101649895768081"}],
   SequenceForm[
   "esatzLanczos ", " itn=", 63, " rnorm=", {0.01881582660684865, 
-   0.9546311380322441}, " time=", 0.878646`6.0943289340970725],
+   0.9546311380322441}, " time=", 0.893583`6.101649895768081],
   Editable->
-   False]], "Print",ExpressionUUID->"9ed17c45-e54f-4d7e-b6de-c375c8a4dbbf"],
+   False]], "Print",ExpressionUUID->"d86776d4-bc07-4a5f-a612-0997d755921c"],
 
 Cell[BoxData[
  InterpretationBox[
@@ -5394,12 +5394,12 @@ Cell[BoxData[
    RowBox[{"{", 
     RowBox[{"0.017653665072679528`", ",", "0.827305139610012`"}], "}"}], 
    "\[InvisibleSpace]", "\<\" time=\"\>", "\[InvisibleSpace]", 
-   "1.094119`6.189579557702115"}],
+   "1.119108`6.199386998159038"}],
   SequenceForm[
   "esatzLanczos ", " itn=", 79, " rnorm=", {0.017653665072679528`, 
-   0.827305139610012}, " time=", 1.094119`6.189579557702115],
+   0.827305139610012}, " time=", 1.119108`6.199386998159038],
   Editable->
-   False]], "Print",ExpressionUUID->"4eb8f130-edae-47e6-8dc7-ba882bdba175"],
+   False]], "Print",ExpressionUUID->"c2a3a0ec-e8c9-4bb5-a009-ce2212d04695"],
 
 Cell[BoxData[
  InterpretationBox[
@@ -5409,12 +5409,12 @@ Cell[BoxData[
    RowBox[{"{", 
     RowBox[{"0.011027875451054384`", ",", "0.5565228966798232`"}], "}"}], 
    "\[InvisibleSpace]", "\<\" time=\"\>", "\[InvisibleSpace]", 
-   "1.384745`6.291884803514713"}],
+   "1.411223`6.300110643774277"}],
   SequenceForm[
   "esatzLanczos ", " itn=", 100, " rnorm=", {0.011027875451054384`, 
-   0.5565228966798232}, " time=", 1.384745`6.291884803514713],
+   0.5565228966798232}, " time=", 1.411223`6.300110643774277],
   Editable->
-   False]], "Print",ExpressionUUID->"9b1faf8d-9bf5-4384-a6d4-e0b9ad1aab3e"],
+   False]], "Print",ExpressionUUID->"1395dafe-24f0-4a12-af10-e0e359d6c17b"],
 
 Cell[BoxData[
  InterpretationBox[
@@ -5424,12 +5424,12 @@ Cell[BoxData[
    RowBox[{"{", 
     RowBox[{"0.009731836711852898`", ",", "0.48885734507619133`"}], "}"}], 
    "\[InvisibleSpace]", "\<\" time=\"\>", "\[InvisibleSpace]", 
-   "1.742682`6.391733143263814"}],
+   "1.772469`6.399093646061331"}],
   SequenceForm[
   "esatzLanczos ", " itn=", 126, " rnorm=", {0.009731836711852898, 
-   0.48885734507619133`}, " time=", 1.742682`6.391733143263814],
+   0.48885734507619133`}, " time=", 1.772469`6.399093646061331],
   Editable->
-   False]], "Print",ExpressionUUID->"94dd0809-23ae-4c98-87db-427f2adb268e"],
+   False]], "Print",ExpressionUUID->"6e0e01db-c0ef-4256-b68a-46a76242044c"],
 
 Cell[BoxData[
  InterpretationBox[
@@ -5439,12 +5439,12 @@ Cell[BoxData[
    RowBox[{"{", 
     RowBox[{"0.007153155332597615`", ",", "0.3979806661259638`"}], "}"}], 
    "\[InvisibleSpace]", "\<\" time=\"\>", "\[InvisibleSpace]", 
-   "2.199602`6.492859103726619"}],
+   "2.226685`6.498173781351077"}],
   SequenceForm[
   "esatzLanczos ", " itn=", 158, " rnorm=", {0.007153155332597615, 
-   0.3979806661259638}, " time=", 2.199602`6.492859103726619],
+   0.3979806661259638}, " time=", 2.226685`6.498173781351077],
   Editable->
-   False]], "Print",ExpressionUUID->"2f6bd3b5-252c-46ef-95f0-a973aeb45af1"],
+   False]], "Print",ExpressionUUID->"11757b0d-b06c-42ec-bc93-c738c45caa62"],
 
 Cell[BoxData[
  InterpretationBox[
@@ -5454,12 +5454,12 @@ Cell[BoxData[
    RowBox[{"{", 
     RowBox[{"0.0029842649790828408`", ",", "0.19749461889260575`"}], "}"}], 
    "\[InvisibleSpace]", "\<\" time=\"\>", "\[InvisibleSpace]", 
-   "2.806434`6.598669831035522"}],
+   "2.881487`6.610131662408401"}],
   SequenceForm[
   "esatzLanczos ", " itn=", 200, " rnorm=", {0.0029842649790828408`, 
-   0.19749461889260575`}, " time=", 2.806434`6.598669831035522],
+   0.19749461889260575`}, " time=", 2.881487`6.610131662408401],
   Editable->
-   False]], "Print",ExpressionUUID->"495cbfe1-ea9e-497b-8039-e2d633d27cb9"],
+   False]], "Print",ExpressionUUID->"db536c1b-e968-42dd-b0da-fe9da73c8966"],
 
 Cell[BoxData[
  InterpretationBox[
@@ -5469,12 +5469,12 @@ Cell[BoxData[
    RowBox[{"{", 
     RowBox[{"0.0015987798231213966`", ",", "0.13350067488545972`"}], "}"}], 
    "\[InvisibleSpace]", "\<\" time=\"\>", "\[InvisibleSpace]", 
-   "3.564187`6.702475479655192"}],
+   "3.718425`6.72087402409798"}],
   SequenceForm[
   "esatzLanczos ", " itn=", 251, " rnorm=", {0.0015987798231213966`, 
-   0.13350067488545972`}, " time=", 3.564187`6.702475479655192],
+   0.13350067488545972`}, " time=", 3.718425`6.72087402409798],
   Editable->
-   False]], "Print",ExpressionUUID->"9270fd86-d77d-4f1a-85df-ceb4fa30c67c"],
+   False]], "Print",ExpressionUUID->"7a04d6f7-be22-4716-85b0-8930d6f06c76"],
 
 Cell[BoxData[
  InterpretationBox[
@@ -5484,12 +5484,12 @@ Cell[BoxData[
    RowBox[{"{", 
     RowBox[{"0.0009445437544787833`", ",", "0.11146150657005173`"}], "}"}], 
    "\[InvisibleSpace]", "\<\" time=\"\>", "\[InvisibleSpace]", 
-   "4.615835`6.814765273744342"}],
+   "4.771383`6.829159276707108"}],
   SequenceForm[
   "esatzLanczos ", " itn=", 316, " rnorm=", {0.0009445437544787833, 
-   0.11146150657005173`}, " time=", 4.615835`6.814765273744342],
+   0.11146150657005173`}, " time=", 4.771383`6.829159276707108],
   Editable->
-   False]], "Print",ExpressionUUID->"04c7186a-1fa7-472e-867d-8d476d5a2b09"],
+   False]], "Print",ExpressionUUID->"64e17831-984a-4608-bf81-6901399f9279"],
 
 Cell[BoxData[
  InterpretationBox[
@@ -5499,12 +5499,12 @@ Cell[BoxData[
    RowBox[{"{", 
     RowBox[{"0.0005977879109712954`", ",", "0.08180674128596584`"}], "}"}], 
    "\[InvisibleSpace]", "\<\" time=\"\>", "\[InvisibleSpace]", 
-   "5.960871`6.925824721138677"}],
+   "6.181096`6.941580486602027"}],
   SequenceForm[
   "esatzLanczos ", " itn=", 398, " rnorm=", {0.0005977879109712954, 
-   0.08180674128596584}, " time=", 5.960871`6.925824721138677],
+   0.08180674128596584}, " time=", 6.181096`6.941580486602027],
   Editable->
-   False]], "Print",ExpressionUUID->"818d8862-b9c5-45cb-aaff-58ddd5aacaac"],
+   False]], "Print",ExpressionUUID->"59c5e89b-34f4-457f-9367-556da37443c9"],
 
 Cell[BoxData[
  InterpretationBox[
@@ -5514,12 +5514,12 @@ Cell[BoxData[
    RowBox[{"{", 
     RowBox[{"0.00028914798674655373`", ",", "0.05439690230061868`"}], "}"}], 
    "\[InvisibleSpace]", "\<\" time=\"\>", "\[InvisibleSpace]", 
-   "7.799543`7.042584154574695"}],
+   "8.159787`7.062193820074583"}],
   SequenceForm[
   "esatzLanczos ", " itn=", 501, " rnorm=", {0.00028914798674655373`, 
-   0.05439690230061868}, " time=", 7.799543`7.042584154574695],
+   0.05439690230061868}, " time=", 8.159787`7.062193820074583],
   Editable->
-   False]], "Print",ExpressionUUID->"6c861a2c-b5f6-4511-ae8f-40ba6b6d3162"],
+   False]], "Print",ExpressionUUID->"3acfb87b-4ce1-4377-b7da-1f79588884d9"],
 
 Cell[BoxData[
  InterpretationBox[
@@ -5529,12 +5529,12 @@ Cell[BoxData[
    RowBox[{"{", 
     RowBox[{"0.00012182704168762603`", ",", "0.03018016671145189`"}], "}"}], 
    "\[InvisibleSpace]", "\<\" time=\"\>", "\[InvisibleSpace]", 
-   "10.374813`7.166495275379977"}],
+   "10.871534`7.18680582625419"}],
   SequenceForm[
   "esatzLanczos ", " itn=", 631, " rnorm=", {0.00012182704168762603`, 
-   0.03018016671145189}, " time=", 10.374813`7.166495275379977],
+   0.03018016671145189}, " time=", 10.871534`7.18680582625419],
   Editable->
-   False]], "Print",ExpressionUUID->"ebb7a7ac-5683-426b-8345-a778c43dff5c"],
+   False]], "Print",ExpressionUUID->"e5b2dd64-3247-41f7-982a-7eddf07d4cbc"],
 
 Cell[BoxData[
  InterpretationBox[
@@ -5544,12 +5544,12 @@ Cell[BoxData[
    RowBox[{"{", 
     RowBox[{"0.00001375003376083173`", ",", "0.02003821303708152`"}], "}"}], 
    "\[InvisibleSpace]", "\<\" time=\"\>", "\[InvisibleSpace]", 
-   "14.307233`7.3060706477324535"}],
+   "14.922167`7.324346893877789"}],
   SequenceForm[
   "esatzLanczos ", " itn=", 794, " rnorm=", {0.00001375003376083173, 
-   0.02003821303708152}, " time=", 14.307233`7.3060706477324535],
+   0.02003821303708152}, " time=", 14.922167`7.324346893877789],
   Editable->
-   False]], "Print",ExpressionUUID->"d1cf65d8-c9d6-4a08-a2de-3565956384dc"],
+   False]], "Print",ExpressionUUID->"2adb8baa-073f-4cf1-8f38-3344557fe5f7"],
 
 Cell[BoxData[
  InterpretationBox[
@@ -5559,12 +5559,12 @@ Cell[BoxData[
    RowBox[{"{", 
     RowBox[{"2.294100410963298`*^-6", ",", "0.02101061741386057`"}], "}"}], 
    "\[InvisibleSpace]", "\<\" time=\"\>", "\[InvisibleSpace]", 
-   "21.96643`7.492274478635883"}],
+   "22.893933`7.510235405337095"}],
   SequenceForm[
   "esatzLanczos ", " itn=", 1000, " rnorm=", {2.294100410963298*^-6, 
-   0.02101061741386057}, " time=", 21.96643`7.492274478635883],
+   0.02101061741386057}, " time=", 22.893933`7.510235405337095],
   Editable->
-   False]], "Print",ExpressionUUID->"8ec51fae-9c45-46f9-9c6e-bb3fa4ccabb8"],
+   False]], "Print",ExpressionUUID->"c31dd7bd-f0e0-4477-9d84-fde9b18f874e"],
 
 Cell[BoxData[
  InterpretationBox[
@@ -5577,7 +5577,7 @@ Cell[BoxData[
   "Exit ersatzLanczos.  ", "istop=", 3, " itn=", 1024, 
    "  converged eigenpairs=", 32],
   Editable->
-   False]], "Print",ExpressionUUID->"15bee366-79ce-40d3-8556-5399d5008e8f"],
+   False]], "Print",ExpressionUUID->"df53b7f3-699b-4738-9155-3bb3096ea769"],
 
 Cell[BoxData[
  InterpretationBox[
@@ -5592,26 +5592,28 @@ Cell[BoxData[
   "Exit ersatzLanczos.  ", "Anorm=", 11.82512211128085, " rnorm=", {
    5.272991581189492*^-24, 4.885915095382027*^-20}],
   Editable->
-   False]], "Print",ExpressionUUID->"e4e8876e-e7c6-4acc-a952-c2c3e670e6ab"],
+   False]], "Print",ExpressionUUID->"ab4dad99-38f5-4ea0-ad3a-73e787056e53"],
 
 Cell[BoxData[
  InterpretationBox[
   RowBox[{"\<\"Exit ersatzLanczos.  \"\>", 
    "\[InvisibleSpace]", "\<\"time (seconds): M=\"\>", "\[InvisibleSpace]", 
    "0", "\[InvisibleSpace]", "\<\", A=\"\>", "\[InvisibleSpace]", 
-   "9.4267100000000000008`4.114575187996", 
+   "9.8934090000000000001`4.135561004658703", 
    "\[InvisibleSpace]", "\<\", orthogonalization=\"\>", "\[InvisibleSpace]", 
-   "2.9168859999999999993`3.304104501547959", 
+   "2.9955949999999999985`3.315668142554739", 
    "\[InvisibleSpace]", "\<\" inner system=\"\>", "\[InvisibleSpace]", 
-   "5.913802`4.926746583054752", "\[InvisibleSpace]", "\<\", total=\"\>", 
-   "\[InvisibleSpace]", "23.249522`7.516929026245221"}],
+   "6.0958290000000000002`4.93991257892195", 
+   "\[InvisibleSpace]", "\<\", total=\"\>", "\[InvisibleSpace]", 
+   "24.267563`7.535541163583264"}],
   SequenceForm[
   "Exit ersatzLanczos.  ", "time (seconds): M=", 0, ", A=", 
-   9.4267100000000000008`4.114575187996, ", orthogonalization=", 
-   2.9168859999999999993`3.304104501547959, " inner system=", 
-   5.913802`4.926746583054752, ", total=", 23.249522`7.516929026245221],
+   9.8934090000000000001`4.135561004658703, ", orthogonalization=", 
+   2.9955949999999999985`3.315668142554739, " inner system=", 
+   6.0958290000000000002`4.93991257892195, ", total=", 
+   24.267563`7.535541163583264],
   Editable->
-   False]], "Print",ExpressionUUID->"9bafde10-7501-4170-8c32-e08c1d4710c5"],
+   False]], "Print",ExpressionUUID->"9d1da814-87a2-457d-bb2a-613c4df32608"],
 
 Cell[BoxData[
  InterpretationBox[
@@ -5622,7 +5624,7 @@ epsilon\"\>"}],
   "Exit ersatzLanczos.  ", 
    "Reasonable accuracy achieved, given machine epsilon"],
   Editable->
-   False]], "Print",ExpressionUUID->"fc4e3a28-38dc-4127-b78a-ee222d330462"],
+   False]], "Print",ExpressionUUID->"a3d34a03-25c5-4603-9ce3-003a14f52d98"],
 
 Cell[BoxData[
  InterpretationBox[
@@ -5634,7 +5636,7 @@ Cell[BoxData[
   SequenceForm[
   "cutoffNullSpace:  ", 14, " of ", 32, " zeros, between ", {2, 32}],
   Editable->
-   False]], "Print",ExpressionUUID->"4d4a2648-4c1c-40f4-815d-24f37e8c3915"],
+   False]], "Print",ExpressionUUID->"58d7cab3-554e-4cb8-8acd-112f5f67a53b"],
 
 Cell[BoxData[
  InterpretationBox[
@@ -5643,7 +5645,7 @@ Cell[BoxData[
    "\[InvisibleSpace]", "495"}],
   SequenceForm["Exit minres.  ", "istop=", 1, " itn=", 495],
   Editable->
-   False]], "Print",ExpressionUUID->"e0e096c4-f5fe-4feb-956e-d89788b7b7a0"],
+   False]], "Print",ExpressionUUID->"25e25f0b-5fe6-453c-bfa6-d7fb324ae1bc"],
 
 Cell[BoxData[
  InterpretationBox[
@@ -5655,7 +5657,7 @@ Cell[BoxData[
   "Exit minres.  ", "Anorm=", 58.315174281988455`, " Acond=", 
    2.156811365894824],
   Editable->
-   False]], "Print",ExpressionUUID->"9cc8299d-9e68-47e4-bbb6-b9a055de09b7"],
+   False]], "Print",ExpressionUUID->"e5a28dcb-f3c6-4702-a03d-f096a10e4792"],
 
 Cell[BoxData[
  InterpretationBox[
@@ -5667,7 +5669,7 @@ Cell[BoxData[
   "Exit minres.  ", "rnorm=", 3.540994733688105*^-11, " ynorm=", 
    58.5590232543895],
   Editable->
-   False]], "Print",ExpressionUUID->"a45e1264-25a6-48ac-ac04-ceea77cff605"],
+   False]], "Print",ExpressionUUID->"aa497d31-b1ed-4c16-b8bb-e8e8f03210bd"],
 
 Cell[BoxData[
  InterpretationBox[
@@ -5675,25 +5677,25 @@ Cell[BoxData[
    "\[InvisibleSpace]", "5.181847126010432`*^-11"}],
   SequenceForm["Exit minres.  ", "Arnorm=", 5.181847126010432*^-11],
   Editable->
-   False]], "Print",ExpressionUUID->"122abc22-48b1-42e6-accf-c7d211e2d5b9"],
+   False]], "Print",ExpressionUUID->"86cc9e46-719c-4686-8bb5-4af53ee27d24"],
 
 Cell[BoxData[
  InterpretationBox[
   RowBox[{"\<\"Exit minres.  \"\>", 
    "\[InvisibleSpace]", "\<\"time (seconds): M=\"\>", "\[InvisibleSpace]", 
    "0", "\[InvisibleSpace]", "\<\", A=\"\>", "\[InvisibleSpace]", 
-   "2.3896920000000000001`3.8342517285828857", 
+   "2.5636679999999999994`3.864771581405204", 
    "\[InvisibleSpace]", "\<\", orthogonalization=\"\>", "\[InvisibleSpace]", 
-   "0.8403770000000000016`3.079353961069056", 
+   "0.8527199999999999986`3.085686252435372", 
    "\[InvisibleSpace]", "\<\", total=\"\>", "\[InvisibleSpace]", 
-   "3.913556`6.743086550454993"}],
+   "4.118936`6.765300041776084"}],
   SequenceForm[
   "Exit minres.  ", "time (seconds): M=", 0, ", A=", 
-   2.3896920000000000001`3.8342517285828857, ", orthogonalization=", 
-   0.8403770000000000016`3.079353961069056, ", total=", 
-   3.913556`6.743086550454993],
+   2.5636679999999999994`3.864771581405204, ", orthogonalization=", 
+   0.8527199999999999986`3.085686252435372, ", total=", 
+   4.118936`6.765300041776084],
   Editable->
-   False]], "Print",ExpressionUUID->"3db1e498-ebc9-4198-89de-df51fd9f48a1"],
+   False]], "Print",ExpressionUUID->"dbf6a3f6-25d7-455f-a3f2-e3354d3a3aca"],
 
 Cell[BoxData[
  InterpretationBox[
@@ -5701,26 +5703,26 @@ Cell[BoxData[
    "\[InvisibleSpace]", "\<\"A solution to Ax=b was found, given rtol\"\>"}],
   SequenceForm["Exit minres.  ", "A solution to Ax=b was found, given rtol"],
   Editable->
-   False]], "Print",ExpressionUUID->"06b1088e-93e5-4f5b-873e-531139dac06a"],
+   False]], "Print",ExpressionUUID->"a5f75894-8ac0-4481-a398-d519f20d8c27"],
 
 Cell[BoxData[
  InterpretationBox[
   RowBox[{"\<\"findDelta time (seconds):  dynamic part=\"\>", 
-   "\[InvisibleSpace]", "15.8173040000000000027`3.7968576092470507", 
+   "\[InvisibleSpace]", "16.7091549999999999983`3.8206796353473242", 
    "\[InvisibleSpace]", "\<\", small shifts=\"\>", "\[InvisibleSpace]", 
-   "0.0308089999999999999`1.9419632572668528", 
+   "0.0330009999999999995`1.9718127551896116", 
    "\[InvisibleSpace]", "\<\", A=\"\>", "\[InvisibleSpace]", 
-   "0.3710489999999999987`2.3142584766352488", 
+   "0.3828910000000000013`2.3279023693682945", 
    "\[InvisibleSpace]", "\<\", total=\"\>", "\[InvisibleSpace]", 
-   "27.177786`7.584729072482089"}],
+   "28.402794`7.6038760617909364"}],
   SequenceForm[
   "findDelta time (seconds):  dynamic part=", 
-   15.8173040000000000027`3.7968576092470507, ", small shifts=", 
-   0.0308089999999999999`1.9419632572668528, ", A=", 
-   0.3710489999999999987`2.3142584766352488, ", total=", 
-   27.177786`7.584729072482089],
+   16.7091549999999999983`3.8206796353473242, ", small shifts=", 
+   0.0330009999999999995`1.9718127551896116, ", A=", 
+   0.3828910000000000013`2.3279023693682945, ", total=", 
+   28.402794`7.6038760617909364],
   Editable->
-   False]], "Print",ExpressionUUID->"68fb56c7-c05d-444e-b7e1-2ddf2e87bbb5"],
+   False]], "Print",ExpressionUUID->"a77fc7d3-5116-418a-967a-58a75460b623"],
 
 Cell[BoxData[
  InterpretationBox[
@@ -5733,7 +5735,7 @@ Cell[BoxData[
   "findDelta counts:  dynamic part=", 3571, " (gauge transform=", 115511, 
    "), small shifts=", 498, ", A=", 2545],
   Editable->
-   False]], "Print",ExpressionUUID->"21ea024a-cbb4-42a6-a155-e6285198b7aa"],
+   False]], "Print",ExpressionUUID->"f428e300-b8b9-4e42-ad83-e4d22d7eea08"],
 
 Cell[BoxData[
  InterpretationBox[
@@ -5742,22 +5744,22 @@ Cell[BoxData[
    "\[InvisibleSpace]", "2"}],
   SequenceForm["applyCutoff2: rescale maxNorm ", 8.320152140750675, " to ", 2],
   Editable->
-   False]], "Print",ExpressionUUID->"9a266888-ee39-4d77-9b07-af6771dedf14"],
+   False]], "Print",ExpressionUUID->"0160e270-f756-4904-9902-117485e48221"],
 
 Cell[BoxData[
  InterpretationBox[
   RowBox[{"\<\"latticeSaddlePointStep times:  \"\>", "\[InvisibleSpace]", 
    RowBox[{"{", 
     RowBox[{
-    "innerLoopTime", ",", "1.040915`6.167930264769869", ",", 
-     "27.178314`7.584737509713107", ",", "0.017536`4.394445534636269"}], 
+    "innerLoopTime", ",", "1.08412`6.185592354253392", ",", 
+     "28.403571`7.6038879423896155", ",", "0.029041`4.613526564646708"}], 
     "}"}]}],
   SequenceForm[
   "latticeSaddlePointStep times:  ", {$CellContext`innerLoopTime, 
-    1.040915`6.167930264769869, 27.178314`7.584737509713107, 
-    0.017536`4.394445534636269}],
+    1.08412`6.185592354253392, 28.403571`7.6038879423896155, 
+    0.029041`4.613526564646708}],
   Editable->
-   False]], "Print",ExpressionUUID->"02a74c3b-89b0-45a1-bdeb-080b87a87829"]
+   False]], "Print",ExpressionUUID->"51746d18-e454-48b8-97b0-bc7ebd4b7a23"]
 }, Open  ]]
 }, Open  ]],
 
@@ -5772,14 +5774,14 @@ Cell[BoxData[
  RowBox[{"{", 
   RowBox[{
    RowBox[{"{", 
-    RowBox[{"8.320152014340525`", ",", "3.0386499427770275`*^-8"}], "}"}], 
+    RowBox[{"8.320152014340543`", ",", "3.0386495319945084`*^-8"}], "}"}], 
    ",", 
    RowBox[{"{", 
-    RowBox[{"58.559023432459334`", ",", 
-     RowBox[{"-", "6.081721348749625`*^-9"}]}], "}"}], ",", 
+    RowBox[{"58.55902343246299`", ",", 
+     RowBox[{"-", "6.081846581906802`*^-9"}]}], "}"}], ",", 
    RowBox[{"{", 
     RowBox[{"0.9999999999999493`", ",", "3.185504425530386`*^-7"}], "}"}]}], 
-  "}"}]], "Output",ExpressionUUID->"99bff541-af7a-46ca-827b-24cba5567ddf"]
+  "}"}]], "Output",ExpressionUUID->"496558c5-a5fc-45cc-93ac-56f6e9b65762"]
 }, Open  ]],
 
 Cell[CellGroupData[{
@@ -5794,8 +5796,8 @@ Cell[BoxData[
    RowBox[{"Flatten", "[", "gaugeFieldDynamicDense", "]"}], 
    "]"}]}]], "Input",ExpressionUUID->"354d88a8-579c-4b35-9f68-69dae58bc6a0"],
 
-Cell[BoxData["1.3083425787153141`*^-7"], \
-"Output",ExpressionUUID->"22bbc474-edfb-409a-8e7a-0871d38fd84e"]
+Cell[BoxData["1.308342560859512`*^-7"], \
+"Output",ExpressionUUID->"087b0192-1b61-4319-b07a-2e2ccd76bb48"]
 }, Open  ]],
 
 Cell["22^3-lattice, nc=3:  2000 vectors is about 4GB.", \
@@ -5847,38 +5849,38 @@ Cell[BoxData[
 
 Cell[CellGroupData[{
 
-Cell[BoxData["\<\"Starting hess, grad\"\>"], \
-"Print",ExpressionUUID->"bd01a75d-2e49-4115-b7eb-eee7f42866b4"],
+Cell[BoxData["\<\"Constructed hess, grad\"\>"], \
+"Print",ExpressionUUID->"fcf5ce19-6fe5-4db0-89b5-207bba468791"],
 
-Cell[BoxData["\<\"Starting gaugeTransformShifts\"\>"], \
-"Print",ExpressionUUID->"6a9451f8-a8d3-40fe-895f-472aca97ced9"],
+Cell[BoxData["\<\"Constructed gauge\"\>"], \
+"Print",ExpressionUUID->"8259f10e-c926-4e30-a5cc-4044382b3587"],
 
 Cell[BoxData["\<\"Starting up and detaching.\"\>"], \
-"Print",ExpressionUUID->"ac02028b-ee23-4e94-8582-ed3f2cc2436b"],
+"Print",ExpressionUUID->"6362d27a-07b8-4e5b-a794-2646e54b0761"],
 
 Cell[BoxData[
  InterpretationBox[
   RowBox[{"\<\"findDelta shifts time (seconds):  total=\"\>", 
-   "\[InvisibleSpace]", "4.832809`6.834714629328173"}],
+   "\[InvisibleSpace]", "0.138521`5.292030615945587"}],
   SequenceForm[
-  "findDelta shifts time (seconds):  total=", 4.832809`6.834714629328173],
+  "findDelta shifts time (seconds):  total=", 0.138521`5.292030615945587],
   Editable->
-   False]], "Print",ExpressionUUID->"f5945ef7-b270-405a-b74f-128a646ad08b"],
+   False]], "Print",ExpressionUUID->"7c3cc0d8-c9ce-43bb-9f22-72dbc771a59c"],
 
 Cell[BoxData[
  InterpretationBox[
   RowBox[{"\<\"latticeSaddlePointStep times:  \"\>", "\[InvisibleSpace]", 
    RowBox[{"{", 
     RowBox[{
-    "innerLoopTime", ",", "1.174546`6.220385028017532", ",", 
-     "4.833286`6.834757492235694", ",", "0.000011`1.1919076829902187"}], 
+    "innerLoopTime", ",", "1.01784`6.158194512003309", ",", 
+     "0.139093`5.293820272052156", ",", "0.000015`1.3266062568876744"}], 
     "}"}]}],
   SequenceForm[
   "latticeSaddlePointStep times:  ", {$CellContext`innerLoopTime, 
-    1.174546`6.220385028017532, 4.833286`6.834757492235694, 
-    0.000011`1.1919076829902187}],
+    1.01784`6.158194512003309, 0.139093`5.293820272052156, 
+    0.000015`1.3266062568876744}],
   Editable->
-   False]], "Print",ExpressionUUID->"53ec676a-159b-460e-b625-f61c8958a58e"]
+   False]], "Print",ExpressionUUID->"5de85cfe-d461-47a9-af99-ae1660844ba2"]
 }, Open  ]]
 }, Open  ]],
 
@@ -5899,25 +5901,24 @@ Cell[BoxData[
 Cell[CellGroupData[{
 
 Cell[BoxData[
- StyleBox["\<\"Opening file hess-grad-gauge.json\\nOpening file hess.dat for \
-157824 elements\\nOpening file grad.dat for a vector of length 1536\\nOpening \
-file gauge.dat for 24576 elements, dimesions (512, 1536)\\n                   \
-                               Mon Sep 16 14:59:01 2019\\nTRLAN execution \
-summary (exit status =0)\\nNumber of SMALLEST eigenpairs             1 \
-(computed)           1 (wanted)\\nTimes the operator is applied:          128 \
-(MAX:           400000 )\\nProblem size:                           512 (PE:   \
- 0)         512 (Global)\\nConvergence tolerance:            1.490e-08 (rel)  \
-      1.620e-07 (abs)\\nMaximum basis size:                    \
-2000\\nRestarting scheme:                        3\\nNumber of \
+ StyleBox["\<\"Opening file hess-grad-gauge.json\\nOpening file \
+hess.mtx\\nOpening file grad.dat for a vector of length 1536\\nOpening file \
+gauge.mtx\\n                                                  Mon Sep 16 \
+21:15:48 2019\\nTRLAN execution summary (exit status =0)\\nNumber of SMALLEST \
+eigenpairs             1 (computed)           1 (wanted)\\nTimes the operator \
+is applied:          128 (MAX:           400000 )\\nProblem size:             \
+              512 (PE:    0)         512 (Global)\\nConvergence tolerance:    \
+        1.490e-08 (rel)        1.620e-07 (abs)\\nMaximum basis size:          \
+          2000\\nRestarting scheme:                        3\\nNumber of \
 re-orthogonalizations:        128\\nNumber of (re)start loops:                \
 1\\nNumber of eigenpairs locked:              0\\nOP(MATVEC):              \
-9.8070e-03 sec,   1.2831e+09 FLOP/S ( 1.2583e+07 \
-FLOP)\\nRe-Orthogonalization::   7.6040e-03 sec,   2.2494e+09 FLOP/S ( \
-1.7104e+07 FLOP)\\nRestarting::             1.7470e-03 sec,   7.5027e+07 \
-FLOP/S ( 1.3107e+05 FLOP)\\nTRLAN on this PE:        3.7089e-02 sec,   \
-8.1458e+08 FLOP/S ( 3.0212e+07 FLOP)\\nGauge matrix extreme eigenvalues \
+9.7820e-03 sec,   1.2863e+09 FLOP/S ( 1.2583e+07 \
+FLOP)\\nRe-Orthogonalization::   7.6180e-03 sec,   2.2453e+09 FLOP/S ( \
+1.7104e+07 FLOP)\\nRestarting::             1.7590e-03 sec,   7.4515e+07 \
+FLOP/S ( 1.3107e+05 FLOP)\\nTRLAN on this PE:        3.6635e-02 sec,   \
+8.2468e+08 FLOP/S ( 3.0212e+07 FLOP)\\nGauge matrix extreme eigenvalues \
 found:\\n  1.130975e+00\\n                                                  \
-Mon Sep 16 14:59:26 2019\\nTRLAN execution summary (exit status =0)\\nNumber \
+Mon Sep 16 21:16:11 2019\\nTRLAN execution summary (exit status =0)\\nNumber \
 of SMALLEST eigenpairs            40 (computed)          40 (wanted)\\nTimes \
 the operator is applied:         1472 (MAX:           400000 )\\nProblem \
 size:                          1536 (PE:    0)        1536 \
@@ -5926,12 +5927,12 @@ size:                          1536 (PE:    0)        1536 \
                   1\\nNumber of re-orthogonalizations:       2856\\nNumber of \
 (re)start loops:                1\\nNumber of random vectors used:          \
 449\\nNumber of eigenpairs locked:              0\\nOP(MATVEC):              \
-1.0061e+01 sec,   9.2360e+07 FLOP/S ( 9.2927e+08 \
-FLOP)\\nRe-Orthogonalization::   1.4454e+01 sec,   3.2495e+06 FLOP/S ( \
-4.6970e+07 FLOP)\\nRestarting::             7.4573e-02 sec,   2.4255e+09 \
-FLOP/S ( 1.8088e+08 FLOP)\\nTRLAN on this PE:        2.4780e+01 sec,   \
-4.7244e+07 FLOP/S ( 1.1707e+09 FLOP)\\nlargeShifts: 1472 matrix-vector ops, \
-2856 reorthogonalizations in 24.78 sec (25 wall)\\ncutoffNullSpace:  14 of 40 \
+9.5633e+00 sec,   9.7170e+07 FLOP/S ( 9.2927e+08 \
+FLOP)\\nRe-Orthogonalization::   1.3640e+01 sec,   3.4434e+06 FLOP/S ( \
+4.6970e+07 FLOP)\\nRestarting::             7.1051e-02 sec,   2.5458e+09 \
+FLOP/S ( 1.8088e+08 FLOP)\\nTRLAN on this PE:        2.3454e+01 sec,   \
+4.9914e+07 FLOP/S ( 1.1707e+09 FLOP)\\nlargeShifts: 1472 matrix-vector ops, \
+2856 reorthogonalizations in 23.45 sec (23 wall)\\ncutoffNullSpace:  14 of 40 \
 zeros between [0, 30]\\nlinearSolve writing to stdout\\n\\n\\n Enter \
 MINRES-QLP.      Solution of symmetric   Ax = b\\n n        =   1536      \
 ||b||    =   2.60E+01   precon   =   F\\n itnlim   =   6144      rtol     =   \
@@ -5958,7 +5959,7 @@ norm(A)   cond(A)\\n       0   0.0000000000E+00  0.00E+00  2.60E+01  4.87E+01 \
  30   4.5482696561E-01  4.18E+01  3.41E+00  1.82E+00  2.30E-02  1.83E-01  \
 2.92E+00  6.19E+00  \\n      40   5.2729243451E-01  4.58E+01  2.45E+00  \
 8.71E-01  1.53E-02  1.22E-01  2.92E+00  6.91E+00  \\n      50   \
-6.2811566898E-01  4.82E+01  1.91E+00  5.29E-01  1.14E-02  9.50E-02  2.92E+00  \
+6.2811566897E-01  4.82E+01  1.91E+00  5.29E-01  1.14E-02  9.50E-02  2.92E+00  \
 8.58E+00  \\n      60   7.3521086013E-01  5.03E+01  1.50E+00  5.55E-01  \
 8.71E-03  1.27E-01  2.92E+00  8.58E+00  \\n      70   8.6987705749E-01  \
 5.22E+01  1.13E+00  5.00E-01  6.34E-03  1.52E-01  2.92E+00  8.58E+00  \\n     \
@@ -6023,47 +6024,47 @@ MINRES-QLP.       Anorm =  2.9174E+00     Acond  =  2.5089E+01\\n Exit  \
 MINRES-QLP.       rnorm =  1.5092E-07     Arnorm =  1.9444E-07\\n Exit  \
 MINRES-QLP.       xnorm =  5.8559E+01\\n Exit  MINRES-QLP.       A solution \
 to (poss. singular) Ax = b found, given rtol.         \\nlinearSolve:  460 \
-iterations, 460 reorthogonalizations in 2.30 sec (2 wall)\\ndynamicProject:  \
-6724 calls (2957 usertol), 148109 matrix-vector ops,\\n                 in \
-16.26 sec (17 wall)\\nOpening output file shifts.dat\\nshifts.c:  \
-input/output in 0.08 sec (0 wall)\\nshifts.c:  overall time 27.20 sec (27 \
+iterations, 460 reorthogonalizations in 2.22 sec (3 wall)\\ndynamicProject:  \
+6724 calls (2936 usertol), 147999 matrix-vector ops,\\n                 in \
+15.40 sec (17 wall)\\nOpening output file shifts.dat\\nshifts.c:  \
+input/output in 0.08 sec (0 wall)\\nshifts.c:  overall time 25.79 sec (26 \
 wall)\\n\"\>",
   StripOnInput->False,
   FontColor->RGBColor[
-   0, 0, 1]]], "Print",ExpressionUUID->"e75203e4-4aa5-46ec-a0c0-ddf49bc41562"],
+   0, 0, 1]]], "Print",ExpressionUUID->"7987aca1-4057-480a-8e02-ce8f5f6ea612"],
 
 Cell[BoxData[
  InterpretationBox[
   RowBox[{"\<\"findDelta shifts time (seconds):  total=\"\>", 
-   "\[InvisibleSpace]", "0.000598`2.9272161818204046"}],
+   "\[InvisibleSpace]", "0.001318`3.270430408089985"}],
   SequenceForm[
-  "findDelta shifts time (seconds):  total=", 0.000598`2.9272161818204046],
+  "findDelta shifts time (seconds):  total=", 0.001318`3.270430408089985],
   Editable->
-   False]], "Print",ExpressionUUID->"5e589854-9dba-4148-8bc5-1f2b4070fcf2"],
+   False]], "Print",ExpressionUUID->"7cb71961-49f2-444b-b88c-8cb15a69aab1"],
 
 Cell[BoxData[
  InterpretationBox[
   RowBox[{"\<\"applyCutoff2: rescale maxNorm \"\>", "\[InvisibleSpace]", 
-   "8.320151872489554`", "\[InvisibleSpace]", "\<\" to \"\>", 
+   "8.320151872489706`", "\[InvisibleSpace]", "\<\" to \"\>", 
    "\[InvisibleSpace]", "2"}],
-  SequenceForm["applyCutoff2: rescale maxNorm ", 8.320151872489554, " to ", 2],
+  SequenceForm["applyCutoff2: rescale maxNorm ", 8.320151872489706, " to ", 2],
   Editable->
-   False]], "Print",ExpressionUUID->"1dbd5c64-f663-453f-a59e-dbfa841e8fa6"],
+   False]], "Print",ExpressionUUID->"8a32ecf6-f185-4d08-b3b5-1c670b068b49"],
 
 Cell[BoxData[
  InterpretationBox[
   RowBox[{"\<\"latticeSaddlePointStep times:  \"\>", "\[InvisibleSpace]", 
    RowBox[{"{", 
     RowBox[{
-    "innerLoopTime", ",", "0.020964`4.47198914886255", ",", 
-     "0.002979`3.6245855010470374", ",", "0.018486`4.4173579465325785"}], 
+    "innerLoopTime", ",", "0.028133`4.599731044038285", ",", 
+     "0.005403`3.8831499653711896", ",", "0.019902`4.44941171973512"}], 
     "}"}]}],
   SequenceForm[
   "latticeSaddlePointStep times:  ", {$CellContext`innerLoopTime, 
-    0.020964`4.47198914886255, 0.002979`3.6245855010470374, 
-    0.018486`4.4173579465325785}],
+    0.028133`4.599731044038285, 0.005403`3.8831499653711896, 
+    0.019902`4.44941171973512}],
   Editable->
-   False]], "Print",ExpressionUUID->"84c027df-7eee-4999-b359-4c9c85e749cf"]
+   False]], "Print",ExpressionUUID->"0ccff0db-2a42-433d-8b5b-d958b37ab44e"]
 }, Open  ]]
 }, Open  ]],
 
@@ -6078,14 +6079,13 @@ Cell[BoxData[
  RowBox[{"{", 
   RowBox[{
    RowBox[{"{", 
-    RowBox[{"8.320151880209966`", ",", 
-     RowBox[{"-", "1.8558343750640915`*^-9"}]}], "}"}], ",", 
+    RowBox[{"8.320151880210059`", ",", 
+     RowBox[{"-", "1.8558199421647714`*^-9"}]}], "}"}], ",", 
    RowBox[{"{", 
-    RowBox[{"58.55902526248471`", ",", "5.6420184191274814`*^-8"}], "}"}], 
-   ",", 
+    RowBox[{"58.55902526248812`", ",", "5.642005063144495`*^-8"}], "}"}], ",", 
    RowBox[{"{", 
-    RowBox[{"0.9999999999997649`", ",", "6.857772766949639`*^-7"}], "}"}]}], 
-  "}"}]], "Output",ExpressionUUID->"f6f3e331-dec1-47ff-b3ae-ae2240c44d24"]
+    RowBox[{"0.999999999999765`", ",", "6.856153649286428`*^-7"}], "}"}]}], 
+  "}"}]], "Output",ExpressionUUID->"6d2e8946-6047-45e4-8ea0-357b2b19a556"]
 }, Open  ]],
 
 Cell[CellGroupData[{
@@ -6100,8 +6100,8 @@ Cell[BoxData[
    RowBox[{"Flatten", "[", "gaugeFieldDynamicDense", "]"}], 
    "]"}]}]], "Input",ExpressionUUID->"16db756a-07de-47c7-ba3f-6bc41f9ee440"],
 
-Cell[BoxData["2.8017902493084227`*^-7"], \
-"Output",ExpressionUUID->"f1ff8c03-8ce0-4514-b1f3-ffed933a3ee4"]
+Cell[BoxData["2.8017891405374185`*^-7"], \
+"Output",ExpressionUUID->"3cdaf991-bfcc-4214-88ca-52f96cdd52e8"]
 }, Open  ]],
 
 Cell[BoxData[
@@ -8848,8 +8848,8 @@ Cell[BoxData[
      RowBox[{"dynamicPart", "[", 
       RowBox[{"sh", ",", 
        RowBox[{"Method", "\[Rule]", "\"\<LinearSolve\>\""}]}], "]"}]}], ")"}],
-    ";"}], 
-  "]"}]], "Input",ExpressionUUID->"b61c9e0b-0df1-4376-ba15-4044a3d0b078"],
+    ";"}], "]"}]], \
+"Input",ExpressionUUID->"b61c9e0b-0df1-4376-ba15-4044a3d0b078"],
 
 Cell[BoxData[
  InterpretationBox[
@@ -11020,7 +11020,7 @@ Cell[BoxData[
 }, Open  ]]
 },
 WindowSize->{990, 659},
-WindowMargins->{{146, Automatic}, {0, Automatic}},
+WindowMargins->{{75, Automatic}, {0, Automatic}},
 PrivateNotebookOptions->{"FileOutlineCache"->False},
 TrackCellChangeTimes->False,
 FrontEndVersion->"11.2 for Linux x86 (64-bit) (September 10, 2017)",

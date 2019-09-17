@@ -479,10 +479,9 @@ findDelta[data:{hess_, grad_, gauge_}, opts:OptionsPattern[]] :=
           "dynamicPartOptions" ->
                {methodOptions[OptionValue[dynamicPartMethod]]}/.symbolString,
           "largeShiftOptions" -> OptionValue[largeShiftOptions]/.symbolString,
-          "hessElements" -> Length[hess["NonzeroValues"]],
-          "gaugeElements" -> Length[gauge["NonzeroValues"]],
           "gaugeDimension" -> Length[gauge]}];
-      Export["hess.mtx", hess];
+      (* Export full matrix, even though it is symmetric. *)
+      Export["hess.mtx", hess, "MatrixStructure" -> "General"];
       Export["grad.dat", grad];
       Export["gauge.mtx", gauge];
       Apply[Clear, Unevaluated[data]]];

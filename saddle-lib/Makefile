@@ -9,12 +9,12 @@ TRLANDIR = ../../linear-algebra/nutrlan
 CFLAGS = -fPIC -Wall -g -O3 -Wextra -pedantic -std=gnu11 -I$(TRLANDIR)/INC
 
 MINRESOBJS = $(MINRESDIR)/minresqlpModule.o $(MINRESDIR)/minresqlpDataModule.o  $(MINRESDIR)/minresqlpBlasModule.o
-SHIFTOBJS = shifts.o dynamic.o eigensystem.o cutoff.o linear.o
+SHIFTOBJS = shifts.o dynamic.o eigensystem.o cutoff.o linear.o mmio.o
 
 shifts: $(SHIFTOBJS)
 	$(CC) $(CFLAGS) -o shifts $(SHIFTOBJS) $(MINRESOBJS) -L$(TRLANDIR) -L/usr/local/lib -lnutrlan -lgfortran -llapack -lblas -lrsb -lm -lcjson
 
-%.o: %.c shifts.h
+%.o: %.c shifts.h mmio.h
 	$(CC) -c -o $@ $< $(CFLAGS)
 
 clean:
