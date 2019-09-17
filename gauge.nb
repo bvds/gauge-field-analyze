@@ -5005,6 +5005,7 @@ Cell[BoxData[
    RowBox[{"latticeSaddlePointStep", "[", 
     RowBox[{
      RowBox[{"storePairs", "\[Rule]", "True"}], ",", 
+     RowBox[{"storeHess", "\[Rule]", "True"}], ",", 
      RowBox[{"fixedDir", "\[Rule]", "0"}]}], "]"}]}], ";", 
   RowBox[{"shiftsDynamicDense", "=", "shifts0"}], 
   ";"}]], "Input",ExpressionUUID->"89f1d4ee-77ad-4a21-b2d4-e62d1cd6d244"],
@@ -5012,10 +5013,10 @@ Cell[BoxData[
 Cell[CellGroupData[{
 
 Cell[BoxData["\<\"Constructed hess, grad\"\>"], \
-"Print",ExpressionUUID->"18b8fd91-5795-4a65-9db9-fe729bfe6344"],
+"Print",ExpressionUUID->"520f130c-9cdd-436b-9f83-e73a89d841ed"],
 
 Cell[BoxData["\<\"Constructed gauge\"\>"], \
-"Print",ExpressionUUID->"d7445b88-1e13-4200-b69e-d8c5a0941c00"],
+"Print",ExpressionUUID->"64765aad-e054-494f-bd7d-800dbd606fe1"],
 
 Cell[BoxData[
  InterpretationBox[
@@ -5027,7 +5028,7 @@ Cell[BoxData[
   SequenceForm[
   "applyCutoff3:  ", 14, " of ", 1024, " zeros, between ", {994, 1024}],
   Editable->
-   False]], "Print",ExpressionUUID->"f7610f80-a1ff-4f02-8108-43d6ffea32a7"],
+   False]], "Print",ExpressionUUID->"6a47ce82-58b9-478f-afb9-64eb6e542328"],
 
 Cell[BoxData[
  InterpretationBox[
@@ -5040,7 +5041,7 @@ Cell[BoxData[
   "shifts norms and rescale:  ", {8.320151887930411, 58.55902361053649, 
    0.9999999999999899}],
   Editable->
-   False]], "Print",ExpressionUUID->"a66de302-4ce9-4279-9692-6e4caa885084"],
+   False]], "Print",ExpressionUUID->"c54447da-48e1-4d3f-82dd-6a04d705ebab"],
 
 Cell[BoxData[
  InterpretationBox[
@@ -5049,22 +5050,22 @@ Cell[BoxData[
    "\[InvisibleSpace]", "2"}],
   SequenceForm["applyCutoff2: rescale maxNorm ", 8.320151887930411, " to ", 2],
   Editable->
-   False]], "Print",ExpressionUUID->"25cce35b-f1a9-43c3-8ec9-913d8206a734"],
+   False]], "Print",ExpressionUUID->"cfba05e7-ba91-47ad-9a17-327dd8aea2a0"],
 
 Cell[BoxData[
  InterpretationBox[
   RowBox[{"\<\"latticeSaddlePointStep times:  \"\>", "\[InvisibleSpace]", 
    RowBox[{"{", 
     RowBox[{
-    "innerLoopTime", ",", "1.057929`6.174971520027482", ",", 
-     "0.943345`6.125185549736576", ",", "0.015453`4.339527802432236"}], 
+    "innerLoopTime", ",", "1.903991`6.430179889013027", ",", 
+     "1.625402`6.361475787633223", ",", "0.039525`4.747386876436241"}], 
     "}"}]}],
   SequenceForm[
   "latticeSaddlePointStep times:  ", {$CellContext`innerLoopTime, 
-    1.057929`6.174971520027482, 0.943345`6.125185549736576, 
-    0.015453`4.339527802432236}],
+    1.903991`6.430179889013027, 1.625402`6.361475787633223, 
+    0.039525`4.747386876436241}],
   Editable->
-   False]], "Print",ExpressionUUID->"9ecebb56-a2fb-43d6-a844-fbe81bf73866"]
+   False]], "Print",ExpressionUUID->"50f0acac-fd3f-495b-a2ee-caa3711e1656"]
 }, Open  ]]
 }, Open  ]],
 
@@ -5803,8 +5804,6 @@ Cell[BoxData["1.308342560859512`*^-7"], \
 Cell["22^3-lattice, nc=3:  2000 vectors is about 4GB.", \
 "Text",ExpressionUUID->"c11624e7-1c86-4d64-a237-496155502c43"],
 
-Cell[CellGroupData[{
-
 Cell[BoxData[
  RowBox[{
   RowBox[{"gaugeFieldDynamicMinres2", "=", 
@@ -5843,46 +5842,9 @@ Cell[BoxData[
          RowBox[{"10.0", "^", 
           RowBox[{"-", "9"}]}]}]}], "}"}]}], ",", 
      RowBox[{"externalAction", "\[Rule]", "\"\<write\>\""}], ",", 
-     RowBox[{"debugProj", "\[Rule]", "False"}]}], "]"}]}], ";", 
-  RowBox[{"shiftsDynamicMinres2", "=", "shifts0"}], 
+     RowBox[{"fullMatrix", "\[Rule]", "False"}], ",", 
+     RowBox[{"debugProj", "\[Rule]", "False"}]}], "]"}]}], 
   ";"}]], "Input",ExpressionUUID->"4ae56d15-6f51-4241-a723-7323eb2d6ff8"],
-
-Cell[CellGroupData[{
-
-Cell[BoxData["\<\"Constructed hess, grad\"\>"], \
-"Print",ExpressionUUID->"fcf5ce19-6fe5-4db0-89b5-207bba468791"],
-
-Cell[BoxData["\<\"Constructed gauge\"\>"], \
-"Print",ExpressionUUID->"8259f10e-c926-4e30-a5cc-4044382b3587"],
-
-Cell[BoxData["\<\"Starting up and detaching.\"\>"], \
-"Print",ExpressionUUID->"6362d27a-07b8-4e5b-a794-2646e54b0761"],
-
-Cell[BoxData[
- InterpretationBox[
-  RowBox[{"\<\"findDelta shifts time (seconds):  total=\"\>", 
-   "\[InvisibleSpace]", "0.138521`5.292030615945587"}],
-  SequenceForm[
-  "findDelta shifts time (seconds):  total=", 0.138521`5.292030615945587],
-  Editable->
-   False]], "Print",ExpressionUUID->"7c3cc0d8-c9ce-43bb-9f22-72dbc771a59c"],
-
-Cell[BoxData[
- InterpretationBox[
-  RowBox[{"\<\"latticeSaddlePointStep times:  \"\>", "\[InvisibleSpace]", 
-   RowBox[{"{", 
-    RowBox[{
-    "innerLoopTime", ",", "1.01784`6.158194512003309", ",", 
-     "0.139093`5.293820272052156", ",", "0.000015`1.3266062568876744"}], 
-    "}"}]}],
-  SequenceForm[
-  "latticeSaddlePointStep times:  ", {$CellContext`innerLoopTime, 
-    1.01784`6.158194512003309, 0.139093`5.293820272052156, 
-    0.000015`1.3266062568876744}],
-  Editable->
-   False]], "Print",ExpressionUUID->"5de85cfe-d461-47a9-af99-ae1660844ba2"]
-}, Open  ]]
-}, Open  ]],
 
 Cell[CellGroupData[{
 
@@ -6079,13 +6041,14 @@ Cell[BoxData[
  RowBox[{"{", 
   RowBox[{
    RowBox[{"{", 
-    RowBox[{"8.320151880210059`", ",", 
-     RowBox[{"-", "1.8558199421647714`*^-9"}]}], "}"}], ",", 
+    RowBox[{"8.320151880209966`", ",", 
+     RowBox[{"-", "1.8558341530194866`*^-9"}]}], "}"}], ",", 
    RowBox[{"{", 
-    RowBox[{"58.55902526248812`", ",", "5.642005063144495`*^-8"}], "}"}], ",", 
+    RowBox[{"58.55902526248042`", ",", "5.6420037752857866`*^-8"}], "}"}], 
+   ",", 
    RowBox[{"{", 
     RowBox[{"0.999999999999765`", ",", "6.856153649286428`*^-7"}], "}"}]}], 
-  "}"}]], "Output",ExpressionUUID->"6d2e8946-6047-45e4-8ea0-357b2b19a556"]
+  "}"}]], "Output",ExpressionUUID->"a1320dea-1605-48e2-8854-67ad0ad5c465"]
 }, Open  ]],
 
 Cell[CellGroupData[{
@@ -6100,8 +6063,8 @@ Cell[BoxData[
    RowBox[{"Flatten", "[", "gaugeFieldDynamicDense", "]"}], 
    "]"}]}]], "Input",ExpressionUUID->"16db756a-07de-47c7-ba3f-6bc41f9ee440"],
 
-Cell[BoxData["2.8017891405374185`*^-7"], \
-"Output",ExpressionUUID->"3cdaf991-bfcc-4214-88ca-52f96cdd52e8"]
+Cell[BoxData["2.801786524273328`*^-7"], \
+"Output",ExpressionUUID->"cc37f7f3-70c8-4d88-8f4f-7deabd043d56"]
 }, Open  ]],
 
 Cell[BoxData[
@@ -11020,7 +10983,7 @@ Cell[BoxData[
 }, Open  ]]
 },
 WindowSize->{990, 659},
-WindowMargins->{{75, Automatic}, {0, Automatic}},
+WindowMargins->{{70, Automatic}, {22, Automatic}},
 PrivateNotebookOptions->{"FileOutlineCache"->False},
 TrackCellChangeTimes->False,
 FrontEndVersion->"11.2 for Linux x86 (64-bit) (September 10, 2017)",

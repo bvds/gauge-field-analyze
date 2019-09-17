@@ -158,7 +158,7 @@ void hessOp(const int nrow, const int ncol, const double *xin, const int ldx,
     int k;
 
     for(k=0; k<ncol; k++) {
-        matrixVector(eigenData.matrix, xin+k*ldx, yout+k*ldy);
+        matrixVector('s', eigenData.matrix, xin+k*ldx, yout+k*ldy);
         // Use the fact that "in" and "out" can overlap.
         dynamicProject(nrow, yout+k*ldy, NULL);
     }
@@ -173,11 +173,11 @@ void hessOp2(const int nrow, const int ncol, const double *xin, const int ldx,
     int k;
 
     for(k=0; k<ncol; k++) {
-        matrixVector(eigenData.matrix, xin+k*ldx, eigenData.z);
+        matrixVector('s', eigenData.matrix, xin+k*ldx, eigenData.z);
         // Use the fact that "in" and "out" can overlap.
         dynamicProject(nrow, eigenData.z, NULL);
         // Apply a second time
-        matrixVector(eigenData.matrix, eigenData.z, yout+k*ldy);
+        matrixVector('s', eigenData.matrix, eigenData.z, yout+k*ldy);
         // Use the fact that "in" and "out" can overlap.
         dynamicProject(nrow, yout+k*ldy, NULL);
     }

@@ -100,8 +100,8 @@ int main(int argc, char **argv){
         exit(701);
     }
     if(!(mm_is_real(matcode) && mm_is_matrix(matcode) && 
-         mm_is_coordinate(matcode) && mm_is_general(matcode))) {
-        printf("Hessian should be real, general, coordinate.\n");
+         mm_is_coordinate(matcode))) {
+        printf("Hessian should be real, coordinate.\n");
         printf("Market Market type: [%s]\n", mm_typecode_to_str(matcode));
         exit(702);
     }

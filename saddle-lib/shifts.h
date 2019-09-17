@@ -29,9 +29,9 @@ int nonzeros(SparseMatrix *matrix);
 #endif
 
 
-void matrixVector(const SparseMatrix *a,
+void matrixVector(const char type, const SparseMatrix *a,
                   const double *in, double *out);
-void vectorMatrix(const SparseMatrix *a,
+void vectorMatrix(const char type, const SparseMatrix *a,
                   const double *in, double *out);
 
 

@@ -130,13 +130,15 @@ coords2gauge[fixed_][coordsIn_, generator_] :=
      latticeIndex[coords, dimensions] - 1];
 gradLinkTake[fixed_][dir_, coords_] :=
     {1, nc^2 - 1} + coords2grad[fixed][dir, coords, 0];
+symAdd::usage = oneAdd::useage = "If full=False, take the lower triangle.  The export to an *.mtx file dumps the lower triangle of a symmetric matrix..";
 symAdd::index = "Invalid index.";
-SetAttributes[symAdd, HoldFirst];
-symAdd[m_, i_, j_, value_] := (
-    m[{i, j}] = Lookup[m, Key[{i, j}], 0.0] + value;
-    m[{j, i}] = Lookup[m, Key[{j, i}], 0.] + value);
-SetAttributes[oneAdd, HoldFirst];
-oneAdd[m_, i_, j_, value_] := m[{i, j}] = Lookup[m, Key[{i, j}], 0.0] + value;
+SetAttributes[symAdd, HoldAll];
+symAdd[m_, i_, j_, value_, full_:True] := (
+    If[full || i>=j, m[{i, j}] = Lookup[m, Key[{i, j}], 0.0] + value];
+    If[full || j>=i, m[{j, i}] = Lookup[m, Key[{j, i}], 0.0] + value]);
+SetAttributes[oneAdd, HoldAll];
+oneAdd[m_, i_, j_, value_, full_:True] :=
+    If[full || i>=j, m[{i, j}] = Lookup[m, Key[{i, j}], 0.0] + value];
 reTrDot::usage = "Compute Re[Tr[a.b]] where a and b are color matrices.";
 reTrDot = Compile[{{x, _Complex, 2}, {y, _Complex, 2}},
 	Sum[Re[x[[i, j]] y[[j, i]]], {i, nc}, {j, nc}], {{nc, _Integer}}];
@@ -181,11 +183,13 @@ gaugeTransformShifts[rootGaugeField_, fixed_: - 1] :=
 
 (* Hessian and gradient *)
 
-Options[latticeHessian] = {allLinks -> True, fixedDir -> -1};
+Options[latticeHessian] = {allLinks -> True, fixedDir -> -1,
+                           fullMatrix -> True};
 latticeHessian::usage = "Set allLinks to False to compare with \
 single-link code.  Option fixedDir>0 will apply a constant shift to \
 any link a given Polyakov loop winding in that direction, compatible \
-with choosing an Axial gauge in that direction.";
+with choosing an Axial gauge in that direction.
+Set the option fullMatrix to False to only compute one triangle";
 latticeHessian[getRootLink_, OptionsPattern[]] :=
  Block[{fixed = OptionValue[fixedDir]},
  (* Adding elements to a SparseArray one at a time is very inefficient
@@ -198,6 +202,7 @@ latticeHessian[getRootLink_, OptionsPattern[]] :=
     gen = suGenerators[] + 0.0 I,
     sym = 0.5*Outer[(#1.#2 + #2.#1)&, suGenerators[], suGenerators[], 1] +
 	  0.0 I,
+    full = OptionValue[fullMatrix],
     coords},
    innerLoopTime = 0;
    Do[coords = latticeCoordinates[i];
@@ -235,19 +240,20 @@ latticeHessian[getRootLink_, OptionsPattern[]] :=
        (* Time is dominated by matrix construction,
        and matrix construction is dominated by the inner color loop. *)
        t0 = SessionTime[];
-       Do[Block[{gg1 = g1 - ca1 + ca2, gg2 = g2 - ca1 + ca2,
-          gg3 = g3 - ca1 + ca2, gg4 = g4 - ca1 + ca2},
-         oneAdd[hess, g1, gg1, -reTrDot[sym[[ca1, ca2]], w3]];
-         oneAdd[hess, g3, gg3, -reTrDot[sym[[ca1, ca2]], w1]];
-         oneAdd[hess, g2, gg2, -reTrDot[sym[[ca1, ca2]], w4]];
-         oneAdd[hess, g4, gg4, -reTrDot[sym[[ca1, ca2]], w2]];
+       Do[Block[{
+           gg1 = g1 - ca1 + ca2, gg2 = g2 - ca1 + ca2,
+           gg3 = g3 - ca1 + ca2, gg4 = g4 - ca1 + ca2},
+         oneAdd[hess, g1, gg1, -reTrDot[sym[[ca1, ca2]], w3], full];
+         oneAdd[hess, g3, gg3, -reTrDot[sym[[ca1, ca2]], w1], full];
+         oneAdd[hess, g2, gg2, -reTrDot[sym[[ca1, ca2]], w4], full];
+         oneAdd[hess, g4, gg4, -reTrDot[sym[[ca1, ca2]], w2], full];
          If[OptionValue[allLinks],
-          symAdd[hess, g1, gg3, reTrDot[ss42, gen[[ca2]]]];
-          symAdd[hess, g2, gg4, reTrDot[ss13, gen[[ca2]]]];
-          symAdd[hess, g2, gg3, reTrDot[vv0011, gen[[ca2]]]];
-          symAdd[hess, g3, gg4, -reTrDot[vv1001, gen[[ca2]]]];
-          symAdd[hess, g4, gg1, reTrDot[vv1100, gen[[ca2]]]];
-          symAdd[hess, g1, gg2, -reTrDot[vv0110, gen[[ca2]]]]]],
+            symAdd[hess, g1, gg3, reTrDot[ss42, gen[[ca2]]], full];
+            symAdd[hess, g2, gg4, reTrDot[ss13, gen[[ca2]]], full];
+            symAdd[hess, g2, gg3, reTrDot[vv0011, gen[[ca2]]], full];
+            symAdd[hess, g3, gg4, -reTrDot[vv1001, gen[[ca2]]], full];
+            symAdd[hess, g4, gg1, reTrDot[vv1100, gen[[ca2]]], full];
+            symAdd[hess, g1, gg2, -reTrDot[vv0110, gen[[ca2]]], full]]],
 	  {ca2, nc^2 - 1}]; innerLoopTime += SessionTime[] - t0],
 	{ca1, nc^2 - 1}]],
       {dir1, nd - 1}, {dir2, dir1 + 1, nd},
@@ -332,6 +338,7 @@ order of decreasing magnitude.  Thus, for large shifts, one must find
 the last eigenvalues/vectors.";
 findDelta::external = "Error in external program.";
 findDelta::dynamicPartMethod = "Only dynamicPartMethod = Automatic is supported.";
+findDelta::symmetric = "Hessian must be symmetric unless Method->\"External\".";
 Options[findDelta] = {dynamicPartMethod -> Automatic, printDetails -> False,
   Method -> Automatic, rescaleCutoff -> 1, dampingFactor -> 1,
   storePairs -> False, storeHess -> False, largeShiftOptions -> {},
@@ -346,6 +353,9 @@ findDelta[{hess_, grad_, gauge_}, OptionsPattern[]] :=
   Block[{hessp, gradp, zzz = OptionValue[rescaleCutoff],
     cutoff = OptionValue[cutoffValue],
     damping = OptionValue[dampingFactor], values, oo, proj, shifts},
+    If[Not[SymmetricMatrixQ[hess]],
+       Message[findDelta::symmetric];
+       Return[$Failed]];
     If[MatrixQ[gauge],
        (* Find projection onto subspace orthogonal to all gauge transforms.
        proj is dense. *)
@@ -382,6 +392,9 @@ findDelta[{hess_, grad_, gauge_}, opts:OptionsPattern[]] :=
     smallProj, smallProj0, tinit = SessionTime[],
         tdp = 0, tsp = 0, tdot = 0, countdp = 0, countdot = 0, countsp = 0,
         countGauge = dynamicPartCounter},
+   If[Not[SymmetricMatrixQ[hess]],
+      Message[findDelta::symmetric];
+      Return[$Failed]];
    dp0 = If[MatrixQ[gauge],
 	    dynamicPart[gauge,
 			Method -> OptionValue[dynamicPartMethod]],
@@ -481,31 +494,33 @@ findDelta[data:{hess_, grad_, gauge_}, opts:OptionsPattern[]] :=
           "largeShiftOptions" -> OptionValue[largeShiftOptions]/.symbolString,
           "gaugeDimension" -> Length[gauge]}];
       (* Export full matrix, even though it is symmetric. *)
-      Export["hess.mtx", hess, "MatrixStructure" -> "General"];
+      Export["hess.mtx", hess];
       Export["grad.dat", grad];
       Export["gauge.mtx", gauge];
       Apply[Clear, Unevaluated[data]]];
    (* Run external program *)
-   If[action =!= "read",
-      Run["rm -f shifts.log shifts.dat"]];
    If[action =!= "read" && action =!= "write",
+      Run["rm -f shifts0.dat"];
       out = RunProcess[{"saddle-lib/shifts",
                         "hess-grad-gauge.json", "hess.mtx",
-                        "grad.dat", "gauge.mtx", "shifts.dat"}];
+                        "grad.dat", "gauge.mtx", "shifts0.dat"}];
       Print[Style[out["StandardOutput"], FontColor -> Blue]];
       If[Length[out["StandardError"]]>0,
          Print[Style[out["StandardError"], FontColor -> Red]]];
       If[out["ExitCode"] != 0,
          Message[findDelta::external]; Return[$Failed]]];
    If[action === "write",
+      Run["rm -f shifts.log shifts1.dat"];
       Print["Starting up and detaching."];
-      Run["(saddle-lib/shifts hess-grad-gauge.json hess.mtx grad.dat gauge.mtx shifts.dat > shifts.log&); echo \"started\""]]
+      Run["(saddle-lib/shifts hess-grad-gauge.json hess.mtx grad.dat gauge.mtx shifts1.dat > shifts.log&); echo \"started\""]]
    If[action === "read",
       Print[Style[ReadString["shifts.log"], FontColor -> Blue]]];
    Print["findDelta shifts time (seconds):  total=", SessionTime[] - tinit];
    (* Read shifts from external file *)
    If[action =!= "write",
-      shifts = ReadList["shifts.dat", Number];
+      shifts = ReadList[
+          If[action=="read", "shifts1.dat", "shifts0.dat"],
+          Number];
       If[OptionValue[storePairs],
          pairs0 = Null;
          shifts0 = shifts];
