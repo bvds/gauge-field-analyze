@@ -36,7 +36,7 @@ char *readFile(char *filename) {
 int main(int argc, char **argv){
     char *options;
     cJSON *jopts, *tmp;
-    int i, k, n, nc;
+    int i, k, n, nc, gaugeDimension;
     unsigned int nLargeShifts;
     FILE *fp;
 #ifdef USE_LIBRSB
@@ -89,7 +89,9 @@ int main(int argc, char **argv){
     jopts = cJSON_Parse(options);
     n = cJSON_GetObjectItemCaseSensitive(jopts, "n")->valueint;
     nc = cJSON_GetObjectItemCaseSensitive(jopts, "nc")->valueint;
-    printf(" n=%i, nc=%i\n", n, nc);
+    gaugeDimension = cJSON_GetObjectItemCaseSensitive(
+                               jopts, "gaugeDimension")->valueint;
+    printf(" n=%i, nc=%i, gauge=%i\n", n, nc, gaugeDimension);
 
     /* Read in arrays */
 #ifdef USE_LIBRSB
@@ -106,7 +108,7 @@ int main(int argc, char **argv){
     printf("%s\n",ib);
 #else
     SparseMatrix hess, *hessp = &hess;
-    printf("Opening file %s\n", argv[2]);
+    printf("Opening file %s", argv[2]);
     fp = fopen(argv[2], "r"); 
     if (mm_read_banner(fp, &matcode) != 0) {
         fprintf(stderr, "Could not process Matrix Market banner.\n");
@@ -123,6 +125,7 @@ int main(int argc, char **argv){
         fprintf(stderr, "Cannot read dimensions\n");
         exit(703);
     }
+    printf(" with %i nonzero elements.\n", hess.nonzeros);
     assert(hess.rows == n);
     assert(hess.columns == n);
 #ifdef USE_MKL
@@ -216,7 +219,7 @@ int main(int argc, char **argv){
     printf("%s\n",ib);
 #else
     SparseMatrix gauge, *gaugep = &gauge;
-    printf("Opening file %s\n", argv[4]);
+    printf("Opening file %s", argv[4]);
     fp = fopen(argv[4], "r"); 
     if (mm_read_banner(fp, &matcode) != 0) {
         fprintf(stderr, "Could not process Matrix Market banner.\n");
@@ -224,8 +227,10 @@ int main(int argc, char **argv){
     }
     if(!(mm_is_real(matcode) && mm_is_matrix(matcode) && 
          mm_is_coordinate(matcode) && mm_is_general(matcode))) {
-        fprintf(stderr, "Gauge matrix should be real, general, coordinate.\n");
-        fprintf(stderr, "Market Market type: [%s]\n", mm_typecode_to_str(matcode));
+        fprintf(stderr, "Gauge matrix should be real, "
+                         "general, coordinate.\n");
+        fprintf(stderr, "Market Market type: [%s]\n",
+                mm_typecode_to_str(matcode));
         exit(702);
     }
     if (mm_read_mtx_crd_size(fp, &(gauge.rows), &(gauge.columns),
@@ -233,6 +238,8 @@ int main(int argc, char **argv){
         fprintf(stderr, "Cannot read dimensions\n");
         exit(703);
     }
+    printf(" with %i nonzero elements.\n", gauge.nonzeros);
+    assert(gauge.rows == gaugeDimension);
     assert(gauge.columns == n);
 #ifdef USE_MKL
     gauge.row = mkl_malloc(gauge.nonzeros * sizeof(int), align);

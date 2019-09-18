@@ -28,6 +28,9 @@
 struct {
     SparseMatrix *matrix;
     double *z;
+    int ops;
+    int sumNcol;
+    int maxNcol;
 } eigenData;
 
 /*
@@ -56,6 +59,9 @@ void largeShifts(SparseMatrix *hess, double *initialVector, cJSON *options,
     // Used by HessOp
     eigenData.matrix = hess;
     eigenData.z = malloc(rows(hess) * sizeof(double));
+    eigenData.ops = 0;
+    eigenData.sumNcol = 0;
+    eigenData.maxNcol = 0;
 
     // Would need a separate flag for the lohi == 0 case.
     tmp  = cJSON_GetObjectItemCaseSensitive(options, "eigenPairs");
@@ -130,6 +136,8 @@ void largeShifts(SparseMatrix *hess, double *initialVector, cJSON *options,
 
     time(&tf);
     if(printDetails > 0) {
+        printf("largeShifts: ops=%i, sumNcol=%i, maxNcol=%i\n",
+               eigenData.ops, eigenData.sumNcol, eigenData.maxNcol);
         printf("largeShifts: %i matrix-vector ops, "
                "%i reorthogonalizations in %.2f sec (%li wall)\n",
                info.matvec, info.north,
@@ -137,7 +145,8 @@ void largeShifts(SparseMatrix *hess, double *initialVector, cJSON *options,
     }
 
     if(info.stat < 0 || info.nec < info.ned) {
-        printf("trlan exit with stat=%i, finding %i of %i eigenpairs.\n",
+        fprintf(stderr, "trlan exit with stat=%i, "
+                "finding %i of %i eigenpairs.\n",
                info.stat, info.nec, info.ned);
         exit(8);
     }
@@ -157,6 +166,11 @@ void hessOp(const int nrow, const int ncol, const double *xin, const int ldx,
     assert(mvparam == NULL);
     int k;
 
+    eigenData.ops += 1;
+    eigenData.sumNcol += ncol;
+    if(eigenData.maxNcol<ncol)
+        eigenData.maxNcol = ncol;
+
     for(k=0; k<ncol; k++) {
         matrixVector(eigenData.matrix, xin+k*ldx, yout+k*ldy);
         // Use the fact that "in" and "out" can overlap.
@@ -171,6 +185,11 @@ void hessOp2(const int nrow, const int ncol, const double *xin, const int ldx,
     assert(rows(eigenData.matrix) == nrow);
     assert(mvparam == NULL);
     int k;
+
+    eigenData.ops += 1;
+    eigenData.sumNcol += ncol;
+    if(eigenData.maxNcol<ncol)
+        eigenData.maxNcol = ncol;
 
     for(k=0; k<ncol; k++) {
         matrixVector(eigenData.matrix, xin+k*ldx, eigenData.z);

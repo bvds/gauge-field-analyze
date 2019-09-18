@@ -38,6 +38,7 @@ struct {
     unsigned int count;
     unsigned int usertol;
     unsigned int matVec;
+    unsigned int maxItn;
     int printDetails;
     doublereal minEigenvalue;
     // doublereal maxEigenvalue;
@@ -64,6 +65,7 @@ void dynamicInit(SparseMatrix *gauge, cJSON *options) {
     gaugeData.count = 0;
     gaugeData.usertol = 0;
     gaugeData.matVec = 0;
+    gaugeData.maxItn = 0;
     gaugeData.printDetails = 0;
 
     tmp  = cJSON_GetObjectItemCaseSensitive(options, "printDetails");
@@ -205,6 +207,9 @@ void dynamicProject(const int n, double *v, double *normDiff) {
     gaugeData.twall += tf - t2;
     gaugeData.count += 1;
     gaugeData.matVec += itn;
+    if(itn > gaugeData.maxItn) {
+        gaugeData.maxItn = itn;
+    }
     if(istop == 8) {
         gaugeData.usertol += 1;
     }
@@ -219,9 +224,10 @@ void dynamicProject(const int n, double *v, double *normDiff) {
 void dynamicClose() {
     if(gaugeData.printDetails > 0){
         printf("dynamicProject:  %i calls (%i usertol), "
-               "%i matrix-vector ops,\n"
+               "%i matrix-vector ops, max itn %i\n"
                "                 in %.2f sec (%li wall)\n",
-               gaugeData.count, gaugeData.usertol, gaugeData.matVec, 
+               gaugeData.count, gaugeData.usertol, gaugeData.matVec,
+               gaugeData.maxItn,
                gaugeData.tcpu/(float) CLOCKS_PER_SEC, gaugeData.twall);
     }
 
