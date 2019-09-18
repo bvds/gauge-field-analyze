@@ -16,6 +16,9 @@
 #include <time.h>
 #include "shifts.h"
 #include "mmio.h"
+#ifdef USE_MKL
+#include "mkl_spblas.h"
+#endif
 
 char *readFile(char *filename) {
     FILE *f = fopen(filename, "rt");
@@ -33,7 +36,7 @@ char *readFile(char *filename) {
 int main(int argc, char **argv){
     char *options;
     cJSON *jopts, *tmp;
-    int i, k, n;
+    int i, k, n, nc;
     unsigned int nLargeShifts;
     FILE *fp;
 #ifdef USE_LIBRSB
@@ -45,7 +48,10 @@ int main(int argc, char **argv){
     MM_typecode matcode;
     int j;
 #ifdef USE_MKL
+    sparse_status_t err;
     const int align = 64;
+    int block_size;
+    sparse_matrix_t coordMatrix;
 #else
     SparseRow *row;
 #endif
@@ -78,10 +84,12 @@ int main(int argc, char **argv){
     /* Read JSON file and use options */
     if(argc <5)
         exit(-1);
-    printf("Opening file %s\n", argv[1]);
+    printf("Opening file %s", argv[1]);
     options = readFile(argv[1]);
     jopts = cJSON_Parse(options);
     n = cJSON_GetObjectItemCaseSensitive(jopts, "n")->valueint;
+    nc = cJSON_GetObjectItemCaseSensitive(jopts, "nc")->valueint;
+    printf(" n=%i, nc=%i\n", n, nc);
 
     /* Read in arrays */
 #ifdef USE_LIBRSB
@@ -101,26 +109,26 @@ int main(int argc, char **argv){
     printf("Opening file %s\n", argv[2]);
     fp = fopen(argv[2], "r"); 
     if (mm_read_banner(fp, &matcode) != 0) {
-        printf("Could not process Matrix Market banner.\n");
+        fprintf(stderr, "Could not process Matrix Market banner.\n");
         exit(701);
     }
     if(!(mm_is_real(matcode) && mm_is_matrix(matcode) && 
          mm_is_coordinate(matcode))) {
-        printf("Hessian should be real, coordinate.\n");
-        printf("Market Market type: [%s]\n", mm_typecode_to_str(matcode));
+        fprintf(stderr, "Hessian should be real, coordinate.\n");
+        fprintf(stderr, "Market Market type: [%s]\n", mm_typecode_to_str(matcode));
         exit(702);
     }
     if (mm_read_mtx_crd_size(fp, &(hess.rows), &(hess.columns),
                              &(hess.nonzeros)) !=0) {
-        printf("Cannot read dimensions\n");
+        fprintf(stderr, "Cannot read dimensions\n");
         exit(703);
     }
     assert(hess.rows == n);
     assert(hess.columns == n);
 #ifdef USE_MKL
-    hess.value = mkl_malloc(hess.nonzeros * sizeof(double), align);
     hess.row = mkl_malloc(hess.nonzeros * sizeof(int), align);
     hess.column = mkl_malloc(hess.nonzeros * sizeof(int), align);
+    hess.value = mkl_malloc(hess.nonzeros * sizeof(double), align);
 #else
     hess.data = malloc(hess.nonzeros * sizeof(SparseRow));
 #endif
@@ -133,22 +141,52 @@ int main(int argc, char **argv){
         row->i -= 1; row->j -= 1; // switch to zero-based indexing
 #endif
         if(k < 3) {
-            printf("Error reading %s, element %i\n", argv[2], j);
+            fprintf(stderr, "Error reading %s, element %i\n", argv[2], j);
             break;
         }
     }
     fclose(fp);
 #ifdef USE_MKL
     /* Create MKL data structure */
-    if(mkl_sparse_d_create_coo(&hess.a, SPARSE_INDEX_BASE_ONE,
+    if((err=mkl_sparse_d_create_coo(&coordMatrix, SPARSE_INDEX_BASE_ONE,
               hess.rows, hess.columns, hess.nonzeros,
-              hess.row, hess.column, hess.value) != SPARSE_STATUS_SUCCESS) {
-        printf("failed\n");
+                               hess.row, hess.column, hess.value)) !=
+           SPARSE_STATUS_SUCCESS) {
+        fprintf(stderr, "mkl_sparse_d_create_coo failed %i\n", err);
         exit(55);
     }
-
-    
+    block_size = nc*nc - 1;
+    if((err = mkl_sparse_convert_bsr(coordMatrix, block_size,
+                            SPARSE_LAYOUT_COLUMN_MAJOR, // BvdS: right?
+                            SPARSE_OPERATION_NON_TRANSPOSE,
+                            &hess.a)) != SPARSE_STATUS_SUCCESS) {
+        fprintf(stderr, "failed %i\n", err);
+        exit(56);
+    }
+    hess.descr.type = SPARSE_MATRIX_TYPE_SYMMETRIC;
+    hess.descr.mode = SPARSE_FILL_MODE_LOWER;
+    hess.descr.diag = SPARSE_DIAG_NON_UNIT;
+#if 0  // Unsupported error
+    const int expected_calls = 100*1000;
+    if((err = mkl_sparse_set_dotmv_hint(hess.a,
+            SPARSE_OPERATION_NON_TRANSPOSE, hess.descr, expected_calls)) !=
+       SPARSE_STATUS_SUCCESS) {
+        fprintf(stderr, "mkl_sparse_set_dotmv_hint failed: %i %i\n", err,
+               SPARSE_STATUS_NOT_SUPPORTED);
+        exit(58);
+    }
+#endif
+    if((err = mkl_sparse_optimize(hess.a)) != SPARSE_STATUS_SUCCESS) {
+        fprintf(stderr, "mkl_sparse_optimize failed %i\n", err);
+        exit(59);
+    }
     mkl_free(hess.row); mkl_free(hess.column); mkl_free(hess.value);
+    if((err = mkl_sparse_destroy(coordMatrix)) != SPARSE_STATUS_SUCCESS) {
+        fprintf(stderr, "failed %i\n", err);
+        exit(60);
+    }
+#else
+    hess.descr = 's';  // Symmetric matrix, with only one triangle stored.
 #endif
 #endif
 
@@ -158,7 +196,7 @@ int main(int argc, char **argv){
     for(i=0; i<n; i++){
         k = fscanf(fp, "%le", grad+i);
         if(k < 1) {
-            printf("Error reading %s on line %i\n", argv[3], i);
+            fprintf(stderr, "Error reading %s on line %i\n", argv[3], i);
             break;
         }
     }
@@ -181,25 +219,25 @@ int main(int argc, char **argv){
     printf("Opening file %s\n", argv[4]);
     fp = fopen(argv[4], "r"); 
     if (mm_read_banner(fp, &matcode) != 0) {
-        printf("Could not process Matrix Market banner.\n");
+        fprintf(stderr, "Could not process Matrix Market banner.\n");
         exit(701);
     }
     if(!(mm_is_real(matcode) && mm_is_matrix(matcode) && 
          mm_is_coordinate(matcode) && mm_is_general(matcode))) {
-        printf("Gauge matrix should be real, general, coordinate.\n");
-        printf("Market Market type: [%s]\n", mm_typecode_to_str(matcode));
+        fprintf(stderr, "Gauge matrix should be real, general, coordinate.\n");
+        fprintf(stderr, "Market Market type: [%s]\n", mm_typecode_to_str(matcode));
         exit(702);
     }
     if (mm_read_mtx_crd_size(fp, &(gauge.rows), &(gauge.columns),
                              &(gauge.nonzeros)) !=0) {
-        printf("Cannot read dimensions\n");
+        fprintf(stderr, "Cannot read dimensions\n");
         exit(703);
     }
     assert(gauge.columns == n);
 #ifdef USE_MKL
-    gauge.value = mkl_malloc(gauge.nonzeros * sizeof(double), align);
     gauge.row = mkl_malloc(gauge.nonzeros * sizeof(int), align);
     gauge.column = mkl_malloc(gauge.nonzeros * sizeof(int), align);
+    gauge.value = mkl_malloc(gauge.nonzeros * sizeof(double), align);
 #else
     gauge.data = malloc(gauge.nonzeros * sizeof(SparseRow));
 #endif
@@ -212,21 +250,49 @@ int main(int argc, char **argv){
         row->i -= 1; row->j -= 1; // switch to zero-based indexing
 #endif
         if(k < 3) {
-            printf("Error reading %s, element %i\n", argv[4], j);
+            fprintf(stderr, "Error reading %s, element %i\n", argv[4], j);
             break;
         }
     }
     fclose(fp);
 #ifdef USE_MKL
     /* Create MKL data structure */
-    if(mkl_sparse_d_create_coo(&gauge.a, SPARSE_INDEX_BASE_ONE,
-              gauge.rows, gauge.columns, gauge.nonzeros,
-              gauge.row, gauge.column, gauge.value) != SPARSE_STATUS_SUCCESS) {
-        printf("failed\n");
+    if((err = mkl_sparse_d_create_coo(&coordMatrix, SPARSE_INDEX_BASE_ONE,
+                gauge.rows, gauge.columns, gauge.nonzeros,
+                gauge.row, gauge.column, gauge.value)) !=
+            SPARSE_STATUS_SUCCESS) {
+        fprintf(stderr, "mkl_sparse_d_create_coo failed %i\n", err);
         exit(55);
     }
-    
+    if((err=mkl_sparse_convert_bsr(coordMatrix, block_size,
+             SPARSE_LAYOUT_COLUMN_MAJOR, // BvdS: right?
+             SPARSE_OPERATION_NON_TRANSPOSE,
+              &gauge.a)) != SPARSE_STATUS_SUCCESS) {
+        fprintf(stderr, "mkl_sparse_convert_bsr failed %i\n", err);
+        exit(56);
+    }
     mkl_free(gauge.row); mkl_free(gauge.column); mkl_free(gauge.value);
+    if((err=mkl_sparse_destroy(coordMatrix)) != SPARSE_STATUS_SUCCESS) {
+        fprintf(stderr, "mkl_sparse_destroy failed %i\n", err);
+        exit(57);
+    }
+    gauge.descr.type = SPARSE_MATRIX_TYPE_GENERAL;
+    gauge.descr.mode = SPARSE_FILL_MODE_LOWER;
+    gauge.descr.diag = SPARSE_DIAG_NON_UNIT;
+#if 0  // Unsupported error
+    if((err = mkl_sparse_set_dotmv_hint(gauge.a,
+        SPARSE_OPERATION_NON_TRANSPOSE, gauge.descr,
+        expected_calls)) != SPARSE_STATUS_SUCCESS) {
+        fprintf(stderr, "mkl_sparse_set_dotmv_hint failed %i\n", err);
+        exit(58);
+    }
+#endif
+    if((err=mkl_sparse_optimize(gauge.a)) != SPARSE_STATUS_SUCCESS) {
+        fprintf(stderr, "mkl_sparse_optimize failed %i\n", err);
+        exit(58);
+    }
+#else
+    gauge.descr = 'g';  // General matrix
 #endif
 #endif
     time(&tf);

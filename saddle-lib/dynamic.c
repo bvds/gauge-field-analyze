@@ -183,7 +183,7 @@ void dynamicProject(const int n, double *v, double *normDiff) {
     // Sanity test for gaugeData.z
     assert(n == columns(gaugeData.matrix));
 
-    matrixVector('g', gaugeData.matrix, v, gaugeData.b);
+    matrixVector(gaugeData.matrix, v, gaugeData.b);
 
     trancond = acondlim; // Always use MINRES
     rr = rows(gaugeData.matrix);
@@ -193,7 +193,7 @@ void dynamicProject(const int n, double *v, double *normDiff) {
               gaugeData.x, &istop, &itn, &rnorm, &arnorm,
               &xnorm, &anorm, &acond);
 
-    vectorMatrix('g', gaugeData.matrix, gaugeData.x, gaugeData.z);
+    vectorMatrix(gaugeData.matrix, gaugeData.x, gaugeData.z);
     // This could be combined with the above matrix product, BLAS style.
     DAXPY(&n, &minusone, gaugeData.z, &one, v, &one);
     if(normDiff != NULL){
@@ -246,13 +246,13 @@ void gaugeOp(const int nrow, const int ncol, const double *xin, const int ldx,
 int gaugeProduct(const integer *vectorLength, const doublereal *x,
                  doublereal *y) {
     assert(*vectorLength == rows(gaugeData.matrix));
-    vectorMatrix('g', gaugeData.matrix, x, gaugeData.z);
-    matrixVector('g', gaugeData.matrix, gaugeData.z, y);
+    vectorMatrix(gaugeData.matrix, x, gaugeData.z);
+    matrixVector(gaugeData.matrix, gaugeData.z, y);
     return 0;
 }
 
 /* in and out must be distinct */
-void matrixVector(const char type, const SparseMatrix *a,
+void matrixVector(const SparseMatrix *a,
                   const double *in, double *out) {
 #ifdef USE_LIBRSB
     const rsb_trans_t trans = RSB_TRANSPOSITION_N;
@@ -265,6 +265,16 @@ void matrixVector(const char type, const SparseMatrix *a,
         exit(121);
     }
 #elif defined(USE_MKL)
+    sparse_status_t err;
+    const double alpha = 1.0, beta=0.0;
+    double d;
+
+    if((err=mkl_sparse_d_dotmv(SPARSE_OPERATION_NON_TRANSPOSE,
+              alpha, a->a, a->descr, in, beta, out, &d)) !=
+           SPARSE_STATUS_SUCCESS) {
+        fprintf(stderr, "mkl_sparse_d_dotmv failed %i\n", err);
+        exit(69);
+    }
 #else
     int k;
     SparseRow *row;
@@ -272,14 +282,14 @@ void matrixVector(const char type, const SparseMatrix *a,
     for(k=0; k<a->nonzeros; k++) {
         row = a->data+k;
         out[row->i] += row->value * in[row->j];
-        if(type == 's' && row->j < row->i) {
+        if(a->descr == 's' && row->j < row->i) {
             out[row->j] += row->value * in[row->i];
         }
     }
 #endif
 }
 
-void vectorMatrix(const char type, const SparseMatrix *a,
+void vectorMatrix(const SparseMatrix *a,
                   const double *in, double *out) {
 #ifdef USE_LIBRSB
     const rsb_trans_t trans = RSB_TRANSPOSITION_T;
@@ -292,6 +302,16 @@ void vectorMatrix(const char type, const SparseMatrix *a,
         exit(121);
     }
 #elif defined(USE_MKL)
+    sparse_status_t err;
+    const double alpha = 1.0, beta=0.0;
+    double d;
+
+    if((err=mkl_sparse_d_dotmv(SPARSE_OPERATION_TRANSPOSE,
+              alpha, a->a, a->descr, in, beta, out, &d)) !=
+           SPARSE_STATUS_SUCCESS) {
+        fprintf(stderr, "mkl_sparse_d_dotmv failed %i\n", err);
+        exit(68);
+    }
 #else
     int k;
     SparseRow *row;
@@ -299,7 +319,7 @@ void vectorMatrix(const char type, const SparseMatrix *a,
     for(k=0; k<a->nonzeros; k++) {
         row = a->data+k;
         out[row->j] += row->value * in[row->i];
-        if(type == 's' && row->i < row->j) {
+        if(a->descr == 's' && row->i < row->j) {
             out[row->i] += row->value * in[row->j];
         }
     }

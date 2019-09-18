@@ -7,6 +7,7 @@ typedef struct rsb_mtx_t SparseMatrix;
 #include "mkl.h"
 typedef struct {
     sparse_matrix_t a;
+    struct matrix_descr descr;
     double *value;
     MKL_INT *row;
     MKL_INT *column;
@@ -23,6 +24,7 @@ typedef struct {
 
 typedef struct {
     SparseRow *data;
+    char descr;
     int nonzeros;
     int rows;
     int columns;
@@ -40,9 +42,9 @@ int nonzeros(SparseMatrix *matrix);
 #endif
 
 
-void matrixVector(const char type, const SparseMatrix *a,
+void matrixVector(const SparseMatrix *a,
                   const double *in, double *out);
-void vectorMatrix(const char type, const SparseMatrix *a,
+void vectorMatrix(const SparseMatrix *a,
                   const double *in, double *out);
 
 

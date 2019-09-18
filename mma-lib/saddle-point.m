@@ -338,7 +338,8 @@ order of decreasing magnitude.  Thus, for large shifts, one must find
 the last eigenvalues/vectors.";
 findDelta::external = "Error in external program.";
 findDelta::dynamicPartMethod = "Only dynamicPartMethod = Automatic is supported.";
-findDelta::symmetric = "Hessian must be symmetric unless Method->\"External\".";
+findDelta::asymmetric = "Hessian must be symmetric unless Method->\"External\".";
+findDelta::symmetric = "Since Method->\"External\", you can set fullMatrix -> False.";
 Options[findDelta] = {dynamicPartMethod -> Automatic, printDetails -> False,
   Method -> Automatic, rescaleCutoff -> 1, dampingFactor -> 1,
   storePairs -> False, storeHess -> False, largeShiftOptions -> {},
@@ -354,7 +355,7 @@ findDelta[{hess_, grad_, gauge_}, OptionsPattern[]] :=
     cutoff = OptionValue[cutoffValue],
     damping = OptionValue[dampingFactor], values, oo, proj, shifts},
     If[Not[SymmetricMatrixQ[hess]],
-       Message[findDelta::symmetric];
+       Message[findDelta::asymmetric];
        Return[$Failed]];
     If[MatrixQ[gauge],
        (* Find projection onto subspace orthogonal to all gauge transforms.
@@ -393,7 +394,7 @@ findDelta[{hess_, grad_, gauge_}, opts:OptionsPattern[]] :=
         tdp = 0, tsp = 0, tdot = 0, countdp = 0, countdot = 0, countsp = 0,
         countGauge = dynamicPartCounter},
    If[Not[SymmetricMatrixQ[hess]],
-      Message[findDelta::symmetric];
+      Message[findDelta::asymmetric];
       Return[$Failed]];
    dp0 = If[MatrixQ[gauge],
 	    dynamicPart[gauge,
@@ -464,14 +465,15 @@ findDelta[{hess_, grad_, gauge_}, opts:OptionsPattern[]] :=
   https://github.com/DaveGamble/cJSON
  *)
 findDelta[data:{hess_, grad_, gauge_}, opts:OptionsPattern[]] :=
-    Block[{(*hess, grad, gauge,*) zzz = OptionValue[rescaleCutoff],
+    Block[{zzz = OptionValue[rescaleCutoff],
     cutoff = OptionValue[cutoffValue],
     damping = OptionValue[dampingFactor], shifts,
     action = OptionValue[externalAction],
     tinit = SessionTime[],
     symbolString = (a_Symbol -> b_) :> SymbolName[a] -> b,
         outFile = "hess-grad-gauge.json", out},
-          (* {hess, grad, gauge} = data;*)
+    If[SymmetricMatrixQ[hess],
+       Message[findDelta::symmetric]];
    (* Dump dimensions, constants, and options into JSON file.
      Dump matrices and vectors: 
          hess, grad, gaugtransformationShifts
