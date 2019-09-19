@@ -117,7 +117,6 @@ int hessProduct(integer *n, doublereal *x, doublereal *y) {
 }
 
 // Project out vecs, assuming they are orthonormal
-// "in" and "out" may overlap
 void userOrtho(char *action, integer *n, double *y) {
     const char trans='T', normal='N';
     const double one=1.0, zero=0.0, minusone=-1.0;

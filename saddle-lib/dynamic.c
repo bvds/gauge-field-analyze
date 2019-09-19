@@ -38,7 +38,7 @@ struct {
     unsigned int count;
     unsigned int usertol;
     unsigned int matVec;
-    unsigned int maxItn;
+    int maxItn;
     int printDetails;
     doublereal minEigenvalue;
     // doublereal maxEigenvalue;
@@ -75,10 +75,15 @@ void dynamicInit(SparseMatrix *gauge, cJSON *options) {
         gaugeData.printDetails = cJSON_IsTrue(tmp)?1:0;
     }
 
+#ifdef USE_MKL
+    gaugeData.b = mkl_malloc(rows(gauge)*sizeof(double), MALLOC_ALIGN);
+    gaugeData.x = mkl_malloc(rows(gauge)*sizeof(double), MALLOC_ALIGN);
+    gaugeData.z = mkl_malloc(columns(gauge)*sizeof(doublereal), MALLOC_ALIGN);
+#else
     gaugeData.b = malloc(rows(gauge)*sizeof(double));
     gaugeData.x = malloc(rows(gauge)*sizeof(double));
     gaugeData.z = malloc(columns(gauge)*sizeof(doublereal));
-
+#endif
 
     /* Calculate the smallest eigenvalue of gaugeProduct.  
        This will inform the stopping condition for MINRES.
@@ -231,9 +236,15 @@ void dynamicClose() {
                gaugeData.tcpu/(float) CLOCKS_PER_SEC, gaugeData.twall);
     }
 
-    free(gaugeData.z); gaugeData.z = NULL;
+#ifdef USE_MKL
+    mkl_free(gaugeData.z);
+    mkl_free(gaugeData.b);
+    mkl_free(gaugeData.x);
+#else
+    free(gaugeData.z);
     free(gaugeData.b);
     free(gaugeData.x);
+#endif
 }
 
 /* Interface for Trlan.

@@ -49,7 +49,6 @@ int main(int argc, char **argv){
     int j;
 #ifdef USE_MKL
     sparse_status_t err;
-    const int align = 64;
     int block_size;
     sparse_matrix_t coordMatrix;
 #else
@@ -129,9 +128,9 @@ int main(int argc, char **argv){
     assert(hess.rows == n);
     assert(hess.columns == n);
 #ifdef USE_MKL
-    hess.row = mkl_malloc(hess.nonzeros * sizeof(int), align);
-    hess.column = mkl_malloc(hess.nonzeros * sizeof(int), align);
-    hess.value = mkl_malloc(hess.nonzeros * sizeof(double), align);
+    hess.row = mkl_malloc(hess.nonzeros * sizeof(int), MALLOC_ALIGN);
+    hess.column = mkl_malloc(hess.nonzeros * sizeof(int), MALLOC_ALIGN);
+    hess.value = mkl_malloc(hess.nonzeros * sizeof(double), MALLOC_ALIGN);
 #else
     hess.data = malloc(hess.nonzeros * sizeof(SparseRow));
 #endif
@@ -242,9 +241,9 @@ int main(int argc, char **argv){
     assert(gauge.rows == gaugeDimension);
     assert(gauge.columns == n);
 #ifdef USE_MKL
-    gauge.row = mkl_malloc(gauge.nonzeros * sizeof(int), align);
-    gauge.column = mkl_malloc(gauge.nonzeros * sizeof(int), align);
-    gauge.value = mkl_malloc(gauge.nonzeros * sizeof(double), align);
+    gauge.row = mkl_malloc(gauge.nonzeros * sizeof(int), MALLOC_ALIGN);
+    gauge.column = mkl_malloc(gauge.nonzeros * sizeof(int), MALLOC_ALIGN);
+    gauge.value = mkl_malloc(gauge.nonzeros * sizeof(double), MALLOC_ALIGN);
 #else
     gauge.data = malloc(gauge.nonzeros * sizeof(SparseRow));
 #endif

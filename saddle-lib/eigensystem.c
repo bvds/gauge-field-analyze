@@ -3,15 +3,33 @@
 
   These would be the eigenvalues with the smallest
   magnitude.  Thus, we calculate the smallest eigenvalues
-  of the Hessian squared.
+  of the Hessian squared using thick-restart Lanczos.
 
-  More properly, one could use the Jacobi-Davidson algorithm.
+  One could use the Jacobi-Davidson algorithm
+  on the Hessian itself.
   For instance, 
     PRIMME [Stathopoulos, 2007] C library
     https://github.com/primme/primme or
 
     JADAMILU [Bollhöfer and Notay, 2007]
-    .
+    Does not have source code available.
+
+  or use
+
+    The FEAST eigensolver.
+    http://www.ecs.umass.edu/~polizzi/feast/
+
+    EVSL
+    https://github.com/eigs/EVSL
+
+  Maybe going to block lanczos would help?  Note
+  that the Hessian itself has nc^2-1 size blocks.
+
+    KSHELL
+    https://sites.google.com/a/cns.s.u-tokyo.ac.jp/kshell/
+
+  Finally, one could use "shift and invert" with the 
+  shift = 0 to calculate the eigensystem of A^-1.
 */
 #include <stdio.h>
 #include <stdlib.h>
@@ -58,7 +76,11 @@ void largeShifts(SparseMatrix *hess, double *initialVector, cJSON *options,
 
     // Used by HessOp
     eigenData.matrix = hess;
+#ifdef USE_MKL
+    eigenData.z = mkl_malloc(rows(hess) * sizeof(double), MALLOC_ALIGN);
+#else
     eigenData.z = malloc(rows(hess) * sizeof(double));
+#endif
     eigenData.ops = 0;
     eigenData.sumNcol = 0;
     eigenData.maxNcol = 0;
@@ -132,7 +154,11 @@ void largeShifts(SparseMatrix *hess, double *initialVector, cJSON *options,
         trl_terse_info(&info, stdout);
     }
 
-    free(eigenData.z); eigenData.z = NULL;
+#ifdef USE_MKL
+    mkl_free(eigenData.z);
+#else
+    free(eigenData.z);
+#endif
 
     time(&tf);
     if(printDetails > 0) {

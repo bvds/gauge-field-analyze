@@ -204,7 +204,6 @@ latticeHessian[getRootLink_, OptionsPattern[]] :=
 	  0.0 I,
     full = OptionValue[fullMatrix],
     coords},
-   innerLoopTime = 0;
    Do[coords = latticeCoordinates[i];
     (* Number of color matrix multiplications:
     (number of plaquettes) (16 + nc (16 + 10 nc)) *)
@@ -254,7 +253,7 @@ latticeHessian[getRootLink_, OptionsPattern[]] :=
             symAdd[hess, g3, gg4, -reTrDot[vv1001, gen[[ca2]]], full];
             symAdd[hess, g4, gg1, reTrDot[vv1100, gen[[ca2]]], full];
             symAdd[hess, g1, gg2, -reTrDot[vv0110, gen[[ca2]]], full]]],
-	  {ca2, nc^2 - 1}]; innerLoopTime += SessionTime[] - t0],
+	  {ca2, nc^2 - 1}]],
 	{ca1, nc^2 - 1}]],
       {dir1, nd - 1}, {dir2, dir1 + 1, nd},
       {i, kernel, latticeVolume[], $KernelCount}];
@@ -587,6 +586,5 @@ latticeSaddlePointStep[opts:OptionsPattern[]] :=
      applyDelta[tmpGaugeField, delta, OptionValue[fixedDir]]];
   t3 = SessionTime[];
   Print["latticeSaddlePointStep times:  ",
-	{innerLoopTime, t1 - t0, t2 - t1, t3 - t2}];
+	{t1 - t0, t2 - t1, t3 - t2}];
   tmpGaugeField];
-

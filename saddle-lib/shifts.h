@@ -5,6 +5,7 @@
 typedef struct rsb_mtx_t SparseMatrix;
 #elif defined(USE_MKL)
 #include "mkl.h"
+#define MALLOC_ALIGN 64
 typedef struct {
     sparse_matrix_t a;
     struct matrix_descr descr;
