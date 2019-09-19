@@ -301,6 +301,7 @@ int main(int argc, char **argv){
     gauge.descr = 'g';  // General matrix
 #endif
 #endif
+    fflush(stdout);
     time(&tf);
     tcpu += clock()-t1;
     twall += tf - t2; 

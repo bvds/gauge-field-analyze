@@ -20,8 +20,8 @@
       A.x = b, A = o.o^T, b = o.x
 
   In principle, one could apply a linear least squares
-  solver to o itself.  However, A is pretty well conditioned
-  so the Conjugate gradient solution is relatively fast.
+  solver to o itself.  However, A is pretty well-conditioned
+  so the conjugate gradient solution is relatively fast.
 
   Also, we terminate the Conjugate Gradient solver based
   the upper limit of norm(o^T.x) relative to norm(v).
@@ -133,7 +133,6 @@ void dynamicInit(SparseMatrix *gauge, cJSON *options) {
     free(eval); free(evec);
 }
 
-/* "in" and "out" may overlap */
 void dynamicProject(const int n, double *v, double *normDiff) {
     doublereal shift = 0.0, *maxxnormp = NULL;
     // Explicit value for these, so we can force MINRES alogrithm.
@@ -220,7 +219,7 @@ void dynamicProject(const int n, double *v, double *normDiff) {
     }
 
     if(istop >= 9) {
-        printf("MINRES returned with istop=%i in %s, exiting.\n",
+        fprintf(stderr, "MINRES returned with istop=%i in %s, exiting.\n",
                istop, __FILE__);
         exit(7);
     }
@@ -234,6 +233,7 @@ void dynamicClose() {
                gaugeData.count, gaugeData.usertol, gaugeData.matVec,
                gaugeData.maxItn,
                gaugeData.tcpu/(float) CLOCKS_PER_SEC, gaugeData.twall);
+        fflush(stdout);
     }
 
 #ifdef USE_MKL

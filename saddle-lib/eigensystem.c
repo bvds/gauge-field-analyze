@@ -1,9 +1,10 @@
 /*
   Find eigenvalues associated with large shifts.
 
-  These would be the eigenvalues with the smallest
+  These would be among the eigenvalues with the smallest
   magnitude.  Thus, we calculate the smallest eigenvalues
   of the Hessian squared using thick-restart Lanczos.
+  This is the largest time user in the calculation.
 
   One could use the Jacobi-Davidson algorithm
   on the Hessian itself.
@@ -14,7 +15,7 @@
     JADAMILU [Bollhöfer and Notay, 2007]
     Does not have source code available.
 
-  or use
+  or use filtered methods
 
     The FEAST eigensolver.
     http://www.ecs.umass.edu/~polizzi/feast/
@@ -22,14 +23,16 @@
     EVSL
     https://github.com/eigs/EVSL
 
-  Maybe going to block lanczos would help?  Note
-  that the Hessian itself has nc^2-1 size blocks.
+  Maybe going to block lanczos would help?  The fact that 
+  the Hessian itself has nc^2-1 size blocks is not relevant.
 
     KSHELL
     https://sites.google.com/a/cns.s.u-tokyo.ac.jp/kshell/
 
   Finally, one could use "shift and invert" with the 
   shift = 0 to calculate the eigensystem of A^-1.
+  However, we already know that solving the final linear
+  system takes many Lanczos iterations.
 */
 #include <stdio.h>
 #include <stdlib.h>
@@ -168,6 +171,7 @@ void largeShifts(SparseMatrix *hess, double *initialVector, cJSON *options,
                "%i reorthogonalizations in %.2f sec (%li wall)\n",
                info.matvec, info.north,
                (clock()-t1)/(float) CLOCKS_PER_SEC, tf-t2);
+        fflush(stdout);
     }
 
     if(info.stat < 0 || info.nec < info.ned) {

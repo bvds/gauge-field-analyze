@@ -335,7 +335,7 @@ associated shifts using either dense or sparse matrix techniques.";
 findDelta::lastPairs = "Mathematica orders eigenvalues/vectors in
 order of decreasing magnitude.  Thus, for large shifts, one must find
 the last eigenvalues/vectors.";
-findDelta::external = "Error in external program.";
+findDelta::external = "External program exited with error `1`.";
 findDelta::dynamicPartMethod = "Only dynamicPartMethod = Automatic is supported.";
 findDelta::asymmetric = "Hessian must be symmetric unless Method->\"External\".";
 findDelta::symmetric = "Since Method->\"External\", you can set fullMatrix -> False.";
@@ -506,10 +506,11 @@ findDelta[data:{hess_, grad_, gauge_}, opts:OptionsPattern[]] :=
                         "hess-grad-gauge.json", "hess.mtx",
                         "grad.dat", "gauge.mtx", "shifts0.dat"}];
       Print[Style[out["StandardOutput"], FontColor -> Blue]];
-      If[Length[out["StandardError"]]>0,
+      If[StringLength[out["StandardError"]]>0,
          Print[Style[out["StandardError"], FontColor -> Red]]];
       If[out["ExitCode"] != 0,
-         Message[findDelta::external]; Return[$Failed]]];
+         Message[findDelta::external, out["ExitCode"]];
+         Return[$Failed]]];
    If[action === "write",
       Run["rm -f shifts.log shifts1.dat"];
       Print["Starting up and detaching."];

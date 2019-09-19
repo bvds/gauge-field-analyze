@@ -100,10 +100,11 @@ void linearSolve(integer n, double *b, cJSON *options, double *x) {
                "in %.2f sec (%li wall)\n",
                itn, minresOrtho.count,
                (clock()-t1)/(float) CLOCKS_PER_SEC, tf-t2);
+        fflush(stdout);
     }
 
     if(istop >= 7) {
-        printf("MINRES returned with istop=%i in %s, exiting.\n", istop, __FILE__);
+        fprintf(stderr, "MINRES returned with istop=%i in %s, exiting.\n", istop, __FILE__);
         exit(14);
     }
 }
@@ -153,8 +154,8 @@ void userOrtho(char *action, integer *n, double *y) {
         
         dynamicProject(*n, y, NULL);
     } else {
-        printf("Bad value %s\n", action);
-        exit(1);
+        fprintf(stderr, "Bad value %s\n", action);
+        exit(111);
     }
 }
 
