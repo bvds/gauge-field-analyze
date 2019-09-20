@@ -52,6 +52,7 @@ struct {
     int ops;
     int sumNcol;
     int maxNcol;
+    clock_t tcpu_mv;
 } eigenData;
 
 /*
@@ -68,7 +69,10 @@ void largeShifts(SparseMatrix *hess, double *initialVector, cJSON *options,
     double tol = -1.0; // Use default tolerance: sqrt(machine epsilon)
     int nrow = rows(hess); // number of rows on this processor
     trl_info info;
-    int i, printDetails = 1, restart = 1;
+    int i, printDetails = 1;
+    /* Strategies 3 & 4 are for matrices where the matrix-vector 
+       multiply is relatively expensive.  */
+    int restart = 4;
     unsigned int k;
     cJSON *tmp;
     clock_t t1;
@@ -87,6 +91,7 @@ void largeShifts(SparseMatrix *hess, double *initialVector, cJSON *options,
     eigenData.ops = 0;
     eigenData.sumNcol = 0;
     eigenData.maxNcol = 0;
+    eigenData.tcpu_mv = 0;
 
     // Would need a separate flag for the lohi == 0 case.
     tmp  = cJSON_GetObjectItemCaseSensitive(options, "eigenPairs");
@@ -171,6 +176,8 @@ void largeShifts(SparseMatrix *hess, double *initialVector, cJSON *options,
                "%i reorthogonalizations in %.2f sec (%li wall)\n",
                info.matvec, info.north,
                (clock()-t1)/(float) CLOCKS_PER_SEC, tf-t2);
+        printf("largeShifts:  %.2fmv cpu sec for ops\n",
+               eigenData.tcpu_mv/(float) CLOCKS_PER_SEC);
         fflush(stdout);
     }
 
@@ -195,6 +202,7 @@ void hessOp(const int nrow, const int ncol, const double *xin, const int ldx,
     assert(rows(eigenData.matrix) == nrow);
     assert(mvparam == NULL);
     int k;
+    clock_t t0;
 
     eigenData.ops += 1;
     eigenData.sumNcol += ncol;
@@ -202,7 +210,9 @@ void hessOp(const int nrow, const int ncol, const double *xin, const int ldx,
         eigenData.maxNcol = ncol;
 
     for(k=0; k<ncol; k++) {
+        t0 = clock();
         matrixVector(eigenData.matrix, xin+k*ldx, yout+k*ldy);
+        eigenData.tcpu_mv += clock() - t0;
         // Use the fact that "in" and "out" can overlap.
         dynamicProject(nrow, yout+k*ldy, NULL);
     }
@@ -215,6 +225,7 @@ void hessOp2(const int nrow, const int ncol, const double *xin, const int ldx,
     assert(rows(eigenData.matrix) == nrow);
     assert(mvparam == NULL);
     int k;
+    clock_t t0;
 
     eigenData.ops += 1;
     eigenData.sumNcol += ncol;
@@ -222,11 +233,15 @@ void hessOp2(const int nrow, const int ncol, const double *xin, const int ldx,
         eigenData.maxNcol = ncol;
 
     for(k=0; k<ncol; k++) {
+        t0 = clock();
         matrixVector(eigenData.matrix, xin+k*ldx, eigenData.z);
+        eigenData.tcpu_mv += clock() - t0;
         // Use the fact that "in" and "out" can overlap.
         dynamicProject(nrow, eigenData.z, NULL);
         // Apply a second time
+        t0 = clock();
         matrixVector(eigenData.matrix, eigenData.z, yout+k*ldy);
+        eigenData.tcpu_mv += clock() - t0;
         // Use the fact that "in" and "out" can overlap.
         dynamicProject(nrow, yout+k*ldy, NULL);
     }

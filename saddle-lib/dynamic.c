@@ -34,6 +34,8 @@ struct {
     doublereal *x;
     doublereal *b;
     unsigned long int tcpu;
+    unsigned long int tcpu_mv;
+    unsigned long int tcpu_vm;
     unsigned long int twall;
     unsigned int count;
     unsigned int usertol;
@@ -233,6 +235,10 @@ void dynamicClose() {
                gaugeData.count, gaugeData.usertol, gaugeData.matVec,
                gaugeData.maxItn,
                gaugeData.tcpu/(float) CLOCKS_PER_SEC, gaugeData.twall);
+        printf("dynamicProject:  %.2fvm + %.2fmv = %.2ftotal cpu sec for ops\n",
+               gaugeData.tcpu_vm/(float) CLOCKS_PER_SEC,
+               gaugeData.tcpu_mv/(float) CLOCKS_PER_SEC,
+               (gaugeData.tcpu_vm+gaugeData.tcpu_mv)/(float) CLOCKS_PER_SEC);
         fflush(stdout);
     }
 
@@ -262,9 +268,12 @@ void gaugeOp(const int nrow, const int ncol, const double *xin, const int ldx,
 
 int gaugeProduct(const integer *vectorLength, const doublereal *x,
                  doublereal *y) {
+    clock_t t0 = clock(), t1;
     assert(*vectorLength == rows(gaugeData.matrix));
     vectorMatrix(gaugeData.matrix, x, gaugeData.z);
+    gaugeData.tcpu_vm += (t1=clock()) - t0;
     matrixVector(gaugeData.matrix, gaugeData.z, y);
+    gaugeData.tcpu_mv += clock() - t1;
     return 0;
 }
 

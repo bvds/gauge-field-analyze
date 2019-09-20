@@ -51,6 +51,19 @@ int main(int argc, char **argv){
     sparse_status_t err;
     int block_size;
     sparse_matrix_t coordMatrix;
+    /*
+      On the T480 laptop, calculations are limited by memory
+      latency/bandwidth:  too many threads causes thread 
+      contention.
+
+      8^3 lattice, nc=3 total execution time:
+      Threads    cpu time   wall time
+      1          884s       884s
+      2          1362s      682s
+      3          2042s      683s
+      4          2878s      722s
+    */
+    const int threads = 2;
 #else
     SparseRow *row;
 #endif
@@ -78,6 +91,9 @@ int main(int argc, char **argv){
         fprintf(stderr, "rsb_lib_set_opt error 0x%x, exiting\n", errval);
         exit(222);
     }
+#elif defined(USE_MKL)
+    printf("Setting MKL to %i threads\n", threads);
+    mkl_set_num_threads_local(threads);
 #endif
 
     /* Read JSON file and use options */
@@ -159,7 +175,7 @@ int main(int argc, char **argv){
     }
     block_size = nc*nc - 1;
     if((err = mkl_sparse_convert_bsr(coordMatrix, block_size,
-                            SPARSE_LAYOUT_COLUMN_MAJOR, // BvdS: right?
+                            SPARSE_LAYOUT_COLUMN_MAJOR,
                             SPARSE_OPERATION_NON_TRANSPOSE,
                             &hess.a)) != SPARSE_STATUS_SUCCESS) {
         fprintf(stderr, "failed %i\n", err);

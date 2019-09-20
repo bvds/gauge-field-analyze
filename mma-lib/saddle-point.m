@@ -512,16 +512,17 @@ findDelta[data:{hess_, grad_, gauge_}, opts:OptionsPattern[]] :=
          Message[findDelta::external, out["ExitCode"]];
          Return[$Failed]]];
    If[action === "write",
-      Run["rm -f shifts.log shifts1.dat"];
+      Run["rm -f shifts1.log shifts1.err shifts1.dat"];
       Print["Starting up and detaching."];
-      Run["(saddle-lib/shifts hess-grad-gauge.json hess.mtx grad.dat gauge.mtx shifts1.dat > shifts.log&); echo \"started\""]]
+      Run["(saddle-lib/shifts hess-grad-gauge.json hess.mtx grad.dat gauge.mtx shifts1.dat 2> shifts1.err 1> shifts1.log&); echo \"started\""]]
    If[action === "read",
-      Print[Style[ReadString["shifts.log"], FontColor -> Blue]]];
+      Print[Style[ReadString["shifts1.log"], FontColor -> Blue]];
+      Print[Style[ReadString["shifts1.err"], FontColor -> Red]]];
    Print["findDelta shifts time (seconds):  total=", SessionTime[] - tinit];
    (* Read shifts from external file *)
    If[action =!= "write",
       shifts = ReadList[
-          If[action=="read", "shifts1.dat", "shifts0.dat"],
+          If[action === "read", "shifts1.dat", "shifts0.dat"],
           Number];
       If[OptionValue[storePairs],
          pairs0 = Null;
