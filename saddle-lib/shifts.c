@@ -322,6 +322,7 @@ int main(int argc, char **argv){
     tcpu += clock()-t1;
     twall += tf - t2; 
 
+
     /* Solve it!  */
 
     double *shifts = malloc(n * sizeof(double));
@@ -330,13 +331,14 @@ int main(int argc, char **argv){
     tmp = cJSON_GetObjectItemCaseSensitive(jopts, "dynamicPartOptions");
     assert(tmp != NULL);
     dynamicInit(gaugep, tmp);
+    eigenInit(hessp);
     // Debug print:
 #if 0
     testOp(hessp, grad);
 #endif
     tmp = cJSON_GetObjectItemCaseSensitive(jopts, "largeShiftOptions");
     assert(tmp != NULL);
-    largeShifts(hessp, grad, tmp, &absVals, &vecs, &nvals);
+    largeShiftsCheckpoint(grad, tmp, &absVals, &vecs, &nvals);
     cutoffNullspace(n, nvals, jopts, grad, absVals, vecs, &nLargeShifts);
     linearInit(hessp, vecs, nLargeShifts);
     tmp = cJSON_GetObjectItemCaseSensitive(jopts, "linearSolveOptions");
@@ -352,9 +354,9 @@ int main(int argc, char **argv){
     printf("Opening output file %s\n", argv[5]);
     fp = fopen(argv[5], "w"); 
     for(i=0; i<n; i++){
-        fprintf(fp, "%.15e\n", shifts[i]);
+        fprintf(fp, "%.17e\n", shifts[i]);
     }
-    fclose(fp);  
+    fclose(fp);
     time(&tf);
     tcpu += clock()-t1;
     twall += tf - t2;

@@ -55,11 +55,71 @@ struct {
     clock_t tcpu_mv;
 } eigenData;
 
+void eigenInit(SparseMatrix *hess) {
+    eigenData.matrix = hess;
+}
+
+/*
+   Wrapper to optionally read/write checkpoint file.
+   For debugging.
+*/
+
+void largeShiftsCheckpoint(double *initialVector, cJSON *options,
+                           double **vals, double **vecs, unsigned int *nvals) {
+    cJSON *tmp;
+    char *checkpoint;
+    FILE *fp;
+    int k;
+    unsigned int i, nn, n = rows(eigenData.matrix);
+    tmp = cJSON_GetObjectItemCaseSensitive(options, "readCheckpoint");
+    if(tmp == NULL) {
+        largeShifts(initialVector, options, vals, vecs, nvals);
+        tmp = cJSON_GetObjectItemCaseSensitive(options, "writeCheckpoint");
+        if(tmp != NULL) {
+            checkpoint = tmp->valuestring;
+            printf("Opening output file %s\n", checkpoint);
+            if((fp = fopen(checkpoint, "w")) == NULL) {
+                fprintf(stderr, "Can't open file %s\n", checkpoint);
+                exit(555);
+            }
+            fprintf(fp,"%u %u\n", n, *nvals);
+            for(i=0; i<n; i++){
+                fprintf(fp, "%.17e\n", (*vals)[i]);
+            }
+            for(i=0; i<*nvals*n; i++){
+                fprintf(fp, "%.17e\n", (*vecs)[i]);
+            }
+            fclose(fp);
+        }
+    } else {
+        checkpoint = tmp->valuestring;
+        printf("Opening input file %s\n", checkpoint);
+        if((fp = fopen(checkpoint, "r")) == NULL) {
+            fprintf(stderr, "Can't open file %s\n", checkpoint);
+            exit(555);
+        }
+        k = fscanf(fp, "%u%u", &nn, nvals);
+        assert(nn==n);
+        assert(k==2);
+        *vals = malloc(n*sizeof(double));
+        *vecs = malloc(n*(*nvals)*sizeof(double));
+        for(i=0; i<n; i++) {
+            k = fscanf(fp, "%le", (*vals)+i);
+            assert(k==1);
+        }
+        for(i=0; i<n*(*nvals); i++) {
+            k = fscanf(fp, "%le", (*vecs)+i);
+            assert(k==1);
+        }
+        fclose(fp);
+    }
+}
+
 /*
   Returns the absolute values of the lowest eigenvalues of
   the Hessian.
  */
-void largeShifts(SparseMatrix *hess, double *initialVector, cJSON *options,
+void largeShifts(double *initialVector, cJSON *options,
 		 double **eval, double **evec, unsigned int *nvals) {
     // Let trlan figure out the work array allocation.
     const int lwrk = 0;
@@ -67,6 +127,7 @@ void largeShifts(SparseMatrix *hess, double *initialVector, cJSON *options,
     double *wrk = NULL;
     int mev, maxlan, lohi, ned, maxmv;
     double tol = -1.0; // Use default tolerance: sqrt(machine epsilon)
+    SparseMatrix *hess = eigenData.matrix;
     int nrow = rows(hess); // number of rows on this processor
     trl_info info;
     int i, printDetails = 1;
@@ -82,7 +143,6 @@ void largeShifts(SparseMatrix *hess, double *initialVector, cJSON *options,
     time(&t2);
 
     // Used by HessOp
-    eigenData.matrix = hess;
 #ifdef USE_MKL
     eigenData.z = mkl_malloc(rows(hess) * sizeof(double), MALLOC_ALIGN);
 #else
@@ -109,7 +169,7 @@ void largeShifts(SparseMatrix *hess, double *initialVector, cJSON *options,
         maxmv = tmp->valueint;
     } else {
         // Documented default (maxmv<0) seems to be broken?
-        maxmv = rows(hess) * ned;  
+        maxmv = rows(hess) * ned;
     }
     /* maxLanczosVecs is maximum number of Lanczos vectors to use.
        This sets an upper bound on the memory used. */

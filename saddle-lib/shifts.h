@@ -97,7 +97,10 @@ void hessOp(const int nrow, const int ncol, const double *xin, const int ldx,
 	    double *yout, const int ldy, void* mvparam);
 void hessOp2(const int nrow, const int ncol, const double *xin, const int ldx,
              double *yout, const int ldy, void* mvparam);
-void largeShifts(SparseMatrix *, double *initialVector, cJSON *options,
+void eigenInit(SparseMatrix *hess);
+void largeShiftsCheckpoint(double *initialVector, cJSON *options,
+		 double **vals, double **vecs, unsigned int *nvals);
+void largeShifts(double *initialVector, cJSON *options,
 		 double **vals, double **vecs, unsigned int *nvals);
 void testOp(SparseMatrix *hess, double *grad);
 

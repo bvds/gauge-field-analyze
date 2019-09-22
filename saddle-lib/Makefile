@@ -36,7 +36,7 @@ endif
 #
 #
 #              -Wall -g -O3
-CFLAGS = -fPIC -O3 -Wextra $(MKL_CFLAGS) $(RSB_CFLAGS) -pedantic -std=gnu11 -I$(TRLANDIR)/INC
+CFLAGS = -fPIC -Wall -g -O -Wextra $(MKL_CFLAGS) $(RSB_CFLAGS) -pedantic -std=gnu11 -I$(TRLANDIR)/INC
 
 MINRESOBJS = $(MINRESDIR)/minresqlpModule.o $(MINRESDIR)/minresqlpDataModule.o  $(MINRESDIR)/minresqlpBlasModule.o
 SHIFTOBJS = shifts.o dynamic.o eigensystem.o cutoff.o linear.o mmio.o
