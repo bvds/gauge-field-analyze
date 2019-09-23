@@ -485,15 +485,15 @@ findDelta[data:{hess_, grad_, gauge_}, opts:OptionsPattern[]] :=
       Export[outFile, {
           "nc" -> nc,
           "n" -> Length[grad],
+          "gaugeDimension" -> Length[gauge],
           "rescaleCutoff" -> zzz,
           "largeShiftCutoff" ->
               OptionValue[largeShiftCutoff]/.Infinity -> 10.0^20,
-          "linearSolveOptions" ->
-	      {methodOptions[OptionValue[Method]]}/.symbolString,
           "dynamicPartOptions" ->
                {methodOptions[OptionValue[dynamicPartMethod]]}/.symbolString,
           "largeShiftOptions" -> OptionValue[largeShiftOptions]/.symbolString,
-          "gaugeDimension" -> Length[gauge]}];
+          "linearSolveOptions" ->
+	      {methodOptions[OptionValue[Method]]}/.symbolString}];
       (* Export full matrix, even though it is symmetric. *)
       Export["hess.mtx", hess];
       Export["grad.dat", grad];

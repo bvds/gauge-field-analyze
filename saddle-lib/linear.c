@@ -21,6 +21,8 @@ struct {
     doublereal *vecs;
     integer nvecs;
     int count;
+    integer maxVecs;
+    integer pointer;
 } minresOrtho;
 
 void linearInit(SparseMatrix *hess, double *vecs, int nvecs) {
@@ -35,7 +37,8 @@ void linearSolve(integer n, double *b, cJSON *options, double *x) {
     // Explicit value for these, so we can force MINRES alogrithm.
     doublereal trancond, acondlim = 1.0e15;
     logical *disablep = NULL;
-    integer nout, *noutp = NULL, istop, itn, itnlim;
+    integer nout, *noutp = NULL, istop, itn,
+        itnlim = n; // Assuming reorthogonalization
     cJSON *tmp;
     doublereal rnorm, arnorm, xnorm, anorm, acond,
         rtol, *rtolp = NULL, *abstolp = NULL;
@@ -49,9 +52,10 @@ void linearSolve(integer n, double *b, cJSON *options, double *x) {
     tmp  = cJSON_GetObjectItemCaseSensitive(options, "maxIterations");
     if(cJSON_IsNumber(tmp)) {
         itnlim = tmp->valueint;
-    } else {
-        itnlim = 4*n;  // Assuming no reorthogonalization
     }
+    tmp  = cJSON_GetObjectItemCaseSensitive(options, "maxLanczosVecs");
+    minresOrtho.maxVecs = cJSON_IsNumber(tmp)?tmp->valueint:itnlim;
+    //
     tmp  = cJSON_GetObjectItemCaseSensitive(options, "rTolerance");
     if(cJSON_IsNumber(tmp)) {
         rtol = tmp->valuedouble;
@@ -72,8 +76,20 @@ void linearSolve(integer n, double *b, cJSON *options, double *x) {
     assert(n == columns(hessData.matrix));
     assert(n == rows(hessData.matrix));
     hessData.z = malloc(hessData.nvecs*sizeof(doublereal));
-    minresOrtho.z = malloc(itnlim*sizeof(doublereal));
-    minresOrtho.vecs = NULL; minresOrtho.nvecs = 0;
+    if((minresOrtho.z = malloc(minresOrtho.maxVecs*
+                               sizeof(doublereal))) == NULL) {
+        fprintf(stderr, "Can't allocated minresOrtho.z size %i*%li\n",
+                minresOrtho.maxVecs, sizeof(doublereal));
+        exit(124);
+    }
+    if((minresOrtho.vecs = malloc(minresOrtho.maxVecs*n*
+                                  sizeof(doublereal))) == NULL) {
+        fprintf(stderr, "Can't allocated minresOrtho.vecs size %i*%i*%li\n",
+                minresOrtho.maxVecs, n, sizeof(doublereal));
+        exit(125);
+    }
+    minresOrtho.nvecs = 0;
+    minresOrtho.pointer = 0;
     minresOrtho.count = 0;
 
     /* grad may have components in the large shift direction */
@@ -91,7 +107,7 @@ void linearSolve(integer n, double *b, cJSON *options, double *x) {
 
     free(hessData.z);
     free(minresOrtho.z);
-    minresOrtho.vecs = realloc(minresOrtho.vecs, 0);
+    free(minresOrtho.vecs);
     minresOrtho.nvecs = 0;
 
     time(&tf);
@@ -122,18 +138,21 @@ void userOrtho(char *action, integer *n, double *y) {
     const char trans='T', normal='N';
     const double one=1.0, zero=0.0, minusone=-1.0;
     const integer inc=1;
-    const integer dn = *n * sizeof(double),
-        offset = minresOrtho.nvecs * *n;
+    const integer dn = *n * sizeof(double);
 
     assert(*n == rows(hessData.matrix));
     assert(*n == columns(hessData.matrix));
 
     if(*action=='a') {
         /* add vector to ortho list */
-        minresOrtho.nvecs += 1;
-        minresOrtho.vecs = realloc(minresOrtho.vecs, minresOrtho.nvecs * dn);
-        memcpy(minresOrtho.vecs + offset, y, dn);
-        minresOrtho.z = realloc(minresOrtho.z, minresOrtho.nvecs * sizeof(double));
+        memcpy(minresOrtho.vecs + minresOrtho.pointer*(*n), y, dn);
+        minresOrtho.pointer += 1;
+        if(minresOrtho.pointer==minresOrtho.maxVecs) {
+            minresOrtho.pointer = 0;
+        }
+        if(minresOrtho.nvecs<minresOrtho.maxVecs) {
+            minresOrtho.nvecs += 1;
+        }
     } else if(*action=='o') {
         /* orthogonalize vector against previous
            vectors, gauge transforms, and large shifts 

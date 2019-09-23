@@ -5000,8 +5000,62 @@ Cell[BoxData[
   RowBox[{"shiftsDynamicDense", "=", "shifts0"}], 
   ";"}]], "Input",ExpressionUUID->"89f1d4ee-77ad-4a21-b2d4-e62d1cd6d244"],
 
+Cell[CellGroupData[{
+
 Cell[BoxData["\<\"Constructed hess, grad\"\>"], \
-"Print",ExpressionUUID->"19f475a9-4068-4a5c-8ec8-1b06073473c0"]
+"Print",ExpressionUUID->"0fb28458-0551-4086-95bb-a26f1598de53"],
+
+Cell[BoxData["\<\"Constructed gauge\"\>"], \
+"Print",ExpressionUUID->"5ca69e4d-3f97-45aa-aedc-1f79ba65bc64"],
+
+Cell[BoxData[
+ InterpretationBox[
+  RowBox[{"\<\"applyCutoff3:  \"\>", "\[InvisibleSpace]", "14", 
+   "\[InvisibleSpace]", "\<\" of \"\>", "\[InvisibleSpace]", "1024", 
+   "\[InvisibleSpace]", "\<\" zeros, between \"\>", "\[InvisibleSpace]", 
+   RowBox[{"{", 
+    RowBox[{"994", ",", "1024"}], "}"}]}],
+  SequenceForm[
+  "applyCutoff3:  ", 14, " of ", 1024, " zeros, between ", {994, 1024}],
+  Editable->
+   False]], "Print",ExpressionUUID->"8c2f26c4-5d93-4774-be9e-557710add924"],
+
+Cell[BoxData[
+ InterpretationBox[
+  RowBox[{"\<\"shifts norms and rescale:  \"\>", "\[InvisibleSpace]", 
+   RowBox[{"{", 
+    RowBox[{
+    "8.320151887930411`", ",", "58.55902361053649`", ",", 
+     "0.9999999999999899`"}], "}"}]}],
+  SequenceForm[
+  "shifts norms and rescale:  ", {8.320151887930411, 58.55902361053649, 
+   0.9999999999999899}],
+  Editable->
+   False]], "Print",ExpressionUUID->"364afc72-aad9-4a1e-aabb-6cd5d951c75f"],
+
+Cell[BoxData[
+ InterpretationBox[
+  RowBox[{"\<\"applyCutoff2: rescale maxNorm \"\>", "\[InvisibleSpace]", 
+   "8.320151887930411`", "\[InvisibleSpace]", "\<\" to \"\>", 
+   "\[InvisibleSpace]", "2"}],
+  SequenceForm["applyCutoff2: rescale maxNorm ", 8.320151887930411, " to ", 2],
+  Editable->
+   False]], "Print",ExpressionUUID->"69411499-6c90-4c21-80a1-40981d90dd02"],
+
+Cell[BoxData[
+ InterpretationBox[
+  RowBox[{"\<\"latticeSaddlePointStep times:  \"\>", "\[InvisibleSpace]", 
+   RowBox[{"{", 
+    RowBox[{
+    "1.719883`6.386013901610081", ",", "1.250977`6.24776432282125", ",", 
+     "0.023116`4.51442768362634"}], "}"}]}],
+  SequenceForm[
+  "latticeSaddlePointStep times:  ", {
+   1.719883`6.386013901610081, 1.250977`6.24776432282125, 
+    0.023116`4.51442768362634}],
+  Editable->
+   False]], "Print",ExpressionUUID->"914c2cb5-8359-46dc-841b-5ed3403ca976"]
+}, Open  ]]
 }, Open  ]],
 
 Cell[BoxData[
@@ -5118,17 +5172,17 @@ Cell[BoxData[
 Cell[CellGroupData[{
 
 Cell[BoxData["\<\"Constructed hess, grad\"\>"], \
-"Print",ExpressionUUID->"2d9468c9-96c0-40ea-9e02-5e21966023ce"],
+"Print",ExpressionUUID->"698cb798-7227-4ca2-a164-8f191b306552"],
 
 Cell[BoxData["\<\"Constructed gauge\"\>"], \
-"Print",ExpressionUUID->"9d7da08f-d09b-454b-a873-7402cdee01f5"],
+"Print",ExpressionUUID->"b51e3ab0-130a-49c2-bae5-d4a36bbb72de"],
 
 Cell[BoxData[
  StyleBox["\<\"Setting MKL to 2 threads\\nOpening file hess-grad-gauge.json \
 n=1536, nc=3, gauge=512\\nOpening file hess.mtx with 79680 nonzero \
 elements.\\nOpening file grad.dat for a vector of length 1536\\nOpening file \
 gauge.mtx with 24576 nonzero elements.\\n                                     \
-             Sat Sep 21 20:04:41 2019\\nTRLAN execution summary (exit status \
+             Mon Sep 23 12:22:29 2019\\nTRLAN execution summary (exit status \
 =0)\\nNumber of SMALLEST eigenpairs             1 (computed)           1 \
 (wanted)\\nTimes the operator is applied:          128 (MAX:           400000 \
 )\\nProblem size:                           512 (PE:    0)         512 \
@@ -5136,54 +5190,70 @@ gauge.mtx with 24576 nonzero elements.\\n                                     \
 (abs)\\nMaximum basis size:                    1000\\nRestarting scheme:      \
                   3\\nNumber of re-orthogonalizations:        128\\nNumber of \
 (re)start loops:                1\\nNumber of eigenpairs locked:              \
-0\\nOP(MATVEC):              6.9860e-03 sec,   1.8012e+09 FLOP/S ( 1.2583e+07 \
-FLOP)\\nRe-Orthogonalization::   1.2390e-03 sec,   1.3805e+10 FLOP/S ( \
-1.7104e+07 FLOP)\\nRestarting::             5.3000e-04 sec,   2.4731e+08 \
-FLOP/S ( 1.3107e+05 FLOP)\\nTRLAN on this PE:        1.8697e-02 sec,   \
-1.6159e+09 FLOP/S ( 3.0212e+07 FLOP)\\nGauge matrix extreme eigenvalues \
-found:\\n  1.130975e+00\\nOpening input file \
-checkpoint.log\\ncutoffNullSpace:  14 of 40 zeros between [0, \
-30]\\nlinearSolve:  460 iterations, 460 reorthogonalizations in 1.49 sec (1 \
-wall)\\ndynamicProject:  924 calls (463 usertol), 14327 matrix-vector ops, \
-max itn 29\\n                 in 1.19 sec (1 wall)\\ndynamicProject:  0.45vm \
-+ 0.40mv = 0.85total cpu sec for ops\\nOpening output file \
-shifts0.dat\\nshifts.c:  input/output in 0.07 sec (0 wall)\\nshifts.c:  \
-overall time 1.61 sec (1 wall)\\n\"\>",
+0\\nOP(MATVEC):              4.3430e-03 sec,   2.8973e+09 FLOP/S ( 1.2583e+07 \
+FLOP)\\nRe-Orthogonalization::   5.8000e-03 sec,   2.9490e+09 FLOP/S ( \
+1.7104e+07 FLOP)\\nRestarting::             5.4200e-04 sec,   2.4183e+08 \
+FLOP/S ( 1.3107e+05 FLOP)\\nTRLAN on this PE:        2.7040e-02 sec,   \
+1.1173e+09 FLOP/S ( 3.0212e+07 FLOP)\\nGauge matrix extreme eigenvalues \
+found:\\n  1.130975e+00\\n                                                  \
+Mon Sep 23 12:22:39 2019\\nTRLAN execution summary (exit status =0)\\nNumber \
+of SMALLEST eigenpairs            40 (computed)          40 (wanted)\\nTimes \
+the operator is applied:         1793 (MAX:           400000 )\\nProblem \
+size:                          1536 (PE:    0)        1536 \
+(Global)\\nConvergence tolerance:            1.000e-07 (rel)        1.849e-06 \
+(abs)\\nMaximum basis size:                     720\\nRestarting scheme:      \
+                  4\\nNumber of re-orthogonalizations:       1793\\nNumber of \
+(re)start loops:                3\\nNumber of eigenpairs locked:              \
+0\\nOP(MATVEC):              1.6073e+01 sec,   3.5555e+07 FLOP/S ( 5.7146e+08 \
+FLOP)\\nRe-Orthogonalization::   3.8129e+00 sec,   1.1972e+09 FLOP/S ( \
+4.5649e+09 FLOP)\\nRestarting::             5.6431e-01 sec,   1.5953e+09 \
+FLOP/S ( 9.0022e+08 FLOP)\\nTRLAN on this PE:        2.0522e+01 sec,   \
+2.9710e+08 FLOP/S ( 6.0971e+09 FLOP)\\nlargeShifts: ops=1793, sumNcol=1793, \
+maxNcol=1\\nlargeShifts: 1793 matrix-vector ops, 1793 reorthogonalizations in \
+20.52 sec (10 wall)\\nlargeShifts:  2.18mv cpu sec for ops\\ncutoffNullSpace: \
+ 14 of 40 zeros between [0, 30]\\nlinearSolve:  460 iterations, 460 \
+reorthogonalizations in 2.82 sec (2 wall)\\ndynamicProject:  6303 calls (2936 \
+usertol), 120979 matrix-vector ops, max itn 29\\n                 in 17.74 \
+sec (9 wall)\\ndynamicProject:  6.59vm + 5.78mv = 12.38total cpu sec for \
+ops\\nOpening output file shifts0.dat\\nshifts.c:  input/output in 0.12 sec \
+(0 wall)\\nshifts.c:  overall time 23.49 sec (12 wall)\\n\"\>",
   StripOnInput->False,
   FontColor->RGBColor[
-   0, 0, 1]]], "Print",ExpressionUUID->"b758ec19-638b-448b-864c-b6cb4fb53fbf"],
+   0, 0, 1]]], "Print",ExpressionUUID->"e3be1e9a-5ecd-462e-aa03-7f0f764842c6"],
 
 Cell[BoxData[
  InterpretationBox[
   RowBox[{"\<\"findDelta shifts time (seconds):  total=\"\>", 
-   "\[InvisibleSpace]", "0.942557`6.124822620940005"}],
+   "\[InvisibleSpace]", "12.030872`7.230812104063242"}],
   SequenceForm[
-  "findDelta shifts time (seconds):  total=", 0.942557`6.124822620940005],
+  "findDelta shifts time (seconds):  total=", 12.030872`7.230812104063242],
   Editable->
-   False]], "Print",ExpressionUUID->"38029f53-3b17-4e20-9e14-da2624ab8e97"],
+   False]], "Print",ExpressionUUID->"fe11fe49-301b-4fd9-95df-50aa7459ca36"],
 
 Cell[BoxData[
  InterpretationBox[
   RowBox[{"\<\"applyCutoff2: rescale maxNorm \"\>", "\[InvisibleSpace]", 
-   "8.320151559769624`", "\[InvisibleSpace]", "\<\" to \"\>", 
-   "\[InvisibleSpace]", "2"}],
-  SequenceForm["applyCutoff2: rescale maxNorm ", 8.320151559769624, " to ", 2],
+   "8.32015159099985535955264177369175630372`17.07986479800509", 
+   "\[InvisibleSpace]", "\<\" to \"\>", "\[InvisibleSpace]", "2"}],
+  SequenceForm[
+  "applyCutoff2: rescale maxNorm ", 
+   8.32015159099985535955264177369175630372`17.07986479800509, " to ", 2],
   Editable->
-   False]], "Print",ExpressionUUID->"f1a37733-02cd-4bbe-b47a-a63232e68d66"],
+   False]], "Print",ExpressionUUID->"9d95f429-6dda-4e5c-b78e-8ff9179c53c5"],
 
 Cell[BoxData[
  InterpretationBox[
   RowBox[{"\<\"latticeSaddlePointStep times:  \"\>", "\[InvisibleSpace]", 
    RowBox[{"{", 
     RowBox[{
-    "0.992444`6.147221008302782", ",", "0.949879`6.1281832841953925", ",", 
-     "0.028111`4.599391292986114"}], "}"}]}],
+    "1.803293`6.406581294684709", ",", "12.040691`7.231166409079027", ",", 
+     "0.171007`5.383528885996964"}], "}"}]}],
   SequenceForm[
   "latticeSaddlePointStep times:  ", {
-   0.992444`6.147221008302782, 0.949879`6.1281832841953925, 
-    0.028111`4.599391292986114}],
+   1.803293`6.406581294684709, 12.040691`7.231166409079027, 
+    0.171007`5.383528885996964}],
   Editable->
-   False]], "Print",ExpressionUUID->"3c6610a9-d414-47ad-92d4-12ed02e7be87"]
+   False]], "Print",ExpressionUUID->"cfbae6c8-c9e2-4e6c-adc5-361dbdfea6dd"]
 }, Open  ]]
 }, Open  ]],
 
@@ -5198,14 +5268,13 @@ Cell[BoxData[
  RowBox[{"{", 
   RowBox[{
    RowBox[{"{", 
-    RowBox[{"8.320151723850017`", ",", 
-     RowBox[{"-", "3.944168391889491`*^-8"}]}], "}"}], ",", 
+    RowBox[{"8.320151739465134`", ",", 
+     RowBox[{"-", "3.568811846044184`*^-8"}]}], "}"}], ",", 
    RowBox[{"{", 
-    RowBox[{"58.559025039484425`", ",", "4.880367787674089`*^-8"}], "}"}], 
-   ",", 
+    RowBox[{"58.55902507119997`", ",", "4.988687718476825`*^-8"}], "}"}], ",", 
    RowBox[{"{", 
-    RowBox[{"0.9999999999998465`", ",", "5.541549319561224`*^-7"}], "}"}]}], 
-  "}"}]], "Output",ExpressionUUID->"8989fa6e-bebc-4f82-a093-5177a1a3dc2b"]
+    RowBox[{"0.999999999999853`", ",", "5.422057330208892`*^-7"}], "}"}]}], 
+  "}"}]], "Output",ExpressionUUID->"37a7d44b-2992-4925-bf28-6e8e8d17d24e"]
 }, Open  ]],
 
 Cell[CellGroupData[{
@@ -5220,8 +5289,8 @@ Cell[BoxData[
    RowBox[{"Flatten", "[", "gaugeFieldDynamicDense", "]"}], 
    "]"}]}]], "Input",ExpressionUUID->"16db756a-07de-47c7-ba3f-6bc41f9ee440"],
 
-Cell[BoxData["2.287442118002195`*^-7"], \
-"Output",ExpressionUUID->"e427d97f-11f7-4fa3-ba59-9c82fe90fc59"]
+Cell[BoxData["2.2366300637021857`*^-7"], \
+"Output",ExpressionUUID->"3303c43a-7f8d-46b6-8447-6dc6a9151b1c"]
 }, Open  ]]
 }, Open  ]],
 
@@ -5247,10 +5316,58 @@ Cell[BoxData[
 Cell[CellGroupData[{
 
 Cell[BoxData["\<\"Constructed hess, grad\"\>"], \
-"Print",ExpressionUUID->"e5548252-7edc-49f7-a179-e6553848f698"],
+"Print",ExpressionUUID->"e11f3121-fc11-4d0b-a6b6-59d68d7b450e"],
 
 Cell[BoxData["\<\"Constructed gauge\"\>"], \
-"Print",ExpressionUUID->"e224a6ce-6c8f-44a6-9ade-e430a354367e"]
+"Print",ExpressionUUID->"4e0f5291-9d77-4e4b-8c79-d40f7fa2568f"],
+
+Cell[BoxData[
+ InterpretationBox[
+  RowBox[{"\<\"applyCutoff3:  \"\>", "\[InvisibleSpace]", "18", 
+   "\[InvisibleSpace]", "\<\" of \"\>", "\[InvisibleSpace]", "1024", 
+   "\[InvisibleSpace]", "\<\" zeros, between \"\>", "\[InvisibleSpace]", 
+   RowBox[{"{", 
+    RowBox[{"980", ",", "1024"}], "}"}]}],
+  SequenceForm[
+  "applyCutoff3:  ", 18, " of ", 1024, " zeros, between ", {980, 1024}],
+  Editable->
+   False]], "Print",ExpressionUUID->"7637d39d-6569-4e75-a3a0-6ddf77ae6707"],
+
+Cell[BoxData[
+ InterpretationBox[
+  RowBox[{"\<\"shifts norms and rescale:  \"\>", "\[InvisibleSpace]", 
+   RowBox[{"{", 
+    RowBox[{
+    "9.950408275075418`", ",", "57.67113802450228`", ",", 
+     "1.0000000000001141`"}], "}"}]}],
+  SequenceForm[
+  "shifts norms and rescale:  ", {9.950408275075418, 57.67113802450228, 
+   1.0000000000001141`}],
+  Editable->
+   False]], "Print",ExpressionUUID->"ca17fcff-e43d-45e5-a85c-6eaadd9e0b79"],
+
+Cell[BoxData[
+ InterpretationBox[
+  RowBox[{"\<\"applyCutoff2: rescale maxNorm \"\>", "\[InvisibleSpace]", 
+   "9.950408275075418`", "\[InvisibleSpace]", "\<\" to \"\>", 
+   "\[InvisibleSpace]", "2"}],
+  SequenceForm["applyCutoff2: rescale maxNorm ", 9.950408275075418, " to ", 2],
+  Editable->
+   False]], "Print",ExpressionUUID->"d4a4f33a-0da3-4c08-8361-4decd075717f"],
+
+Cell[BoxData[
+ InterpretationBox[
+  RowBox[{"\<\"latticeSaddlePointStep times:  \"\>", "\[InvisibleSpace]", 
+   RowBox[{"{", 
+    RowBox[{
+    "2.445161`6.538822458064464", ",", "1.458084`6.314297542174467", ",", 
+     "0.038655`4.73772067543858"}], "}"}]}],
+  SequenceForm[
+  "latticeSaddlePointStep times:  ", {
+   2.445161`6.538822458064464, 1.458084`6.314297542174467, 
+    0.038655`4.73772067543858}],
+  Editable->
+   False]], "Print",ExpressionUUID->"7440ebea-fa2e-4b45-952f-726b3e6226d9"]
 }, Open  ]]
 }, Open  ]],
 
@@ -5338,17 +5455,17 @@ Cell[BoxData[
 Cell[CellGroupData[{
 
 Cell[BoxData["\<\"Constructed hess, grad\"\>"], \
-"Print",ExpressionUUID->"cc95c93a-76d2-417a-a6bc-ba1271dae9a5"],
+"Print",ExpressionUUID->"c32db404-493b-4537-88b4-f0c51fa59fc2"],
 
 Cell[BoxData["\<\"Constructed gauge\"\>"], \
-"Print",ExpressionUUID->"cc4daf20-9d26-4f4f-ba5f-2d4bfda11572"],
+"Print",ExpressionUUID->"62390282-340c-4236-b32b-304eff41cac1"],
 
 Cell[BoxData[
  StyleBox["\<\"Setting MKL to 2 threads\\nOpening file hess-grad-gauge.json \
 n=1152, nc=3, gauge=128\\nOpening file hess.mtx with 55664 nonzero \
 elements.\\nOpening file grad.dat for a vector of length 1152\\nOpening file \
 gauge.mtx with 17392 nonzero elements.\\n                                     \
-             Sat Sep 21 21:10:12 2019\\nTRLAN execution summary (exit status \
+             Mon Sep 23 12:24:09 2019\\nTRLAN execution summary (exit status \
 =0)\\nNumber of SMALLEST eigenpairs             1 (computed)           1 \
 (wanted)\\nTimes the operator is applied:           64 (MAX:           400000 \
 )\\nProblem size:                           128 (PE:    0)         128 \
@@ -5356,13 +5473,13 @@ gauge.mtx with 17392 nonzero elements.\\n                                     \
 (abs)\\nMaximum basis size:                    1000\\nRestarting scheme:      \
                   3\\nNumber of re-orthogonalizations:         64\\nNumber of \
 (re)start loops:                1\\nNumber of eigenpairs locked:              \
-0\\nOP(MATVEC):              7.6370e-03 sec,   5.8300e+08 FLOP/S ( 4.4524e+06 \
-FLOP)\\nRe-Orthogonalization::   4.4500e-04 sec,   2.4484e+09 FLOP/S ( \
-1.0895e+06 FLOP)\\nRestarting::             4.8400e-03 sec,   3.3851e+06 \
-FLOP/S ( 1.6384e+04 FLOP)\\nTRLAN on this PE:        3.1036e-02 sec,   \
-1.8068e+08 FLOP/S ( 5.6076e+06 FLOP)\\nGauge matrix extreme eigenvalues \
+0\\nOP(MATVEC):              6.9250e-03 sec,   6.4294e+08 FLOP/S ( 4.4524e+06 \
+FLOP)\\nRe-Orthogonalization::   3.2200e-04 sec,   3.3836e+09 FLOP/S ( \
+1.0895e+06 FLOP)\\nRestarting::             6.1900e-04 sec,   2.6468e+07 \
+FLOP/S ( 1.6384e+04 FLOP)\\nTRLAN on this PE:        2.4092e-02 sec,   \
+2.3276e+08 FLOP/S ( 5.6076e+06 FLOP)\\nGauge matrix extreme eigenvalues \
 found:\\n  6.443231e+00\\n                                                  \
-Sat Sep 21 21:10:24 2019\\nTRLAN execution summary (exit status =0)\\nNumber \
+Mon Sep 23 12:24:16 2019\\nTRLAN execution summary (exit status =0)\\nNumber \
 of SMALLEST eigenpairs           100 (computed)         100 (wanted)\\nTimes \
 the operator is applied:         1781 (MAX:           400000 )\\nProblem \
 size:                          1152 (PE:    0)        1152 \
@@ -5370,56 +5487,56 @@ size:                          1152 (PE:    0)        1152 \
 (abs)\\nMaximum basis size:                     720\\nRestarting scheme:      \
                   4\\nNumber of re-orthogonalizations:       1781\\nNumber of \
 (re)start loops:                7\\nNumber of eigenpairs locked:            \
-395\\nOP(MATVEC):              1.5108e+01 sec,   2.6248e+07 FLOP/S ( \
-3.9655e+08 FLOP)\\nRe-Orthogonalization::   5.6198e+00 sec,   7.0880e+08 \
-FLOP/S ( 3.9833e+09 FLOP)\\nRestarting::             1.7108e+00 sec,   \
-1.4121e+09 FLOP/S ( 2.4158e+09 FLOP)\\nTRLAN on this PE:        2.2618e+01 \
-sec,   3.1411e+08 FLOP/S ( 7.1046e+09 FLOP)\\nlargeShifts: ops=1781, \
+395\\nOP(MATVEC):              9.2139e+00 sec,   4.3038e+07 FLOP/S ( \
+3.9655e+08 FLOP)\\nRe-Orthogonalization::   2.7904e+00 sec,   1.4275e+09 \
+FLOP/S ( 3.9833e+09 FLOP)\\nRestarting::             1.0112e+00 sec,   \
+2.3890e+09 FLOP/S ( 2.4158e+09 FLOP)\\nTRLAN on this PE:        1.3118e+01 \
+sec,   5.4160e+08 FLOP/S ( 7.1046e+09 FLOP)\\nlargeShifts: ops=1781, \
 sumNcol=1781, maxNcol=1\\nlargeShifts: 1781 matrix-vector ops, 1781 \
-reorthogonalizations in 22.62 sec (12 wall)\\nlargeShifts:  2.59mv cpu sec \
-for ops\\nOpening output file checkpoint.log\\ncutoffNullSpace:  18 of 100 \
-zeros between [0, 44]\\nlinearSolve:  601 iterations, 601 \
-reorthogonalizations in 3.74 sec (1 wall)\\ndynamicProject:  6549 calls (4821 \
-usertol), 75434 matrix-vector ops, max itn 18\\n                 in 17.27 sec \
-(6 wall)\\ndynamicProject:  6.19vm + 5.27mv = 11.46total cpu sec for \
-ops\\nOpening output file shifts0.dat\\nshifts.c:  input/output in 0.15 sec \
-(0 wall)\\nshifts.c:  overall time 26.66 sec (13 wall)\\n\"\>",
+reorthogonalizations in 13.12 sec (7 wall)\\nlargeShifts:  1.58mv cpu sec for \
+ops\\ncutoffNullSpace:  18 of 100 zeros between [0, 44]\\nlinearSolve:  601 \
+iterations, 601 reorthogonalizations in 2.26 sec (1 wall)\\ndynamicProject:  \
+6549 calls (4821 usertol), 75434 matrix-vector ops, max itn 18\\n             \
+    in 10.53 sec (2 wall)\\ndynamicProject:  3.83vm + 3.18mv = 7.02total cpu \
+sec for ops\\nOpening output file shifts0.dat\\nshifts.c:  input/output in \
+0.09 sec (0 wall)\\nshifts.c:  overall time 15.49 sec (8 wall)\\n\"\>",
   StripOnInput->False,
   FontColor->RGBColor[
-   0, 0, 1]]], "Print",ExpressionUUID->"ad3a62a3-8a1a-49ad-a437-9112502faa47"],
+   0, 0, 1]]], "Print",ExpressionUUID->"8d0930d4-a85f-46e2-89b0-067ae05f6e1e"],
 
 Cell[BoxData[
  InterpretationBox[
   RowBox[{"\<\"findDelta shifts time (seconds):  total=\"\>", 
-   "\[InvisibleSpace]", "13.782764`7.289851317695081"}],
+   "\[InvisibleSpace]", "7.971117`7.052034181580108"}],
   SequenceForm[
-  "findDelta shifts time (seconds):  total=", 13.782764`7.289851317695081],
+  "findDelta shifts time (seconds):  total=", 7.971117`7.052034181580108],
   Editable->
-   False]], "Print",ExpressionUUID->"3cbc46b1-0b4c-40c9-bbac-001806cad68e"],
+   False]], "Print",ExpressionUUID->"40cad73e-0876-4e8e-9bc9-31a934a0eef2"],
 
 Cell[BoxData[
  InterpretationBox[
   RowBox[{"\<\"applyCutoff2: rescale maxNorm \"\>", "\[InvisibleSpace]", 
-   "9.95040648965702`", "\[InvisibleSpace]", "\<\" to \"\>", 
-   "\[InvisibleSpace]", "2"}],
-  SequenceForm["applyCutoff2: rescale maxNorm ", 9.95040648965702, " to ", 2],
-  
+   "9.95040648965701887050023070904348887497`17.26716167976564", 
+   "\[InvisibleSpace]", "\<\" to \"\>", "\[InvisibleSpace]", "2"}],
+  SequenceForm[
+  "applyCutoff2: rescale maxNorm ", 
+   9.95040648965701887050023070904348887497`17.26716167976564, " to ", 2],
   Editable->
-   False]], "Print",ExpressionUUID->"da10f985-1e97-4f65-a72d-9248528c29e8"],
+   False]], "Print",ExpressionUUID->"5b29ea97-4871-4079-bd14-cb86d4ad577a"],
 
 Cell[BoxData[
  InterpretationBox[
   RowBox[{"\<\"latticeSaddlePointStep times:  \"\>", "\[InvisibleSpace]", 
    RowBox[{"{", 
     RowBox[{
-    "2.73186`6.586973437063526", ",", "13.78804`7.290017532486242", ",", 
-     "0.044171`4.795652229319631"}], "}"}]}],
+    "1.841445`6.415673749774912", ",", "7.978945`7.052460469261911", ",", 
+     "0.170294`5.381714344486342"}], "}"}]}],
   SequenceForm[
   "latticeSaddlePointStep times:  ", {
-   2.73186`6.586973437063526, 13.78804`7.290017532486242, 
-    0.044171`4.795652229319631}],
+   1.841445`6.415673749774912, 7.978945`7.052460469261911, 
+    0.170294`5.381714344486342}],
   Editable->
-   False]], "Print",ExpressionUUID->"6e2cc224-5c04-4c5a-b9ce-eaa7426444b4"]
+   False]], "Print",ExpressionUUID->"7d341d9f-d8f6-4855-abe1-46b5ebe37714"]
 }, Open  ]]
 }, Open  ]],
 
@@ -5435,13 +5552,13 @@ Cell[BoxData[
   RowBox[{
    RowBox[{"{", 
     RowBox[{"9.950407382366219`", ",", 
-     RowBox[{"-", "1.7943170460554825`*^-7"}]}], "}"}], ",", 
+     RowBox[{"-", "1.7943170482759285`*^-7"}]}], "}"}], ",", 
    RowBox[{"{", 
     RowBox[{"57.67114631014239`", ",", "2.8734087864634716`*^-7"}], "}"}], 
    ",", 
    RowBox[{"{", 
     RowBox[{"0.9999999999976332`", ",", "2.175671594654445`*^-6"}], "}"}]}], 
-  "}"}]], "Output",ExpressionUUID->"6cc406f9-2655-4c44-ae51-b1cca1a591a2"]
+  "}"}]], "Output",ExpressionUUID->"9c2d35cd-c609-4232-a87b-3ccd134af2f5"]
 }, Open  ]],
 
 Cell[CellGroupData[{
@@ -5452,8 +5569,8 @@ Cell[BoxData[
    RowBox[{"gaugeFieldAxialDense", "-", "gaugeFieldAxialMinres2"}], "]"}], 
   "]"}]], "Input",ExpressionUUID->"48a66a96-b48e-4608-8a58-a421a5fc9767"],
 
-Cell[BoxData["0.000018725489509702946`"], \
-"Output",ExpressionUUID->"d10a153c-02da-457f-b6d2-f70c3b7747ee"]
+Cell[BoxData["0.000018725489509754987`"], \
+"Output",ExpressionUUID->"86657e0a-1f29-44c1-8b51-df513800ba1c"]
 }, Open  ]],
 
 Cell[BoxData[
@@ -5524,8 +5641,8 @@ Cell[BoxData[
   RowBox[{"gaugeFieldAxialDense", ",", "gaugeFieldDynamicDense"}], 
   "]"}]], "Input",ExpressionUUID->"77912ccc-6af4-40fa-96ac-4e2fdcd15349"],
 
-Cell[BoxData["0.3077084526364659`"], \
-"Output",ExpressionUUID->"74f96f9e-1dfd-4439-b38a-6b85b93aa129"]
+Cell[BoxData["0.3054565617576242`"], \
+"Output",ExpressionUUID->"2a54861d-7c88-4b78-bb14-68f4a2d80008"]
 }, Open  ]]
 }, Open  ]]
 }, Open  ]]
@@ -10134,7 +10251,7 @@ Cell[BoxData[
 "Input",ExpressionUUID->"9a6ff1cc-c2b6-48d1-881c-2bf52533c037"],
 
 Cell["\<\
-4^3 40, 6^3 120, 8^3 127, 12^3 252, 16^3 ???
+4^3 40, 6^3 120, 8^3 127, 12^3 252, 16^3 207, 22^3 ??? 
 22^3-lattice, nc=3:  2000 vectors is about 4GB.\
 \>", "Text",ExpressionUUID->"c11624e7-1c86-4d64-a237-496155502c43"],
 
@@ -10176,7 +10293,8 @@ Cell[BoxData[
         RowBox[{"printDetails", "\[Rule]", "1"}], ",", " ", 
         RowBox[{"rTolerance", " ", "\[Rule]", " ", 
          RowBox[{"10.0", "^", 
-          RowBox[{"-", "9"}]}]}]}], "}"}]}], ",", 
+          RowBox[{"-", "9"}]}]}], ",", 
+        RowBox[{"maxLanczosVecs", "\[Rule]", "1000"}]}], "}"}]}], ",", 
      RowBox[{"externalAction", "\[Rule]", "\"\<writefdsj\>\""}], ",", 
      RowBox[{"fullMatrix", "\[Rule]", "False"}]}], "]"}]}], 
   ";"}]], "Input",ExpressionUUID->"4ae56d15-6f51-4241-a723-7323eb2d6ff8"],
@@ -10373,8 +10491,9 @@ Cell[BoxData[
 }, Open  ]]
 }, Open  ]],
 
-Cell["Total wall clock time, 2 threads, vs L for nc = 3", \
-"Text",ExpressionUUID->"6e6093e4-9d4c-495b-b7fe-603fb5a810dc"],
+Cell["\<\
+Total wall clock time, 2 threads, vs L for nc = 3, strategy=4\
+\>", "Text",ExpressionUUID->"6e6093e4-9d4c-495b-b7fe-603fb5a810dc"],
 
 Cell[BoxData[
  RowBox[{
@@ -10382,13 +10501,15 @@ Cell[BoxData[
    RowBox[{"{", 
     RowBox[{
      RowBox[{"{", 
-      RowBox[{"4", ",", "10"}], "}"}], ",", 
+      RowBox[{"4", ",", "7"}], "}"}], ",", 
      RowBox[{"{", 
-      RowBox[{"6", ",", "89"}], "}"}], ",", 
+      RowBox[{"6", ",", "85"}], "}"}], ",", 
      RowBox[{"{", 
-      RowBox[{"8", ",", "654"}], "}"}], ",", 
+      RowBox[{"8", ",", "530"}], "}"}], ",", 
      RowBox[{"{", 
-      RowBox[{"12", ",", "7046"}], "}"}]}], "}"}]}], 
+      RowBox[{"12", ",", "7180"}], "}"}], ",", 
+     RowBox[{"{", 
+      RowBox[{"16", ",", "43432"}], "}"}]}], "}"}]}], 
   ";"}]], "Input",ExpressionUUID->"783addad-6a39-4702-8584-1cdde9a894c8"],
 
 Cell[CellGroupData[{
@@ -10405,11 +10526,11 @@ Cell[BoxData[
 
 Cell[BoxData[
  RowBox[{
-  RowBox[{"-", "6.043410185277562`"}], "+", 
+  RowBox[{"-", "6.9652439595728985`"}], "+", 
   RowBox[{
-  "6.004445359605783`", " ", 
+  "6.368325563727461`", " ", 
    "logt"}]}]], \
-"Output",ExpressionUUID->"9e82f9a9-7aa8-4662-aa10-7fe644776a3c"]
+"Output",ExpressionUUID->"cac39597-d04b-4bc1-af31-6f5709c17567"]
 }, Open  ]],
 
 Cell[CellGroupData[{
@@ -10422,20 +10543,17 @@ Cell[BoxData[
     RowBox[{"{", 
      RowBox[{
       RowBox[{"t", "^", "6"}], ",", 
-      RowBox[{"t", "^", "5"}], ",", 
-      RowBox[{"t", "^", "4"}]}], "}"}], ",", "t"}], 
+      RowBox[{"t", "^", "3"}], ",", "t"}], "}"}], ",", "t"}], 
    "]"}]}]], "Input",ExpressionUUID->"4a020a4b-62ec-488c-ad51-230fe6d1e770"],
 
 Cell[BoxData[
  RowBox[{
-  RowBox[{
-   RowBox[{"-", "0.08458116319444232`"}], " ", 
-   SuperscriptBox["t", "4"]}], "+", 
-  RowBox[{"0.02086397649819915`", " ", 
-   SuperscriptBox["t", "5"]}], "+", 
-  RowBox[{"0.0012083956243570172`", " ", 
+  RowBox[{"22.05569235799773`", " ", "t"}], "-", 
+  RowBox[{"0.7483104933255207`", " ", 
+   SuperscriptBox["t", "3"]}], "+", 
+  RowBox[{"0.002750376067194586`", " ", 
    SuperscriptBox["t", 
-    "6"]}]}]], "Output",ExpressionUUID->"429ff165-4df7-4a27-9c2d-5d08dab187a4"]
+    "6"]}]}]], "Output",ExpressionUUID->"782b7968-948a-4c4b-a034-4c3e773f6ef9"]
 }, Open  ]],
 
 Cell[CellGroupData[{
@@ -10450,10 +10568,9 @@ Cell[BoxData[
 
 Cell[BoxData[
  RowBox[{"{", 
-  RowBox[{
-   RowBox[{"-", "1753.8749999999561`"}], ",", "5191.624999999891`", ",", 
-   "3608.2500000000637`"}], 
-  "}"}]], "Output",ExpressionUUID->"9202859a-d326-4d33-b57d-a2dfdcbe44cb"]
+  RowBox[{"72.93223465043175`", ",", 
+   RowBox[{"-", "1019.9034175818762`"}], ",", "8146.754459321917`"}], 
+  "}"}]], "Output",ExpressionUUID->"4a8a1321-e0bd-4062-afc0-c5c2e5f916ee"]
 }, Open  ]],
 
 Cell[CellGroupData[{
@@ -10465,8 +10582,8 @@ Cell[BoxData[
   "t", "\[Rule]", 
    "16"}]}]], "Input",ExpressionUUID->"19861fdb-1287-4468-8389-08c65ec5483f"],
 
-Cell[BoxData["10.168852309099234`"], \
-"Output",ExpressionUUID->"9b662b30-205e-4945-aae5-d2246e3eb035"]
+Cell[BoxData["12.063664364754327`"], \
+"Output",ExpressionUUID->"69ffa269-2e82-4d7d-99d0-f2267957c07d"]
 }, Open  ]],
 
 Cell[CellGroupData[{
@@ -10486,48 +10603,66 @@ Cell[BoxData[
  GraphicsBox[{{{}, {{}, 
      {RGBColor[0.368417, 0.506779, 0.709798], PointSize[
       0.012833333333333334`], AbsoluteThickness[1.6], 
-      PointBox[{{4., 2.70805020110221}, {6., 4.6913478822291435`}, {8., 
-       6.483107351457199}, {12., 
-       8.860215358901183}}]}, {}}, {}, {}, {}, {}}, {{{}, {}, 
+      PointBox[{{4., 1.9459101490553132`}, {6., 4.442651256490317}, {8., 
+       6.272877006546167}, {12., 8.87905466204227}, {16., 
+       10.678951775585286`}}]}, {}}, {}, {}, {}, {}}, {{{}, {}, 
      TagBox[
       {RGBColor[0.368417, 0.506779, 0.709798], AbsoluteThickness[1.6], 
        Opacity[1.], LineBox[CompressedData["
-1:eJwVkH081AcAxs9LzoeaO+85zr387rzFz4dlWHUPNWGhVSQak4smRZOXSGmM
-UvKWjLXJVJKbt1qpKBROy241KTdvSfISTQw3cbv98Xyez/eP5/M8n4e9J2rb
-XmUKhbJdof/9x61RNAqFhtDTPmO80gXBW9XXPQ9VaCg5mjwf0bEgWHc7oOwU
-lYaskeWh9OkFgZTt5qCjRYM8RMv0MxeZQH/GeDefSUNf2af+b/plgpyCR+Vb
-1tHww6PXNkydRcG3Up6gKIGGGzYh/r0hS4IwYe8Bu2kaUqhLT4O6KPCThAW5
-/0NDjsE3thojFLg5T3sHyWjQniziX52ngE9Ts81UoqPjqL13g5ESRu6S71/S
-6RD9dC/L/Ssl7NVJjcu1o0P1PqOBOqYEYYvF8b9j6Ng6EpDQPq2MEFZ8TtUc
-HZ51/p5XhlUxTopquse1kWKyeVefrTocq0V3P5bq4EOkx6imoSbqu6Wne/t0
-cbytI3HT3Cq0fVG2y/YPPTCWcrxeONCgFlv0trNbH88Ih7Dlw3RoqgdGlL4w
-gIe5ufX099oombr5mtVhCL2OnuSKIh0Ik8Ef71yNGDV7NcdSXdQHC4XBzUa4
-H8U0W8jUw5Pa7VkaNQxMFccYPN+rD4YoOkleZwyxXyQx626AWZlZ+MVLJgiq
-yStYpWsI+buVhqevMfE5ZeO9uDeGkPg2Xq+sNIVFTbPhRNVqFFLT+A1eLBw8
-efaF5x4jBDk2+bZLWPAwtiwxYzIwmdeRau7BRpNP7AlROwMFzV+fq3rMhktJ
-YVnsEWOYXo0qlnhx4F3Wv/kQxwTR9a4lbm0c9MTviIi+awLpBVH6kDsXXA8D
-9dzdTGhWvorsauGiY6Zu++9TTJgeSnEPcSYw5PTKIS7RFFs0b6jpNBBoEHPs
-VlBZgOTGA6O1POgsf3KR48mCV/iW0M31PBT9Nauqk8vCulseCx858ZEWJg5Y
-6mJhxlb3zJpaPu7fPpDZr81Gy7FY5Sh7MzQl+Q3E7GBj11xZPPUXM1hJG9N9
-cth4ynMccibModwwqN/awYbQIpTMv2yOnwdocokaB41+gUkuTAu0GpVdKdzA
-Aek/XqFbagHJ/oEV3Uc42Jfq9nw9wxKMQcuCVTUcxQ71f5XyLZGa1T7nMMzB
-bZMQ+biuFbQ3XdO9w+Di1+V0FcuzVphgbqzJ8+bi0fWN41n0NagYbfutIo2L
-ZlZY25m8NXjCdpWI67lIueVb+lLDGnc8QhjZo1z4c3qDArOskdp4sjOBQWD+
-JsmwotpgZgrVdp4EElTGHhccs0GxVUSRWzwBbcIphEchEfxs4LywnEDMQb9Z
-jSMkMgO7BPl/EjB0EIr5SSRqDmcs+3Upfl86dME1mUQo/2W10TMCallZmxJP
-kIgazh4v7SZQXPnw3NgpEpRKrabqHgIto3ZrxcUkatU3TIoHFH2hWnHfNZAw
-kx74cnqCwC1LE8/SeyQGM84fvv6WwO73lszGJhJe2aXHYicJXDnh1jb7kES0
-eth+2RQB54vJ+sJOElOre8sp7wns6Zu46dpPwp5pULVygQD1siwzaJDEuxSX
-2U4FiyKpwYlDJNzS9ltnywjMLXKodSMkHtS0JtAXCWQaBexkvyNBDW+N0Vsm
-QA6FW62fJhFZaLqtW8FdFbFy/xlFfiSDWygnwHTKLc+ZJzGqn1liqMTDA0pJ
-kkhG4ni+mWePgveJRT7iRRKWQumbImUeVubc4Q4vkQj0vZQQoMJD7U7xvFxO
-gm2f8cFIlYf/ADPcPEY=
+1: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
+/5+vuRto/A+ji5Fh
         "]]},
-      Annotation[#, "Charting`Private`Tag$9834#1"]& ]}, {}, {}}},
+      Annotation[#, "Charting`Private`Tag$13778#1"]& ]}, {}, {}}},
   AspectRatio->NCache[GoldenRatio^(-1), 0.6180339887498948],
   Axes->{True, True},
   AxesLabel->{None, None},
-  AxesOrigin->{3.875, 2.261522084810349},
+  AxesOrigin->{3.8125000000000004`, 1.312060353581364},
   DisplayFunction->Identity,
   Frame->{{False, False}, {False, False}},
   FrameLabel->{{None, None}, {None, None}},
@@ -10547,7 +10682,7 @@ gm2f8cFIlYf/ADPcPEY=
          Part[#, 1]], 
         (Exp[#]& )[
          Part[#, 2]]}& )}},
-  PlotRange->{{4., 12.}, {2.366263247891156, 8.860215358901183}},
+  PlotRange->{{4., 16.}, {1.4607411698036483`, 10.678951775585286`}},
   PlotRangeClipping->True,
   PlotRangePadding->{{
      Scaled[0.02], 
@@ -10557,16 +10692,41 @@ gm2f8cFIlYf/ADPcPEY=
   Ticks->FrontEndValueCache[{Automatic, 
      Charting`ScaledTicks[{Log, Exp}]}, {Automatic, {{2.302585092994046, 
        FormBox["10", TraditionalForm], {0.01, 0.}, {
-        AbsoluteThickness[0.1]}}, {3.912023005428146, 
-       FormBox["50", TraditionalForm], {0.01, 0.}, {
         AbsoluteThickness[0.1]}}, {4.605170185988092, 
        FormBox["100", TraditionalForm], {0.01, 0.}, {
-        AbsoluteThickness[0.1]}}, {6.214608098422191, 
-       FormBox["500", TraditionalForm], {0.01, 0.}, {
         AbsoluteThickness[0.1]}}, {6.907755278982137, 
        FormBox["1000", TraditionalForm], {0.01, 0.}, {
-        AbsoluteThickness[0.1]}}, {8.517193191416238, 
-       FormBox["5000", TraditionalForm], {0.01, 0.}, {
+        AbsoluteThickness[0.1]}}, {9.210340371976184, 
+       FormBox[
+        TemplateBox[{"10", "4"}, "Superscript", SyntaxForm -> SuperscriptBox],
+         TraditionalForm], {0.01, 0.}, {
+        AbsoluteThickness[0.1]}}, {0., 
+       FormBox[
+        TemplateBox[{0., 0.}, "Spacer2"], TraditionalForm], {0.005, 0.}, {
+        AbsoluteThickness[0.1]}}, {0.6931471805599453, 
+       FormBox[
+        TemplateBox[{0., 0.}, "Spacer2"], TraditionalForm], {0.005, 0.}, {
+        AbsoluteThickness[0.1]}}, {1.0986122886681098`, 
+       FormBox[
+        TemplateBox[{0., 0.}, "Spacer2"], TraditionalForm], {0.005, 0.}, {
+        AbsoluteThickness[0.1]}}, {1.3862943611198906`, 
+       FormBox[
+        TemplateBox[{0., 0.}, "Spacer2"], TraditionalForm], {0.005, 0.}, {
+        AbsoluteThickness[0.1]}}, {1.6094379124341003`, 
+       FormBox[
+        TemplateBox[{0., 0.}, "Spacer2"], TraditionalForm], {0.005, 0.}, {
+        AbsoluteThickness[0.1]}}, {1.791759469228055, 
+       FormBox[
+        TemplateBox[{0., 0.}, "Spacer2"], TraditionalForm], {0.005, 0.}, {
+        AbsoluteThickness[0.1]}}, {1.9459101490553132`, 
+       FormBox[
+        TemplateBox[{0., 0.}, "Spacer2"], TraditionalForm], {0.005, 0.}, {
+        AbsoluteThickness[0.1]}}, {2.0794415416798357`, 
+       FormBox[
+        TemplateBox[{0., 0.}, "Spacer2"], TraditionalForm], {0.005, 0.}, {
+        AbsoluteThickness[0.1]}}, {2.1972245773362196`, 
+       FormBox[
+        TemplateBox[{0., 0.}, "Spacer2"], TraditionalForm], {0.005, 0.}, {
         AbsoluteThickness[0.1]}}, {2.995732273553991, 
        FormBox[
         TemplateBox[{0., 0.}, "Spacer2"], TraditionalForm], {0.005, 0.}, {
@@ -10574,6 +10734,9 @@ gm2f8cFIlYf/ADPcPEY=
        FormBox[
         TemplateBox[{0., 0.}, "Spacer2"], TraditionalForm], {0.005, 0.}, {
         AbsoluteThickness[0.1]}}, {3.6888794541139363`, 
+       FormBox[
+        TemplateBox[{0., 0.}, "Spacer2"], TraditionalForm], {0.005, 0.}, {
+        AbsoluteThickness[0.1]}}, {3.912023005428146, 
        FormBox[
         TemplateBox[{0., 0.}, "Spacer2"], TraditionalForm], {0.005, 0.}, {
         AbsoluteThickness[0.1]}}, {4.0943445622221, 
@@ -10597,6 +10760,9 @@ gm2f8cFIlYf/ADPcPEY=
         AbsoluteThickness[0.1]}}, {5.991464547107982, 
        FormBox[
         TemplateBox[{0., 0.}, "Spacer2"], TraditionalForm], {0.005, 0.}, {
+        AbsoluteThickness[0.1]}}, {6.214608098422191, 
+       FormBox[
+        TemplateBox[{0., 0.}, "Spacer2"], TraditionalForm], {0.005, 0.}, {
         AbsoluteThickness[0.1]}}, {6.396929655216146, 
        FormBox[
         TemplateBox[{0., 0.}, "Spacer2"], TraditionalForm], {0.005, 0.}, {
@@ -10618,6 +10784,9 @@ gm2f8cFIlYf/ADPcPEY=
         AbsoluteThickness[0.1]}}, {8.294049640102028, 
        FormBox[
         TemplateBox[{0., 0.}, "Spacer2"], TraditionalForm], {0.005, 0.}, {
+        AbsoluteThickness[0.1]}}, {8.517193191416238, 
+       FormBox[
+        TemplateBox[{0., 0.}, "Spacer2"], TraditionalForm], {0.005, 0.}, {
         AbsoluteThickness[0.1]}}, {8.699514748210191, 
        FormBox[
         TemplateBox[{0., 0.}, "Spacer2"], TraditionalForm], {0.005, 0.}, {
@@ -10630,18 +10799,45 @@ gm2f8cFIlYf/ADPcPEY=
         AbsoluteThickness[0.1]}}, {9.104979856318357, 
        FormBox[
         TemplateBox[{0., 0.}, "Spacer2"], TraditionalForm], {0.005, 0.}, {
-        AbsoluteThickness[0.1]}}, {9.210340371976184, 
-       FormBox[
-        TemplateBox[{0., 0.}, "Spacer2"], TraditionalForm], {0.005, 0.}, {
-        AbsoluteThickness[0.1]}}, {9.615805480084347, 
-       FormBox[
-        TemplateBox[{0., 0.}, "Spacer2"], TraditionalForm], {0.005, 0.}, {
         AbsoluteThickness[0.1]}}, {9.903487552536127, 
+       FormBox[
+        TemplateBox[{0., 0.}, "Spacer2"], TraditionalForm], {0.005, 0.}, {
+        AbsoluteThickness[0.1]}}, {10.308952660644293`, 
+       FormBox[
+        TemplateBox[{0., 0.}, "Spacer2"], TraditionalForm], {0.005, 0.}, {
+        AbsoluteThickness[0.1]}}, {10.596634733096073`, 
+       FormBox[
+        TemplateBox[{0., 0.}, "Spacer2"], TraditionalForm], {0.005, 0.}, {
+        AbsoluteThickness[0.1]}}, {10.819778284410283`, 
+       FormBox[
+        TemplateBox[{0., 0.}, "Spacer2"], TraditionalForm], {0.005, 0.}, {
+        AbsoluteThickness[0.1]}}, {11.002099841204238`, 
+       FormBox[
+        TemplateBox[{0., 0.}, "Spacer2"], TraditionalForm], {0.005, 0.}, {
+        AbsoluteThickness[0.1]}}, {11.156250521031495`, 
+       FormBox[
+        TemplateBox[{0., 0.}, "Spacer2"], TraditionalForm], {0.005, 0.}, {
+        AbsoluteThickness[0.1]}}, {11.289781913656018`, 
+       FormBox[
+        TemplateBox[{0., 0.}, "Spacer2"], TraditionalForm], {0.005, 0.}, {
+        AbsoluteThickness[0.1]}}, {11.407564949312402`, 
+       FormBox[
+        TemplateBox[{0., 0.}, "Spacer2"], TraditionalForm], {0.005, 0.}, {
+        AbsoluteThickness[0.1]}}, {11.512925464970229`, 
+       FormBox[
+        TemplateBox[{0., 0.}, "Spacer2"], TraditionalForm], {0.005, 0.}, {
+        AbsoluteThickness[0.1]}}, {11.918390573078392`, 
+       FormBox[
+        TemplateBox[{0., 0.}, "Spacer2"], TraditionalForm], {0.005, 0.}, {
+        AbsoluteThickness[0.1]}}, {12.206072645530174`, 
+       FormBox[
+        TemplateBox[{0., 0.}, "Spacer2"], TraditionalForm], {0.005, 0.}, {
+        AbsoluteThickness[0.1]}}, {12.429216196844383`, 
        FormBox[
         TemplateBox[{0., 0.}, "Spacer2"], TraditionalForm], {0.005, 0.}, {
         AbsoluteThickness[
         0.1]}}}}]]], \
-"Output",ExpressionUUID->"e8650f35-0290-4e92-8f79-137184315a74"]
+"Output",ExpressionUUID->"ee7b961b-d359-4185-89e4-e51e5ac552d9"]
 }, Open  ]],
 
 Cell["\<\
@@ -10675,10 +10871,10 @@ Cell[BoxData[
     RowBox[{"(", 
      RowBox[{
       RowBox[{"2", "*", "637440"}], "-", "12288"}], ")"}]}], 
-   ")"}]}]], "Input",ExpressionUUID->"fb38223c-5779-4c19-89d2-2e80582111a0"],
+   ")"}]}]], "Input",ExpressionUUID->"d8e05908-8d33-4692-a3b5-b305ffb72284"],
 
 Cell[BoxData["1.7275617526014902`*^-9"], \
-"Output",ExpressionUUID->"30daf81c-5082-443c-83fc-830ccbcccb51"]
+"Output",ExpressionUUID->"e85183f1-4324-449f-92ef-61a0dd6aad09"]
 }, Open  ]]
 }, Open  ]],
 
@@ -10825,7 +11021,7 @@ Cell[BoxData["$Aborted"], \
 }, Open  ]]
 },
 WindowSize->{986, 659},
-WindowMargins->{{125, Automatic}, {Automatic, 30}},
+WindowMargins->{{Automatic, 19}, {35, Automatic}},
 PrivateNotebookOptions->{"FileOutlineCache"->False},
 TrackCellChangeTimes->False,
 FrontEndVersion->"11.2 for Linux x86 (64-bit) (September 10, 2017)",

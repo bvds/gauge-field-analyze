@@ -9,14 +9,11 @@
      with an L-infinity norm applied to that.
 
      Returns filtered vals & vecs arrays.
-     However, it does not re-allocate the associated memory
-
-cutoffNullspace[vals, vecs.grad, vecs,
-         OptionValue[largeShiftCutoff], OptionValue[rescaleCutoff]]
+     The associated memory is re-allocated.
 */
 void cutoffNullspace(unsigned int n, unsigned int nvals, cJSON *options,
                      double *grad,
-                     double *vals, double *vecs, unsigned int *nLargeShifts) {
+                     double **vals, double **vecs, unsigned int *nLargeShifts) {
     unsigned int i, j;
     int na, nc;
     int firstValue = -1;
@@ -47,8 +44,8 @@ void cutoffNullspace(unsigned int n, unsigned int nvals, cJSON *options,
         norm2 = 0.0;
         vecdotgrad = 0.0;
         for(j=0; j<n; j++) {
-            norm2 += pow(vecs[i*n + j], 2);
-            vecdotgrad += vecs[i*n + j] * grad[j];
+            norm2 += pow((*vecs)[i*n + j], 2);
+            vecdotgrad += (*vecs)[i*n + j] * grad[j];
             if((j+1)%na == 0) {
                 if(norm2 > maxnorm2) {
                     maxnorm2 = norm2;
@@ -59,18 +56,21 @@ void cutoffNullspace(unsigned int n, unsigned int nvals, cJSON *options,
         }
         /* If eigenvectors are normalized, then vecnorm2
            is not needed. */
-        if(zzz>0.0 && zzz * rescale * fabs(vals[i]) * vecnorm2 <=
+        if(zzz>0.0 && zzz * rescale * fabs((*vals)[i]) * vecnorm2 <=
            fabs(vecdotgrad) * sqrt(maxnorm2)) {
             if(firstValue < 0)
                 firstValue = i;
             lastValue = i;
             if(*nLargeShifts < i) {
-                vals[*nLargeShifts] = vals[i];
-                memcpy(vecs+(*nLargeShifts)*n, vecs+i*n, n*sizeof(double));
+                (*vals)[*nLargeShifts] = (*vals)[i];
+                memcpy(*vecs+(*nLargeShifts)*n, *vecs+i*n, n*sizeof(double));
             }
             *nLargeShifts += 1;
         }
     }
+    *vals = realloc(*vals, (*nLargeShifts)*sizeof(double));
+    *vecs = realloc(*vecs, n*(*nLargeShifts)*sizeof(double));
     printf("cutoffNullSpace:  %u of %u zeros between [%i, %i]\n",
            *nLargeShifts, nvals, firstValue, lastValue);
+    fflush(stdout);
 }

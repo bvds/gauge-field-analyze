@@ -339,7 +339,7 @@ int main(int argc, char **argv){
     tmp = cJSON_GetObjectItemCaseSensitive(jopts, "largeShiftOptions");
     assert(tmp != NULL);
     largeShiftsCheckpoint(grad, tmp, &absVals, &vecs, &nvals);
-    cutoffNullspace(n, nvals, jopts, grad, absVals, vecs, &nLargeShifts);
+    cutoffNullspace(n, nvals, jopts, grad, &absVals, &vecs, &nLargeShifts);
     linearInit(hessp, vecs, nLargeShifts);
     tmp = cJSON_GetObjectItemCaseSensitive(jopts, "linearSolveOptions");
     assert(tmp != NULL);

@@ -107,7 +107,7 @@ void testOp(SparseMatrix *hess, double *grad);
 
 void cutoffNullspace(unsigned int n, unsigned int nvals, cJSON *options,
                      double *grad,
-                     double *vals, double *vecs, unsigned int *nLargeShifts);
+                     double **vals, double **vecs, unsigned int *nLargeShifts);
 
 
 void linearInit(SparseMatrix *hess, double *vecs, int nvecs);
