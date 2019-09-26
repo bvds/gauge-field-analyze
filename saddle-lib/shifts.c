@@ -21,14 +21,16 @@
 #endif
 
 char *readFile(char *filename) {
+    int k;
     FILE *f = fopen(filename, "rt");
-    assert(f);
+    assert(f != NULL);
     fseek(f, 0, SEEK_END);
     long length = ftell(f);
     fseek(f, 0, SEEK_SET);
     char *buffer = (char *) malloc(length + 1);
     buffer[length] = '\0';
-    fread(buffer, 1, length, f);
+    k = fread(buffer, 1, length, f);
+    assert(k == length);
     fclose(f);
     return buffer;
 }

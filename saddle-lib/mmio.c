@@ -20,7 +20,7 @@ int mm_read_unsymmetric_sparse(const char *fname, int *M_, int *N_, int *nz_,
     FILE *f;
     MM_typecode matcode;
     int M, N;
-    int i, nz;
+    int i, k, nz;
     double *val;
     int *I, *J;
  
@@ -58,7 +58,7 @@ int mm_read_unsymmetric_sparse(const char *fname, int *M_, int *N_, int *nz_,
     *N_ = N;
     *nz_ = nz;
  
-    /* reseve memory for matrices */
+    /* reserve memory for matrices */
  
     I = (int *) malloc(nz * sizeof(int));
     J = (int *) malloc(nz * sizeof(int));
@@ -74,7 +74,11 @@ int mm_read_unsymmetric_sparse(const char *fname, int *M_, int *N_, int *nz_,
  
     for (i=0; i<nz; i++)
     {
-        fscanf(f, "%d %d %lg\n", &I[i], &J[i], &val[i]);
+        k = fscanf(f, "%d %d %lg\n", &I[i], &J[i], &val[i]);
+        if (k<3) {
+            fprintf(stderr, "file read error.\n");
+            return -1;
+        }
         I[i]--;  /* adjust from 1-based to 0-based */
         J[i]--;
     }
