@@ -1,15 +1,30 @@
 #include <cjson/cJSON.h>
 
+#ifdef USE_MKL
+#include "mkl.h"
+#define MALLOC_ALIGN 64
+#endif
 #ifdef USE_LIBRSB
 #include <rsb.h>         /* for rsb_lib_init */
 typedef struct rsb_mtx_t SparseMatrix;
+#elif defined(USE_BLOCK)
+typedef struct {
+    double *value;
+    size_t *i;
+    size_t *j;
+    size_t blocks;
+    int blockSize;
+    int nonzeros;
+    int rows;
+    int columns;
+    char descr;
+} SparseMatrix;
 #elif defined(USE_MKL)
-#include "mkl.h"
-#define MALLOC_ALIGN 64
 typedef struct {
     sparse_matrix_t a;
     struct matrix_descr descr;
     double *value;
+    unsigned int blockSize;
     MKL_INT *row;
     MKL_INT *column;
     MKL_INT rows;

@@ -31,6 +31,10 @@ After downloading these, you will need to compile the
 associated libraries.
 Then modify `Makefile` to point to these libraries.
 
+### CentOs
+
+On CentOs, had to provide a link for the LAPACK and BLAS libraries like this:  `sudo ln -s liblapack.so.3 liblapack.so`
+
 ### Intel MKL
 
 One can link to the Intel Math Kernel Library

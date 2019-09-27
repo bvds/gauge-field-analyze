@@ -35,6 +35,188 @@ char *readFile(char *filename) {
     return buffer;
 }
 
+#ifdef USE_BLOCK
+void readtoBlock(FILE *fp, SparseMatrix *mat, char *fileName);
+int intCmp (const void * a, const void * b);
+void blockFree(SparseMatrix *mat);
+
+// See https://stackoverflow.com/questions/10996418
+int intCmp (const void * a, const void * b) {
+    return (*(size_t *)a < *(size_t *)b) ? -1 :
+        (*(size_t *)a > *(size_t *)b);
+}
+void readtoBlock(FILE *fp, SparseMatrix *mat, char *fileName) {
+    int j;
+    unsigned int i, k, ii, jj, lastii = 0, blockCols = 0;
+    size_t *blockColp;
+    const unsigned int block = mat->blockSize,
+        maxBlockCol = mat->columns/block;
+    double value, *blockRowValue, *blockValuep;
+    int *blockColFlag;
+    assert(mat->rows%block == 0);
+    assert(mat->columns%block == 0);
+    mat->blocks = 0;
+    blockRowValue = malloc(mat->columns*block*sizeof(double));
+    blockColFlag = malloc(maxBlockCol*sizeof(*blockColFlag));
+    blockColp = malloc(maxBlockCol*sizeof(*blockColp));
+#ifdef USE_MKL
+    mat->value = mkl_malloc(0, MALLOC_ALIGN);
+    mat->i = mkl_malloc(0, MALLOC_ALIGN);
+    mat->j = mkl_malloc(0, MALLOC_ALIGN);
+#else
+    mat->value = NULL;
+    mat->i = NULL;
+    mat->j = NULL;
+#endif
+    memset(blockRowValue, 0, mat->columns*block*sizeof(double));
+    memset(blockColFlag, 0, maxBlockCol*sizeof(*blockColFlag));
+    for(j=0;; j++){
+        if(j<mat->nonzeros) {
+            k = fscanf(fp, "%u%u%le", &ii, &jj, &value);
+            if(k < 3) {
+                fprintf(stderr, "Error reading %s, element %i\n", fileName, j);
+                break;
+            }
+            ii -= 1; jj -= 1; // switch to zero-based indexing
+            assert(ii>=lastii);
+        }
+        if(j==mat->nonzeros || (lastii<ii && ii%block == 0)) {
+            // Retire block row and reset for a new one
+#ifdef USE_MKL
+            mat->value = mkl_realloc(mat->value,
+                     (mat->blocks + blockCols)*block*block*sizeof(double));
+            mat->i = mkl_realloc(mat->i,
+                     (mat->blocks + blockCols)*sizeof(*mat->i));
+            mat->j = mkl_realloc(mat->j,
+                     (mat->blocks + blockCols)*sizeof(*mat->j));
+#else
+            mat->value = realloc(mat->value,
+                    (mat->blocks + blockCols)*block*block*sizeof(double));
+            mat->i = realloc(mat->i,
+                    (mat->blocks + blockCols)*sizeof(*mat->i));
+            mat->j = realloc(mat->j,
+                    (mat->blocks + blockCols)*sizeof(*mat->j));
+#endif
+            // Sort the blocks
+            qsort(blockColp, blockCols, sizeof(*blockColp), intCmp);
+            for(i=0; i<blockCols; i++) {
+                k = blockColp[i];
+#if 0
+                printf("  %i %i mat->blocks=%i blockCols=%i\n",
+                       j, k, mat->blocks, blockCols);
+#endif
+                blockValuep = blockRowValue+k*block*block;
+                memcpy(mat->value+block*block*mat->blocks,
+                       blockValuep, block*block*sizeof(double));
+                memset(blockValuep, 0, block*block*sizeof(double));
+                mat->i[mat->blocks] = (lastii/block)*block;
+                mat->j[mat->blocks] = k*block;
+                mat->blocks += 1;
+                blockColFlag[k] = 0;
+            }
+            blockCols = 0;
+        }
+        if(j==mat->nonzeros)
+            break;
+        lastii = ii;
+        // Mark this block
+        k = jj/block;
+        if(!blockColFlag[k]) {
+            blockColp[blockCols] = k;
+            blockCols += 1;
+            blockColFlag[k] = 1;
+        }
+        // Add value to this block
+        blockRowValue[(k*block + ii%block)*block + jj%block] = value;
+        /* fill diagonal blocks of symmetric matrix */
+        if(mat->descr == 's' && ii/block == k && ii!=jj) {
+            blockRowValue[(k*block + jj%block)*block + ii%block] = value;
+        }
+    }
+    free(blockRowValue);
+    free(blockColFlag);
+    free(blockColp);
+#if 0
+    printf("Print matrix for file %s\n", fileName);
+    for(k=0; k<mat->blocks; k++) {
+        printf("%i %i  ", mat->i[k] + 1, mat->j[k] + 1);
+        for(ii=0; ii<block; ii++) {
+            if(ii>0)
+                printf("    ");
+            for(jj=0; jj<block; jj++)
+                printf(" %.3e", mat->value[(k*block + ii)*block + jj]);
+            printf("\n");
+        }
+    }
+#endif
+}
+
+void blockFree(SparseMatrix *mat) {
+#ifdef USE_MKL
+    mkl_free(mat->value);
+    mkl_free(mat->i);
+    mkl_free(mat->j);
+#else
+    free(mat->value);
+    free(mat->i);
+    free(mat->j);
+#endif
+}
+
+#elif defined(USE_MKL)
+void readtoBlock(FILE *fp, SparseMatrix *mat, char *fileName);
+
+void readtoBlock(FILE *fp, SparseMatrix *mat, char *fileName) {
+    int j, k;
+    sparse_status_t err;
+    sparse_matrix_t coordMatrix;
+    mat->row = mkl_malloc(mat->nonzeros * sizeof(int), MALLOC_ALIGN);
+    mat->column = mkl_malloc(mat->nonzeros * sizeof(int), MALLOC_ALIGN);
+    mat->value = mkl_malloc(mat->nonzeros * sizeof(double), MALLOC_ALIGN);
+    for(j=0; j<mat->nonzeros; j++){
+        k = fscanf(fp, "%d%d%le", mat->row+j, mat->column+j, mat->value+j); 
+        if(k < 3) {
+            fprintf(stderr, "Error reading %s, element %i\n", fileName, j);
+            break;
+        }
+    }
+    /* Create MKL data structure */
+    if((err=mkl_sparse_d_create_coo(&coordMatrix, SPARSE_INDEX_BASE_ONE,
+              mat->rows, mat->columns, mat->nonzeros,
+                               mat->row, mat->column, mat->value)) !=
+           SPARSE_STATUS_SUCCESS) {
+        fprintf(stderr, "mkl_sparse_d_create_coo failed %i\n", err);
+        exit(55);
+    }
+    if((err = mkl_sparse_convert_bsr(coordMatrix, mat->blockSize,
+                            SPARSE_LAYOUT_COLUMN_MAJOR,
+                            SPARSE_OPERATION_NON_TRANSPOSE,
+                            &mat->a)) != SPARSE_STATUS_SUCCESS) {
+        fprintf(stderr, "failed %i\n", err);
+        exit(56);
+    }
+#if 0  // Unsupported error
+    const int expected_calls = 100*1000;
+    if((err = mkl_sparse_set_dotmv_hint(mat->a,
+            SPARSE_OPERATION_NON_TRANSPOSE, mat->descr, expected_calls)) !=
+       SPARSE_STATUS_SUCCESS) {
+        fprintf(stderr, "mkl_sparse_set_dotmv_hint failed: %i %i\n", err,
+               SPARSE_STATUS_NOT_SUPPORTED);
+        exit(58);
+    }
+#endif
+    if((err = mkl_sparse_optimize(mat->a)) != SPARSE_STATUS_SUCCESS) {
+        fprintf(stderr, "mkl_sparse_optimize failed %i\n", err);
+        exit(59);
+    }
+    mkl_free(mat->row); mkl_free(mat->column); mkl_free(mat->value);
+    if((err = mkl_sparse_destroy(coordMatrix)) != SPARSE_STATUS_SUCCESS) {
+        fprintf(stderr, "failed %i\n", err);
+        exit(60);
+    }
+ }
+#endif
+
 int main(int argc, char **argv){
     char *options;
     cJSON *jopts, *tmp;
@@ -48,11 +230,7 @@ int main(int argc, char **argv){
     rsb_type_t typecode = RSB_NUMERICAL_TYPE_DEFAULT;
 #else
     MM_typecode matcode;
-    int j;
 #ifdef USE_MKL
-    sparse_status_t err;
-    int block_size;
-    sparse_matrix_t coordMatrix;
     /*
       On the T480 laptop, calculations are limited by memory
       latency/bandwidth:  too many threads causes thread 
@@ -66,8 +244,10 @@ int main(int argc, char **argv){
       4          2878s      722s
     */
     const int threads = 2;
-#else
+#endif
+#if !defined(USE_BLOCK) && !defined(USE_MKL)
     SparseRow *row;
+    int j;
 #endif
 #endif
     long int twall = 0, tcpu = 0;
@@ -110,7 +290,7 @@ int main(int argc, char **argv){
                                jopts, "gaugeDimension")->valueint;
     printf(" n=%i, nc=%i, gauge=%i\n", n, nc, gaugeDimension);
 
-    /* Read in arrays */
+    /* Read in Matrix */
 #ifdef USE_LIBRSB
     SparseMatrix *hessp;
     printf("Opening file %s\n", argv[2]);
@@ -145,69 +325,30 @@ int main(int argc, char **argv){
     printf(" with %i nonzero elements.\n", hess.nonzeros);
     assert(hess.rows == n);
     assert(hess.columns == n);
-#ifdef USE_MKL
-    hess.row = mkl_malloc(hess.nonzeros * sizeof(int), MALLOC_ALIGN);
-    hess.column = mkl_malloc(hess.nonzeros * sizeof(int), MALLOC_ALIGN);
-    hess.value = mkl_malloc(hess.nonzeros * sizeof(double), MALLOC_ALIGN);
+#ifdef USE_BLOCK
+    hess.descr = 's';  // Symmetric matrix, with only one triangle stored.
+    hess.blockSize = nc*nc-1;
+    readtoBlock(fp, hessp, argv[2]);
+#elif defined(USE_MKL)
+    hess.descr.type = SPARSE_MATRIX_TYPE_SYMMETRIC;
+    hess.descr.mode = SPARSE_FILL_MODE_LOWER;
+    hess.descr.diag = SPARSE_DIAG_NON_UNIT;
+    hess.blockSize = nc*nc-1;
+    readtoBlock(fp, hessp, argv[2]);
 #else
+    hess.descr = 's';  // Symmetric matrix, with only one triangle stored.
     hess.data = malloc(hess.nonzeros * sizeof(SparseRow));
-#endif
     for(j=0; j<hess.nonzeros; j++){
-#ifdef USE_MKL
-        k = fscanf(fp, "%d%d%le", hess.row+j, hess.column+j, hess.value+j); 
-#else
         row = hess.data+j;
         k = fscanf(fp, "%u%u%le", &(row->i), &(row->j), &(row->value));
         row->i -= 1; row->j -= 1; // switch to zero-based indexing
-#endif
         if(k < 3) {
             fprintf(stderr, "Error reading %s, element %i\n", argv[2], j);
             break;
         }
     }
+#endif
     fclose(fp);
-#ifdef USE_MKL
-    /* Create MKL data structure */
-    if((err=mkl_sparse_d_create_coo(&coordMatrix, SPARSE_INDEX_BASE_ONE,
-              hess.rows, hess.columns, hess.nonzeros,
-                               hess.row, hess.column, hess.value)) !=
-           SPARSE_STATUS_SUCCESS) {
-        fprintf(stderr, "mkl_sparse_d_create_coo failed %i\n", err);
-        exit(55);
-    }
-    block_size = nc*nc - 1;
-    if((err = mkl_sparse_convert_bsr(coordMatrix, block_size,
-                            SPARSE_LAYOUT_COLUMN_MAJOR,
-                            SPARSE_OPERATION_NON_TRANSPOSE,
-                            &hess.a)) != SPARSE_STATUS_SUCCESS) {
-        fprintf(stderr, "failed %i\n", err);
-        exit(56);
-    }
-    hess.descr.type = SPARSE_MATRIX_TYPE_SYMMETRIC;
-    hess.descr.mode = SPARSE_FILL_MODE_LOWER;
-    hess.descr.diag = SPARSE_DIAG_NON_UNIT;
-#if 0  // Unsupported error
-    const int expected_calls = 100*1000;
-    if((err = mkl_sparse_set_dotmv_hint(hess.a,
-            SPARSE_OPERATION_NON_TRANSPOSE, hess.descr, expected_calls)) !=
-       SPARSE_STATUS_SUCCESS) {
-        fprintf(stderr, "mkl_sparse_set_dotmv_hint failed: %i %i\n", err,
-               SPARSE_STATUS_NOT_SUPPORTED);
-        exit(58);
-    }
-#endif
-    if((err = mkl_sparse_optimize(hess.a)) != SPARSE_STATUS_SUCCESS) {
-        fprintf(stderr, "mkl_sparse_optimize failed %i\n", err);
-        exit(59);
-    }
-    mkl_free(hess.row); mkl_free(hess.column); mkl_free(hess.value);
-    if((err = mkl_sparse_destroy(coordMatrix)) != SPARSE_STATUS_SUCCESS) {
-        fprintf(stderr, "failed %i\n", err);
-        exit(60);
-    }
-#else
-    hess.descr = 's';  // Symmetric matrix, with only one triangle stored.
-#endif
 #endif
 
     double *grad = malloc(n * sizeof(double));
@@ -258,66 +399,31 @@ int main(int argc, char **argv){
     printf(" with %i nonzero elements.\n", gauge.nonzeros);
     assert(gauge.rows == gaugeDimension);
     assert(gauge.columns == n);
-#ifdef USE_MKL
-    gauge.row = mkl_malloc(gauge.nonzeros * sizeof(int), MALLOC_ALIGN);
-    gauge.column = mkl_malloc(gauge.nonzeros * sizeof(int), MALLOC_ALIGN);
-    gauge.value = mkl_malloc(gauge.nonzeros * sizeof(double), MALLOC_ALIGN);
+
+#ifdef USE_BLOCK
+    gauge.descr = 'g';  // General matrix
+    gauge.blockSize = nc*nc-1;
+    readtoBlock(fp, gaugep, argv[4]);
+#elif defined(USE_MKL)
+    gauge.descr.type = SPARSE_MATRIX_TYPE_GENERAL;
+    gauge.descr.mode = SPARSE_FILL_MODE_LOWER;
+    gauge.descr.diag = SPARSE_DIAG_NON_UNIT;
+    gauge.blockSize = nc*nc-1;
+    readtoBlock(fp, gaugep, argv[4]);
 #else
+    gauge.descr = 'g';  // General matrix
     gauge.data = malloc(gauge.nonzeros * sizeof(SparseRow));
-#endif
     for(j=0; j<gauge.nonzeros; j++){
-#ifdef USE_MKL
-        k = fscanf(fp, "%d%d%le", gauge.row+j, gauge.column+j, gauge.value+j); 
-#else
         row = gauge.data+j;
         k = fscanf(fp, "%u%u%lf", &(row->i), &(row->j), &(row->value));
         row->i -= 1; row->j -= 1; // switch to zero-based indexing
-#endif
         if(k < 3) {
             fprintf(stderr, "Error reading %s, element %i\n", argv[4], j);
             break;
         }
     }
+#endif
     fclose(fp);
-#ifdef USE_MKL
-    /* Create MKL data structure */
-    if((err = mkl_sparse_d_create_coo(&coordMatrix, SPARSE_INDEX_BASE_ONE,
-                gauge.rows, gauge.columns, gauge.nonzeros,
-                gauge.row, gauge.column, gauge.value)) !=
-            SPARSE_STATUS_SUCCESS) {
-        fprintf(stderr, "mkl_sparse_d_create_coo failed %i\n", err);
-        exit(55);
-    }
-    if((err=mkl_sparse_convert_bsr(coordMatrix, block_size,
-             SPARSE_LAYOUT_COLUMN_MAJOR, // BvdS: right?
-             SPARSE_OPERATION_NON_TRANSPOSE,
-              &gauge.a)) != SPARSE_STATUS_SUCCESS) {
-        fprintf(stderr, "mkl_sparse_convert_bsr failed %i\n", err);
-        exit(56);
-    }
-    mkl_free(gauge.row); mkl_free(gauge.column); mkl_free(gauge.value);
-    if((err=mkl_sparse_destroy(coordMatrix)) != SPARSE_STATUS_SUCCESS) {
-        fprintf(stderr, "mkl_sparse_destroy failed %i\n", err);
-        exit(57);
-    }
-    gauge.descr.type = SPARSE_MATRIX_TYPE_GENERAL;
-    gauge.descr.mode = SPARSE_FILL_MODE_LOWER;
-    gauge.descr.diag = SPARSE_DIAG_NON_UNIT;
-#if 0  // Unsupported error
-    if((err = mkl_sparse_set_dotmv_hint(gauge.a,
-        SPARSE_OPERATION_NON_TRANSPOSE, gauge.descr,
-        expected_calls)) != SPARSE_STATUS_SUCCESS) {
-        fprintf(stderr, "mkl_sparse_set_dotmv_hint failed %i\n", err);
-        exit(58);
-    }
-#endif
-    if((err=mkl_sparse_optimize(gauge.a)) != SPARSE_STATUS_SUCCESS) {
-        fprintf(stderr, "mkl_sparse_optimize failed %i\n", err);
-        exit(58);
-    }
-#else
-    gauge.descr = 'g';  // General matrix
-#endif
 #endif
     fflush(stdout);
     time(&tf);
@@ -373,6 +479,9 @@ int main(int argc, char **argv){
     rsb_mtx_free(hessp);
     rsb_mtx_free(gaugep); 
     rsb_lib_exit(RSB_NULL_EXIT_OPTIONS);
+#elif defined(USE_BLOCK)
+    blockFree(hessp);
+    blockFree(gaugep);
 #elif defined(USE_MKL)
     mkl_sparse_destroy(hess.a); mkl_sparse_destroy(gauge.a);
 #else

@@ -259,7 +259,7 @@ void gaugeOp(const int nrow, const int ncol, const double *xin, const int ldx,
 	    double *yout, const int ldy, void* mvparam) {
     assert(rows(gaugeData.matrix) == nrow);
     assert(mvparam == NULL);
-    int k;
+    size_t k;
 
     for(k=0; k<ncol; k++) {
         gaugeProduct(&nrow, xin+k*ldx, yout+k*ldy);
@@ -290,6 +290,26 @@ void matrixVector(const SparseMatrix *a,
         fprintf(stderr, "rsb_spmv error 0x%x, exiting\n", errval);
         exit(121);
     }
+#elif defined(USE_BLOCK)
+    size_t k;
+    double *matp = a->value;
+    const integer n = a->blockSize, n2=n*n;
+    const double one=1.0;
+    const integer inc=1;
+    const char trans='T', normal='N';
+
+    memset(out, 0, a->rows * sizeof(double));
+    for(k=0; k<a->blocks; k++, matp+=n2) {
+        DGEMV(&trans, &n, &n, &one,
+              matp, &n, in + a->j[k], &inc, &one,
+              out + a->i[k], &inc);
+
+        if(a->descr == 's' && a->i[k] != a->j[k]) {
+            DGEMV(&normal, &n, &n, &one,
+                  matp, &n, in + a->i[k], &inc, &one,
+                  out + a->j[k], &inc);
+        }
+    }
 #elif defined(USE_MKL)
     sparse_status_t err;
     const double alpha = 1.0, beta=0.0;
@@ -302,13 +322,13 @@ void matrixVector(const SparseMatrix *a,
         exit(69);
     }
 #else
-    int k;
+    size_t k;
     SparseRow *row;
     memset(out, 0, a->rows * sizeof(double));
     for(k=0; k<a->nonzeros; k++) {
         row = a->data+k;
         out[row->i] += row->value * in[row->j];
-        if(a->descr == 's' && row->j < row->i) {
+        if(a->descr == 's' && row->j != row->i) {
             out[row->j] += row->value * in[row->i];
         }
     }
@@ -327,6 +347,26 @@ void vectorMatrix(const SparseMatrix *a,
         fprintf(stderr, "rsb_spmv error 0x%x, exiting\n", errval);
         exit(121);
     }
+#elif defined(USE_BLOCK)
+    size_t k;
+    double *matp = a->value;
+    const integer n = a->blockSize, n2 = n*n;
+    const double one=1.0;
+    const integer inc=1;
+    const char trans='T', normal='N';
+
+    memset(out, 0, a->columns * sizeof(double));
+    for(k=0; k<a->blocks; k++, matp+=n2) {
+        DGEMV(&normal, &n, &n, &one,
+              matp, &n, in + a->i[k], &inc, &one,
+              out + a->j[k], &inc);
+
+        if(a->descr == 's' && a->i[k] != a->j[k]) {
+            DGEMV(&trans, &n, &n, &one,
+                  matp, &n, in + a->j[k], &inc, &one,
+                  out + a->i[k], &inc);
+        }
+    }
 #elif defined(USE_MKL)
     sparse_status_t err;
     const double alpha = 1.0, beta=0.0;
@@ -339,13 +379,13 @@ void vectorMatrix(const SparseMatrix *a,
         exit(68);
     }
 #else
-    int k;
+    size_t k;
     SparseRow *row;
     memset(out, 0, a->columns * sizeof(double));
     for(k=0; k<a->nonzeros; k++) {
         row = a->data+k;
         out[row->j] += row->value * in[row->i];
-        if(a->descr == 's' && row->i < row->j) {
+        if(a->descr == 's' && row->i != row->j) {
             out[row->i] += row->value * in[row->j];
         }
     }

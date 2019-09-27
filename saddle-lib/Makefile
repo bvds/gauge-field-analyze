@@ -44,6 +44,12 @@ else
 LFLAGS += -llapack -lblas
 endif
 #
+#   Use block-sparse coordinate format for matrices
+#
+ifeq (1, 0)
+CFLAGS += -DUSE_BLOCK
+endif
+#
 #
 #            RSB
 ifeq (1, 0)
