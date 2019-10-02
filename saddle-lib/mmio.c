@@ -14,13 +14,14 @@
 
 #include "mmio.h"
 
-int mm_read_unsymmetric_sparse(const char *fname, int *M_, int *N_, int *nz_,
+int mm_read_unsymmetric_sparse(const char *fname,
+                mm_int *M_, mm_int *N_, mm_int *nz_,
                 double **val_, int **I_, int **J_)
 {
     FILE *f;
     MM_typecode matcode;
-    int M, N;
-    int i, k, nz;
+    mm_int i, M, N, nz;
+    int k;
     double *val;
     int *I, *J;
  
@@ -101,14 +102,14 @@ int mm_read_banner(FILE *f, MM_typecode *matcode)
 {
     char line[MM_MAX_LINE_LENGTH];
     char banner[MM_MAX_TOKEN_LENGTH];
-    char mtx[MM_MAX_TOKEN_LENGTH]; 
+    char mtx[MM_MAX_TOKEN_LENGTH];
     char crd[MM_MAX_TOKEN_LENGTH];
     char data_type[MM_MAX_TOKEN_LENGTH];
     char storage_scheme[MM_MAX_TOKEN_LENGTH];
     char *p;
 
 
-    mm_clear_typecode(matcode);  
+    mm_clear_typecode(matcode);
 
     if (fgets(line, MM_MAX_LINE_LENGTH, f) == NULL) 
         return MM_PREMATURE_EOF;
@@ -118,7 +119,7 @@ int mm_read_banner(FILE *f, MM_typecode *matcode)
         return MM_PREMATURE_EOF;
 
     for (p=mtx; *p!='\0'; *p=tolower(*p),p++);  /* convert to lower case */
-    for (p=crd; *p!='\0'; *p=tolower(*p),p++);  
+    for (p=crd; *p!='\0'; *p=tolower(*p),p++);
     for (p=data_type; *p!='\0'; *p=tolower(*p),p++);
     for (p=storage_scheme; *p!='\0'; *p=tolower(*p),p++);
 
@@ -182,7 +183,7 @@ int mm_read_banner(FILE *f, MM_typecode *matcode)
     return 0;
 }
 
-int mm_write_mtx_crd_size(FILE *f, int M, int N, int nz)
+int mm_write_mtx_crd_size(FILE *f, mm_int M, mm_int N, mm_int nz)
 {
     if (fprintf(f, "%d %d %d\n", M, N, nz) != 3)
         return MM_COULD_NOT_WRITE_FILE;
@@ -190,7 +191,7 @@ int mm_write_mtx_crd_size(FILE *f, int M, int N, int nz)
         return 0;
 }
 
-int mm_read_mtx_crd_size(FILE *f, int *M, int *N, int *nz )
+int mm_read_mtx_crd_size(FILE *f, mm_int *M, mm_int *N, mm_int *nz )
 {
     char line[MM_MAX_LINE_LENGTH];
     int num_items_read;
@@ -206,13 +207,13 @@ int mm_read_mtx_crd_size(FILE *f, int *M, int *N, int *nz )
     }while (line[0] == '%');
 
     /* line[] is either blank or has M,N, nz */
-    if (sscanf(line, "%d %d %d", M, N, nz) == 3)
+    if (sscanf(line, "%u %u %u", M, N, nz) == 3)
         return 0;
         
     else
     do
     { 
-        num_items_read = fscanf(f, "%d %d %d", M, N, nz); 
+        num_items_read = fscanf(f, "%u %u %u", M, N, nz);
         if (num_items_read == EOF) return MM_PREMATURE_EOF;
     }
     while (num_items_read != 3);
@@ -221,7 +222,7 @@ int mm_read_mtx_crd_size(FILE *f, int *M, int *N, int *nz )
 }
 
 
-int mm_read_mtx_array_size(FILE *f, int *M, int *N)
+int mm_read_mtx_array_size(FILE *f, mm_int *M, mm_int *N)
 {
     char line[MM_MAX_LINE_LENGTH];
     int num_items_read;
@@ -235,14 +236,14 @@ int mm_read_mtx_array_size(FILE *f, int *M, int *N)
             return MM_PREMATURE_EOF;
     }while (line[0] == '%');
 
-    /* line[] is either blank or has M,N, nz */
-    if (sscanf(line, "%d %d", M, N) == 2)
+    /* line[] is either blank or has M, N, nz */
+    if (sscanf(line, "%u %u", M, N) == 2)
         return 0;
         
     else /* we have a blank line */
     do
     { 
-        num_items_read = fscanf(f, "%d %d", M, N); 
+        num_items_read = fscanf(f, "%u %u", M, N);
         if (num_items_read == EOF) return MM_PREMATURE_EOF;
     }
     while (num_items_read != 2);
@@ -250,7 +251,7 @@ int mm_read_mtx_array_size(FILE *f, int *M, int *N)
     return 0;
 }
 
-int mm_write_mtx_array_size(FILE *f, int M, int N)
+int mm_write_mtx_array_size(FILE *f, mm_int M, mm_int N)
 {
     if (fprintf(f, "%d %d\n", M, N) != 2)
         return MM_COULD_NOT_WRITE_FILE;
@@ -266,10 +267,10 @@ int mm_write_mtx_array_size(FILE *f, int M, int N)
 /* use when I[], J[], and val[]J, and val[] are already allocated */
 /******************************************************************/
 
-int mm_read_mtx_crd_data(FILE *f, int nz, int I[], int J[],
+int mm_read_mtx_crd_data(FILE *f, mm_int nz, int I[], int J[],
         double val[], MM_typecode matcode)
 {
-    int i;
+    mm_int i;
     if (mm_is_complex(matcode))
     {
         for (i=0; i<nz; i++)
@@ -334,7 +335,7 @@ int mm_read_mtx_crd_entry(FILE *f, int *I, int *J,
                             (nz pairs of real/imaginary values)
 ************************************************************************/
 
-int mm_read_mtx_crd(char *fname, int *M, int *N, int *nz,
+int mm_read_mtx_crd(char *fname, mm_int *M, mm_int *N, mm_int *nz,
                     int **I, int **J, 
         double **val, MM_typecode *matcode)
 {
@@ -401,12 +402,12 @@ int mm_write_banner(FILE *f, MM_typecode matcode)
         return 0;
 }
 
-int mm_write_mtx_crd(char fname[], int M, int N, int nz,
+int mm_write_mtx_crd(char fname[], mm_int M, mm_int N, mm_int nz,
                      int I[], int J[],
         double val[], MM_typecode matcode)
 {
     FILE *f;
-    int i;
+    mm_int i;
 
     if (strcmp(fname, "stdout") == 0) 
         f = stdout;

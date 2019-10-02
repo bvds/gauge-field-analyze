@@ -72,7 +72,7 @@ void eigenInit(SparseMatrix *hess) {
 */
 
 void largeShiftsCheckpoint(double *initialVector, cJSON *options,
-                           double **vals, double **vecs, unsigned int *nvals) {
+                           double **vals, double **vecs, int *nvals) {
     cJSON *tmp;
     char *checkpoint;
     FILE *fp;
@@ -105,7 +105,7 @@ void largeShiftsCheckpoint(double *initialVector, cJSON *options,
             fprintf(stderr, "Can't open file %s\n", checkpoint);
             exit(555);
         }
-        k = fscanf(fp, "%u%u", &nn, nvals);
+        k = fscanf(fp, "%u%d", &nn, nvals);
         assert(nn==n);
         assert(k==2);
         *vals = malloc(n*sizeof(double));
@@ -127,7 +127,7 @@ void largeShiftsCheckpoint(double *initialVector, cJSON *options,
   the Hessian.
  */
 void largeShifts(double *initialVector, cJSON *options,
-		 double **eval, double **evec, unsigned int *nvals) {
+		 double **eval, double **evec, int *nvals) {
 #ifdef USE_PRIMME
     primme_params primme;
     double *rnorm;   /* Array with the computed eigenpairs residual norms */
@@ -143,7 +143,7 @@ void largeShifts(double *initialVector, cJSON *options,
        multiply is relatively expensive.  */
     int restart = 4;
     trl_info info;
-    unsigned int k;
+    int k;
 #endif
     SparseMatrix *hess = eigenData.matrix;
     int nrow = rows(hess); // number of rows on this processor
@@ -325,10 +325,11 @@ void hessOpPrimme(void *x, PRIMME_INT *ldx, void *y, PRIMME_INT *ldy,
 #endif
 
 /* The extra parameter mvparam is not used in this case. */
-void hessOp(const int nrow, const int ncol, const double *xin, const int ldx,
+void hessOp(const int nrow, const int ncol,
+            const double *xin, const int ldx,
 	    double *yout, const int ldy, void* mvparam) {
-    assert(columns(eigenData.matrix) == nrow);
-    assert(rows(eigenData.matrix) == nrow);
+    assert(columns(eigenData.matrix) == abs(nrow));
+    assert(rows(eigenData.matrix) == abs(nrow));
     assert(mvparam == NULL);
     int k;
     clock_t t0;
@@ -348,10 +349,11 @@ void hessOp(const int nrow, const int ncol, const double *xin, const int ldx,
 }
 
 /* The extra parameter mvparam is not used in this case. */
-void hessOp2(const int nrow, const int ncol, const double *xin, const int ldx,
-	    double *yout, const int ldy, void* mvparam) {
-    assert(columns(eigenData.matrix) == nrow);
-    assert(rows(eigenData.matrix) == nrow);
+void hessOp2(const int nrow, const int ncol,
+             const double *xin, const int ldx,
+             double *yout, const int ldy, void* mvparam) {
+    assert(columns(eigenData.matrix) == abs(nrow));
+    assert(rows(eigenData.matrix) == abs(nrow));
     assert(mvparam == NULL);
     int k;
     clock_t t0;
@@ -379,7 +381,7 @@ void hessOp2(const int nrow, const int ncol, const double *xin, const int ldx,
 // Debug print of dynamic part of hess.grad
 void testOp(SparseMatrix *hess, double *grad) {
     double *y;
-    int i;
+    unsigned int i;
 
     y = malloc(rows(hess) * sizeof(double));
     hessOp(rows(hess), 1, grad, 1, y, 1, NULL);

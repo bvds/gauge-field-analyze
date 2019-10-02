@@ -14,9 +14,9 @@ typedef struct {
     size_t *j;
     size_t blocks;
     int blockSize;
-    int nonzeros;
-    int rows;
-    int columns;
+    unsigned int nonzeros;
+    unsigned int rows;
+    unsigned int columns;
     char descr;
 } SparseMatrix;
 #elif defined(USE_MKL)
@@ -27,23 +27,23 @@ typedef struct {
     unsigned int blockSize;
     MKL_INT *row;
     MKL_INT *column;
-    MKL_INT rows;
-    MKL_INT columns;
-    MKL_INT nonzeros;
+    unsigned int rows;
+    unsigned int columns;
+    unsigned int nonzeros;
 } SparseMatrix;
 #else
 typedef struct {
-    size_t i;
-    size_t j;
+    unsigned int i;
+    unsigned int j;
     double value;
 } SparseRow;
 
 typedef struct {
     SparseRow *data;
     char descr;
-    int nonzeros;
-    int rows;
-    int columns;
+    unsigned int nonzeros;
+    unsigned int rows;
+    unsigned int columns;
 } SparseMatrix;
 #endif
 
@@ -56,12 +56,6 @@ int nonzeros(SparseMatrix *matrix);
 #define columns(A) A->columns
 #define nonzeros(A) A->nonzeros
 #endif
-
-
-void matrixVector(const SparseMatrix *a,
-                  const double *in, double *out);
-void vectorMatrix(const SparseMatrix *a,
-                  const double *in, double *out);
 
 
 /* FORTRAN to C data type matching */
@@ -99,24 +93,31 @@ extern int DAXPY(const integer *n,  const doublereal *alpha,
                  const doublereal *x, const integer *incx,
                  const doublereal *y, const integer *incy); 
 
+
 void dynamicInit(SparseMatrix *gauge, cJSON *options);
-void dynamicProject(const int n, double *v, double *normDiff);
+void dynamicProject(const integer n, double *v, double *normDiff);
 void gaugeOp(const int nrow, const int ncol, const double *xin, const int ldx,
              double *yout, const int ldy, void* mvparam);
 int gaugeProduct(const integer *vectorLength, const doublereal *x,
                  doublereal *y);
 void dynamicClose();
+void matrixVector(const SparseMatrix *a,
+                  const doublereal *in, doublereal *out);
+void vectorMatrix(const SparseMatrix *a,
+                  const doublereal *in, doublereal *out);
 
 
-void hessOp(const int nrow, const int ncol, const double *xin, const int ldx,
+void hessOp(const int nrow, const int ncol,
+            const double *xin, const int ldx,
 	    double *yout, const int ldy, void* mvparam);
-void hessOp2(const int nrow, const int ncol, const double *xin, const int ldx,
+void hessOp2(const int nrow, const int ncol,
+             const double *xin, const int ldx,
              double *yout, const int ldy, void* mvparam);
 void eigenInit(SparseMatrix *hess);
 void largeShiftsCheckpoint(double *initialVector, cJSON *options,
-		 double **vals, double **vecs, unsigned int *nvals);
+		 double **vals, double **vecs, int *nvals);
 void largeShifts(double *initialVector, cJSON *options,
-		 double **vals, double **vecs, unsigned int *nvals);
+		 double **vals, double **vecs, int *nvals);
 void testOp(SparseMatrix *hess, double *grad);
 
 

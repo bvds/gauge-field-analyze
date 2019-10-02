@@ -467,7 +467,7 @@ findDelta[{hess_, grad_, gauge_}, opts:OptionsPattern[]] :=
  KeyExistsQ[minresLabels, methodName[OptionValue[Method]]];
 
 (* External version.
-  https://github.com/DaveGamble/cJSON
+   https://github.com/DaveGamble/cJSON
  *)
 findDelta[data:{hess_, grad_, gauge_}, opts:OptionsPattern[]] :=
     Block[{zzz = OptionValue[rescaleCutoff],
@@ -476,8 +476,10 @@ findDelta[data:{hess_, grad_, gauge_}, opts:OptionsPattern[]] :=
     action = OptionValue[externalAction],
     tinit = SessionTime[],
     symbolString = (a_Symbol -> b_) :> SymbolName[a] -> b,
-        outFile = "hess-grad-gauge.json", out},
-    If[SymmetricMatrixQ[hess],
+    outFile = "hess-grad-gauge.json",
+    hessFile = "hess.mtx", gradFile = "grad.dat",
+    gaugeFile = "gauge.mtx", out},
+   If[SymmetricMatrixQ[hess],
        Message[findDelta::symmetric]];
    (* Dump dimensions, constants, and options into JSON file.
      Dump matrices and vectors: 
@@ -490,6 +492,7 @@ findDelta[data:{hess_, grad_, gauge_}, opts:OptionsPattern[]] :=
    If[action =!= "read",
       Export[outFile, {
           "nc" -> nc,
+          "nd" -> nd,
           "n" -> Length[grad],
           "gaugeDimension" -> Length[gauge],
           "rescaleCutoff" -> zzz,
@@ -499,18 +502,20 @@ findDelta[data:{hess_, grad_, gauge_}, opts:OptionsPattern[]] :=
                {methodOptions[OptionValue[dynamicPartMethod]]}/.symbolString,
           "largeShiftOptions" -> OptionValue[largeShiftOptions]/.symbolString,
           "linearSolveOptions" ->
-	      {methodOptions[OptionValue[Method]]}/.symbolString}];
+	       {methodOptions[OptionValue[Method]]}/.symbolString,
+          "hessFile" -> hessFile,
+          "gradFile" -> gradFile,
+          "gaugeFile" -> gaugeFile}];
       (* Export full matrix, even though it is symmetric. *)
-      Export["hess.mtx", hess];
-      Export["grad.dat", grad];
-      Export["gauge.mtx", gauge];
+      Export[hessFile, hess];
+      Export[gradFile, grad];
+      Export[gaugeFile, gauge];
       Apply[Clear, Unevaluated[data]]];
    (* Run external program interactively *)
    If[action =!= "read" && action =!= "write" && action =!= "detach",
       Run["rm -f shifts0.dat"];
       out = RunProcess[{"saddle-lib/shifts",
-                        "hess-grad-gauge.json", "hess.mtx",
-                        "grad.dat", "gauge.mtx", "shifts0.dat"}];
+                        "hess-grad-gauge.json", "shifts0.dat"}];
       Print[Style[out["StandardOutput"], FontColor -> Blue]];
       If[StringLength[out["StandardError"]]>0,
          Print[Style[out["StandardError"], FontColor -> Red]]];
@@ -521,7 +526,7 @@ findDelta[data:{hess_, grad_, gauge_}, opts:OptionsPattern[]] :=
    If[action === "detach",
       Run["rm -f shifts1.log shifts1.err shifts1.dat"];
       Print["Starting up and detaching."];
-      Run["(saddle-lib/shifts hess-grad-gauge.json hess.mtx grad.dat gauge.mtx shifts1.dat 2> shifts1.err 1> shifts1.log&); echo \"started\""]];
+      Run["(saddle-lib/shifts hess-grad-gauge.json shifts1.dat 2> shifts1.err 1> shifts1.log&); echo \"started\""]];
    (* Read after detached program has run. *)
    If[action === "read",
       Print[Style[ReadString["shifts1.log"], FontColor -> Blue]];

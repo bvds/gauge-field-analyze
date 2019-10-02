@@ -14,16 +14,17 @@
 #define MM_MAX_TOKEN_LENGTH 64
 
 typedef char MM_typecode[4];
+typedef unsigned int mm_int;
 
 char *mm_typecode_to_str(MM_typecode matcode);
 
 int mm_read_banner(FILE *f, MM_typecode *matcode);
-int mm_read_mtx_crd_size(FILE *f, int *M, int *N, int *nz);
-int mm_read_mtx_array_size(FILE *f, int *M, int *N);
+int mm_read_mtx_crd_size(FILE *f, mm_int *M, mm_int *N, mm_int *nz);
+int mm_read_mtx_array_size(FILE *f, mm_int *M, mm_int *N);
 
 int mm_write_banner(FILE *f, MM_typecode matcode);
-int mm_write_mtx_crd_size(FILE *f, int M, int N, int nz);
-int mm_write_mtx_array_size(FILE *f, int M, int N);
+int mm_write_mtx_crd_size(FILE *f, mm_int M, mm_int N, mm_int nz);
+int mm_write_mtx_array_size(FILE *f, mm_int M, mm_int N);
 
 
 /********************* MM_typecode query fucntions ***************************/
@@ -118,15 +119,16 @@ int mm_is_valid(MM_typecode matcode);		/* too complex for a macro */
 
 /*  high level routines */
 
-int mm_write_mtx_crd(char fname[], int M, int N, int nz,
-                     int I[], int J[],
-		 double val[], MM_typecode matcode);
-int mm_read_mtx_crd_data(FILE *f, int nz, int I[], int J[],
+int mm_write_mtx_crd(char fname[], mm_int M, mm_int N, mm_int nz,
+                int I[], int J[],
+		double val[], MM_typecode matcode);
+int mm_read_mtx_crd_data(FILE *f, mm_int nz, int I[], int J[],
 		double val[], MM_typecode matcode);
 int mm_read_mtx_crd_entry(FILE *f, int *I, int *J, double *real, double *img,
-			MM_typecode matcode);
+		MM_typecode matcode);
 
-int mm_read_unsymmetric_sparse(const char *fname, int *M_, int *N_, int *nz_,
+int mm_read_unsymmetric_sparse(const char *fname,
+                mm_int *M_, mm_int *N_, mm_int *nz_,
                 double **val_, int **I_, int **J_);
 
 

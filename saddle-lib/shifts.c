@@ -15,6 +15,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <libgen.h> // POSIX
 #include <assert.h>
 #include <time.h>
 #include "shifts.h"
@@ -22,6 +23,21 @@
 #ifdef USE_MKL
 #include "mkl_spblas.h"
 #endif
+
+
+char *catStrings(const char *str1, const char *str2);
+
+char *catStrings(const char *str1, const char *str2) {
+    const char d[] = "/";
+    // Add a byte for the string terminator.
+    char *x = malloc((strlen(str1) + strlen(d) + strlen(str2) + 1)*
+                     sizeof(char));
+    char *y = stpcpy(x, str1);
+    y = stpcpy(y, d);
+    stpcpy(y, str2);
+    // printf("catStrings %s+%s -> %s\n", str1, str2, x);
+    return x;
+}
 
 char *readFile(char *filename) {
     int k;
@@ -49,7 +65,7 @@ int intCmp (const void * a, const void * b) {
         (*(size_t *)a > *(size_t *)b);
 }
 void readtoBlock(FILE *fp, SparseMatrix *mat, char *fileName) {
-    int j;
+    unsigned int j;
     unsigned int i, k, ii, jj, lastii = 0, blockCols = 0;
     size_t *blockColp;
     const unsigned int block = mat->blockSize,
@@ -170,7 +186,8 @@ void blockFree(SparseMatrix *mat) {
 void readtoBlock(FILE *fp, SparseMatrix *mat, char *fileName);
 
 void readtoBlock(FILE *fp, SparseMatrix *mat, char *fileName) {
-    int j, k;
+    unsigned int j;
+    int k;
     sparse_status_t err;
     sparse_matrix_t coordMatrix;
     mat->row = mkl_malloc(mat->nonzeros * sizeof(int), MALLOC_ALIGN);
@@ -221,6 +238,7 @@ void readtoBlock(FILE *fp, SparseMatrix *mat, char *fileName) {
 #endif
 
 int main(int argc, char **argv){
+    char *dataPath, *hessFile, *gradFile, *gaugeFile;
     char *options;
     cJSON *jopts, *tmp;
     int i, k, n, nc, gaugeDimension;
@@ -250,7 +268,7 @@ int main(int argc, char **argv){
 #endif
 #if !defined(USE_BLOCK) && !defined(USE_MKL)
     SparseRow *row;
-    int j;
+    unsigned int j;
 #endif
 #endif
     long int twall = 0, tcpu = 0;
@@ -282,8 +300,11 @@ int main(int argc, char **argv){
 #endif
 
     /* Read JSON file and use options */
-    if(argc <5)
+    if(argc <2) {
+        fprintf(stderr, "Usage:  ./shifts <parameters.json> <output.dat>\n");
         exit(-1);
+    }
+    dataPath = dirname(strdup(argv[1]));
     printf("Opening file %s", argv[1]);
     options = readFile(argv[1]);
     jopts = cJSON_Parse(options);
@@ -293,11 +314,13 @@ int main(int argc, char **argv){
                                jopts, "gaugeDimension")->valueint;
     printf(" n=%i, nc=%i, gauge=%i\n", n, nc, gaugeDimension);
 
-    /* Read in Matrix */
+    /* Read in Hessian Matrix */
+    tmp = cJSON_GetObjectItemCaseSensitive(jopts, "hessFile");
+    hessFile = catStrings(dataPath, tmp->valuestring);
 #ifdef USE_LIBRSB
     SparseMatrix *hessp;
-    printf("Opening file %s\n", argv[2]);
-    hessp = rsb_file_mtx_load(argv[2], flagsA, typecode, &errval);
+    printf("Opening file %s\n", hessFile);
+    hessp = rsb_file_mtx_load(hessFile, flagsA, typecode, &errval);
     if(errval != RSB_ERR_NO_ERROR) {
         fprintf(stderr, "rsb_file_mtx_load error 0x%x, exiting\n", errval);
         exit(113);
@@ -308,8 +331,11 @@ int main(int argc, char **argv){
     printf("%s\n",ib);
 #else
     SparseMatrix hess, *hessp = &hess;
-    printf("Opening file %s", argv[2]);
-    fp = fopen(argv[2], "r"); 
+    printf("Opening file %s", hessFile);
+    if((fp = fopen(hessFile, "r")) == NULL) {
+        fprintf(stderr, "Could not open file %s\n", hessFile);
+        exit(44);
+    }
     if (mm_read_banner(fp, &matcode) != 0) {
         fprintf(stderr, "Could not process Matrix Market banner.\n");
         exit(701);
@@ -326,18 +352,18 @@ int main(int argc, char **argv){
         exit(703);
     }
     printf(" with %i nonzero elements.\n", hess.nonzeros);
-    assert(hess.rows == n);
-    assert(hess.columns == n);
+    assert(hess.rows == abs(n));
+    assert(hess.columns == abs(n));
 #ifdef USE_BLOCK
     hess.descr = 's';  // Symmetric matrix, with only one triangle stored.
     hess.blockSize = nc*nc-1;
-    readtoBlock(fp, hessp, argv[2]);
+    readtoBlock(fp, hessp, hessFile);
 #elif defined(USE_MKL)
     hess.descr.type = SPARSE_MATRIX_TYPE_SYMMETRIC;
     hess.descr.mode = SPARSE_FILL_MODE_LOWER;
     hess.descr.diag = SPARSE_DIAG_NON_UNIT;
     hess.blockSize = nc*nc-1;
-    readtoBlock(fp, hessp, argv[2]);
+    readtoBlock(fp, hessp, hessFile);
 #else
     hess.descr = 's';  // Symmetric matrix, with only one triangle stored.
     hess.data = malloc(hess.nonzeros * sizeof(SparseRow));
@@ -346,7 +372,7 @@ int main(int argc, char **argv){
         k = fscanf(fp, "%u%u%le", &(row->i), &(row->j), &(row->value));
         row->i -= 1; row->j -= 1; // switch to zero-based indexing
         if(k < 3) {
-            fprintf(stderr, "Error reading %s, element %i\n", argv[2], j);
+            fprintf(stderr, "Error reading %s, element %i\n", hessFile, j);
             break;
         }
     }
@@ -355,21 +381,25 @@ int main(int argc, char **argv){
 #endif
 
     double *grad = malloc(n * sizeof(double));
-    printf("Opening file %s for a vector of length %i\n", argv[3], n);
-    fp = fopen(argv[3], "r"); 
+    tmp = cJSON_GetObjectItemCaseSensitive(jopts, "gradFile");
+    gradFile = catStrings(dataPath, tmp->valuestring);
+    printf("Opening file %s for a vector of length %i\n", gradFile, n);
+    fp = fopen(gradFile, "r");
     for(i=0; i<n; i++){
         k = fscanf(fp, "%le", grad+i);
         if(k < 1) {
-            fprintf(stderr, "Error reading %s on line %i\n", argv[3], i);
+            fprintf(stderr, "Error reading %s on line %i\n", gradFile, i);
             break;
         }
     }
     fclose(fp);
 
+    tmp = cJSON_GetObjectItemCaseSensitive(jopts, "gaugeFile");
+    gaugeFile = catStrings(dataPath, tmp->valuestring);
 #ifdef USE_LIBRSB
     SparseMatrix *gaugep;
-    printf("Opening file %s\n", argv[4]);
-    gaugep = rsb_file_mtx_load(argv[4], flagsA, typecode, &errval);
+    printf("Opening file %s\n", gaugeFile);
+    gaugep = rsb_file_mtx_load(gaugeFile, flagsA, typecode, &errval);
     if(errval != RSB_ERR_NO_ERROR) {
         fprintf(stderr, "rsb_file_mtx_load error 0x%x, exiting\n", errval);
         exit(113);
@@ -380,8 +410,8 @@ int main(int argc, char **argv){
     printf("%s\n",ib);
 #else
     SparseMatrix gauge, *gaugep = &gauge;
-    printf("Opening file %s", argv[4]);
-    fp = fopen(argv[4], "r"); 
+    printf("Opening file %s", gaugeFile);
+    fp = fopen(gaugeFile, "r");
     if (mm_read_banner(fp, &matcode) != 0) {
         fprintf(stderr, "Could not process Matrix Market banner.\n");
         exit(701);
@@ -400,19 +430,19 @@ int main(int argc, char **argv){
         exit(703);
     }
     printf(" with %i nonzero elements.\n", gauge.nonzeros);
-    assert(gauge.rows == gaugeDimension);
-    assert(gauge.columns == n);
+    assert(gauge.rows == abs(gaugeDimension));
+    assert(gauge.columns == abs(n));
 
 #ifdef USE_BLOCK
     gauge.descr = 'g';  // General matrix
     gauge.blockSize = nc*nc-1;
-    readtoBlock(fp, gaugep, argv[4]);
+    readtoBlock(fp, gaugep, gaugeFile);
 #elif defined(USE_MKL)
     gauge.descr.type = SPARSE_MATRIX_TYPE_GENERAL;
     gauge.descr.mode = SPARSE_FILL_MODE_LOWER;
     gauge.descr.diag = SPARSE_DIAG_NON_UNIT;
     gauge.blockSize = nc*nc-1;
-    readtoBlock(fp, gaugep, argv[4]);
+    readtoBlock(fp, gaugep, gaugeFile);
 #else
     gauge.descr = 'g';  // General matrix
     gauge.data = malloc(gauge.nonzeros * sizeof(SparseRow));
@@ -421,7 +451,7 @@ int main(int argc, char **argv){
         k = fscanf(fp, "%u%u%lf", &(row->i), &(row->j), &(row->value));
         row->i -= 1; row->j -= 1; // switch to zero-based indexing
         if(k < 3) {
-            fprintf(stderr, "Error reading %s, element %i\n", argv[4], j);
+            fprintf(stderr, "Error reading %s, element %i\n", gaugeFile, j);
             break;
         }
     }
@@ -438,7 +468,7 @@ int main(int argc, char **argv){
 
     double *shifts = malloc(n * sizeof(double));
     double *absVals, *vecs;
-    unsigned int nvals;
+    int nvals;
     tmp = cJSON_GetObjectItemCaseSensitive(jopts, "dynamicPartOptions");
     assert(tmp != NULL);
     dynamicInit(gaugep, tmp);
@@ -462,8 +492,8 @@ int main(int argc, char **argv){
 
     t1 = clock();
     time(&t2);
-    printf("Opening output file %s\n", argv[5]);
-    fp = fopen(argv[5], "w"); 
+    printf("Opening output file %s\n", argv[2]);
+    fp = fopen(argv[2], "w");
     for(i=0; i<n; i++){
         fprintf(fp, "%.17e\n", shifts[i]);
     }
@@ -475,6 +505,7 @@ int main(int argc, char **argv){
            __FILE__, tcpu/(float) CLOCKS_PER_SEC, twall);
     printf("%s:  overall time %.2f sec (%li wall)\n",
            __FILE__, (clock()-tt1)/(float) CLOCKS_PER_SEC, tf-tt2);
+    fflush(stdout);
 
 
 #ifdef USE_LIBRSB
@@ -490,7 +521,9 @@ int main(int argc, char **argv){
 #else
     free(hess.data); free(gauge.data);
 #endif
+    free(dataPath);
     free(absVals); free(vecs); free(shifts); free(grad);
+    free(hessFile); free(gradFile); free(gaugeFile);
     cJSON_Delete(jopts);
     free(options);
     return 0;

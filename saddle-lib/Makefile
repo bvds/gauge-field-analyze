@@ -8,7 +8,7 @@ PRIMMEDIR = ../../linear-algebra/primme
 #
 #
 #              -Wall -g -O3
-CFLAGS = -fPIC -Wall -g -O -Wextra -pedantic -std=gnu11 -I$(TRLANDIR)/INC
+CFLAGS = -fPIC -Wall -g -O3 -Wextra -pedantic -std=gnu11 -I$(TRLANDIR)/INC
 LFLAGS =  -L$(TRLANDIR) -L/usr/local/lib -lnutrlan -lgfortran
 #
 #  Optionally, use Jacobi-Davidson library PRIMME

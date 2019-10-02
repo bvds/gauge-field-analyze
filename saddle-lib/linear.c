@@ -73,8 +73,9 @@ void linearSolve(integer n, double *b, cJSON *options, double *x) {
         printf("linearSolve writing to stdout\n");
     }
 
-    assert(n == columns(hessData.matrix));
-    assert(n == rows(hessData.matrix));
+    assert(n>=0);
+    assert(abs(n) == columns(hessData.matrix));
+    assert(abs(n) == rows(hessData.matrix));
     hessData.z = malloc(hessData.nvecs*sizeof(doublereal));
     if((minresOrtho.z = malloc(minresOrtho.maxVecs*
                                sizeof(doublereal))) == NULL) {
@@ -126,8 +127,8 @@ void linearSolve(integer n, double *b, cJSON *options, double *x) {
 }
 
 int hessProduct(integer *n, doublereal *x, doublereal *y) {
-    assert(*n == rows(hessData.matrix));
-    assert(*n == columns(hessData.matrix));
+    assert(abs(*n) == rows(hessData.matrix));
+    assert(abs(*n) == columns(hessData.matrix));
     hessOp(*n, 1, x, *n, y, *n, NULL);
     largeShiftProject(*n, y);
     return 0;
@@ -140,8 +141,8 @@ void userOrtho(char *action, integer *n, double *y) {
     const integer inc=1;
     const integer dn = *n * sizeof(double);
 
-    assert(*n == rows(hessData.matrix));
-    assert(*n == columns(hessData.matrix));
+    assert(abs(*n) == rows(hessData.matrix));
+    assert(abs(*n) == columns(hessData.matrix));
 
     if(*action=='a') {
         /* add vector to ortho list */

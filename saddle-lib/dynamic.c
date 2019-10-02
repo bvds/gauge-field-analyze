@@ -80,11 +80,11 @@ void dynamicInit(SparseMatrix *gauge, cJSON *options) {
 #ifdef USE_MKL
     gaugeData.b = mkl_malloc(rows(gauge)*sizeof(double), MALLOC_ALIGN);
     gaugeData.x = mkl_malloc(rows(gauge)*sizeof(double), MALLOC_ALIGN);
-    gaugeData.z = mkl_malloc(columns(gauge)*sizeof(doublereal), MALLOC_ALIGN);
+    gaugeData.z = mkl_malloc(columns(gauge)*sizeof(*gaugeData.z), MALLOC_ALIGN);
 #else
     gaugeData.b = malloc(rows(gauge)*sizeof(double));
     gaugeData.x = malloc(rows(gauge)*sizeof(double));
-    gaugeData.z = malloc(columns(gauge)*sizeof(doublereal));
+    gaugeData.z = malloc(columns(gauge)*sizeof(*gaugeData.z));
 #endif
 
     /* Calculate the smallest eigenvalue of gaugeProduct.  
@@ -135,7 +135,7 @@ void dynamicInit(SparseMatrix *gauge, cJSON *options) {
     free(eval); free(evec);
 }
 
-void dynamicProject(const int n, double *v, double *normDiff) {
+void dynamicProject(const integer n, double *v, double *normDiff) {
     doublereal shift = 0.0, *maxxnormp = NULL;
     // Explicit value for these, so we can force MINRES alogrithm.
     doublereal trancond, acondlim = 1.0e15;
@@ -189,7 +189,7 @@ void dynamicProject(const int n, double *v, double *normDiff) {
     }
 
     // Sanity test for gaugeData.z
-    assert(n == columns(gaugeData.matrix));
+    assert(abs(n) == columns(gaugeData.matrix));
 
     matrixVector(gaugeData.matrix, v, gaugeData.b);
 
@@ -257,7 +257,7 @@ void dynamicClose() {
    The extra parameter mvparam is not used in this case. */
 void gaugeOp(const int nrow, const int ncol, const double *xin, const int ldx,
 	    double *yout, const int ldy, void* mvparam) {
-    assert(rows(gaugeData.matrix) == nrow);
+    assert(rows(gaugeData.matrix) == abs(nrow));
     assert(mvparam == NULL);
     int k;
 
@@ -269,7 +269,7 @@ void gaugeOp(const int nrow, const int ncol, const double *xin, const int ldx,
 int gaugeProduct(const integer *vectorLength, const doublereal *x,
                  doublereal *y) {
     clock_t t0 = clock(), t1;
-    assert(*vectorLength == rows(gaugeData.matrix));
+    assert(abs(*vectorLength) == rows(gaugeData.matrix));
     vectorMatrix(gaugeData.matrix, x, gaugeData.z);
     gaugeData.tcpu_vm += (t1=clock()) - t0;
     matrixVector(gaugeData.matrix, gaugeData.z, y);
@@ -279,7 +279,7 @@ int gaugeProduct(const integer *vectorLength, const doublereal *x,
 
 /* in and out must be distinct */
 void matrixVector(const SparseMatrix *a,
-                  const double *in, double *out) {
+                  const doublereal *in, doublereal *out) {
 #ifdef USE_LIBRSB
     const rsb_trans_t trans = RSB_TRANSPOSITION_N;
     const double zero = 0.0, one = 1.0;
@@ -294,7 +294,7 @@ void matrixVector(const SparseMatrix *a,
     size_t k;
     double *matp = a->value;
     const integer n = a->blockSize, n2=n*n;
-    const double one=1.0;
+    const doublereal one=1.0;
     const integer inc=1;
     const char trans='T', normal='N';
 
@@ -336,7 +336,7 @@ void matrixVector(const SparseMatrix *a,
 }
 
 void vectorMatrix(const SparseMatrix *a,
-                  const double *in, double *out) {
+                  const doublereal *in, doublereal *out) {
 #ifdef USE_LIBRSB
     const rsb_trans_t trans = RSB_TRANSPOSITION_T;
     const double zero = 0.0, one = 1.0;
@@ -351,11 +351,11 @@ void vectorMatrix(const SparseMatrix *a,
     size_t k;
     double *matp = a->value;
     const integer n = a->blockSize, n2 = n*n;
-    const double one=1.0;
+    const doublereal one=1.0;
     const integer inc=1;
     const char trans='T', normal='N';
 
-    memset(out, 0, a->columns * sizeof(double));
+    memset(out, 0, a->columns * sizeof(*out));
     for(k=0; k<a->blocks; k++, matp+=n2) {
         DGEMV(&normal, &n, &n, &one,
               matp, &n, in + a->i[k], &inc, &one,
@@ -381,7 +381,7 @@ void vectorMatrix(const SparseMatrix *a,
 #else
     size_t k;
     SparseRow *row;
-    memset(out, 0, a->columns * sizeof(double));
+    memset(out, 0, a->columns * sizeof(*out));
     for(k=0; k<a->nonzeros; k++) {
         row = a->data+k;
         out[row->j] += row->value * in[row->i];
