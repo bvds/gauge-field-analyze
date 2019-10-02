@@ -110,15 +110,21 @@ nGrad::usage = "Size of basis for lattice-wide shifts.";
 nGrad[fixed_] := If[fixed < 1, nd,
    nd - 1 + 1/latticeDimensions[[fixed]]] latticeVolume[]*(nc^2 - 1);
 coords2grad::usage = "Use latticeIndex, rather than linearSiteIndex \
-to order the sites, so we can handle fixed>0.";
-coords2grad[fixed_][dir_, coordsIn_, generator_] :=
- generator + (nc^2 - 1)*
-   Block[{coords = coordsIn, dimensions = latticeDimensions},
-    If[fixed == dir, coords[[fixed]] = 1; dimensions[[fixed]] = 1];
-    latticeIndex[coords, dimensions] - 1 +
-     latticeVolume[]*
-      Sum[If[fixed == k, 1/latticeDimensions[[k]], 1], {k, dir - 1}]];
- nGauge::usage = "Size of basis for a gauge tranformation.  fixed=0: \
+to order the sites, so we can handle fixed>0.
+For efficient code parallelization, links that are spatially close \
+should be close in the basis.";
+coords2grad[fixed_][dir_, coords_, generator_] :=
+    generator + (nc^2 - 1)*If[fixed>0,
+    Block[{cords = coords, dimensions = latticeDimensions},
+          cords[[fixed]] = 1; dimensions[[fixed]] = 1;
+          (latticeIndex[cords, dimensions] - 1) *
+          (1 + (nd-1) latticeDimensions[[fixed]]) +
+          If[fixed<dir, 1 + latticeDimensions[[fixed]]*(dir - 2),
+               latticeDimensions[[fixed]]*(dir - 1)] +
+          If[dir==fixed, 1, coords[[fixed]]] - 1],
+     (* non-Axial case *)
+     (latticeIndex[coords] - 1)*nd + dir - 1];
+nGauge::usage = "Size of basis for a gauge tranformation.  fixed=0: \
 arbitrary gauge tranformation.  fixed>0:  gauge transforms that \
 preserve Axial gauge in the \"fixed\" direction.";
 nGauge[fixed_] := latticeVolume[] (nc^2 - 1) If[fixed < 1, 1,
@@ -353,7 +359,7 @@ findDelta[{hess_, grad_, gauge_}, OptionsPattern[]] :=
   Block[{hessp, gradp, zzz = OptionValue[rescaleCutoff],
     cutoff = OptionValue[cutoffValue],
     damping = OptionValue[dampingFactor], values, oo, proj, shifts},
-    If[Not[SymmetricMatrixQ[hess]],
+    If[Not[SymmetricMatrixQ[hess, Tolerance->256*$MachineEpsilon]],
        Message[findDelta::asymmetric];
        Return[$Failed]];
     If[MatrixQ[gauge],
@@ -499,8 +505,8 @@ findDelta[data:{hess_, grad_, gauge_}, opts:OptionsPattern[]] :=
       Export["grad.dat", grad];
       Export["gauge.mtx", gauge];
       Apply[Clear, Unevaluated[data]]];
-   (* Run external program *)
-   If[action =!= "read" && action =!= "write",
+   (* Run external program interactively *)
+   If[action =!= "read" && action =!= "write" && action =!= "detach",
       Run["rm -f shifts0.dat"];
       out = RunProcess[{"saddle-lib/shifts",
                         "hess-grad-gauge.json", "hess.mtx",
@@ -511,16 +517,19 @@ findDelta[data:{hess_, grad_, gauge_}, opts:OptionsPattern[]] :=
       If[out["ExitCode"] != 0,
          Message[findDelta::external, out["ExitCode"]];
          Return[$Failed]]];
-   If[action === "write",
+   (* Start up external program and detach *)
+   If[action === "detach",
       Run["rm -f shifts1.log shifts1.err shifts1.dat"];
       Print["Starting up and detaching."];
-      Run["(saddle-lib/shifts hess-grad-gauge.json hess.mtx grad.dat gauge.mtx shifts1.dat 2> shifts1.err 1> shifts1.log&); echo \"started\""]]
+      Run["(saddle-lib/shifts hess-grad-gauge.json hess.mtx grad.dat gauge.mtx shifts1.dat 2> shifts1.err 1> shifts1.log&); echo \"started\""]];
+   (* Read after detached program has run. *)
    If[action === "read",
       Print[Style[ReadString["shifts1.log"], FontColor -> Blue]];
       Print[Style[ReadString["shifts1.err"], FontColor -> Red]]];
+   (* Read results *)
    Print["findDelta shifts time (seconds):  total=", SessionTime[] - tinit];
    (* Read shifts from external file *)
-   If[action =!= "write",
+   If[action =!= "write" && action =!=  "detach",
       shifts = ReadList[
           If[action === "read", "shifts1.dat", "shifts0.dat"],
           Number];

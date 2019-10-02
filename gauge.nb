@@ -4935,10 +4935,8 @@ Cell[BoxData[
   "averagePlaquette", "[", 
    "]"}]}]], "Input",ExpressionUUID->"5c707a37-26ce-461e-ac1e-dea684f9a683"],
 
-Cell[BoxData[
- RowBox[{"-", 
-  "0.1413443992897264`"}]], \
-"Output",ExpressionUUID->"4a01281c-370a-4fec-ae7e-ba7c621205df"]
+Cell[BoxData["0.06276938723474386`"], \
+"Output",ExpressionUUID->"4e267fc0-ecd6-48c1-b001-ae2bcb4bf3dc"]
 }, Open  ]],
 
 Cell[CellGroupData[{
@@ -4969,10 +4967,10 @@ Cell[BoxData[
 Cell[CellGroupData[{
 
 Cell[BoxData["\<\"Constructed hess, grad\"\>"], \
-"Print",ExpressionUUID->"3d8fa3e6-0974-42dc-a16a-e2d4ee6f00d2"],
+"Print",ExpressionUUID->"f99ca70e-c1df-43e4-a161-68d8a5055373"],
 
 Cell[BoxData["\<\"Constructed gauge\"\>"], \
-"Print",ExpressionUUID->"2f5f1229-9499-44bf-a4d7-7c29438989bd"],
+"Print",ExpressionUUID->"6072c521-b1ea-4b08-a43a-4462d80599af"],
 
 Cell[BoxData[
  InterpretationBox[
@@ -4984,43 +4982,43 @@ Cell[BoxData[
   SequenceForm[
   "applyCutoff3:  ", 14, " of ", 1024, " zeros, between ", {994, 1024}],
   Editable->
-   False]], "Print",ExpressionUUID->"168cc5cd-ca3c-4ae8-ad77-ab795b7494c2"],
+   False]], "Print",ExpressionUUID->"9520486b-1075-4953-a7ea-8f56447ff004"],
 
 Cell[BoxData[
  InterpretationBox[
   RowBox[{"\<\"shifts norms and rescale:  \"\>", "\[InvisibleSpace]", 
    RowBox[{"{", 
     RowBox[{
-    "8.320151887930411`", ",", "58.55902361053649`", ",", 
-     "0.9999999999999899`"}], "}"}]}],
+    "8.320151887930377`", ",", "58.55902361052917`", ",", 
+     "1.0000000000003126`"}], "}"}]}],
   SequenceForm[
-  "shifts norms and rescale:  ", {8.320151887930411, 58.55902361053649, 
-   0.9999999999999899}],
+  "shifts norms and rescale:  ", {8.320151887930377, 58.55902361052917, 
+   1.0000000000003126`}],
   Editable->
-   False]], "Print",ExpressionUUID->"0c5336de-dbb8-4074-aafa-c08087c6fcf8"],
+   False]], "Print",ExpressionUUID->"82dcac01-f899-4e65-b972-e44787897fae"],
 
 Cell[BoxData[
  InterpretationBox[
   RowBox[{"\<\"applyCutoff2: rescale maxNorm \"\>", "\[InvisibleSpace]", 
-   "8.320151887930411`", "\[InvisibleSpace]", "\<\" to \"\>", 
+   "8.320151887930377`", "\[InvisibleSpace]", "\<\" to \"\>", 
    "\[InvisibleSpace]", "2"}],
-  SequenceForm["applyCutoff2: rescale maxNorm ", 8.320151887930411, " to ", 2],
+  SequenceForm["applyCutoff2: rescale maxNorm ", 8.320151887930377, " to ", 2],
   Editable->
-   False]], "Print",ExpressionUUID->"8915a2d3-2ea5-4056-b507-696a74fa0aa0"],
+   False]], "Print",ExpressionUUID->"269d21df-8335-4f04-9091-6a4b549497fc"],
 
 Cell[BoxData[
  InterpretationBox[
   RowBox[{"\<\"latticeSaddlePointStep times:  \"\>", "\[InvisibleSpace]", 
    RowBox[{"{", 
     RowBox[{
-    "1.448077`6.311306653467986", ",", "1.08093`6.1843125681978215", ",", 
-     "0.017699`4.398463727089247"}], "}"}]}],
+    "1.263573`6.25211533516934", ",", "0.939508`6.1234154803431124", ",", 
+     "0.015654`4.345140327315859"}], "}"}]}],
   SequenceForm[
   "latticeSaddlePointStep times:  ", {
-   1.448077`6.311306653467986, 1.08093`6.1843125681978215, 
-    0.017699`4.398463727089247}],
+   1.263573`6.25211533516934, 0.939508`6.1234154803431124, 
+    0.015654`4.345140327315859}],
   Editable->
-   False]], "Print",ExpressionUUID->"f0554299-8bde-4545-8910-b65542ae7786"]
+   False]], "Print",ExpressionUUID->"6c918e6b-d093-4cb9-a058-2b4d2b05dae9"]
 }, Open  ]]
 }, Open  ]],
 
@@ -5104,7 +5102,7 @@ Cell[BoxData[
      RowBox[{"dynamicPartMethod", "\[Rule]", 
       RowBox[{"{", 
        RowBox[{"Automatic", ",", 
-        RowBox[{"maxLanczosVecs", "\[Rule]", "1000"}], ",", 
+        RowBox[{"maxLanczosVecs", "\[Rule]", "240"}], ",", 
         RowBox[{"maxIterations", "\[Rule]", 
          RowBox[{"400", "*", "1000"}]}], ",", 
         RowBox[{"rTolerance", "\[Rule]", 
@@ -5130,7 +5128,8 @@ Cell[BoxData[
         RowBox[{"printDetails", "\[Rule]", "1"}], ",", " ", 
         RowBox[{"rTolerance", " ", "\[Rule]", " ", 
          RowBox[{"10.0", "^", 
-          RowBox[{"-", "9"}]}]}]}], "}"}]}], ",", 
+          RowBox[{"-", "9"}]}]}], ",", 
+        RowBox[{"maxLanczosVecs", "\[Rule]", "240"}]}], "}"}]}], ",", 
      RowBox[{"fullMatrix", "\[Rule]", "False"}]}], "]"}]}], ";", 
   RowBox[{"shiftsDynamicMinres2", "=", "shifts0"}], 
   ";"}]], "Input",ExpressionUUID->"1ea453be-2931-4d7b-9fd7-8d0cc734193e"],
@@ -5138,31 +5137,31 @@ Cell[BoxData[
 Cell[CellGroupData[{
 
 Cell[BoxData["\<\"Constructed hess, grad\"\>"], \
-"Print",ExpressionUUID->"fe3cdc5f-002c-4aa8-a3a5-c8e23bbd651d"],
+"Print",ExpressionUUID->"c39ab0a9-e1b1-40ea-bdec-60e613d0123b"],
 
 Cell[BoxData["\<\"Constructed gauge\"\>"], \
-"Print",ExpressionUUID->"ab8813dd-2e60-46da-b452-83de8f88649d"],
+"Print",ExpressionUUID->"dd149920-f519-4792-abda-c4d3120e5770"],
 
 Cell[BoxData[
  StyleBox["\<\"Setting MKL to 2 threads\\nOpening file hess-grad-gauge.json \
 n=1536, nc=3, gauge=512\\nOpening file hess.mtx with 79680 nonzero \
 elements.\\nOpening file grad.dat for a vector of length 1536\\nOpening file \
 gauge.mtx with 24576 nonzero elements.\\n                                     \
-             Wed Sep 25 17:57:33 2019\\nTRLAN execution summary (exit status \
+             Tue Oct  1 17:11:25 2019\\nTRLAN execution summary (exit status \
 =0)\\nNumber of SMALLEST eigenpairs             1 (computed)           1 \
 (wanted)\\nTimes the operator is applied:          128 (MAX:           400000 \
 )\\nProblem size:                           512 (PE:    0)         512 \
 (Global)\\nConvergence tolerance:            1.490e-08 (rel)        1.620e-07 \
-(abs)\\nMaximum basis size:                    1000\\nRestarting scheme:      \
+(abs)\\nMaximum basis size:                     240\\nRestarting scheme:      \
                   3\\nNumber of re-orthogonalizations:        128\\nNumber of \
 (re)start loops:                1\\nNumber of eigenpairs locked:              \
-0\\nOP(MATVEC):              1.0864e-02 sec,   1.1582e+09 FLOP/S ( 1.2583e+07 \
-FLOP)\\nRe-Orthogonalization::   1.2380e-03 sec,   1.3816e+10 FLOP/S ( \
-1.7104e+07 FLOP)\\nRestarting::             4.5500e-04 sec,   2.8807e+08 \
-FLOP/S ( 1.3107e+05 FLOP)\\nTRLAN on this PE:        2.2643e-02 sec,   \
-1.3343e+09 FLOP/S ( 3.0212e+07 FLOP)\\nGauge matrix extreme eigenvalues \
+0\\nOP(MATVEC):              2.7570e-03 sec,   4.5640e+09 FLOP/S ( 1.2583e+07 \
+FLOP)\\nRe-Orthogonalization::   5.1980e-03 sec,   3.2906e+09 FLOP/S ( \
+1.7104e+07 FLOP)\\nRestarting::             3.9000e-05 sec,   3.3608e+09 \
+FLOP/S ( 1.3107e+05 FLOP)\\nTRLAN on this PE:        9.5510e-03 sec,   \
+3.1632e+09 FLOP/S ( 3.0212e+07 FLOP)\\nGauge matrix extreme eigenvalues \
 found:\\n  1.130975e+00\\n                                                  \
-Wed Sep 25 17:57:39 2019\\nTRLAN execution summary (exit status =0)\\nNumber \
+Tue Oct  1 17:11:31 2019\\nTRLAN execution summary (exit status =0)\\nNumber \
 of SMALLEST eigenpairs            40 (computed)          40 (wanted)\\nTimes \
 the operator is applied:         1959 (MAX:           100000 )\\nProblem \
 size:                          1536 (PE:    0)        1536 \
@@ -5170,56 +5169,56 @@ size:                          1536 (PE:    0)        1536 \
 (abs)\\nMaximum basis size:                     240\\nRestarting scheme:      \
                   4\\nNumber of re-orthogonalizations:       1959\\nNumber of \
 (re)start loops:               23\\nNumber of eigenpairs locked:             \
-22\\nOP(MATVEC):              9.6540e+00 sec,   6.4675e+07 FLOP/S ( \
-6.2437e+08 FLOP)\\nRe-Orthogonalization::   1.3973e+00 sec,   1.6397e+09 \
-FLOP/S ( 2.2911e+09 FLOP)\\nRestarting::             3.9607e-01 sec,   \
-5.9161e+09 FLOP/S ( 2.3432e+09 FLOP)\\nTRLAN on this PE:        1.1493e+01 \
-sec,   4.7787e+08 FLOP/S ( 5.4920e+09 FLOP)\\nlargeShifts: ops=1959, \
+22\\nOP(MATVEC):              8.9124e+00 sec,   7.0056e+07 FLOP/S ( \
+6.2437e+08 FLOP)\\nRe-Orthogonalization::   1.3069e+00 sec,   1.7531e+09 \
+FLOP/S ( 2.2911e+09 FLOP)\\nRestarting::             3.8281e-01 sec,   \
+6.1209e+09 FLOP/S ( 2.3432e+09 FLOP)\\nTRLAN on this PE:        1.0653e+01 \
+sec,   5.1552e+08 FLOP/S ( 5.4920e+09 FLOP)\\nlargeShifts: ops=1959, \
 sumNcol=1959, maxNcol=1\\nlargeShifts: 1959 matrix-vector ops, 1959 \
-reorthogonalizations in 11.49 sec (6 wall)\\nlargeShifts:  1.42mv cpu sec for \
-ops\\ncutoffNullSpace:  14 of 40 zeros between [0, 30]\\nlinearSolve:  460 \
-iterations, 460 reorthogonalizations in 1.52 sec (1 wall)\\ndynamicProject:  \
-6801 calls (3762 usertol), 130301 matrix-vector ops, max itn 29\\n            \
-     in 10.39 sec (6 wall)\\ndynamicProject:  3.90vm + 3.52mv = 7.42total cpu \
+reorthogonalizations in 10.65 sec (6 wall)\\nlargeShifts:  1.31mv cpu sec for \
+ops\\ncutoffNullSpace:  14 of 40 zeros between [0, 30]\\nlinearSolve:  609 \
+iterations, 609 reorthogonalizations in 1.82 sec (0 wall)\\ndynamicProject:  \
+7099 calls (3911 usertol), 134845 matrix-vector ops, max itn 29\\n            \
+     in 10.06 sec (5 wall)\\ndynamicProject:  3.77vm + 3.52mv = 7.28total cpu \
 sec for ops\\nOpening output file shifts0.dat\\nshifts.c:  input/output in \
-0.07 sec (0 wall)\\nshifts.c:  overall time 13.11 sec (7 wall)\\n\"\>",
+0.07 sec (0 wall)\\nshifts.c:  overall time 12.56 sec (6 wall)\\n\"\>",
   StripOnInput->False,
   FontColor->RGBColor[
-   0, 0, 1]]], "Print",ExpressionUUID->"ad98545e-3bb2-4b82-9493-ee524df1b123"],
+   0, 0, 1]]], "Print",ExpressionUUID->"3addbd8f-3a0e-4c92-bd5a-3d0013cd9153"],
 
 Cell[BoxData[
  InterpretationBox[
   RowBox[{"\<\"findDelta shifts time (seconds):  total=\"\>", 
-   "\[InvisibleSpace]", "6.71488`6.977553253734196"}],
+   "\[InvisibleSpace]", "6.433022`6.958930034458892"}],
   SequenceForm[
-  "findDelta shifts time (seconds):  total=", 6.71488`6.977553253734196],
+  "findDelta shifts time (seconds):  total=", 6.433022`6.958930034458892],
   Editable->
-   False]], "Print",ExpressionUUID->"bb0e20fb-b82f-46ac-a645-056a5411e2b6"],
+   False]], "Print",ExpressionUUID->"05f21a96-576e-4a1b-a12a-2aadf18ffc82"],
 
 Cell[BoxData[
  InterpretationBox[
   RowBox[{"\<\"applyCutoff2: rescale maxNorm \"\>", "\[InvisibleSpace]", 
-   "8.3201508941169553967154042549548704854`17.079865047940473", 
+   "8.32015088666083386889136916598840841608`17.079865035508703", 
    "\[InvisibleSpace]", "\<\" to \"\>", "\[InvisibleSpace]", "2"}],
   SequenceForm[
   "applyCutoff2: rescale maxNorm ", 
-   8.3201508941169553967154042549548704854`17.079865047940473, " to ", 2],
+   8.32015088666083386889136916598840841608`17.079865035508703, " to ", 2],
   Editable->
-   False]], "Print",ExpressionUUID->"25b4ad11-704d-423f-a7b4-f2d198d9628f"],
+   False]], "Print",ExpressionUUID->"25163f59-a1ee-4f48-9137-c65c4f18be90"],
 
 Cell[BoxData[
  InterpretationBox[
   RowBox[{"\<\"latticeSaddlePointStep times:  \"\>", "\[InvisibleSpace]", 
    RowBox[{"{", 
     RowBox[{
-    "0.979957`6.141722017328126", ",", "6.720993`6.9779484409097625", ",", 
-     "0.115081`5.2115186248823555"}], "}"}]}],
+    "0.947014`6.1268713971919775", ",", "6.438336`6.95928863547177", ",", 
+     "0.105489`5.173722173215766"}], "}"}]}],
   SequenceForm[
   "latticeSaddlePointStep times:  ", {
-   0.979957`6.141722017328126, 6.720993`6.9779484409097625, 
-    0.115081`5.2115186248823555}],
+   0.947014`6.1268713971919775, 6.438336`6.95928863547177, 
+    0.105489`5.173722173215766}],
   Editable->
-   False]], "Print",ExpressionUUID->"347ae7ea-f24e-42f1-964f-8701166abcfc"]
+   False]], "Print",ExpressionUUID->"73250787-83d9-4a9b-a1f5-ad839500ff9e"]
 }, Open  ]]
 }, Open  ]],
 
@@ -5234,13 +5233,14 @@ Cell[BoxData[
  RowBox[{"{", 
   RowBox[{
    RowBox[{"{", 
-    RowBox[{"8.320151391023682`", ",", 
-     RowBox[{"-", "1.1944656641560414`*^-7"}]}], "}"}], ",", 
+    RowBox[{"8.320151387295606`", ",", 
+     RowBox[{"-", "1.2034271468230884`*^-7"}]}], "}"}], ",", 
    RowBox[{"{", 
-    RowBox[{"58.5590237191888`", ",", "3.7108649486583545`*^-9"}], "}"}], ",", 
+    RowBox[{"58.559023717435345`", ",", "3.651228097645287`*^-9"}], "}"}], 
+   ",", 
    RowBox[{"{", 
-    RowBox[{"0.9999999999999176`", ",", "4.059028170071827`*^-7"}], "}"}]}], 
-  "}"}]], "Output",ExpressionUUID->"08050240-18d6-4fba-8182-12e1ca64b89c"]
+    RowBox[{"0.9999999999999177`", ",", "4.056292053704238`*^-7"}], "}"}]}], 
+  "}"}]], "Output",ExpressionUUID->"9b16aa9b-ff31-40e0-b8c8-33da39a44c10"]
 }, Open  ]],
 
 Cell[CellGroupData[{
@@ -5255,8 +5255,8 @@ Cell[BoxData[
    RowBox[{"Flatten", "[", "gaugeFieldDynamicDense", "]"}], 
    "]"}]}]], "Input",ExpressionUUID->"16db756a-07de-47c7-ba3f-6bc41f9ee440"],
 
-Cell[BoxData["1.732222596155118`*^-7"], \
-"Output",ExpressionUUID->"40a4dea1-fb2b-464e-839d-d9392291c036"]
+Cell[BoxData["1.732326377479872`*^-7"], \
+"Output",ExpressionUUID->"5c291e3c-695d-4369-aca7-99c54a1711e0"]
 }, Open  ]]
 }, Open  ]],
 
@@ -5282,10 +5282,10 @@ Cell[BoxData[
 Cell[CellGroupData[{
 
 Cell[BoxData["\<\"Constructed hess, grad\"\>"], \
-"Print",ExpressionUUID->"12952717-0b0c-430f-b1e0-82e9a3af7804"],
+"Print",ExpressionUUID->"c4e472ed-16f2-4ed0-ae99-5a3c10096294"],
 
 Cell[BoxData["\<\"Constructed gauge\"\>"], \
-"Print",ExpressionUUID->"67b7aaf8-d267-4b28-a0ea-e6937d2ad732"],
+"Print",ExpressionUUID->"43e515c2-5b55-4eaa-b13e-0cd649aac8f9"],
 
 Cell[BoxData[
  InterpretationBox[
@@ -5297,7 +5297,7 @@ Cell[BoxData[
   SequenceForm[
   "applyCutoff3:  ", 18, " of ", 1024, " zeros, between ", {980, 1024}],
   Editable->
-   False]], "Print",ExpressionUUID->"8ecdf90f-9c4a-4f8b-8307-ce63f8df43e0"],
+   False]], "Print",ExpressionUUID->"0979ecc9-9dfa-478b-a19c-c70a25001cec"],
 
 Cell[BoxData[
  InterpretationBox[
@@ -5310,7 +5310,7 @@ Cell[BoxData[
   "shifts norms and rescale:  ", {9.950408275075418, 57.67113802450228, 
    1.0000000000001141`}],
   Editable->
-   False]], "Print",ExpressionUUID->"3779d9ed-750f-4092-ac75-d52ea4319da2"],
+   False]], "Print",ExpressionUUID->"e9a8a825-af3d-4812-ba89-c67ee6d53247"],
 
 Cell[BoxData[
  InterpretationBox[
@@ -5319,21 +5319,21 @@ Cell[BoxData[
    "\[InvisibleSpace]", "2"}],
   SequenceForm["applyCutoff2: rescale maxNorm ", 9.950408275075418, " to ", 2],
   Editable->
-   False]], "Print",ExpressionUUID->"b88e9bb4-623d-490e-8232-8c548ffcd8c7"],
+   False]], "Print",ExpressionUUID->"d65bc430-5378-4bb8-a1f7-1885cf10db89"],
 
 Cell[BoxData[
  InterpretationBox[
   RowBox[{"\<\"latticeSaddlePointStep times:  \"\>", "\[InvisibleSpace]", 
    RowBox[{"{", 
     RowBox[{
-    "1.439137`6.3086171368081585", ",", "0.797958`6.052495030976872", ",", 
-     "0.018424`4.415898922788166"}], "}"}]}],
+    "1.386646`6.292480601032696", ",", "0.84798`6.078900607173534", ",", 
+     "0.025437`4.555980887816519"}], "}"}]}],
   SequenceForm[
   "latticeSaddlePointStep times:  ", {
-   1.439137`6.3086171368081585, 0.797958`6.052495030976872, 
-    0.018424`4.415898922788166}],
+   1.386646`6.292480601032696, 0.84798`6.078900607173534, 
+    0.025437`4.555980887816519}],
   Editable->
-   False]], "Print",ExpressionUUID->"2906c249-6983-4a09-b5e8-ba09c250c0c2"]
+   False]], "Print",ExpressionUUID->"760e031c-8ded-459c-983e-6d97e6dc6274"]
 }, Open  ]]
 }, Open  ]],
 
@@ -5374,8 +5374,6 @@ Cell[BoxData[
   RowBox[{"Flatten", "[", 
    RowBox[{"gaugeFieldAxialDense", "-", "gaugeFieldAxialMinres1"}], "]"}], 
   "]"}]], "Input",ExpressionUUID->"45ea4879-9a59-45d7-b660-bb2a8fe20176"],
-
-Cell[CellGroupData[{
 
 Cell[BoxData[
  RowBox[{
@@ -5420,94 +5418,6 @@ Cell[BoxData[
 
 Cell[CellGroupData[{
 
-Cell[BoxData["\<\"Constructed hess, grad\"\>"], \
-"Print",ExpressionUUID->"c32db404-493b-4537-88b4-f0c51fa59fc2"],
-
-Cell[BoxData["\<\"Constructed gauge\"\>"], \
-"Print",ExpressionUUID->"62390282-340c-4236-b32b-304eff41cac1"],
-
-Cell[BoxData[
- StyleBox["\<\"Setting MKL to 2 threads\\nOpening file hess-grad-gauge.json \
-n=1152, nc=3, gauge=128\\nOpening file hess.mtx with 55664 nonzero \
-elements.\\nOpening file grad.dat for a vector of length 1152\\nOpening file \
-gauge.mtx with 17392 nonzero elements.\\n                                     \
-             Mon Sep 23 12:24:09 2019\\nTRLAN execution summary (exit status \
-=0)\\nNumber of SMALLEST eigenpairs             1 (computed)           1 \
-(wanted)\\nTimes the operator is applied:           64 (MAX:           400000 \
-)\\nProblem size:                           128 (PE:    0)         128 \
-(Global)\\nConvergence tolerance:            1.490e-08 (rel)        3.883e-07 \
-(abs)\\nMaximum basis size:                    1000\\nRestarting scheme:      \
-                  3\\nNumber of re-orthogonalizations:         64\\nNumber of \
-(re)start loops:                1\\nNumber of eigenpairs locked:              \
-0\\nOP(MATVEC):              6.9250e-03 sec,   6.4294e+08 FLOP/S ( 4.4524e+06 \
-FLOP)\\nRe-Orthogonalization::   3.2200e-04 sec,   3.3836e+09 FLOP/S ( \
-1.0895e+06 FLOP)\\nRestarting::             6.1900e-04 sec,   2.6468e+07 \
-FLOP/S ( 1.6384e+04 FLOP)\\nTRLAN on this PE:        2.4092e-02 sec,   \
-2.3276e+08 FLOP/S ( 5.6076e+06 FLOP)\\nGauge matrix extreme eigenvalues \
-found:\\n  6.443231e+00\\n                                                  \
-Mon Sep 23 12:24:16 2019\\nTRLAN execution summary (exit status =0)\\nNumber \
-of SMALLEST eigenpairs           100 (computed)         100 (wanted)\\nTimes \
-the operator is applied:         1781 (MAX:           400000 )\\nProblem \
-size:                          1152 (PE:    0)        1152 \
-(Global)\\nConvergence tolerance:            1.000e-07 (rel)        9.800e-06 \
-(abs)\\nMaximum basis size:                     720\\nRestarting scheme:      \
-                  4\\nNumber of re-orthogonalizations:       1781\\nNumber of \
-(re)start loops:                7\\nNumber of eigenpairs locked:            \
-395\\nOP(MATVEC):              9.2139e+00 sec,   4.3038e+07 FLOP/S ( \
-3.9655e+08 FLOP)\\nRe-Orthogonalization::   2.7904e+00 sec,   1.4275e+09 \
-FLOP/S ( 3.9833e+09 FLOP)\\nRestarting::             1.0112e+00 sec,   \
-2.3890e+09 FLOP/S ( 2.4158e+09 FLOP)\\nTRLAN on this PE:        1.3118e+01 \
-sec,   5.4160e+08 FLOP/S ( 7.1046e+09 FLOP)\\nlargeShifts: ops=1781, \
-sumNcol=1781, maxNcol=1\\nlargeShifts: 1781 matrix-vector ops, 1781 \
-reorthogonalizations in 13.12 sec (7 wall)\\nlargeShifts:  1.58mv cpu sec for \
-ops\\ncutoffNullSpace:  18 of 100 zeros between [0, 44]\\nlinearSolve:  601 \
-iterations, 601 reorthogonalizations in 2.26 sec (1 wall)\\ndynamicProject:  \
-6549 calls (4821 usertol), 75434 matrix-vector ops, max itn 18\\n             \
-    in 10.53 sec (2 wall)\\ndynamicProject:  3.83vm + 3.18mv = 7.02total cpu \
-sec for ops\\nOpening output file shifts0.dat\\nshifts.c:  input/output in \
-0.09 sec (0 wall)\\nshifts.c:  overall time 15.49 sec (8 wall)\\n\"\>",
-  StripOnInput->False,
-  FontColor->RGBColor[
-   0, 0, 1]]], "Print",ExpressionUUID->"8d0930d4-a85f-46e2-89b0-067ae05f6e1e"],
-
-Cell[BoxData[
- InterpretationBox[
-  RowBox[{"\<\"findDelta shifts time (seconds):  total=\"\>", 
-   "\[InvisibleSpace]", "7.971117`7.052034181580108"}],
-  SequenceForm[
-  "findDelta shifts time (seconds):  total=", 7.971117`7.052034181580108],
-  Editable->
-   False]], "Print",ExpressionUUID->"40cad73e-0876-4e8e-9bc9-31a934a0eef2"],
-
-Cell[BoxData[
- InterpretationBox[
-  RowBox[{"\<\"applyCutoff2: rescale maxNorm \"\>", "\[InvisibleSpace]", 
-   "9.95040648965701887050023070904348887497`17.26716167976564", 
-   "\[InvisibleSpace]", "\<\" to \"\>", "\[InvisibleSpace]", "2"}],
-  SequenceForm[
-  "applyCutoff2: rescale maxNorm ", 
-   9.95040648965701887050023070904348887497`17.26716167976564, " to ", 2],
-  Editable->
-   False]], "Print",ExpressionUUID->"5b29ea97-4871-4079-bd14-cb86d4ad577a"],
-
-Cell[BoxData[
- InterpretationBox[
-  RowBox[{"\<\"latticeSaddlePointStep times:  \"\>", "\[InvisibleSpace]", 
-   RowBox[{"{", 
-    RowBox[{
-    "1.841445`6.415673749774912", ",", "7.978945`7.052460469261911", ",", 
-     "0.170294`5.381714344486342"}], "}"}]}],
-  SequenceForm[
-  "latticeSaddlePointStep times:  ", {
-   1.841445`6.415673749774912, 7.978945`7.052460469261911, 
-    0.170294`5.381714344486342}],
-  Editable->
-   False]], "Print",ExpressionUUID->"7d341d9f-d8f6-4855-abe1-46b5ebe37714"]
-}, Open  ]]
-}, Open  ]],
-
-Cell[CellGroupData[{
-
 Cell[BoxData[
  RowBox[{"compareVectors", "[", 
   RowBox[{"shiftsAxialDense", ",", "shiftsAxialMinres2"}], 
@@ -5538,7 +5448,7 @@ Cell[BoxData[
 Cell[BoxData["0.000018725489509754987`"], \
 "Output",ExpressionUUID->"86657e0a-1f29-44c1-8b51-df513800ba1c"]
 }, Open  ]]
-}, Open  ]],
+}, Closed]],
 
 Cell[CellGroupData[{
 
@@ -5616,7 +5526,7 @@ Cell[BoxData[
 Cell[BoxData["0.3054565617575611`"], \
 "Output",ExpressionUUID->"f55b61e7-b8a3-4d6c-990f-a942615b3d48"]
 }, Open  ]]
-}, Open  ]]
+}, Closed]]
 }, Open  ]]
 }, Open  ]],
 
@@ -10992,8 +10902,8 @@ Cell[BoxData["$Aborted"], \
 }, Open  ]]
 }, Open  ]]
 },
-WindowSize->{986, 659},
-WindowMargins->{{Automatic, 35}, {0, Automatic}},
+WindowSize->{985, 642},
+WindowMargins->{{132, Automatic}, {22, Automatic}},
 PrivateNotebookOptions->{"FileOutlineCache"->False},
 TrackCellChangeTimes->False,
 FrontEndVersion->"11.2 for Linux x86 (64-bit) (September 10, 2017)",

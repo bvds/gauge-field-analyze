@@ -7,6 +7,9 @@
     Valgrind debugging example:
     valgrind --tool=memcheck --leak-check=yes --show-reachable=yes --num-callers=20 --track-fds=yes ./shifts ...
 
+
+      scp hess-grad-gauge.json hess.mtx gauge.mtx grad.dat bvds@192.168.0.35:lattice/gauge-field-analyze/
+
 */
 
 #include <stdio.h>

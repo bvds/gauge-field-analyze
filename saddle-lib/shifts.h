@@ -33,8 +33,8 @@ typedef struct {
 } SparseMatrix;
 #else
 typedef struct {
-    unsigned int i;
-    unsigned int j;
+    size_t i;
+    size_t j;
     double value;
 } SparseRow;
 

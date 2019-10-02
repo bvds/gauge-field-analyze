@@ -8,7 +8,7 @@ PRIMMEDIR = ../../linear-algebra/primme
 #
 #
 #              -Wall -g -O3
-CFLAGS = -fPIC -Wall -g -O -Wextra $(MKL_CFLAGS) -pedantic -std=gnu11 -I$(TRLANDIR)/INC
+CFLAGS = -fPIC -Wall -g -O -Wextra -pedantic -std=gnu11 -I$(TRLANDIR)/INC
 LFLAGS =  -L$(TRLANDIR) -L/usr/local/lib -lnutrlan -lgfortran
 #
 #  Optionally, use Jacobi-Davidson library PRIMME
@@ -30,7 +30,7 @@ ifeq (1, 1)  # Use MKL or not.
 #  cd /usr/local/intel/mkl/tools; ./mkl_link_tool -interactive
 #
 #  compiler flags:
-MKL_CFLAGS = -DUSE_MKL -m64 -I$(MKLROOT)/include
+CFLAGS += -DUSE_MKL -m64 -I$(MKLROOT)/include
 #
 #  Linker flags:
 #  Looks like dynamic linking doesn't work well if the routine

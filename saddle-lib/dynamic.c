@@ -259,7 +259,7 @@ void gaugeOp(const int nrow, const int ncol, const double *xin, const int ldx,
 	    double *yout, const int ldy, void* mvparam) {
     assert(rows(gaugeData.matrix) == nrow);
     assert(mvparam == NULL);
-    size_t k;
+    int k;
 
     for(k=0; k<ncol; k++) {
         gaugeProduct(&nrow, xin+k*ldx, yout+k*ldy);
