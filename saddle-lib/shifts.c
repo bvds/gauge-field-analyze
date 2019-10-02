@@ -3,10 +3,9 @@
     of a saddle-point search.
 
     Example usage:
-    ./shifts ../hess-grad-gauge.json ../hess.mtx ../grad.dat ../gauge.mtx ../shifts.dat
+    ./shifts ../hess-grad-gauge.json ../shifts.dat
     Valgrind debugging example:
-    valgrind --tool=memcheck --leak-check=yes --show-reachable=yes --num-callers=20 --track-fds=yes ./shifts ...
-
+    valgrind --tool=memcheck --leak-check=yes --show-reachable=yes --num-callers=20 --track-fds=yes ../hess-grad-gauge.json ../shifts.dat
 
       scp hess-grad-gauge.json hess.mtx gauge.mtx grad.dat bvds@192.168.0.35:lattice/gauge-field-analyze/
 

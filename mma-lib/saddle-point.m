@@ -466,6 +466,18 @@ findDelta[{hess_, grad_, gauge_}, opts:OptionsPattern[]] :=
    -damping applyCutoff2[shifts, cutoff, zzz]] /;
  KeyExistsQ[minresLabels, methodName[OptionValue[Method]]];
 
+runRemote[command_] :=
+    Block[{out = RunProcess[command,
+               (* Path to scp, ssh ... *)
+               ProcessEnvironment -> <|"PATH"->"/usr/bin:/usr/local/bin"|>]},
+          If[StringLength[out["StandardOutput"]]>0,
+             Print[Style[out["StandardOutput"], FontColor -> Blue]]];
+          If[StringLength[out["StandardError"]]>0,
+             Print[Style[out["StandardError"], FontColor -> Red]]];
+          If[out["ExitCode"] != 0,
+             Message[findDelta::external, out["ExitCode"]]];
+          out["ExitCode"]];
+
 (* External version.
    https://github.com/DaveGamble/cJSON
  *)
@@ -478,7 +490,7 @@ findDelta[data:{hess_, grad_, gauge_}, opts:OptionsPattern[]] :=
     symbolString = (a_Symbol -> b_) :> SymbolName[a] -> b,
     outFile = "hess-grad-gauge.json",
     hessFile = "hess.mtx", gradFile = "grad.dat",
-    gaugeFile = "gauge.mtx", out},
+    gaugeFile = "gauge.mtx", out, remoteHost, remotePath, remote},
    If[SymmetricMatrixQ[hess],
        Message[findDelta::symmetric]];
    (* Dump dimensions, constants, and options into JSON file.
@@ -506,13 +518,14 @@ findDelta[data:{hess_, grad_, gauge_}, opts:OptionsPattern[]] :=
           "hessFile" -> hessFile,
           "gradFile" -> gradFile,
           "gaugeFile" -> gaugeFile}];
-      (* Export full matrix, even though it is symmetric. *)
+      (* If the matrix is symmetric, the default is to export
+        only the lower triangle. *)
       Export[hessFile, hess];
       Export[gradFile, grad];
       Export[gaugeFile, gauge];
       Apply[Clear, Unevaluated[data]]];
    (* Run external program interactively *)
-   If[action =!= "read" && action =!= "write" && action =!= "detach",
+   If[action === Automatic,
       Run["rm -f shifts0.dat"];
       out = RunProcess[{"saddle-lib/shifts",
                         "hess-grad-gauge.json", "shifts0.dat"}];
@@ -521,6 +534,20 @@ findDelta[data:{hess_, grad_, gauge_}, opts:OptionsPattern[]] :=
          Print[Style[out["StandardError"], FontColor -> Red]]];
       If[out["ExitCode"] != 0,
          Message[findDelta::external, out["ExitCode"]];
+         Return[$Failed]]];
+   (* Run external program on a remote host *)
+   If[action == "remote",
+      Run["rm -f shifts0.dat"];
+      remoteHost = "bvds@192.168.0.5";
+      remotePath = "lattice/gauge-field-analyze/saddle-lib";
+      remote = remoteHost <> ":" <> remotePath;
+      Print["Running at ", remote];
+      If[runRemote[{"scp", "hess-grad-gauge.json", hessFile, gradFile,
+                    gaugeFile, remote}] != 0, Return[$Failed]];
+      If[runRemote[{"ssh", remoteHost, remotePath <> "/shifts",
+                    remotePath <> "/hess-grad-gauge.json",
+                    remotePath <> "/shifts0.dat"}] != 0, Return[$Failed]];
+      If[runRemote[{"scp", remote <> "/shifts0.dat", "."}] != 0,
          Return[$Failed]]];
    (* Start up external program and detach *)
    If[action === "detach",
