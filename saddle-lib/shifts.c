@@ -243,12 +243,6 @@ int main(int argc, char **argv){
     int i, k, n, nc, gaugeDimension;
     unsigned int nLargeShifts;
     FILE *fp;
-#ifdef USE_LIBRSB
-    char ib[1000];
-    rsb_err_t errval = RSB_ERR_NO_ERROR;
-    rsb_flags_t flagsA = RSB_FLAG_NOFLAGS;
-    rsb_type_t typecode = RSB_NUMERICAL_TYPE_DEFAULT;
-#else
     MM_typecode matcode;
 #ifdef USE_MKL
     /*
@@ -269,7 +263,6 @@ int main(int argc, char **argv){
     SparseRow *row;
     unsigned int j;
 #endif
-#endif
     long int twall = 0, tcpu = 0;
     clock_t t1, tt1;
     time_t t2, tt2, tf;
@@ -277,23 +270,7 @@ int main(int argc, char **argv){
     t1 = clock(); tt1 = t1;
     time(&t2); tt2 = t2;
 
-#ifdef USE_LIBRSB
-    if((errval = rsb_lib_init(RSB_NULL_INIT_OPTIONS)) != RSB_ERR_NO_ERROR) {
-        fprintf(stderr, "rsb_lib_init error 0x%x, exiting\n", errval);
-        exit(111);
-    }
-    /* Doesn't seem to work:  always uses full number of threads,
-       However, specifying on the command line works:
-             OMP_NUM_THREADS=4 ./shifts ...
-       But we see only one CPU fully utilized.  Even a second goes down
-       to 50%.  */
-    int tn = 2;
-    if((errval = rsb_lib_set_opt(RSB_IO_WANT_EXECUTING_THREADS, &tn))
-        != RSB_ERR_NO_ERROR) {
-        fprintf(stderr, "rsb_lib_set_opt error 0x%x, exiting\n", errval);
-        exit(222);
-    }
-#elif defined(USE_MKL)
+#ifdef USE_MKL
     printf("Setting MKL to %i threads\n", threads);
     mkl_set_num_threads_local(threads);
 #endif
@@ -316,19 +293,6 @@ int main(int argc, char **argv){
     /* Read in Hessian Matrix */
     tmp = cJSON_GetObjectItemCaseSensitive(jopts, "hessFile");
     hessFile = catStrings(dataPath, tmp->valuestring);
-#ifdef USE_LIBRSB
-    SparseMatrix *hessp;
-    printf("Opening file %s\n", hessFile);
-    hessp = rsb_file_mtx_load(hessFile, flagsA, typecode, &errval);
-    if(errval != RSB_ERR_NO_ERROR) {
-        fprintf(stderr, "rsb_file_mtx_load error 0x%x, exiting\n", errval);
-        exit(113);
-    }
-    /* print out the matrix summary information  */
-    rsb_mtx_get_info_str(hessp, "RSB_MIF_MATRIX_INFO__TO__CHAR_P",
-                         ib, sizeof(ib));
-    printf("%s\n",ib);
-#else
     SparseMatrix hess, *hessp = &hess;
     printf("Opening file %s", hessFile);
     if((fp = fopen(hessFile, "r")) == NULL) {
@@ -377,7 +341,6 @@ int main(int argc, char **argv){
     }
 #endif
     fclose(fp);
-#endif
 
     double *grad = malloc(n * sizeof(double));
     tmp = cJSON_GetObjectItemCaseSensitive(jopts, "gradFile");
@@ -395,19 +358,6 @@ int main(int argc, char **argv){
 
     tmp = cJSON_GetObjectItemCaseSensitive(jopts, "gaugeFile");
     gaugeFile = catStrings(dataPath, tmp->valuestring);
-#ifdef USE_LIBRSB
-    SparseMatrix *gaugep;
-    printf("Opening file %s\n", gaugeFile);
-    gaugep = rsb_file_mtx_load(gaugeFile, flagsA, typecode, &errval);
-    if(errval != RSB_ERR_NO_ERROR) {
-        fprintf(stderr, "rsb_file_mtx_load error 0x%x, exiting\n", errval);
-        exit(113);
-    }
-    /* print out the matrix summary information  */
-    rsb_mtx_get_info_str(gaugep, "RSB_MIF_MATRIX_INFO__TO__CHAR_P",
-                         ib, sizeof(ib));
-    printf("%s\n",ib);
-#else
     SparseMatrix gauge, *gaugep = &gauge;
     printf("Opening file %s", gaugeFile);
     fp = fopen(gaugeFile, "r");
@@ -456,7 +406,6 @@ int main(int argc, char **argv){
     }
 #endif
     fclose(fp);
-#endif
     fflush(stdout);
     time(&tf);
     tcpu += clock()-t1;
@@ -507,12 +456,7 @@ int main(int argc, char **argv){
     fflush(stdout);
 
 
-#ifdef USE_LIBRSB
-    printf("rsb_mtx_free: deallocating hess and gauge.\n");
-    rsb_mtx_free(hessp);
-    rsb_mtx_free(gaugep); 
-    rsb_lib_exit(RSB_NULL_EXIT_OPTIONS);
-#elif defined(USE_BLOCK)
+#ifdef USE_BLOCK
     blockFree(hessp);
     blockFree(gaugep);
 #elif defined(USE_MKL)
@@ -527,24 +471,3 @@ int main(int argc, char **argv){
     free(options);
     return 0;
 }
-
-#ifdef USE_LIBRSB
-int rows(SparseMatrix *matrix){
-    int value;
-    rsb_mtx_get_info(matrix,
-                     RSB_MIF_MATRIX_ROWS__TO__RSB_COO_INDEX_T, &value);
-    return value;
-}
-int columns(SparseMatrix *matrix){
-    int value;
-    rsb_mtx_get_info(matrix,
-                     RSB_MIF_MATRIX_COLS__TO__RSB_COO_INDEX_T, &value);
-    return value;
-}
-int nonzeros(SparseMatrix *matrix){
-    int value;
-    rsb_mtx_get_info(matrix,
-                     RSB_MIF_MATRIX_NNZ__TO__RSB_NNZ_INDEX_T, &value);
-    return value;
-}
-#endif

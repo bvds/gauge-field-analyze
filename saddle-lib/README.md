@@ -47,10 +47,6 @@ for the sparse matrix-vector multiplications.
 
 ### LibRSB
 
-Note:  This didn't perform very well, and I abandoned the effort.  
-One can use the sparse matrix library [`librsb`](http://librsb.sourceforge.net)
-for the hessian and the gauge transform shifts. 
-* Install the library.  On Ubuntu:  `sudo apt install librsb-dev`.
-* In `Makefile`, add the compiler flag `-DUSE_LIBRSB`.
-* Currently, there is some issue with `RunProcess` hanging
-  even when `./shifts` runs correctly.
+I tried [`librsb`](http://librsb.sourceforge.net), but it
+did not perform very well.  In addition, it cannot take advantage
+of the color block structure of the matrices.

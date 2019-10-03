@@ -49,14 +49,6 @@ endif
 ifeq (1, 0)
 CFLAGS += -DUSE_BLOCK
 endif
-#
-#
-#            RSB
-ifeq (1, 0)
-CFLAGS += -DUSE_LIBRSB
-LFLAGS += -lrsb
-endif
-#
 
 MINRESOBJS = $(MINRESDIR)/minresqlpModule.o $(MINRESDIR)/minresqlpDataModule.o  $(MINRESDIR)/minresqlpBlasModule.o
 SHIFTOBJS = shifts.o dynamic.o eigensystem.o cutoff.o linear.o mmio.o

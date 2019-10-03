@@ -280,17 +280,7 @@ int gaugeProduct(const integer *vectorLength, const doublereal *x,
 /* in and out must be distinct */
 void matrixVector(const SparseMatrix *a,
                   const doublereal *in, doublereal *out) {
-#ifdef USE_LIBRSB
-    const rsb_trans_t trans = RSB_TRANSPOSITION_N;
-    const double zero = 0.0, one = 1.0;
-    int errval;
-
-    if((errval = rsb_spmv(trans, &one, a, in, 1, &zero, out, 1))
-       != RSB_ERR_NO_ERROR) {
-        fprintf(stderr, "rsb_spmv error 0x%x, exiting\n", errval);
-        exit(121);
-    }
-#elif defined(USE_BLOCK)
+#ifdef USE_BLOCK
     size_t k;
     double *matp = a->value;
     const integer n = a->blockSize, n2=n*n;
@@ -337,17 +327,7 @@ void matrixVector(const SparseMatrix *a,
 
 void vectorMatrix(const SparseMatrix *a,
                   const doublereal *in, doublereal *out) {
-#ifdef USE_LIBRSB
-    const rsb_trans_t trans = RSB_TRANSPOSITION_T;
-    const double zero = 0.0, one = 1.0;
-    int errval;
-
-    if((errval = rsb_spmv(trans, &one, a, in, 1, &zero, out, 1))
-       != RSB_ERR_NO_ERROR) {
-        fprintf(stderr, "rsb_spmv error 0x%x, exiting\n", errval);
-        exit(121);
-    }
-#elif defined(USE_BLOCK)
+#ifdef USE_BLOCK
     size_t k;
     double *matp = a->value;
     const integer n = a->blockSize, n2 = n*n;

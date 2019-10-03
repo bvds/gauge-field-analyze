@@ -4,10 +4,7 @@
 #include "mkl.h"
 #define MALLOC_ALIGN 64
 #endif
-#ifdef USE_LIBRSB
-#include <rsb.h>         /* for rsb_lib_init */
-typedef struct rsb_mtx_t SparseMatrix;
-#elif defined(USE_BLOCK)
+#ifdef USE_BLOCK
 typedef struct {
     double *value;
     size_t *i;
@@ -47,15 +44,9 @@ typedef struct {
 } SparseMatrix;
 #endif
 
-#ifdef USE_LIBRSB
-int rows(SparseMatrix *matrix);
-int columns(SparseMatrix *matrix);
-int nonzeros(SparseMatrix *matrix);
-#else
 #define rows(A) A->rows
 #define columns(A) A->columns
 #define nonzeros(A) A->nonzeros
-#endif
 
 
 /* FORTRAN to C data type matching */
