@@ -312,14 +312,16 @@ void matrixVector(const SparseMatrix *a,
         exit(69);
     }
 #else
-    size_t k;
-    SparseRow *row;
+    unsigned int i, j, k;
+    double value;
     memset(out, 0, a->rows * sizeof(double));
     for(k=0; k<a->nonzeros; k++) {
-        row = a->data+k;
-        out[row->i] += row->value * in[row->j];
-        if(a->descr == 's' && row->j != row->i) {
-            out[row->j] += row->value * in[row->i];
+        i = a->i[k];
+        j = a->j[k];
+        value = a->value[k];
+        out[i] += value * in[j];
+        if(a->descr == 's' && j != i) {
+            out[j] += value * in[i];
         }
     }
 #endif
@@ -359,14 +361,16 @@ void vectorMatrix(const SparseMatrix *a,
         exit(68);
     }
 #else
-    size_t k;
-    SparseRow *row;
+    unsigned int i, j, k;
+    double value;
     memset(out, 0, a->columns * sizeof(*out));
     for(k=0; k<a->nonzeros; k++) {
-        row = a->data+k;
-        out[row->j] += row->value * in[row->i];
-        if(a->descr == 's' && row->i != row->j) {
-            out[row->i] += row->value * in[row->j];
+        i = a->i[k];
+        j = a->j[k];
+        value = a->value[k];
+        out[j] += value * in[i];
+        if(a->descr == 's' && i != j) {
+            out[i] += value * in[j];
         }
     }
 #endif

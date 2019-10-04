@@ -348,7 +348,9 @@ findDelta::symmetric = "Since Method->\"External\", you can set fullMatrix -> Fa
 Options[findDelta] = {dynamicPartMethod -> Automatic, printDetails -> False,
   Method -> Automatic, rescaleCutoff -> 1, dampingFactor -> 1,
   storePairs -> False, storeHess -> False, largeShiftOptions -> {},
-  storeBB -> False, debugProj -> False, externalAction -> Automatic, 
+  storeBB -> False, debugProj -> False, externalAction -> Automatic,
+  (* This will result in just sorting rows and columns *)
+  chunkSize -> 1,
   (* Roughly speaking, the relative error in the matrix norm of
      one link goes as Norm[shift]^3/48. *)
   largeShiftCutoff -> 2, cutoffValue -> 2};
@@ -515,6 +517,7 @@ findDelta[data:{hess_, grad_, gauge_}, opts:OptionsPattern[]] :=
           "largeShiftOptions" -> OptionValue[largeShiftOptions]/.symbolString,
           "linearSolveOptions" ->
 	       {methodOptions[OptionValue[Method]]}/.symbolString,
+          "chunkSize" -> OptionValue[chunkSize],
           "hessFile" -> hessFile,
           "gradFile" -> gradFile,
           "gaugeFile" -> gaugeFile}];

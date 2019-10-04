@@ -51,7 +51,7 @@ CFLAGS += -DUSE_BLOCK
 endif
 
 MINRESOBJS = $(MINRESDIR)/minresqlpModule.o $(MINRESDIR)/minresqlpDataModule.o  $(MINRESDIR)/minresqlpBlasModule.o
-SHIFTOBJS = shifts.o dynamic.o eigensystem.o cutoff.o linear.o mmio.o
+SHIFTOBJS = shifts.o dynamic.o eigensystem.o cutoff.o linear.o mmio.o sort.o
 
 shifts: $(SHIFTOBJS)
 	$(CC) $(CFLAGS) -o shifts $(SHIFTOBJS) $(MINRESOBJS) $(LFLAGS) -lm -lcjson

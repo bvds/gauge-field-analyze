@@ -7,10 +7,10 @@
 #ifdef USE_BLOCK
 typedef struct {
     double *value;
-    size_t *i;
-    size_t *j;
-    size_t blocks;
-    int blockSize;
+    unsigned int *i;
+    unsigned int *j;
+    unsigned int blocks;
+    unsigned int blockSize;
     unsigned int nonzeros;
     unsigned int rows;
     unsigned int columns;
@@ -22,21 +22,17 @@ typedef struct {
     struct matrix_descr descr;
     double *value;
     unsigned int blockSize;
-    MKL_INT *row;
-    MKL_INT *column;
+    MKL_INT *i;
+    MKL_INT *j;
     unsigned int rows;
     unsigned int columns;
     unsigned int nonzeros;
 } SparseMatrix;
 #else
 typedef struct {
-    unsigned int i;
-    unsigned int j;
-    double value;
-} SparseRow;
-
-typedef struct {
-    SparseRow *data;
+    double *value;
+    unsigned int *i;
+    unsigned int *j;
     char descr;
     unsigned int nonzeros;
     unsigned int rows;
@@ -122,3 +118,5 @@ int hessProduct(integer *vectorLength, doublereal *x, doublereal *y);
 void linearSolve(integer n, double *b, cJSON *options, double *x);
 void userOrtho(char *action, integer *n, double *y);
 void largeShiftProject(integer n, double *y);
+
+void sortMatrix(SparseMatrix *mat, const unsigned int chunk);

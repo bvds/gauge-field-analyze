@@ -5,7 +5,7 @@
     Example usage:
     ./shifts ../hess-grad-gauge.json ../shifts.dat
     Valgrind debugging example:
-    valgrind --tool=memcheck --leak-check=yes --show-reachable=yes --num-callers=20 --track-fds=yes ../hess-grad-gauge.json ../shifts.dat
+    valgrind --tool=memcheck --leak-check=yes --show-reachable=yes --num-callers=20 --track-fds=yes ./shifts ../hess-grad-gauge.json ../shifts.dat
 
       scp hess-grad-gauge.json hess.mtx gauge.mtx grad.dat bvds@192.168.0.35:lattice/gauge-field-analyze/
 
@@ -55,26 +55,20 @@ char *readFile(char *filename) {
 
 #ifdef USE_BLOCK
 void readtoBlock(FILE *fp, SparseMatrix *mat, char *fileName);
-int intCmp (const void * a, const void * b);
 void blockFree(SparseMatrix *mat);
 
-// See https://stackoverflow.com/questions/10996418
-int intCmp (const void * a, const void * b) {
-    return (*(size_t *)a < *(size_t *)b) ? -1 :
-        (*(size_t *)a > *(size_t *)b);
-}
 void readtoBlock(FILE *fp, SparseMatrix *mat, char *fileName) {
     unsigned int j;
     unsigned int i, k, ii, jj, lastii = 0, blockCols = 0;
-    size_t *blockColp;
+    unsigned int *blockColp;
     const unsigned int block = mat->blockSize,
         maxBlockCol = mat->columns/block;
     double value, *blockRowValue, *blockValuep;
-    int *blockColFlag;
+    int *blockColFlag, nread;
     assert(mat->rows%block == 0);
     assert(mat->columns%block == 0);
     mat->blocks = 0;
-    blockRowValue = malloc(mat->columns*block*sizeof(double));
+    blockRowValue = malloc(mat->columns*block*sizeof(*blockRowValue));
     blockColFlag = malloc(maxBlockCol*sizeof(*blockColFlag));
     blockColp = malloc(maxBlockCol*sizeof(*blockColp));
 #ifdef USE_MKL
@@ -90,8 +84,8 @@ void readtoBlock(FILE *fp, SparseMatrix *mat, char *fileName) {
     memset(blockColFlag, 0, maxBlockCol*sizeof(*blockColFlag));
     for(j=0;; j++){
         if(j<mat->nonzeros) {
-            k = fscanf(fp, "%u%u%le", &ii, &jj, &value);
-            if(k < 3) {
+            nread = fscanf(fp, "%u%u%le", &ii, &jj, &value);
+            if(nread < 3) {
                 fprintf(stderr, "Error reading %s, element %i\n", fileName, j);
                 break;
             }
@@ -115,8 +109,6 @@ void readtoBlock(FILE *fp, SparseMatrix *mat, char *fileName) {
             mat->j = realloc(mat->j,
                     (mat->blocks + blockCols)*sizeof(*mat->j));
 #endif
-            // Sort the blocks
-            qsort(blockColp, blockCols, sizeof(*blockColp), intCmp);
             for(i=0; i<blockCols; i++) {
                 k = blockColp[i];
 #if 0
@@ -185,24 +177,24 @@ void blockFree(SparseMatrix *mat) {
 void readtoBlock(FILE *fp, SparseMatrix *mat, char *fileName);
 
 void readtoBlock(FILE *fp, SparseMatrix *mat, char *fileName) {
-    unsigned int j;
-    int k;
+    unsigned int k;
+    int nread;
     sparse_status_t err;
     sparse_matrix_t coordMatrix;
-    mat->row = mkl_malloc(mat->nonzeros * sizeof(int), MALLOC_ALIGN);
-    mat->column = mkl_malloc(mat->nonzeros * sizeof(int), MALLOC_ALIGN);
-    mat->value = mkl_malloc(mat->nonzeros * sizeof(double), MALLOC_ALIGN);
-    for(j=0; j<mat->nonzeros; j++){
-        k = fscanf(fp, "%d%d%le", mat->row+j, mat->column+j, mat->value+j); 
-        if(k < 3) {
-            fprintf(stderr, "Error reading %s, element %i\n", fileName, j);
+    mat->i = mkl_malloc(mat->nonzeros * sizeof(*(mat->i)), MALLOC_ALIGN);
+    mat->j = mkl_malloc(mat->nonzeros * sizeof(*(mat->j)), MALLOC_ALIGN);
+    mat->value = mkl_malloc(mat->nonzeros * sizeof(*(mat->value)), MALLOC_ALIGN);
+    for(k=0; k<mat->nonzeros; k++){
+        nread = fscanf(fp, "%d%d%le", mat->i+k, mat->j+k, mat->value+k);
+        if(nread < 3) {
+            fprintf(stderr, "Error reading %s, element %i\n", fileName, k);
             break;
         }
     }
     /* Create MKL data structure */
     if((err=mkl_sparse_d_create_coo(&coordMatrix, SPARSE_INDEX_BASE_ONE,
               mat->rows, mat->columns, mat->nonzeros,
-                               mat->row, mat->column, mat->value)) !=
+                               mat->i, mat->j, mat->value)) !=
            SPARSE_STATUS_SUCCESS) {
         fprintf(stderr, "mkl_sparse_d_create_coo failed %i\n", err);
         exit(55);
@@ -228,7 +220,7 @@ void readtoBlock(FILE *fp, SparseMatrix *mat, char *fileName) {
         fprintf(stderr, "mkl_sparse_optimize failed %i\n", err);
         exit(59);
     }
-    mkl_free(mat->row); mkl_free(mat->column); mkl_free(mat->value);
+    mkl_free(mat->i); mkl_free(mat->j); mkl_free(mat->value);
     if((err = mkl_sparse_destroy(coordMatrix)) != SPARSE_STATUS_SUCCESS) {
         fprintf(stderr, "failed %i\n", err);
         exit(60);
@@ -237,13 +229,15 @@ void readtoBlock(FILE *fp, SparseMatrix *mat, char *fileName) {
 #endif
 
 int main(int argc, char **argv){
-    char *dataPath, *hessFile, *gradFile, *gaugeFile;
+    char *fdup, *dataPath, *hessFile, *gradFile, *gaugeFile;
     char *options;
     cJSON *jopts, *tmp;
-    int i, k, n, nc, gaugeDimension;
+    int i, n, nc, gaugeDimension;
     unsigned int nLargeShifts;
     FILE *fp;
     MM_typecode matcode;
+    int nread;
+    unsigned int chunkSize;
 #ifdef USE_MKL
     /*
       On the T480 laptop, calculations are limited by memory
@@ -258,10 +252,6 @@ int main(int argc, char **argv){
       4          2878s      722s
     */
     const int threads = 2;
-#endif
-#if !defined(USE_BLOCK) && !defined(USE_MKL)
-    SparseRow *row;
-    unsigned int j;
 #endif
     long int twall = 0, tcpu = 0;
     clock_t t1, tt1;
@@ -280,7 +270,8 @@ int main(int argc, char **argv){
         fprintf(stderr, "Usage:  ./shifts <parameters.json> <output.dat>\n");
         exit(-1);
     }
-    dataPath = dirname(strdup(argv[1]));
+    fdup = strdup(argv[1]);
+    dataPath = dirname(fdup);
     printf("Opening file %s", argv[1]);
     options = readFile(argv[1]);
     jopts = cJSON_Parse(options);
@@ -289,6 +280,10 @@ int main(int argc, char **argv){
     gaugeDimension = cJSON_GetObjectItemCaseSensitive(
                                jopts, "gaugeDimension")->valueint;
     printf(" n=%i, nc=%i, gauge=%i\n", n, nc, gaugeDimension);
+    // Not used if using the MKL matrix.
+    tmp = cJSON_GetObjectItemCaseSensitive(jopts, "chunkSize");
+    chunkSize = cJSON_IsNumber(tmp)?tmp->valueint:10;
+    assert(chunkSize > 0);
 
     /* Read in Hessian Matrix */
     tmp = cJSON_GetObjectItemCaseSensitive(jopts, "hessFile");
@@ -321,6 +316,7 @@ int main(int argc, char **argv){
     hess.descr = 's';  // Symmetric matrix, with only one triangle stored.
     hess.blockSize = nc*nc-1;
     readtoBlock(fp, hessp, hessFile);
+    sortMatrix(hessp, (chunkSize+1)/2);
 #elif defined(USE_MKL)
     hess.descr.type = SPARSE_MATRIX_TYPE_SYMMETRIC;
     hess.descr.mode = SPARSE_FILL_MODE_LOWER;
@@ -328,17 +324,21 @@ int main(int argc, char **argv){
     hess.blockSize = nc*nc-1;
     readtoBlock(fp, hessp, hessFile);
 #else
+    unsigned int k;
     hess.descr = 's';  // Symmetric matrix, with only one triangle stored.
-    hess.data = malloc(hess.nonzeros * sizeof(SparseRow));
-    for(j=0; j<hess.nonzeros; j++){
-        row = hess.data+j;
-        k = fscanf(fp, "%u%u%le", &(row->i), &(row->j), &(row->value));
-        row->i -= 1; row->j -= 1; // switch to zero-based indexing
-        if(k < 3) {
-            fprintf(stderr, "Error reading %s, element %i\n", hessFile, j);
+    hess.i = malloc(hess.nonzeros * sizeof(*hess.i));
+    hess.j = malloc(hess.nonzeros * sizeof(*hess.j));
+    hess.value = malloc(hess.nonzeros * sizeof(*hess.value));
+    for(k=0; k<hess.nonzeros; k++){
+        nread = fscanf(fp, "%u%u%le", hess.i+k, hess.j+k,
+                       hess.value+k);
+        hess.i[k] -= 1; hess.j[k] -= 1; // switch to zero-based indexing
+        if(nread < 3) {
+            fprintf(stderr, "Error reading %s, element %i\n", hessFile, k);
             break;
         }
     }
+    sortMatrix(hessp, (chunkSize+1)/2);
 #endif
     fclose(fp);
 
@@ -348,8 +348,8 @@ int main(int argc, char **argv){
     printf("Opening file %s for a vector of length %i\n", gradFile, n);
     fp = fopen(gradFile, "r");
     for(i=0; i<n; i++){
-        k = fscanf(fp, "%le", grad+i);
-        if(k < 1) {
+        nread = fscanf(fp, "%le", grad+i);
+        if(nread < 1) {
             fprintf(stderr, "Error reading %s on line %i\n", gradFile, i);
             break;
         }
@@ -386,6 +386,7 @@ int main(int argc, char **argv){
     gauge.descr = 'g';  // General matrix
     gauge.blockSize = nc*nc-1;
     readtoBlock(fp, gaugep, gaugeFile);
+    sortMatrix(gaugep, chunkSize);
 #elif defined(USE_MKL)
     gauge.descr.type = SPARSE_MATRIX_TYPE_GENERAL;
     gauge.descr.mode = SPARSE_FILL_MODE_LOWER;
@@ -394,16 +395,18 @@ int main(int argc, char **argv){
     readtoBlock(fp, gaugep, gaugeFile);
 #else
     gauge.descr = 'g';  // General matrix
-    gauge.data = malloc(gauge.nonzeros * sizeof(SparseRow));
-    for(j=0; j<gauge.nonzeros; j++){
-        row = gauge.data+j;
-        k = fscanf(fp, "%u%u%lf", &(row->i), &(row->j), &(row->value));
-        row->i -= 1; row->j -= 1; // switch to zero-based indexing
-        if(k < 3) {
-            fprintf(stderr, "Error reading %s, element %i\n", gaugeFile, j);
+    gauge.i = malloc(gauge.nonzeros * sizeof(*gauge.i));
+    gauge.j = malloc(gauge.nonzeros * sizeof(*gauge.j));
+    gauge.value = malloc(gauge.nonzeros * sizeof(*gauge.value));
+    for(k=0; k<gauge.nonzeros; k++){
+        nread = fscanf(fp, "%u%u%lf", gauge.i+k, gauge.j+k, gauge.value+k);
+        gauge.i[k] -= 1; gauge.j[k] -= 1; // switch to zero-based indexing
+        if(nread < 3) {
+            fprintf(stderr, "Error reading %s, element %i\n", gaugeFile, k);
             break;
         }
     }
+    sortMatrix(gaugep, chunkSize);
 #endif
     fclose(fp);
     fflush(stdout);
@@ -462,9 +465,10 @@ int main(int argc, char **argv){
 #elif defined(USE_MKL)
     mkl_sparse_destroy(hess.a); mkl_sparse_destroy(gauge.a);
 #else
-    free(hess.data); free(gauge.data);
+    free(hess.i); free(hess.j); free(hess.value);
+    free(gauge.i); free(gauge.j); free(gauge.value);
 #endif
-    free(dataPath);
+    free(fdup);
     free(absVals); free(vecs); free(shifts); free(grad);
     free(hessFile); free(gradFile); free(gaugeFile);
     cJSON_Delete(jopts);
