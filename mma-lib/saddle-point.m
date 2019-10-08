@@ -349,6 +349,8 @@ Options[findDelta] = {dynamicPartMethod -> Automatic, printDetails -> False,
   Method -> Automatic, rescaleCutoff -> 1, dampingFactor -> 1,
   storePairs -> False, storeHess -> False, largeShiftOptions -> {},
   storeBB -> False, debugProj -> False, externalAction -> Automatic,
+  (* Only used by MKL version *)
+  threads -> 2,
   (* This will result in just sorting rows and columns *)
   chunkSize -> 1,
   (* Roughly speaking, the relative error in the matrix norm of
@@ -518,6 +520,7 @@ findDelta[data:{hess_, grad_, gauge_}, opts:OptionsPattern[]] :=
           "linearSolveOptions" ->
 	       {methodOptions[OptionValue[Method]]}/.symbolString,
           "chunkSize" -> OptionValue[chunkSize],
+          "threads" -> OptionValue[threads],
           "hessFile" -> hessFile,
           "gradFile" -> gradFile,
           "gaugeFile" -> gaugeFile}];
@@ -541,7 +544,7 @@ findDelta[data:{hess_, grad_, gauge_}, opts:OptionsPattern[]] :=
    (* Run external program on a remote host *)
    If[action == "remote",
       Run["rm -f shifts0.dat"];
-      remoteHost = "bvds@192.168.0.5";
+      remoteHost = "bvds@192.168.0.8";
       remotePath = "lattice/gauge-field-analyze/saddle-lib";
       remote = remoteHost <> ":" <> remotePath;
       Print["Running at ", remote];

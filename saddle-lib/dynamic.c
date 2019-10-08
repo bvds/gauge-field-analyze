@@ -266,7 +266,7 @@ void gaugeOp(const int nrow, const int ncol, const double *xin, const int ldx,
     }
 }
 
-int gaugeProduct(const integer *vectorLength, const doublereal *x,
+void gaugeProduct(const integer *vectorLength, const doublereal *x,
                  doublereal *y) {
     clock_t t0 = clock(), t1;
     assert(abs(*vectorLength) == rows(gaugeData.matrix));
@@ -274,7 +274,6 @@ int gaugeProduct(const integer *vectorLength, const doublereal *x,
     gaugeData.tcpu_vm += (t1=clock()) - t0;
     matrixVector(gaugeData.matrix, gaugeData.z, y);
     gaugeData.tcpu_mv += clock() - t1;
-    return 0;
 }
 
 /* in and out must be distinct */

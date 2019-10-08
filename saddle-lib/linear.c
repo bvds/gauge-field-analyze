@@ -101,7 +101,8 @@ void linearSolve(integer n, double *b, cJSON *options, double *x) {
 
     trancond = acondlim; // Always use MINRES
     MINRESQLP(
-              &n, hessProduct, b, &shift, NULL, (S_fp) userOrtho,
+              &n, hessProduct, b, &shift, NULL,
+	      (S_fp) userOrtho,
               disablep, noutp, &itnlim, rtolp, abstolp, maxxnormp,
               &trancond, &acondlim,
               x, &istop, &itn, &rnorm, &arnorm, &xnorm, &anorm, &acond);
@@ -126,12 +127,11 @@ void linearSolve(integer n, double *b, cJSON *options, double *x) {
     }
 }
 
-int hessProduct(integer *n, doublereal *x, doublereal *y) {
+void hessProduct(integer *n, doublereal *x, doublereal *y) {
     assert(abs(*n) == rows(hessData.matrix));
     assert(abs(*n) == columns(hessData.matrix));
     hessOp(*n, 1, x, *n, y, *n, NULL);
     largeShiftProject(*n, y);
-    return 0;
 }
 
 // Project out vecs, assuming they are orthonormal

@@ -251,7 +251,7 @@ int main(int argc, char **argv){
       3          2042s      683s
       4          2878s      722s
     */
-    const int threads = 2;
+    int threads;
 #endif
     long int twall = 0, tcpu = 0;
     clock_t t1, tt1;
@@ -260,10 +260,6 @@ int main(int argc, char **argv){
     t1 = clock(); tt1 = t1;
     time(&t2); tt2 = t2;
 
-#ifdef USE_MKL
-    printf("Setting MKL to %i threads\n", threads);
-    mkl_set_num_threads_local(threads);
-#endif
 
     /* Read JSON file and use options */
     if(argc <2) {
@@ -284,6 +280,13 @@ int main(int argc, char **argv){
     tmp = cJSON_GetObjectItemCaseSensitive(jopts, "chunkSize");
     chunkSize = cJSON_IsNumber(tmp)?tmp->valueint:10;
     assert(chunkSize > 0);
+
+#ifdef USE_MKL
+    tmp = cJSON_GetObjectItemCaseSensitive(jopts, "threads");
+    threads = cJSON_IsNumber(tmp)?tmp->valueint:1;
+    printf("Setting MKL to %i threads\n", threads);
+    mkl_set_num_threads_local(threads);
+#endif
 
     /* Read in Hessian Matrix */
     tmp = cJSON_GetObjectItemCaseSensitive(jopts, "hessFile");

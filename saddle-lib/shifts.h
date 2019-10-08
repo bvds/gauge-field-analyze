@@ -48,7 +48,7 @@ typedef struct {
 /* FORTRAN to C data type matching */
 typedef double doublereal;
 typedef int integer;
-typedef int fsub;
+typedef void fsub;  // gfortran convension
 typedef fsub (*U_fp)(); /* Unknown procedure type (function name) */
 typedef /* Subroutine */ fsub (*S_fp)();
 typedef doublereal (*D_fp)();
@@ -85,7 +85,7 @@ void dynamicInit(SparseMatrix *gauge, cJSON *options);
 void dynamicProject(const integer n, double *v, double *normDiff);
 void gaugeOp(const int nrow, const int ncol, const double *xin, const int ldx,
              double *yout, const int ldy, void* mvparam);
-int gaugeProduct(const integer *vectorLength, const doublereal *x,
+void gaugeProduct(const integer *vectorLength, const doublereal *x,
                  doublereal *y);
 void dynamicClose();
 void matrixVector(const SparseMatrix *a,
@@ -114,7 +114,7 @@ void cutoffNullspace(unsigned int n, unsigned int nvals, cJSON *options,
 
 
 void linearInit(SparseMatrix *hess, double *vecs, int nvecs);
-int hessProduct(integer *vectorLength, doublereal *x, doublereal *y);
+void hessProduct(integer *vectorLength, doublereal *x, doublereal *y);
 void linearSolve(integer n, double *b, cJSON *options, double *x);
 void userOrtho(char *action, integer *n, double *y);
 void largeShiftProject(integer n, double *y);
