@@ -37,9 +37,9 @@ struct {
     unsigned long int tcpu_mv;
     unsigned long int tcpu_vm;
     unsigned long int twall;
-    unsigned int count;
-    unsigned int usertol;
-    unsigned int matVec;
+    mat_int count;
+    mat_int usertol;
+    mat_int matVec;
     int maxItn;
     int printDetails;
     doublereal minEigenvalue;
@@ -104,8 +104,10 @@ void dynamicInit(SparseMatrix *gauge, cJSON *options) {
 
     mev = ned; // Allocate memory for the number of requested eigenpairs
     eval = malloc(mev*sizeof(double));
+    printf("mev=%i nrow=%i\n", mev, nrow);
     evec = malloc(mev*nrow*sizeof(double));
     trl_init_info(&info, nrow, maxlan, lohi, ned, tol, restart, maxmv, 0);
+                  // (MPI_Comm) -666);  // dummy value
     memset(eval, 0, mev*sizeof(double));
 
     // call TRLAN to compute the eigenvalues
@@ -311,7 +313,7 @@ void matrixVector(const SparseMatrix *a,
         exit(69);
     }
 #else
-    unsigned int i, j, k;
+    mat_int i, j, k;
     double value;
     memset(out, 0, a->rows * sizeof(double));
     for(k=0; k<a->nonzeros; k++) {
@@ -360,7 +362,7 @@ void vectorMatrix(const SparseMatrix *a,
         exit(68);
     }
 #else
-    unsigned int i, j, k;
+    mat_int i, j, k;
     double value;
     memset(out, 0, a->columns * sizeof(*out));
     for(k=0; k<a->nonzeros; k++) {

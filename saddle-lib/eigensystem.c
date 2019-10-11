@@ -77,7 +77,7 @@ void largeShiftsCheckpoint(double *initialVector, cJSON *options,
     char *checkpoint;
     FILE *fp;
     int k;
-    unsigned int i, nn, n = rows(eigenData.matrix);
+    mat_int i, nn, n = rows(eigenData.matrix);
     tmp = cJSON_GetObjectItemCaseSensitive(options, "readCheckpoint");
     if(tmp == NULL) {
         largeShifts(initialVector, options, vals, vecs, nvals);
@@ -381,7 +381,7 @@ void hessOp2(const int nrow, const int ncol,
 // Debug print of dynamic part of hess.grad
 void testOp(SparseMatrix *hess, double *grad) {
     double *y;
-    unsigned int i;
+    mat_int i;
 
     y = malloc(rows(hess) * sizeof(double));
     hessOp(rows(hess), 1, grad, 1, y, 1, NULL);

@@ -58,10 +58,10 @@ void readtoBlock(FILE *fp, SparseMatrix *mat, char *fileName);
 void blockFree(SparseMatrix *mat);
 
 void readtoBlock(FILE *fp, SparseMatrix *mat, char *fileName) {
-    unsigned int j;
-    unsigned int i, k, ii, jj, lastii = 0, blockCols = 0;
-    unsigned int *blockColp;
-    const unsigned int block = mat->blockSize,
+    mat_int j;
+    mat_int i, k, ii, jj, lastii = 0, blockCols = 0;
+    mat_int *blockColp;
+    const mat_int block = mat->blockSize,
         maxBlockCol = mat->columns/block;
     double value, *blockRowValue, *blockValuep;
     int *blockColFlag, nread;
@@ -177,7 +177,7 @@ void blockFree(SparseMatrix *mat) {
 void readtoBlock(FILE *fp, SparseMatrix *mat, char *fileName);
 
 void readtoBlock(FILE *fp, SparseMatrix *mat, char *fileName) {
-    unsigned int k;
+    mat_int k;
     int nread;
     sparse_status_t err;
     sparse_matrix_t coordMatrix;
@@ -232,12 +232,12 @@ int main(int argc, char **argv){
     char *fdup, *dataPath, *hessFile, *gradFile, *gaugeFile;
     char *options;
     cJSON *jopts, *tmp;
-    int i, n, nc, gaugeDimension;
-    unsigned int nLargeShifts;
+    int i, n, blockSize, gaugeDimension;
+    mat_int nLargeShifts;
     FILE *fp;
     MM_typecode matcode;
     int nread;
-    unsigned int chunkSize;
+    mat_int chunkSize;
 #ifdef USE_MKL
     /*
       On the T480 laptop, calculations are limited by memory
@@ -272,13 +272,14 @@ int main(int argc, char **argv){
     options = readFile(argv[1]);
     jopts = cJSON_Parse(options);
     n = cJSON_GetObjectItemCaseSensitive(jopts, "n")->valueint;
-    nc = cJSON_GetObjectItemCaseSensitive(jopts, "nc")->valueint;
+    tmp = cJSON_GetObjectItemCaseSensitive(jopts, "blockSize");
+    blockSize = cJSON_IsNumber(tmp)?tmp->valueint:1;
     gaugeDimension = cJSON_GetObjectItemCaseSensitive(
                                jopts, "gaugeDimension")->valueint;
-    printf(" n=%i, nc=%i, gauge=%i\n", n, nc, gaugeDimension);
+    printf(" n=%i, blockSize=%i, gauge=%i\n", n, blockSize, gaugeDimension);
     // Not used if using the MKL matrix.
     tmp = cJSON_GetObjectItemCaseSensitive(jopts, "chunkSize");
-    chunkSize = cJSON_IsNumber(tmp)?tmp->valueint:10;
+    chunkSize = cJSON_IsNumber(tmp)?tmp->valueint:1;
     assert(chunkSize > 0);
 
 #ifdef USE_MKL
@@ -317,17 +318,17 @@ int main(int argc, char **argv){
     assert(hess.columns == abs(n));
 #ifdef USE_BLOCK
     hess.descr = 's';  // Symmetric matrix, with only one triangle stored.
-    hess.blockSize = nc*nc-1;
+    hess.blockSize = blockSize;
     readtoBlock(fp, hessp, hessFile);
     sortMatrix(hessp, (chunkSize+1)/2);
 #elif defined(USE_MKL)
     hess.descr.type = SPARSE_MATRIX_TYPE_SYMMETRIC;
     hess.descr.mode = SPARSE_FILL_MODE_LOWER;
     hess.descr.diag = SPARSE_DIAG_NON_UNIT;
-    hess.blockSize = nc*nc-1;
+    hess.blockSize = blockSize;
     readtoBlock(fp, hessp, hessFile);
 #else
-    unsigned int k;
+    mat_int k;
     hess.descr = 's';  // Symmetric matrix, with only one triangle stored.
     hess.i = malloc(hess.nonzeros * sizeof(*hess.i));
     hess.j = malloc(hess.nonzeros * sizeof(*hess.j));
@@ -387,14 +388,14 @@ int main(int argc, char **argv){
 
 #ifdef USE_BLOCK
     gauge.descr = 'g';  // General matrix
-    gauge.blockSize = nc*nc-1;
+    gauge.blockSize = blockSize;
     readtoBlock(fp, gaugep, gaugeFile);
     sortMatrix(gaugep, chunkSize);
 #elif defined(USE_MKL)
     gauge.descr.type = SPARSE_MATRIX_TYPE_GENERAL;
     gauge.descr.mode = SPARSE_FILL_MODE_LOWER;
     gauge.descr.diag = SPARSE_DIAG_NON_UNIT;
-    gauge.blockSize = nc*nc-1;
+    gauge.blockSize = blockSize;
     readtoBlock(fp, gaugep, gaugeFile);
 #else
     gauge.descr = 'g';  // General matrix

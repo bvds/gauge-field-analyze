@@ -1,5 +1,8 @@
 #include <cjson/cJSON.h>
 
+// Index sparse matrix rows/columns
+typedef unsigned int mat_int;
+
 #ifdef USE_MKL
 #include "mkl.h"
 #define MALLOC_ALIGN 64
@@ -7,13 +10,13 @@
 #ifdef USE_BLOCK
 typedef struct {
     double *value;
-    unsigned int *i;
-    unsigned int *j;
-    unsigned int blocks;
-    unsigned int blockSize;
-    unsigned int nonzeros;
-    unsigned int rows;
-    unsigned int columns;
+    mat_int *i;
+    mat_int *j;
+    mat_int blocks;
+    mat_int blockSize;
+    mat_int nonzeros;
+    mat_int rows;
+    mat_int columns;
     char descr;
 } SparseMatrix;
 #elif defined(USE_MKL)
@@ -21,22 +24,22 @@ typedef struct {
     sparse_matrix_t a;
     struct matrix_descr descr;
     double *value;
-    unsigned int blockSize;
+    mat_int blockSize;
     MKL_INT *i;
     MKL_INT *j;
-    unsigned int rows;
-    unsigned int columns;
-    unsigned int nonzeros;
+    mat_int rows;
+    mat_int columns;
+    mat_int nonzeros;
 } SparseMatrix;
 #else
 typedef struct {
     double *value;
-    unsigned int *i;
-    unsigned int *j;
+    mat_int *i;
+    mat_int *j;
     char descr;
-    unsigned int nonzeros;
-    unsigned int rows;
-    unsigned int columns;
+    mat_int nonzeros;
+    mat_int rows;
+    mat_int columns;
 } SparseMatrix;
 #endif
 
@@ -108,9 +111,9 @@ void largeShifts(double *initialVector, cJSON *options,
 void testOp(SparseMatrix *hess, double *grad);
 
 
-void cutoffNullspace(unsigned int n, unsigned int nvals, cJSON *options,
+void cutoffNullspace(mat_int n, mat_int nvals, cJSON *options,
                      double *grad,
-                     double **vals, double **vecs, unsigned int *nLargeShifts);
+                     double **vals, double **vecs, mat_int *nLargeShifts);
 
 
 void linearInit(SparseMatrix *hess, double *vecs, int nvecs);
@@ -119,4 +122,4 @@ void linearSolve(integer n, double *b, cJSON *options, double *x);
 void userOrtho(char *action, integer *n, double *y);
 void largeShiftProject(integer n, double *y);
 
-void sortMatrix(SparseMatrix *mat, const unsigned int chunk);
+void sortMatrix(SparseMatrix *mat, const mat_int chunk);

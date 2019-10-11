@@ -17,8 +17,7 @@ tri-diagonalization is not repeated.
 ## Install
 
 Install cJSON from GitHub in `/usr/local/lib`.
-I had trouble with the runtime finding library in `/usr/local/lib` and
-ran `sudo ldconfig` to update the linker cache.
+Then run `sudo ldconfig` to update the linker cache.
 
 Download source code:
 * <https://github.com/bvds/minres-qlp> is a customized version
@@ -39,10 +38,10 @@ On CentOs, had to provide a link for the LAPACK and BLAS libraries like this:  `
 
 One can link to the Intel Math Kernel Library
 for the sparse matrix-vector multiplications.
-*  I installed the library in `/usr/local`
+*  Onstall the library in the default directory (`/opt`)
 *  The dynamic linker needs to find the library:
    *  Create file `/etc/ld.so.conf.d/mkl.conf`
-      containing `/usr/local/intel/mkl/lib/intel64`
+      containing `/opt/intel/mkl/lib/intel64`
    *  run `sudo ldconfig`
 
 ### LibRSB

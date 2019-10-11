@@ -507,7 +507,7 @@ findDelta[data:{hess_, grad_, gauge_}, opts:OptionsPattern[]] :=
       Message[findDelta::dynamicPartMethod]; Return[$Failed]];
    If[action =!= "read",
       Export[outFile, {
-          "nc" -> nc,
+          "blockSize" -> nc^2 - 1,
           "nd" -> nd,
           "n" -> Length[grad],
           "gaugeDimension" -> Length[gauge],

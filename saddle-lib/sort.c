@@ -10,10 +10,10 @@
 #include "shifts.h"
 
 void makeChunkNumber(const SparseMatrix *mat,
-                     const unsigned int chunk);
+                     const mat_int chunk);
 int indexCmp (const void * a, const void * b);
 
-unsigned int *chunkNumber;
+mat_int *chunkNumber;
 
 /* Calculate index for each block of the matrix,
    so that "chunks" are continguous.
@@ -24,15 +24,15 @@ unsigned int *chunkNumber;
    still be correctly ordered.
 */
 void makeChunkNumber(const SparseMatrix *mat,
-                         const unsigned int chunk) {
-    unsigned int i, j, k;
+                         const mat_int chunk) {
+    mat_int i, j, k;
 #ifdef USE_BLOCK
-    const unsigned int b1 = mat->blockSize, n=mat->blocks;
+    const mat_int b1 = mat->blockSize, n=mat->blocks;
 #else
-    const unsigned int b1 = 1, n = mat->nonzeros;
+    const mat_int b1 = 1, n = mat->nonzeros;
 #endif
     assert(chunk>0);
-    const unsigned int columnChunks =
+    const mat_int columnChunks =
         (mat->columns/b1 + chunk - 1)/chunk;
 
     chunkNumber = malloc(n * sizeof(*chunkNumber));
@@ -48,8 +48,8 @@ void makeChunkNumber(const SparseMatrix *mat,
 /* See https://stackoverflow.com/questions/10996418
    https://stackoverflow.com/questions/31229657 */
 int indexCmp (const void * a, const void * b) {
-    const unsigned int ia = *(unsigned int *)a,
-                       ib = *(unsigned int *)b;
+    const mat_int ia = *(mat_int *)a,
+                       ib = *(mat_int *)b;
     return (chunkNumber[ia] > chunkNumber[ib]) -
         (chunkNumber[ib] > chunkNumber[ia]);
 }
@@ -60,14 +60,14 @@ int indexCmp (const void * a, const void * b) {
   For the right value of chunk, cache misses
   should be minimized
 */
-void sortMatrix(SparseMatrix *mat, const unsigned int chunk) {
-    unsigned int k, k1, k2, *index;
-    unsigned int holdi, holdj;
+void sortMatrix(SparseMatrix *mat, const mat_int chunk) {
+    mat_int k, k1, k2, *index;
+    mat_int holdi, holdj;
 #ifdef USE_BLOCK
-    const unsigned int n = mat->blocks,
+    const mat_int n = mat->blocks,
         nn = mat->blockSize * mat->blockSize;
 #else
-    const unsigned int n = mat->nonzeros,
+    const mat_int n = mat->nonzeros,
         nn = 1;
 #endif
     double *holdValue = malloc(nn*sizeof(*holdValue));

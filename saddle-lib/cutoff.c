@@ -12,21 +12,20 @@
      Returns filtered vals & vecs arrays.
      The associated memory is re-allocated.
 */
-void cutoffNullspace(unsigned int n, unsigned int nvals, cJSON *options,
+void cutoffNullspace(mat_int n, mat_int nvals, cJSON *options,
                      double *grad,
-                     double **vals, double **vecs, unsigned int *nLargeShifts) {
-    unsigned int i, j;
-    int na, nc;
+                     double **vals, double **vecs, mat_int *nLargeShifts) {
+    mat_int i, j;
+    int na;
     int firstValue = -1;
     int lastValue = -1;
     double norm2, vecnorm2,  maxnorm2, vecdotgrad;
     double zzz, rescale;
     cJSON *tmp;
 
-    tmp  = cJSON_GetObjectItemCaseSensitive(options, "nc");
+    tmp  = cJSON_GetObjectItemCaseSensitive(options, "blockSize");
     assert(cJSON_IsNumber(tmp));
-    nc = tmp->valueint;
-    na = nc*nc-1;
+    na = tmp->valueint;
     tmp  = cJSON_GetObjectItemCaseSensitive(options, "largeShiftCutoff");
     zzz = cJSON_IsNumber(tmp)?tmp->valuedouble:1.0;
     tmp  = cJSON_GetObjectItemCaseSensitive(options, "rescaleCutoff");

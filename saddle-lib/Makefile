@@ -56,7 +56,7 @@ SHIFTOBJS = shifts.o dynamic.o eigensystem.o cutoff.o linear.o mmio.o sort.o
 shifts: $(SHIFTOBJS)
 	$(CC) $(CFLAGS) -o shifts $(SHIFTOBJS) $(MINRESOBJS) $(LFLAGS) -lm -lcjson
 
-%.o: %.c shifts.h mmio.h
+%.o: %.c shifts.h mmio.h Makefile
 	$(CC) -c -o $@ $< $(CFLAGS)
 
 clean:
