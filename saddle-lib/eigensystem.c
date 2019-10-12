@@ -78,7 +78,7 @@ void largeShiftsCheckpoint(double *initialVector, cJSON *options,
     char *checkpoint;
     FILE *fp;
     int k;
-    mat_int i, nn, n = rows(eigenData.matrix);
+    mat_int i, nn, n = eigenData.matrix->rows;
     tmp = cJSON_GetObjectItemCaseSensitive(options, "readCheckpoint");
     if(tmp == NULL) {
         largeShifts(initialVector, options, vals, vecs, nvals, mpicomp);
@@ -148,7 +148,7 @@ void largeShifts(double *initialVector, cJSON *options,
     int k;
 #endif
     SparseMatrix *hess = eigenData.matrix;
-    int nrow = rows(hess); // number of rows on this processor
+    int nrow = hess->rows; // number of rows on this processor
     int ned = 1;  // number of requested eigenpairs.
     int lohi = -1; // lowest or highest abs value eigenpairs.
     int i, ierr, printDetails = 1;
@@ -164,7 +164,7 @@ void largeShifts(double *initialVector, cJSON *options,
     eigenData.maxNcol = 0;
     eigenData.tcpu_mv = 0;
 
-    assert(columns(hess) == rows(hess));
+    assert(hess->columns == hess->rows);
     assert(eval != NULL);
     assert(evec != NULL);
 
@@ -184,7 +184,7 @@ void largeShifts(double *initialVector, cJSON *options,
     /* Set default values in PRIMME configuration struct */
     primme_initialize(&primme);
     primme.matrixMatvec = hessOpPrimme;
-    primme.n = rows(hess);
+    primme.n = hess->rows;
     primme.numEvals = ned;
     primme.target = lohi<0?primme_closest_abs:primme_largest_abs;
     primme.numTargetShifts = 1;
@@ -227,7 +227,7 @@ void largeShifts(double *initialVector, cJSON *options,
         maxmv = tmp->valueint;
     } else {
         // Documented default (maxmv<0) seems to be broken?
-        maxmv = rows(hess) * ned;
+        maxmv = hess->rows * ned;
     }
     /* maxLanczosVecs is maximum number of Lanczos vectors to use.
        This sets an upper bound on the memory used. */
@@ -235,7 +235,7 @@ void largeShifts(double *initialVector, cJSON *options,
     if(cJSON_IsNumber(tmp)) {
         maxlan = tmp->valueint;
     } else {
-        maxlan = rows(hess);  // Since we do reorthogonalization.
+        maxlan = hess->rows;  // Since we do reorthogonalization.
     }
     tmp  = cJSON_GetObjectItemCaseSensitive(options, "restartStrategy");
     if(cJSON_IsNumber(tmp)) {
@@ -248,9 +248,9 @@ void largeShifts(double *initialVector, cJSON *options,
 
     // Used by HessOp2
 #ifdef USE_MKL
-    eigenData.z = mkl_malloc(rows(hess) * sizeof(double), MALLOC_ALIGN);
+    eigenData.z = mkl_malloc(hess->rows * sizeof(double), MALLOC_ALIGN);
 #else
-    eigenData.z = malloc(rows(hess) * sizeof(double));
+    eigenData.z = malloc(hess->rows * sizeof(double));
 #endif
     mev = ned; // Allocate memory for the number of requested eigenpairs
     *eval = (double *) malloc(mev*sizeof(double));
@@ -273,7 +273,7 @@ void largeShifts(double *initialVector, cJSON *options,
         /* This estimate of flops doesn't include dynamicProject() call. 
            Assuming 1 addition and 1 multiply per nonzero element,
            2 matrix multiplies. */
-        trl_print_info(&info, 4*nonzeros(hess));
+        trl_print_info(&info, 4*(hess->nonzeros));
     } else if(printDetails > 0) {
         trl_terse_info(&info, stdout);
     }
@@ -331,8 +331,8 @@ void hessOpPrimme(void *x, PRIMME_INT *ldx, void *y, PRIMME_INT *ldy,
 void hessOp(const int nrow, const int ncol,
             const double *xin, const int ldx,
 	    double *yout, const int ldy, void* mvparam) {
-    assert(columns(eigenData.matrix) == abs(nrow));
-    assert(rows(eigenData.matrix) == abs(nrow));
+    assert(eigenData.matrix->columns == abs(nrow));
+    assert(eigenData.matrix->rows == abs(nrow));
     assert(mvparam == NULL);
     int k;
     clock_t t0;
@@ -355,8 +355,8 @@ void hessOp(const int nrow, const int ncol,
 void hessOp2(const int nrow, const int ncol,
              const double *xin, const int ldx,
              double *yout, const int ldy, void* mvparam) {
-    assert(columns(eigenData.matrix) == abs(nrow));
-    assert(rows(eigenData.matrix) == abs(nrow));
+    assert(eigenData.matrix->columns == abs(nrow));
+    assert(eigenData.matrix->rows == abs(nrow));
     assert(mvparam == NULL);
     int k;
     clock_t t0;
@@ -386,10 +386,10 @@ void testOp(SparseMatrix *hess, double *grad) {
     double *y;
     mat_int i;
 
-    y = malloc(rows(hess) * sizeof(double));
-    hessOp(rows(hess), 1, grad, 1, y, 1, NULL);
+    y = malloc(hess->rows * sizeof(double));
+    hessOp(hess->rows, 1, grad, 1, y, 1, NULL);
     printf("Dynamic part of hess.grad\n");
-    for(i=0; i<rows(hess); i++) {
+    for(i=0; i<hess->rows; i++) {
         printf("  %le\n", y[i]);
     }
     free(y);

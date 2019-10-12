@@ -43,11 +43,6 @@ typedef struct {
 } SparseMatrix;
 #endif
 
-#define rows(A) A->rows
-#define columns(A) A->columns
-#define nonzeros(A) A->nonzeros
-
-
 /* FORTRAN to C data type matching */
 typedef double doublereal;
 typedef int integer;
