@@ -9,6 +9,9 @@
 
       scp hess-grad-gauge.json hess.mtx gauge.mtx grad.dat bvds@192.168.0.35:lattice/gauge-field-analyze/
 
+    Invoke gdb in parallel version:
+    mpirun -np 2 xterm -e gdb -ex run --args ./pshifts ../hess-grad-gauge.json junk.out
+
 */
 
 #include <stdio.h>
@@ -17,12 +20,52 @@
 #include <libgen.h> // POSIX
 #include <assert.h>
 #include <time.h>
+#ifdef USE_MPI
+#include <mpi.h>
+#endif
 #include "shifts.h"
 #include "mmio.h"
 #ifdef USE_MKL
 #include "mkl_spblas.h"
 #endif
 
+/*
+  Divide vectors and matrices up for mpi.  
+  Without mpi, wrank = 0 and wsize = 1 gives
+  the desired single-process behavior.
+ */
+int indexRank(const mat_int i, const int wsize, const mat_int n) {
+    if(i/(n/wsize + 1) < n%wsize) 
+        return i/(n/wsize + 1);
+    else
+        return (i-n%wsize)/(n/wsize);
+}
+mat_int localSize(const unsigned int wrank, const int wsize, const mat_int n) {
+    return n/wsize + ((wrank<(n%wsize))?1:0);
+}
+mat_int rankIndex(const unsigned int wrank, const int wsize, const mat_int n) {
+    if(wrank < n%wsize)
+        return wrank*(n/wsize + 1);
+    else
+        return wrank*(n/wsize) + n%wsize;
+}
+
+// Sanity tests for localSize, rankIndex, and indexRank
+void rankSanityTest(mat_int n) {
+    int i, wsize = 1;
+    mat_int k;
+#ifdef USE_MPI
+    MPI_Comm_size(MPI_COMM_WORLD, &wsize);
+#endif
+    k = 0;
+    for(i=0; i<wsize; i++) {
+        assert(i == indexRank(rankIndex(i, wsize, n), wsize, n));
+        assert(localSize(i, wsize, n) == rankIndex(i + 1, wsize, n)
+               - rankIndex(i, wsize, n));
+        k += localSize(i, wsize, n);
+    }
+    assert(k == n);
+}
 
 char *catStrings(const char *str1, const char *str2);
 
@@ -54,10 +97,10 @@ char *readFile(char *filename) {
 }
 
 #ifdef USE_BLOCK
-void readtoBlock(FILE *fp, SparseMatrix *mat, char *fileName);
+void readtoBlock(FILE *fp, SparseMatrix *mat, char *fileName, int wrank);
 void blockFree(SparseMatrix *mat);
 
-void readtoBlock(FILE *fp, SparseMatrix *mat, char *fileName) {
+void readtoBlock(FILE *fp, SparseMatrix *mat, char *fileName, int wrank) {
     mat_int j;
     mat_int i, k, ii, jj, lastii = 0, blockCols = 0;
     mat_int *blockColp;
@@ -86,7 +129,8 @@ void readtoBlock(FILE *fp, SparseMatrix *mat, char *fileName) {
         if(j<mat->nonzeros) {
             nread = fscanf(fp, "%u%u%le", &ii, &jj, &value);
             if(nread < 3) {
-                fprintf(stderr, "Error reading %s, element %i\n", fileName, j);
+                fprintf(stderr, "%i:  Error reading %s, element %i\n",
+                        wrank, fileName, j);
                 break;
             }
             ii -= 1; jj -= 1; // switch to zero-based indexing
@@ -174,9 +218,9 @@ void blockFree(SparseMatrix *mat) {
 }
 
 #elif defined(USE_MKL)
-void readtoBlock(FILE *fp, SparseMatrix *mat, char *fileName);
+void readtoBlock(FILE *fp, SparseMatrix *mat, char *fileName, int wrank);
 
-void readtoBlock(FILE *fp, SparseMatrix *mat, char *fileName) {
+void readtoBlock(FILE *fp, SparseMatrix *mat, char *fileName, int wrank) {
     mat_int k;
     int nread;
     sparse_status_t err;
@@ -187,7 +231,8 @@ void readtoBlock(FILE *fp, SparseMatrix *mat, char *fileName) {
     for(k=0; k<mat->nonzeros; k++){
         nread = fscanf(fp, "%d%d%le", mat->i+k, mat->j+k, mat->value+k);
         if(nread < 3) {
-            fprintf(stderr, "Error reading %s, element %i\n", fileName, k);
+            fprintf(stderr, "%i:  Error reading %s, element %i\n",
+                    wrank, fileName, k);
             break;
         }
     }
@@ -196,14 +241,15 @@ void readtoBlock(FILE *fp, SparseMatrix *mat, char *fileName) {
               mat->rows, mat->columns, mat->nonzeros,
                                mat->i, mat->j, mat->value)) !=
            SPARSE_STATUS_SUCCESS) {
-        fprintf(stderr, "mkl_sparse_d_create_coo failed %i\n", err);
+        fprintf(stderr, "%i:  mkl_sparse_d_create_coo failed %i\n",
+                wrank, err);
         exit(55);
     }
     if((err = mkl_sparse_convert_bsr(coordMatrix, mat->blockSize,
                             SPARSE_LAYOUT_COLUMN_MAJOR,
                             SPARSE_OPERATION_NON_TRANSPOSE,
                             &mat->a)) != SPARSE_STATUS_SUCCESS) {
-        fprintf(stderr, "failed %i\n", err);
+        fprintf(stderr, "%i:  failed %i\n", wrank, err);
         exit(56);
     }
 #if 0  // Unsupported error
@@ -211,18 +257,18 @@ void readtoBlock(FILE *fp, SparseMatrix *mat, char *fileName) {
     if((err = mkl_sparse_set_dotmv_hint(mat->a,
             SPARSE_OPERATION_NON_TRANSPOSE, mat->descr, expected_calls)) !=
        SPARSE_STATUS_SUCCESS) {
-        fprintf(stderr, "mkl_sparse_set_dotmv_hint failed: %i %i\n", err,
-               SPARSE_STATUS_NOT_SUPPORTED);
+        fprintf(stderr, "%i:  mkl_sparse_set_dotmv_hint failed: %i %i\n",
+                wrank, err, SPARSE_STATUS_NOT_SUPPORTED);
         exit(58);
     }
 #endif
     if((err = mkl_sparse_optimize(mat->a)) != SPARSE_STATUS_SUCCESS) {
-        fprintf(stderr, "mkl_sparse_optimize failed %i\n", err);
+        fprintf(stderr, "%i:  mkl_sparse_optimize failed %i\n", wrank, err);
         exit(59);
     }
     mkl_free(mat->i); mkl_free(mat->j); mkl_free(mat->value);
     if((err = mkl_sparse_destroy(coordMatrix)) != SPARSE_STATUS_SUCCESS) {
-        fprintf(stderr, "failed %i\n", err);
+        fprintf(stderr, "%i:  failed %i\n", wrank, err);
         exit(60);
     }
  }
@@ -232,7 +278,7 @@ int main(int argc, char **argv){
     char *fdup, *dataPath, *hessFile, *gradFile, *gaugeFile;
     char *options;
     cJSON *jopts, *tmp;
-    int i, n, blockSize, gaugeDimension;
+    int i, n, blockSize, gaugeDimension, wsize, wrank;
     mat_int nLargeShifts;
     FILE *fp;
     MM_typecode matcode;
@@ -261,6 +307,22 @@ int main(int argc, char **argv){
     time(&t2); tt2 = t2;
 
 
+    /* Initialize MPI */
+#ifdef USE_MPI
+    if(MPI_Init(&argc, &argv) != MPI_SUCCESS) {
+        fprintf(stderr, "%i:  Failed to initialize MPI.", wrank);
+        exit(321);
+    }
+    MPI_Comm_size(MPI_COMM_WORLD, &wsize);
+    MPI_Comm_rank(MPI_COMM_WORLD, &wrank);
+    MPI_Comm mpicom = MPI_COMM_WORLD, *mpicomp = &mpicom;
+#else
+    void *mpicomp = NULL;
+    wsize = 1;
+    wrank = 0;
+#endif
+
+
     /* Read JSON file and use options */
     if(argc <2) {
         fprintf(stderr, "Usage:  ./shifts <parameters.json> <output.dat>\n");
@@ -268,7 +330,8 @@ int main(int argc, char **argv){
     }
     fdup = strdup(argv[1]);
     dataPath = dirname(fdup);
-    printf("Opening file %s", argv[1]);
+    if(wrank ==0)
+        printf("Opening file %s", argv[1]);
     options = readFile(argv[1]);
     jopts = cJSON_Parse(options);
     n = cJSON_GetObjectItemCaseSensitive(jopts, "n")->valueint;
@@ -276,7 +339,8 @@ int main(int argc, char **argv){
     blockSize = cJSON_IsNumber(tmp)?tmp->valueint:1;
     gaugeDimension = cJSON_GetObjectItemCaseSensitive(
                                jopts, "gaugeDimension")->valueint;
-    printf(" n=%i, blockSize=%i, gauge=%i\n", n, blockSize, gaugeDimension);
+    if(wrank ==0)
+        printf(" n=%i, blockSize=%i, gauge=%i\n", n, blockSize, gaugeDimension);
     // Not used if using the MKL matrix.
     tmp = cJSON_GetObjectItemCaseSensitive(jopts, "chunkSize");
     chunkSize = cJSON_IsNumber(tmp)?tmp->valueint:1;
@@ -285,7 +349,8 @@ int main(int argc, char **argv){
 #ifdef USE_MKL
     tmp = cJSON_GetObjectItemCaseSensitive(jopts, "threads");
     threads = cJSON_IsNumber(tmp)?tmp->valueint:1;
-    printf("Setting MKL to %i threads\n", threads);
+    if(wrank ==0)
+        printf("Setting MKL to %i threads\n", threads);
     mkl_set_num_threads_local(threads);
 #endif
 
@@ -293,40 +358,44 @@ int main(int argc, char **argv){
     tmp = cJSON_GetObjectItemCaseSensitive(jopts, "hessFile");
     hessFile = catStrings(dataPath, tmp->valuestring);
     SparseMatrix hess, *hessp = &hess;
-    printf("Opening file %s", hessFile);
+    if(wrank ==0)
+        printf("Opening file %s", hessFile);
     if((fp = fopen(hessFile, "r")) == NULL) {
-        fprintf(stderr, "Could not open file %s\n", hessFile);
+        fprintf(stderr, "%i:  Could not open file %s\n", wrank, hessFile);
         exit(44);
     }
     if (mm_read_banner(fp, &matcode) != 0) {
-        fprintf(stderr, "Could not process Matrix Market banner.\n");
+        fprintf(stderr, "%i:  Could not process Matrix Market banner.\n",
+                wrank);
         exit(701);
     }
     if(!(mm_is_real(matcode) && mm_is_matrix(matcode) && 
          mm_is_coordinate(matcode))) {
-        fprintf(stderr, "Hessian should be real, coordinate.\n");
-        fprintf(stderr, "Market Market type: [%s]\n", mm_typecode_to_str(matcode));
+        fprintf(stderr, "%i:  Hessian should be real, coordinate.\n", wrank);
+        fprintf(stderr, "%i:  Market Market type: [%s]\n", wrank,
+                mm_typecode_to_str(matcode));
         exit(702);
     }
     if (mm_read_mtx_crd_size(fp, &(hess.rows), &(hess.columns),
                              &(hess.nonzeros)) !=0) {
-        fprintf(stderr, "Cannot read dimensions\n");
+        fprintf(stderr, "%i:  Cannot read dimensions\n", wrank);
         exit(703);
     }
-    printf(" with %i nonzero elements.\n", hess.nonzeros);
+    if(wrank ==0)
+        printf(" with %i nonzero elements.\n", hess.nonzeros);
     assert(hess.rows == abs(n));
     assert(hess.columns == abs(n));
 #ifdef USE_BLOCK
     hess.descr = 's';  // Symmetric matrix, with only one triangle stored.
     hess.blockSize = blockSize;
-    readtoBlock(fp, hessp, hessFile);
+    readtoBlock(fp, hessp, hessFile, wrank);
     sortMatrix(hessp, (chunkSize+1)/2);
 #elif defined(USE_MKL)
     hess.descr.type = SPARSE_MATRIX_TYPE_SYMMETRIC;
     hess.descr.mode = SPARSE_FILL_MODE_LOWER;
     hess.descr.diag = SPARSE_DIAG_NON_UNIT;
     hess.blockSize = blockSize;
-    readtoBlock(fp, hessp, hessFile);
+    readtoBlock(fp, hessp, hessFile, wrank);
 #else
     mat_int k;
     hess.descr = 's';  // Symmetric matrix, with only one triangle stored.
@@ -338,7 +407,8 @@ int main(int argc, char **argv){
                        hess.value+k);
         hess.i[k] -= 1; hess.j[k] -= 1; // switch to zero-based indexing
         if(nread < 3) {
-            fprintf(stderr, "Error reading %s, element %i\n", hessFile, k);
+            fprintf(stderr, "%i:  Error reading %s, element %i\n",
+                    wrank, hessFile, k);
             break;
         }
     }
@@ -346,57 +416,71 @@ int main(int argc, char **argv){
 #endif
     fclose(fp);
 
-    double *grad = malloc(n * sizeof(double));
+
+    mat_int wn;
+    rankSanityTest(n/blockSize);
+
+    wn = blockSize*localSize(wrank, wsize, n/blockSize);
+    double *grad = malloc(wn * sizeof(double)), *gradp = grad, dummy;
     tmp = cJSON_GetObjectItemCaseSensitive(jopts, "gradFile");
     gradFile = catStrings(dataPath, tmp->valuestring);
-    printf("Opening file %s for a vector of length %i\n", gradFile, n);
+    if(wrank ==0)
+        printf("Opening file %s for a vector of length %i\n", gradFile, n);
     fp = fopen(gradFile, "r");
     for(i=0; i<n; i++){
-        nread = fscanf(fp, "%le", grad+i);
+        if(indexRank(i/blockSize, wsize, n/blockSize) == wrank)
+            nread = fscanf(fp, "%le", gradp++);
+        else
+            nread = fscanf(fp, "%le", &dummy);
         if(nread < 1) {
-            fprintf(stderr, "Error reading %s on line %i\n", gradFile, i);
+            fprintf(stderr, "%i:  Error reading %s on line %i\n",
+                    wrank, gradFile, i);
             break;
         }
     }
+    assert(wn == gradp - grad);
     fclose(fp);
 
     tmp = cJSON_GetObjectItemCaseSensitive(jopts, "gaugeFile");
     gaugeFile = catStrings(dataPath, tmp->valuestring);
     SparseMatrix gauge, *gaugep = &gauge;
-    printf("Opening file %s", gaugeFile);
+    if(wrank ==0)
+        printf("Opening file %s", gaugeFile);
     fp = fopen(gaugeFile, "r");
     if (mm_read_banner(fp, &matcode) != 0) {
-        fprintf(stderr, "Could not process Matrix Market banner.\n");
+        fprintf(stderr, "%i:  Could not process Matrix Market banner.\n",
+                wrank);
         exit(701);
     }
     if(!(mm_is_real(matcode) && mm_is_matrix(matcode) && 
          mm_is_coordinate(matcode) && mm_is_general(matcode))) {
-        fprintf(stderr, "Gauge matrix should be real, "
-                         "general, coordinate.\n");
-        fprintf(stderr, "Market Market type: [%s]\n",
+        fprintf(stderr, "%i:  Gauge matrix should be real, "
+                "general, coordinate.\n", wrank);
+        fprintf(stderr, "%i:  Market Market type: [%s]\n", wrank,
                 mm_typecode_to_str(matcode));
         exit(702);
     }
     if (mm_read_mtx_crd_size(fp, &(gauge.rows), &(gauge.columns),
                              &(gauge.nonzeros)) !=0) {
-        fprintf(stderr, "Cannot read dimensions\n");
+        fprintf(stderr, "%i:  Cannot read dimensions\n", wrank);
         exit(703);
     }
-    printf(" with %i nonzero elements.\n", gauge.nonzeros);
+    if(wrank ==0)
+        printf(" with %i nonzero elements.\n", gauge.nonzeros);
     assert(gauge.rows == abs(gaugeDimension));
     assert(gauge.columns == abs(n));
 
 #ifdef USE_BLOCK
     gauge.descr = 'g';  // General matrix
     gauge.blockSize = blockSize;
-    readtoBlock(fp, gaugep, gaugeFile);
+    readtoBlock(fp, gaugep, gaugeFile, wrank);
     sortMatrix(gaugep, chunkSize);
 #elif defined(USE_MKL)
     gauge.descr.type = SPARSE_MATRIX_TYPE_GENERAL;
     gauge.descr.mode = SPARSE_FILL_MODE_LOWER;
     gauge.descr.diag = SPARSE_DIAG_NON_UNIT;
     gauge.blockSize = blockSize;
-    readtoBlock(fp, gaugep, gaugeFile);
+    readtoBlock(fp, gaugep, gaugeFile, wrank);
 #else
     gauge.descr = 'g';  // General matrix
     gauge.i = malloc(gauge.nonzeros * sizeof(*gauge.i));
@@ -406,7 +490,8 @@ int main(int argc, char **argv){
         nread = fscanf(fp, "%u%u%lf", gauge.i+k, gauge.j+k, gauge.value+k);
         gauge.i[k] -= 1; gauge.j[k] -= 1; // switch to zero-based indexing
         if(nread < 3) {
-            fprintf(stderr, "Error reading %s, element %i\n", gaugeFile, k);
+            fprintf(stderr, "%i:  Error reading %s, element %i\n",
+                    wrank, gaugeFile, k);
             break;
         }
     }
@@ -426,7 +511,7 @@ int main(int argc, char **argv){
     int nvals;
     tmp = cJSON_GetObjectItemCaseSensitive(jopts, "dynamicPartOptions");
     assert(tmp != NULL);
-    dynamicInit(gaugep, tmp);
+    dynamicInit(gaugep, tmp, mpicomp);
     eigenInit(hessp);
     // Debug print:
 #if 0
@@ -434,7 +519,7 @@ int main(int argc, char **argv){
 #endif
     tmp = cJSON_GetObjectItemCaseSensitive(jopts, "largeShiftOptions");
     assert(tmp != NULL);
-    largeShiftsCheckpoint(grad, tmp, &absVals, &vecs, &nvals);
+    largeShiftsCheckpoint(grad, tmp, &absVals, &vecs, &nvals, mpicomp);
     cutoffNullspace(n, nvals, jopts, grad, &absVals, &vecs, &nLargeShifts);
     linearInit(hessp, vecs, nLargeShifts);
     tmp = cJSON_GetObjectItemCaseSensitive(jopts, "linearSolveOptions");
@@ -447,7 +532,8 @@ int main(int argc, char **argv){
 
     t1 = clock();
     time(&t2);
-    printf("Opening output file %s\n", argv[2]);
+    if(wrank ==0)
+        printf("Opening output file %s\n", argv[2]);
     fp = fopen(argv[2], "w");
     for(i=0; i<n; i++){
         fprintf(fp, "%.17e\n", shifts[i]);
@@ -477,5 +563,8 @@ int main(int argc, char **argv){
     free(hessFile); free(gradFile); free(gaugeFile);
     cJSON_Delete(jopts);
     free(options);
+#ifdef USE_MPI
+    MPI_Finalize();
+#endif
     return 0;
 }

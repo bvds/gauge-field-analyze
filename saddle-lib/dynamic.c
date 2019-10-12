@@ -48,7 +48,7 @@ struct {
 
 
 
-void dynamicInit(SparseMatrix *gauge, cJSON *options) {
+void dynamicInit(SparseMatrix *gauge, cJSON *options, void *mpicomp) {
     // Let trlan figure out the work array allocation.
     const int lwrk = 0; double *wrk = NULL;
     int mev, maxlan, lohi, ned, maxmv;
@@ -104,10 +104,8 @@ void dynamicInit(SparseMatrix *gauge, cJSON *options) {
 
     mev = ned; // Allocate memory for the number of requested eigenpairs
     eval = malloc(mev*sizeof(double));
-    printf("mev=%i nrow=%i\n", mev, nrow);
     evec = malloc(mev*nrow*sizeof(double));
-    trl_init_info(&info, nrow, maxlan, lohi, ned, tol, restart, maxmv, 0);
-                  // (MPI_Comm) -666);  // dummy value
+    trl_init_info(&info, nrow, maxlan, lohi, ned, tol, restart, maxmv, mpicomp);
     memset(eval, 0, mev*sizeof(double));
 
     // call TRLAN to compute the eigenvalues

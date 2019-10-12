@@ -84,7 +84,7 @@ extern int DAXPY(const integer *n,  const doublereal *alpha,
                  const doublereal *y, const integer *incy); 
 
 
-void dynamicInit(SparseMatrix *gauge, cJSON *options);
+void dynamicInit(SparseMatrix *gauge, cJSON *options, void *mpicomp);
 void dynamicProject(const integer n, double *v, double *normDiff);
 void gaugeOp(const int nrow, const int ncol, const double *xin, const int ldx,
              double *yout, const int ldy, void* mvparam);
@@ -105,9 +105,11 @@ void hessOp2(const int nrow, const int ncol,
              double *yout, const int ldy, void* mvparam);
 void eigenInit(SparseMatrix *hess);
 void largeShiftsCheckpoint(double *initialVector, cJSON *options,
-		 double **vals, double **vecs, int *nvals);
+                           double **vals, double **vecs, int *nvals,
+                           void *mpicomp);
 void largeShifts(double *initialVector, cJSON *options,
-		 double **vals, double **vecs, int *nvals);
+		 double **vals, double **vecs, int *nvals,
+                 void *mpicomp);
 void testOp(SparseMatrix *hess, double *grad);
 
 

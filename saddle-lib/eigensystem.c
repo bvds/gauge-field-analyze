@@ -72,7 +72,8 @@ void eigenInit(SparseMatrix *hess) {
 */
 
 void largeShiftsCheckpoint(double *initialVector, cJSON *options,
-                           double **vals, double **vecs, int *nvals) {
+                           double **vals, double **vecs, int *nvals,
+                           void *mpicomp) {
     cJSON *tmp;
     char *checkpoint;
     FILE *fp;
@@ -80,7 +81,7 @@ void largeShiftsCheckpoint(double *initialVector, cJSON *options,
     mat_int i, nn, n = rows(eigenData.matrix);
     tmp = cJSON_GetObjectItemCaseSensitive(options, "readCheckpoint");
     if(tmp == NULL) {
-        largeShifts(initialVector, options, vals, vecs, nvals);
+        largeShifts(initialVector, options, vals, vecs, nvals, mpicomp);
         tmp = cJSON_GetObjectItemCaseSensitive(options, "writeCheckpoint");
         if(tmp != NULL) {
             checkpoint = tmp->valuestring;
@@ -127,7 +128,8 @@ void largeShiftsCheckpoint(double *initialVector, cJSON *options,
   the Hessian.
  */
 void largeShifts(double *initialVector, cJSON *options,
-		 double **eval, double **evec, int *nvals) {
+		 double **eval, double **evec, int *nvals,
+                 void *mpicomp) {
 #ifdef USE_PRIMME
     primme_params primme;
     double *rnorm;   /* Array with the computed eigenpairs residual norms */
@@ -253,7 +255,8 @@ void largeShifts(double *initialVector, cJSON *options,
     mev = ned; // Allocate memory for the number of requested eigenpairs
     *eval = (double *) malloc(mev*sizeof(double));
     *evec = (double *) malloc(mev*nrow*sizeof(double));
-    trl_init_info(&info, nrow, maxlan, lohi, ned, tol, restart, maxmv, 0);
+    trl_init_info(&info, nrow, maxlan, lohi, ned, tol, restart, maxmv,
+                  mpicomp);
     trl_set_iguess(&info, 0, iguess, 0, NULL);
     memset(*eval, 0, mev*sizeof(double));
     // Provide the initial vector

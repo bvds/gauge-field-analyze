@@ -9,11 +9,15 @@ PRIMMEDIR = ../../linear-algebra/primme
 #
 #              -Wall -g -O3
 CFLAGS = -fPIC -Wall -g -O3 -Wextra -pedantic -std=gnu11 -I$(TRLANDIR)/INC
-LFLAGS =  -L$(TRLANDIR) -L/usr/local/lib -lnutrlan -lgfortran
+LFLAGS =  -L$(TRLANDIR) -L/usr/local/lib -lcjson -lgfortran
+SLFLAGS = -lnutrlan
+#  Need to add fortran libraries needed by MINRES-QLP
+#  Use "ldd minresqlptest_mpi" to view libraries.
+PLFLAGS = -lmpi_mpifh -lmpi_usempif08 -lnutrlan_mpi
 #
 #  Optionally, use Jacobi-Davidson library PRIMME
 #
-#  I abandoned this attempt because putting in user_ortho
+#  I abandoned this attempt because adding a function user_ortho
 #  to enforce the gauge transform constraint appears to be difficult.
 ifeq (1, 0)
 CFLAGS += -DUSE_PRIMME -I$(PRIMMEDIR)/include
@@ -41,7 +45,7 @@ LFLAGS +=  $(MKLROOT)/lib/intel64/libmkl_blas95_lp64.a $(MKLROOT)/lib/intel64/li
 #LFLAGS += -L$(MKLROOT)/lib/intel64 -lmkl_blas95_lp64 -lmkl_lapack95_lp64 -Wl,--no-as-needed -lmkl_rt -lpthread -ldl
 #LFLAGS += -L$(MKLROOT)/lib/intel64  -lmkl_blas95_lp64 -lmkl_lapack95_lp64 -Wl,--no-as-needed -lmkl_intel_lp64 -lmkl_gnu_thread -lmkl_core -lgomp -lpthread -ldl
 else
-LFLAGS += -llapack -lblas
+LFLAGS += -llapack -lblas -lm
 endif
 #
 #   Use block-sparse coordinate format for matrices
@@ -50,14 +54,31 @@ ifeq (1, 0)
 CFLAGS += -DUSE_BLOCK
 endif
 
-MINRESOBJS = $(MINRESDIR)/minresqlpModule.o $(MINRESDIR)/minresqlpDataModule.o  $(MINRESDIR)/minresqlpBlasModule.o
-SHIFTOBJS = shifts.o dynamic.o eigensystem.o cutoff.o linear.o mmio.o sort.o
+MINRESOBJS = $(MINRESDIR)/minresqlpDataModule.o  $(MINRESDIR)/minresqlpBlasModule.o
+SMINRESOBJS = $(MINRESOBJS) $(MINRESDIR)/minresqlpModule.o 
+PMINRESOBJS = $(MINRESOBJS) $(MINRESDIR)/minresqlpModule_mpi.o $(MINRESDIR)/parallelBlasModule_mpi.o
 
-shifts: $(SHIFTOBJS)
-	$(CC) $(CFLAGS) -o shifts $(SHIFTOBJS) $(MINRESOBJS) $(LFLAGS) -lm -lcjson
+SOBJS = shifts.o dynamic.o eigensystem.o cutoff.o linear.o mmio.o sort.o
+POBJS = shifts_mpi.o dynamic_mpi.o eigensystem_mpi.o cutoff_mpi.o
+POBJS += linear_mpi.o mmio.o sort.o
+
+MPICC = mpicc
+MPIFC = mpifc
+
+shifts: $(SOBJS)
+	$(CC) $(CFLAGS) -o $@ $(SOBJS) $(SMINRESOBJS) $(SLFLAGS) $(LFLAGS)
+
+pshifts: $(POBJS)
+	$(MPICC) $(CFLAGS) -o $@ $(POBJS) $(PMINRESOBJS) $(PLFLAGS) $(LFLAGS)
 
 %.o: %.c shifts.h mmio.h Makefile
 	$(CC) -c -o $@ $< $(CFLAGS)
+
+%_mpi.o: %.c shifts.h Makefile
+	$(MPICC) -c -DUSE_MPI -o $@ $< $(CFLAGS)
+
+prun:
+	mpirun -np 2 xterm -e gdb -ex run --args ./pshifts ../hess-grad-gauge.json junk.out
 
 clean:
 	rm shifts *.o
