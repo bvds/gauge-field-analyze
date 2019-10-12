@@ -58,9 +58,9 @@ MINRESOBJS = $(MINRESDIR)/minresqlpDataModule.o  $(MINRESDIR)/minresqlpBlasModul
 SMINRESOBJS = $(MINRESOBJS) $(MINRESDIR)/minresqlpModule.o 
 PMINRESOBJS = $(MINRESOBJS) $(MINRESDIR)/minresqlpModule_mpi.o $(MINRESDIR)/parallelBlasModule_mpi.o
 
-SOBJS = shifts.o dynamic.o eigensystem.o cutoff.o linear.o mmio.o sort.o
+SOBJS = shifts.o dynamic.o eigensystem.o cutoff.o linear.o mmio.o sort.o matrix.o
 POBJS = shifts_mpi.o dynamic_mpi.o eigensystem_mpi.o cutoff_mpi.o
-POBJS += linear_mpi.o mmio.o sort.o
+POBJS += linear_mpi.o mmio.o sort.o matrix_mpi.o
 
 MPICC = mpicc
 MPIFC = mpifc

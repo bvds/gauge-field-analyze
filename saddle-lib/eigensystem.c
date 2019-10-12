@@ -346,7 +346,6 @@ void hessOp(const int nrow, const int ncol,
         t0 = clock();
         matrixVector(eigenData.matrix, xin+k*ldx, yout+k*ldy);
         eigenData.tcpu_mv += clock() - t0;
-        // Use the fact that "in" and "out" can overlap.
         dynamicProject(nrow, yout+k*ldy, NULL);
     }
 }
@@ -370,7 +369,6 @@ void hessOp2(const int nrow, const int ncol,
         t0 = clock();
         matrixVector(eigenData.matrix, xin+k*ldx, eigenData.z);
         eigenData.tcpu_mv += clock() - t0;
-        // Use the fact that "in" and "out" can overlap.
         dynamicProject(nrow, eigenData.z, NULL);
         // Apply a second time
         t0 = clock();

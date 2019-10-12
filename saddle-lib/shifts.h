@@ -1,12 +1,16 @@
 #include <cjson/cJSON.h>
-
-// Index sparse matrix rows/columns
-typedef unsigned int mat_int;
-
 #ifdef USE_MKL
 #include "mkl.h"
 #define MALLOC_ALIGN 64
 #endif
+
+
+/*
+      Sparse matrix data structures
+*/
+// Index for sparse matrix rows/columns, nonzeros
+typedef unsigned int mat_int;
+
 #ifdef USE_BLOCK
 typedef struct {
     double *value;
@@ -43,7 +47,10 @@ typedef struct {
 } SparseMatrix;
 #endif
 
-/* FORTRAN to C data type matching */
+
+/*
+           FORTRAN to C data type matching
+*/
 typedef double doublereal;
 typedef int integer;
 typedef void fsub;  // gfortran convension
@@ -79,6 +86,9 @@ extern int DAXPY(const integer *n,  const doublereal *alpha,
                  const doublereal *y, const integer *incy); 
 
 
+/*
+            dynamic.c
+ */
 void dynamicInit(SparseMatrix *gauge, cJSON *options, void *mpicomp);
 void dynamicProject(const integer n, double *v, double *normDiff);
 void gaugeOp(const int nrow, const int ncol, const double *xin, const int ldx,
@@ -86,12 +96,11 @@ void gaugeOp(const int nrow, const int ncol, const double *xin, const int ldx,
 void gaugeProduct(const integer *vectorLength, const doublereal *x,
                  doublereal *y);
 void dynamicClose();
-void matrixVector(const SparseMatrix *a,
-                  const doublereal *in, doublereal *out);
-void vectorMatrix(const SparseMatrix *a,
-                  const doublereal *in, doublereal *out);
 
 
+/*
+              eigensystem.c
+ */
 void hessOp(const int nrow, const int ncol,
             const double *xin, const int ldx,
 	    double *yout, const int ldy, void* mvparam);
@@ -108,15 +117,40 @@ void largeShifts(double *initialVector, cJSON *options,
 void testOp(SparseMatrix *hess, double *grad);
 
 
+/*
+         cutoff.c
+*/
 void cutoffNullspace(mat_int n, mat_int nvals, cJSON *options,
                      double *grad,
                      double **vals, double **vecs, mat_int *nLargeShifts);
 
 
+/*
+            linear.c
+ */
 void linearInit(SparseMatrix *hess, double *vecs, int nvecs);
 void hessProduct(integer *vectorLength, doublereal *x, doublereal *y);
 void linearSolve(integer n, double *b, cJSON *options, double *x);
 void userOrtho(char *action, integer *n, double *y);
 void largeShiftProject(integer n, double *y);
 
+
+/*
+         sort.c
+*/
 void sortMatrix(SparseMatrix *mat, const mat_int chunk);
+
+
+/*
+         matrix.c
+*/
+int indexRank(const mat_int i, const int wsize, const mat_int n);
+mat_int localSize(const unsigned int wrank, const int wsize, const mat_int n);
+mat_int rankIndex(const unsigned int wrank, const int wsize, const mat_int n);
+void rankSanityTest(mat_int n);
+void readtoBlock(FILE *fp, SparseMatrix *mat, char *fileName, int wrank);
+void blockFree(SparseMatrix *mat);
+void matrixVector(const SparseMatrix *a,
+                  const doublereal *in, doublereal *out);
+void vectorMatrix(const SparseMatrix *a,
+                  const doublereal *in, doublereal *out);
