@@ -247,11 +247,7 @@ void largeShifts(double *initialVector, cJSON *options,
     }
 
     // Used by HessOp2
-#ifdef USE_MKL
-    eigenData.z = mkl_malloc(hess->rows * sizeof(double), MALLOC_ALIGN);
-#else
-    eigenData.z = malloc(hess->rows * sizeof(double));
-#endif
+    eigenData.z = MALLOC(hess->rows * sizeof(double));
     mev = ned; // Allocate memory for the number of requested eigenpairs
     *eval = (double *) malloc(mev*sizeof(double));
     *evec = (double *) malloc(mev*nrow*sizeof(double));
@@ -278,11 +274,7 @@ void largeShifts(double *initialVector, cJSON *options,
         trl_terse_info(&info, stdout);
     }
 
-#ifdef USE_MKL
-    mkl_free(eigenData.z);
-#else
-    free(eigenData.z);
-#endif
+    FREE(eigenData.z);
 #endif
 
     time(&tf);

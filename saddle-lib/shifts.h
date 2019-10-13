@@ -1,7 +1,26 @@
 #include <cjson/cJSON.h>
 #ifdef USE_MKL
 #include "mkl.h"
+#endif
+
+
+/*
+       Memory allocation
+*/
+#ifdef USE_MPI
+// Worry about this later
+#define MALLOC(A) malloc(A)
+#define REALLOC(A, B) realloc(A, B)
+#define FREE(A) free(A)
+#elif defined(USE_MKL)
 #define MALLOC_ALIGN 64
+#define MALLOC(A) mkl_malloc(A, MALLOC_ALIGN)
+#define REALLOC(A, B) mkl_realloc(A, B)
+#define FREE(A) mkl_free(A)
+#else
+#define MALLOC(A) malloc(A)
+#define REALLOC(A, B) realloc(A, B)
+#define FREE(A) free(A)
 #endif
 
 
@@ -148,8 +167,8 @@ int indexRank(const mat_int i, const int wsize, const mat_int n);
 mat_int localSize(const unsigned int wrank, const int wsize, const mat_int n);
 mat_int rankIndex(const unsigned int wrank, const int wsize, const mat_int n);
 void rankSanityTest(mat_int n);
-void readtoBlock(FILE *fp, SparseMatrix *mat, char *fileName, int wrank);
-void blockFree(SparseMatrix *mat);
+void sparseMatrixRead(FILE *fp, SparseMatrix *mat, char *fileName, int wrank);
+void sparseMatrixFree(SparseMatrix *mat);
 void matrixVector(const SparseMatrix *a,
                   const doublereal *in, doublereal *out);
 void vectorMatrix(const SparseMatrix *a,

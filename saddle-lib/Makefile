@@ -65,6 +65,8 @@ POBJS += linear_mpi.o mmio.o sort.o matrix_mpi.o
 MPICC = mpicc
 MPIFC = mpifc
 
+shifts.h: fortran.h
+
 shifts: $(SOBJS)
 	$(CC) $(CFLAGS) -o $@ $(SOBJS) $(SMINRESOBJS) $(SLFLAGS) $(LFLAGS)
 

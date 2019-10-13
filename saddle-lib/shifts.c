@@ -125,6 +125,10 @@ int main(int argc, char **argv){
     blockSize = cJSON_IsNumber(tmp)?tmp->valueint:1;
     gaugeDimension = cJSON_GetObjectItemCaseSensitive(
                                jopts, "gaugeDimension")->valueint;
+    assert(n%blockSize == 0);
+    assert(n%gaugeDimension == 0);
+    rankSanityTest(n/blockSize);
+    rankSanityTest(gaugeDimension/blockSize);
     if(wrank ==0)
         printf(" n=%i, blockSize=%i, gauge=%i\n", n, blockSize, gaugeDimension);
     // Not used if using the MKL matrix.
@@ -140,7 +144,10 @@ int main(int argc, char **argv){
     mkl_set_num_threads_local(threads);
 #endif
 
-    /* Read in Hessian Matrix */
+
+    /*
+      Read in Hessian Matrix 
+    */
     tmp = cJSON_GetObjectItemCaseSensitive(jopts, "hessFile");
     hessFile = catStrings(dataPath, tmp->valuestring);
     SparseMatrix hess, *hessp = &hess;
@@ -174,38 +181,28 @@ int main(int argc, char **argv){
 #ifdef USE_BLOCK
     hess.descr = 's';  // Symmetric matrix, with only one triangle stored.
     hess.blockSize = blockSize;
-    readtoBlock(fp, hessp, hessFile, wrank);
+    sparseMatrixRead(fp, hessp, hessFile, wrank);
     sortMatrix(hessp, (chunkSize+1)/2);
 #elif defined(USE_MKL)
     hess.descr.type = SPARSE_MATRIX_TYPE_SYMMETRIC;
     hess.descr.mode = SPARSE_FILL_MODE_LOWER;
     hess.descr.diag = SPARSE_DIAG_NON_UNIT;
     hess.blockSize = blockSize;
-    readtoBlock(fp, hessp, hessFile, wrank);
+    sparseMatrixRead(fp, hessp, hessFile, wrank);
 #else
-    mat_int k;
     hess.descr = 's';  // Symmetric matrix, with only one triangle stored.
-    hess.i = malloc(hess.nonzeros * sizeof(*hess.i));
-    hess.j = malloc(hess.nonzeros * sizeof(*hess.j));
-    hess.value = malloc(hess.nonzeros * sizeof(*hess.value));
-    for(k=0; k<hess.nonzeros; k++){
-        nread = fscanf(fp, "%u%u%le", hess.i+k, hess.j+k,
-                       hess.value+k);
-        hess.i[k] -= 1; hess.j[k] -= 1; // switch to zero-based indexing
-        if(nread < 3) {
-            fprintf(stderr, "%i:  Error reading %s, element %i\n",
-                    wrank, hessFile, k);
-            break;
-        }
-    }
+    sparseMatrixRead(fp, hessp, hessFile, wrank);
     sortMatrix(hessp, (chunkSize+1)/2);
 #endif
     fclose(fp);
 
-
     mat_int wn;
     rankSanityTest(n/blockSize);
 
+
+    /*
+          Read gradient vector
+    */
     wn = blockSize*localSize(wrank, wsize, n/blockSize);
     double *grad = malloc(wn * sizeof(double)), *gradp = grad, dummy;
     tmp = cJSON_GetObjectItemCaseSensitive(jopts, "gradFile");
@@ -227,6 +224,10 @@ int main(int argc, char **argv){
     assert(wn == gradp - grad);
     fclose(fp);
 
+
+    /*
+           Read gauge-invariant shifts matrix
+    */
     tmp = cJSON_GetObjectItemCaseSensitive(jopts, "gaugeFile");
     gaugeFile = catStrings(dataPath, tmp->valuestring);
     SparseMatrix gauge, *gaugep = &gauge;
@@ -259,28 +260,17 @@ int main(int argc, char **argv){
 #ifdef USE_BLOCK
     gauge.descr = 'g';  // General matrix
     gauge.blockSize = blockSize;
-    readtoBlock(fp, gaugep, gaugeFile, wrank);
+    sparseMatrixRead(fp, gaugep, gaugeFile, wrank);
     sortMatrix(gaugep, chunkSize);
 #elif defined(USE_MKL)
     gauge.descr.type = SPARSE_MATRIX_TYPE_GENERAL;
     gauge.descr.mode = SPARSE_FILL_MODE_LOWER;
     gauge.descr.diag = SPARSE_DIAG_NON_UNIT;
     gauge.blockSize = blockSize;
-    readtoBlock(fp, gaugep, gaugeFile, wrank);
+    sparseMatrixRead(fp, gaugep, gaugeFile, wrank);
 #else
-    gauge.descr = 'g';  // General matrix
-    gauge.i = malloc(gauge.nonzeros * sizeof(*gauge.i));
-    gauge.j = malloc(gauge.nonzeros * sizeof(*gauge.j));
-    gauge.value = malloc(gauge.nonzeros * sizeof(*gauge.value));
-    for(k=0; k<gauge.nonzeros; k++){
-        nread = fscanf(fp, "%u%u%lf", gauge.i+k, gauge.j+k, gauge.value+k);
-        gauge.i[k] -= 1; gauge.j[k] -= 1; // switch to zero-based indexing
-        if(nread < 3) {
-            fprintf(stderr, "%i:  Error reading %s, element %i\n",
-                    wrank, gaugeFile, k);
-            break;
-        }
-    }
+    gauge.descr = 'g';  // Symmetric matrix, with only one triangle stored.
+    sparseMatrixRead(fp, gaugep, gaugeFile, wrank);
     sortMatrix(gaugep, chunkSize);
 #endif
     fclose(fp);
@@ -335,15 +325,8 @@ int main(int argc, char **argv){
     fflush(stdout);
 
 
-#ifdef USE_BLOCK
-    blockFree(hessp);
-    blockFree(gaugep);
-#elif defined(USE_MKL)
-    mkl_sparse_destroy(hess.a); mkl_sparse_destroy(gauge.a);
-#else
-    free(hess.i); free(hess.j); free(hess.value);
-    free(gauge.i); free(gauge.j); free(gauge.value);
-#endif
+    sparseMatrixFree(hessp);
+    sparseMatrixFree(gaugep);
     free(fdup);
     free(absVals); free(vecs); free(shifts); free(grad);
     free(hessFile); free(gradFile); free(gaugeFile);

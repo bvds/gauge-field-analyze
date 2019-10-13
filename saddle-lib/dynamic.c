@@ -77,15 +77,10 @@ void dynamicInit(SparseMatrix *gauge, cJSON *options, void *mpicomp) {
         gaugeData.printDetails = cJSON_IsTrue(tmp)?1:0;
     }
 
-#ifdef USE_MKL
-    gaugeData.b = mkl_malloc(gauge->rows*sizeof(double), MALLOC_ALIGN);
-    gaugeData.x = mkl_malloc(gauge->rows*sizeof(double), MALLOC_ALIGN);
-    gaugeData.z = mkl_malloc(gauge->columns*sizeof(*gaugeData.z), MALLOC_ALIGN);
-#else
-    gaugeData.b = malloc(gauge->rows*sizeof(double));
-    gaugeData.x = malloc(gauge->rows*sizeof(double));
-    gaugeData.z = malloc(gauge->columns*sizeof(*gaugeData.z));
-#endif
+
+    gaugeData.b = MALLOC(gauge->rows*sizeof(double));
+    gaugeData.x = MALLOC(gauge->rows*sizeof(double));
+    gaugeData.z = MALLOC(gauge->columns*sizeof(*gaugeData.z));
 
     /* Calculate the smallest eigenvalue of gaugeProduct.  
        This will inform the stopping condition for MINRES.
@@ -242,15 +237,9 @@ void dynamicClose() {
         fflush(stdout);
     }
 
-#ifdef USE_MKL
-    mkl_free(gaugeData.z);
-    mkl_free(gaugeData.b);
-    mkl_free(gaugeData.x);
-#else
-    free(gaugeData.z);
-    free(gaugeData.b);
-    free(gaugeData.x);
-#endif
+    FREE(gaugeData.z);
+    FREE(gaugeData.b);
+    FREE(gaugeData.x);
 }
 
 /* Interface for Trlan.

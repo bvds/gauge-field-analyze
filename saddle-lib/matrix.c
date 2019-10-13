@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include <assert.h>
 #include <time.h>
 #ifdef USE_MPI
@@ -49,30 +50,25 @@ void rankSanityTest(mat_int n) {
 }
 
 
+void sparseMatrixRead(FILE *fp, SparseMatrix *mat, char *fileName, int wrank) {
+    mat_int k;
+    int nread;
 #ifdef USE_BLOCK
-void readtoBlock(FILE *fp, SparseMatrix *mat, char *fileName, int wrank) {
-    mat_int j;
-    mat_int i, k, ii, jj, lastii = 0, blockCols = 0;
+    mat_int i, j, ii, jj, lastii = 0, blockCols = 0;
     mat_int *blockColp;
     const mat_int block = mat->blockSize,
         maxBlockCol = mat->columns/block;
     double value, *blockRowValue, *blockValuep;
-    int *blockColFlag, nread;
+    int *blockColFlag;
     assert(mat->rows%block == 0);
     assert(mat->columns%block == 0);
     mat->blocks = 0;
     blockRowValue = malloc(mat->columns*block*sizeof(*blockRowValue));
     blockColFlag = malloc(maxBlockCol*sizeof(*blockColFlag));
     blockColp = malloc(maxBlockCol*sizeof(*blockColp));
-#ifdef USE_MKL
-    mat->value = mkl_malloc(0, MALLOC_ALIGN);
-    mat->i = mkl_malloc(0, MALLOC_ALIGN);
-    mat->j = mkl_malloc(0, MALLOC_ALIGN);
-#else
-    mat->value = NULL;
-    mat->i = NULL;
-    mat->j = NULL;
-#endif
+    mat->value = MALLOC(0);
+    mat->i = MALLOC(0);
+    mat->j = MALLOC(0);
     memset(blockRowValue, 0, mat->columns*block*sizeof(double));
     memset(blockColFlag, 0, maxBlockCol*sizeof(*blockColFlag));
     for(j=0;; j++){
@@ -88,21 +84,12 @@ void readtoBlock(FILE *fp, SparseMatrix *mat, char *fileName, int wrank) {
         }
         if(j==mat->nonzeros || (lastii<ii && ii%block == 0)) {
             // Retire block row and reset for a new one
-#ifdef USE_MKL
-            mat->value = mkl_realloc(mat->value,
+            mat->value = REALLOC(mat->value,
                      (mat->blocks + blockCols)*block*block*sizeof(double));
-            mat->i = mkl_realloc(mat->i,
+            mat->i = REALLOC(mat->i,
                      (mat->blocks + blockCols)*sizeof(*mat->i));
-            mat->j = mkl_realloc(mat->j,
+            mat->j = REALLOC(mat->j,
                      (mat->blocks + blockCols)*sizeof(*mat->j));
-#else
-            mat->value = realloc(mat->value,
-                    (mat->blocks + blockCols)*block*block*sizeof(double));
-            mat->i = realloc(mat->i,
-                    (mat->blocks + blockCols)*sizeof(*mat->i));
-            mat->j = realloc(mat->j,
-                    (mat->blocks + blockCols)*sizeof(*mat->j));
-#endif
             for(i=0; i<blockCols; i++) {
                 k = blockColp[i];
 #if 0
@@ -153,29 +140,12 @@ void readtoBlock(FILE *fp, SparseMatrix *mat, char *fileName, int wrank) {
         }
     }
 #endif
-}
-
-void blockFree(SparseMatrix *mat) {
-#ifdef USE_MKL
-    mkl_free(mat->value);
-    mkl_free(mat->i);
-    mkl_free(mat->j);
-#else
-    free(mat->value);
-    free(mat->i);
-    free(mat->j);
-#endif
-}
-
 #elif defined(USE_MKL)
-void readtoBlock(FILE *fp, SparseMatrix *mat, char *fileName, int wrank) {
-    mat_int k;
-    int nread;
     sparse_status_t err;
     sparse_matrix_t coordMatrix;
-    mat->i = mkl_malloc(mat->nonzeros * sizeof(*(mat->i)), MALLOC_ALIGN);
-    mat->j = mkl_malloc(mat->nonzeros * sizeof(*(mat->j)), MALLOC_ALIGN);
-    mat->value = mkl_malloc(mat->nonzeros * sizeof(*(mat->value)), MALLOC_ALIGN);
+    mat->i = MALLOC(mat->nonzeros * sizeof(*(mat->i)));
+    mat->j = MALLOC(mat->nonzeros * sizeof(*(mat->j)));
+    mat->value = MALLOC(mat->nonzeros * sizeof(*(mat->value)));
     for(k=0; k<mat->nonzeros; k++){
         nread = fscanf(fp, "%d%d%le", mat->i+k, mat->j+k, mat->value+k);
         if(nread < 3) {
@@ -214,13 +184,39 @@ void readtoBlock(FILE *fp, SparseMatrix *mat, char *fileName, int wrank) {
         fprintf(stderr, "%i:  mkl_sparse_optimize failed %i\n", wrank, err);
         exit(59);
     }
-    mkl_free(mat->i); mkl_free(mat->j); mkl_free(mat->value);
+    FREE(mat->i);
+    FREE(mat->j);
+    FREE(mat->value);
     if((err = mkl_sparse_destroy(coordMatrix)) != SPARSE_STATUS_SUCCESS) {
         fprintf(stderr, "%i:  failed %i\n", wrank, err);
         exit(60);
     }
- }
+#else
+    mat->i = MALLOC(mat->nonzeros * sizeof(*mat->i));
+    mat->j = MALLOC(mat->nonzeros * sizeof(*mat->j));
+    mat->value = MALLOC(mat->nonzeros * sizeof(*mat->value));
+    for(k=0; k<mat->nonzeros; k++){
+        nread = fscanf(fp, "%u%u%le", mat->i+k, mat->j+k,
+                       mat->value+k);
+        mat->i[k] -= 1; mat->j[k] -= 1; // switch to zero-based indexing
+        if(nread < 3) {
+            fprintf(stderr, "%i:  Error reading %s, element %i\n",
+                    wrank, fileName, k);
+            break;
+        }
+    }
 #endif
+}
+
+void sparseMatrixFree(SparseMatrix *mat) {
+#if defined(USE_MKL) && !defined(USE_BLOCK) && !defined(USE_MPI)
+    mkl_sparse_destroy(mat->a);
+#else
+    FREE(mat->value);
+    FREE(mat->i);
+    FREE(mat->j);
+#endif
+}
 
 /* in and out must be distinct */
 void matrixVector(const SparseMatrix *a,
