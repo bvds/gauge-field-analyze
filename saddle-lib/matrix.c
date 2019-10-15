@@ -140,7 +140,7 @@ void sparseMatrixRead(FILE *fp, SparseMatrix *mat, char *fileName, int wrank) {
         }
     }
 #endif
-#elif defined(USE_MKL)
+#elif defined(USE_MKL) && !defined(USE_MPI)
     sparse_status_t err;
     sparse_matrix_t coordMatrix;
     mat->i = MALLOC(mat->nonzeros * sizeof(*(mat->i)));
@@ -220,7 +220,14 @@ void sparseMatrixFree(SparseMatrix *mat) {
 
 /* in and out must be distinct */
 void matrixVector(const SparseMatrix *a,
-                  const doublereal *in, doublereal *out) {
+                  const mat_int lin, const doublereal *in,
+                  const mat_int lout, doublereal *out, void *mpicomp) {
+#ifdef USE_MPI
+#else
+    assert(mpicomp == NULL);
+    assert(lin == a->columns);
+    assert(lout == a->rows);
+#endif
 #ifdef USE_BLOCK
     size_t k;
     double *matp = a->value;
@@ -229,7 +236,7 @@ void matrixVector(const SparseMatrix *a,
     const integer inc=1;
     const char trans='T', normal='N';
 
-    memset(out, 0, a->rows * sizeof(double));
+    memset(out, 0, lout * sizeof(double));
     for(k=0; k<a->blocks; k++, matp+=n2) {
         DGEMV(&trans, &n, &n, &one,
               matp, &n, in + a->j[k], &inc, &one,
@@ -241,21 +248,21 @@ void matrixVector(const SparseMatrix *a,
                   out + a->j[k], &inc);
         }
     }
-#elif defined(USE_MKL)
+#elif defined(USE_MKL) && !defined(USE_MPI)
     sparse_status_t err;
     const double alpha = 1.0, beta=0.0;
     double d;
 
     if((err=mkl_sparse_d_dotmv(SPARSE_OPERATION_NON_TRANSPOSE,
-              alpha, a->a, a->descr, in, beta, out, &d)) !=
-           SPARSE_STATUS_SUCCESS) {
+                  alpha, a->a, a->descr, in, beta, out, &d)) !=
+                              SPARSE_STATUS_SUCCESS) {
         fprintf(stderr, "mkl_sparse_d_dotmv failed %i\n", err);
         exit(69);
     }
 #else
     mat_int i, j, k;
     double value;
-    memset(out, 0, a->rows * sizeof(double));
+    memset(out, 0, lout * sizeof(double));
     for(k=0; k<a->nonzeros; k++) {
         i = a->i[k];
         j = a->j[k];
@@ -269,7 +276,14 @@ void matrixVector(const SparseMatrix *a,
 }
 
 void vectorMatrix(const SparseMatrix *a,
-                  const doublereal *in, doublereal *out) {
+                  const mat_int lin, const doublereal *in,
+                  const mat_int lout, doublereal *out, void *mpicomp) {
+#ifdef USE_MPI
+#else
+    assert(mpicomp == NULL);
+    assert(lin == a->rows);
+    assert(lout == a->columns);
+#endif
 #ifdef USE_BLOCK
     size_t k;
     double *matp = a->value;
@@ -278,7 +292,7 @@ void vectorMatrix(const SparseMatrix *a,
     const integer inc=1;
     const char trans='T', normal='N';
 
-    memset(out, 0, a->columns * sizeof(*out));
+    memset(out, 0, lout * sizeof(*out));
     for(k=0; k<a->blocks; k++, matp+=n2) {
         DGEMV(&normal, &n, &n, &one,
               matp, &n, in + a->i[k], &inc, &one,
@@ -290,21 +304,21 @@ void vectorMatrix(const SparseMatrix *a,
                   out + a->i[k], &inc);
         }
     }
-#elif defined(USE_MKL)
+#elif defined(USE_MKL) && !defined(USE_MPI)
     sparse_status_t err;
     const double alpha = 1.0, beta=0.0;
     double d;
 
     if((err=mkl_sparse_d_dotmv(SPARSE_OPERATION_TRANSPOSE,
-              alpha, a->a, a->descr, in, beta, out, &d)) !=
-           SPARSE_STATUS_SUCCESS) {
+                   alpha, a->a, a->descr, in, beta, out, &d)) !=
+                            SPARSE_STATUS_SUCCESS) {
         fprintf(stderr, "mkl_sparse_d_dotmv failed %i\n", err);
         exit(68);
     }
 #else
     mat_int i, j, k;
     double value;
-    memset(out, 0, a->columns * sizeof(*out));
+    memset(out, 0, lout * sizeof(*out));
     for(k=0; k<a->nonzeros; k++) {
         i = a->i[k];
         j = a->j[k];

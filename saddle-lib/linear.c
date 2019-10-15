@@ -10,10 +10,14 @@
 */
 
 struct {
+    mat_int nrow;
     SparseMatrix *matrix;
     doublereal *vecs;
     integer nvecs;
     doublereal *z;
+#ifdef USE_MPI
+    MPI_Comm mpicom;
+#endif
 } hessData;
 
 struct {
@@ -23,12 +27,22 @@ struct {
     int count;
     integer maxVecs;
     integer pointer;
+#ifdef USE_MPI
+    MPI_Comm mpicom;
+#endif
 } minresOrtho;
 
-void linearInit(SparseMatrix *hess, double *vecs, int nvecs) {
+void linearInit(SparseMatrix *hess, const mat_int nrow,
+                double *vecs, int nvecs, void *mpicomp) {
+    hessData.nrow = nrow;  // For sanity checks
     hessData.matrix = hess;
     hessData.vecs = vecs;
     hessData.nvecs = nvecs;
+#ifdef USE_MPI
+    hessData.mpicom = *((MPI_Comm *) mpicomp);
+#else
+    assert(mpicomp == NULL);
+#endif
 }
 
 /* "in" and "out" may overlap */
@@ -37,12 +51,12 @@ void linearSolve(integer n, double *b, cJSON *options, double *x) {
     // Explicit value for these, so we can force MINRES alogrithm.
     doublereal trancond, acondlim = 1.0e15;
     logical *disablep = NULL;
-    integer nout, *noutp = NULL, istop, itn,
-        itnlim = n; // Assuming reorthogonalization
+    integer nout, *noutp = NULL, istop, itn, itnlim;
     cJSON *tmp;
     doublereal rnorm, arnorm, xnorm, anorm, acond,
         rtol, *rtolp = NULL, *abstolp = NULL;
-    int printDetails = 0;
+    int printDetails = 0, wrank;
+    unsigned long tcpu;
     clock_t t1;
     time_t t2, tf;
 
@@ -50,9 +64,9 @@ void linearSolve(integer n, double *b, cJSON *options, double *x) {
     time(&t2);
 
     tmp  = cJSON_GetObjectItemCaseSensitive(options, "maxIterations");
-    if(cJSON_IsNumber(tmp)) {
-        itnlim = tmp->valueint;
-    }
+    itnlim = cJSON_IsNumber(tmp)?(mat_int) tmp->valueint:
+        // Default appropriate for full reorthogonalization
+        hessData.matrix->rows;
     tmp  = cJSON_GetObjectItemCaseSensitive(options, "maxLanczosVecs");
     minresOrtho.maxVecs = cJSON_IsNumber(tmp)?tmp->valueint:itnlim;
     //
@@ -73,25 +87,26 @@ void linearSolve(integer n, double *b, cJSON *options, double *x) {
         printf("linearSolve writing to stdout\n");
     }
 
-    assert(n>=0);
-    assert(abs(n) == hessData.matrix->columns);
-    assert(abs(n) == hessData.matrix->rows);
+    assert(hessData.nrow == (mat_int) n);
     hessData.z = malloc(hessData.nvecs*sizeof(doublereal));
     if((minresOrtho.z = malloc(minresOrtho.maxVecs*
                                sizeof(doublereal))) == NULL) {
-        fprintf(stderr, "Can't allocated minresOrtho.z size %i*%li\n",
+        fprintf(stderr, "Can't allocate minresOrtho.z size %i*%li\n",
                 minresOrtho.maxVecs, sizeof(doublereal));
         exit(124);
     }
     if((minresOrtho.vecs = malloc(minresOrtho.maxVecs*n*
                                   sizeof(doublereal))) == NULL) {
-        fprintf(stderr, "Can't allocated minresOrtho.vecs size %i*%i*%li\n",
+        fprintf(stderr, "Can't allocate minresOrtho.vecs size %i*%i*%li\n",
                 minresOrtho.maxVecs, n, sizeof(doublereal));
         exit(125);
     }
     minresOrtho.nvecs = 0;
     minresOrtho.pointer = 0;
     minresOrtho.count = 0;
+#ifdef USE_MPI
+    minresOrtho.mpicom = hessData.mpicom;
+#endif
 
     /* grad may have components in the large shift direction */
     largeShiftProject(n, b);
@@ -113,23 +128,30 @@ void linearSolve(integer n, double *b, cJSON *options, double *x) {
     minresOrtho.nvecs = 0;
 
     time(&tf);
-    if(printDetails > 0) {
+    tcpu = clock() - t1;
+#ifdef USE_MPI
+    MPI_Comm_rank(hessData.mpicom, &wrank);
+    MPI_Allreduce(MPI_IN_PLACE, &tcpu, 1, MPI_LONG,
+                  MPI_SUM, hessData.mpicom);
+#else
+    wrank = 0;
+#endif
+    if(printDetails > 0 && wrank==0) {
         printf("linearSolve:  %i iterations, %i reorthogonalizations "
                "in %.2f sec (%li wall)\n",
                itn, minresOrtho.count,
-               (clock()-t1)/(float) CLOCKS_PER_SEC, tf-t2);
+               tcpu/(float) CLOCKS_PER_SEC, tf-t2);
         fflush(stdout);
     }
 
     if(istop >= 7) {
-        fprintf(stderr, "MINRES returned with istop=%i in %s, exiting.\n", istop, __FILE__);
+        fprintf(stderr, "%i:  MINRES returned with istop=%i in %s, exiting.\n",
+                wrank, istop, __FILE__);
         exit(14);
     }
 }
 
 void hessProduct(integer *n, doublereal *x, doublereal *y) {
-    assert(abs(*n) == hessData.matrix->rows);
-    assert(abs(*n) == hessData.matrix->columns);
     hessOp(*n, 1, x, *n, y, *n, NULL);
     largeShiftProject(*n, y);
 }
@@ -140,9 +162,6 @@ void userOrtho(char *action, integer *n, double *y) {
     const double one=1.0, zero=0.0, minusone=-1.0;
     const integer inc=1;
     const integer dn = *n * sizeof(double);
-
-    assert(abs(*n) == hessData.matrix->rows);
-    assert(abs(*n) == hessData.matrix->columns);
 
     if(*action=='a') {
         /* add vector to ortho list */
@@ -166,6 +185,10 @@ void userOrtho(char *action, integer *n, double *y) {
         DGEMV(&trans, n, &minresOrtho.nvecs, &one,
               minresOrtho.vecs, n, y, &inc, &zero,
               minresOrtho.z, &inc);
+#ifdef USE_MPI
+        MPI_Allreduce(MPI_IN_PLACE, minresOrtho.z, minresOrtho.nvecs,
+                      MPI_DOUBLE_PRECISION, MPI_SUM, minresOrtho.mpicom);
+#endif
         DGEMV(&normal, n, &minresOrtho.nvecs, &minusone,
               minresOrtho.vecs, n, minresOrtho.z, &inc, &one,
               y, &inc);
@@ -184,9 +207,15 @@ void largeShiftProject(integer n, double *y) {
     const double one=1.0, zero=0.0, minusone=-1.0;
     const integer inc=1;
 
+    assert(hessData.nrow == (mat_int) n);
+
     DGEMV(&trans, &n, &hessData.nvecs, &one,
           hessData.vecs, &n, y, &inc, &zero,
           hessData.z, &inc);
+#ifdef USE_MPI
+    MPI_Allreduce(MPI_IN_PLACE, hessData.z, hessData.nvecs,
+                  MPI_DOUBLE_PRECISION, MPI_SUM, hessData.mpicom);
+#endif
     DGEMV(&normal, &n, &hessData.nvecs, &minusone,
           hessData.vecs, &n, hessData.z, &inc, &one,
           y, &inc);

@@ -20,9 +20,6 @@
 #include <libgen.h> // POSIX
 #include <assert.h>
 #include <time.h>
-#ifdef USE_MPI
-#include <mpi.h>
-#endif
 #include "shifts.h"
 #include "mmio.h"
 #ifdef USE_MKL
@@ -64,8 +61,8 @@ int main(int argc, char **argv){
     char *fdup, *dataPath, *hessFile, *gradFile, *gaugeFile;
     char *options;
     cJSON *jopts, *tmp;
-    int i, n, blockSize, gaugeDimension, wsize, wrank;
-    mat_int nLargeShifts;
+    int i, blockSize, nLargeShifts, wsize, wrank;
+    mat_int k, n, local_n, gaugeDimension, local_gaugeDimension;
     FILE *fp;
     MM_typecode matcode;
     int nread;
@@ -85,7 +82,7 @@ int main(int argc, char **argv){
     */
     int threads;
 #endif
-    long int twall = 0, tcpu = 0;
+    long int twall = 0, tcpu = 0, toverall;
     clock_t t1, tt1;
     time_t t2, tt2, tf;
 
@@ -96,7 +93,7 @@ int main(int argc, char **argv){
     /* Initialize MPI */
 #ifdef USE_MPI
     if(MPI_Init(&argc, &argv) != MPI_SUCCESS) {
-        fprintf(stderr, "%i:  Failed to initialize MPI.", wrank);
+        fprintf(stderr, "Failed to initialize MPI.");
         exit(321);
     }
     MPI_Comm_size(MPI_COMM_WORLD, &wsize);
@@ -121,14 +118,21 @@ int main(int argc, char **argv){
     options = readFile(argv[1]);
     jopts = cJSON_Parse(options);
     n = cJSON_GetObjectItemCaseSensitive(jopts, "n")->valueint;
-    tmp = cJSON_GetObjectItemCaseSensitive(jopts, "blockSize");
-    blockSize = cJSON_IsNumber(tmp)?tmp->valueint:1;
+    /* Needed for calculation of the cutoff.
+       In the parallel case, local size should be
+       a multiple of blockSize.  */
+    blockSize = cJSON_GetObjectItemCaseSensitive(jopts, "blockSize")->valueint;
+    assert(n%blockSize == 0);
+    rankSanityTest(n/blockSize);
+    local_n = blockSize*localSize(wrank, wsize, n/blockSize);
+    assert(wsize>1 || local_n ==n );
     gaugeDimension = cJSON_GetObjectItemCaseSensitive(
                                jopts, "gaugeDimension")->valueint;
-    assert(n%blockSize == 0);
     assert(n%gaugeDimension == 0);
-    rankSanityTest(n/blockSize);
     rankSanityTest(gaugeDimension/blockSize);
+    local_gaugeDimension = blockSize*localSize(wrank, wsize,
+                                               gaugeDimension/blockSize);
+    assert(wsize>1 || local_gaugeDimension == gaugeDimension);
     if(wrank ==0)
         printf(" n=%i, blockSize=%i, gauge=%i\n", n, blockSize, gaugeDimension);
     // Not used if using the MKL matrix.
@@ -176,18 +180,18 @@ int main(int argc, char **argv){
     }
     if(wrank ==0)
         printf(" with %i nonzero elements.\n", hess.nonzeros);
-    assert(hess.rows == abs(n));
-    assert(hess.columns == abs(n));
+    assert(hess.rows == n);
+    assert(hess.columns == n);
 #ifdef USE_BLOCK
-    hess.descr = 's';  // Symmetric matrix, with only one triangle stored.
     hess.blockSize = blockSize;
+    hess.descr = 's';  // Symmetric matrix, with only one triangle stored.
     sparseMatrixRead(fp, hessp, hessFile, wrank);
     sortMatrix(hessp, (chunkSize+1)/2);
-#elif defined(USE_MKL)
+#elif defined(USE_MKL) && !defined(USE_MPI)
+    hess.blockSize = blockSize;
     hess.descr.type = SPARSE_MATRIX_TYPE_SYMMETRIC;
     hess.descr.mode = SPARSE_FILL_MODE_LOWER;
     hess.descr.diag = SPARSE_DIAG_NON_UNIT;
-    hess.blockSize = blockSize;
     sparseMatrixRead(fp, hessp, hessFile, wrank);
 #else
     hess.descr = 's';  // Symmetric matrix, with only one triangle stored.
@@ -196,32 +200,29 @@ int main(int argc, char **argv){
 #endif
     fclose(fp);
 
-    mat_int wn;
-    rankSanityTest(n/blockSize);
 
 
     /*
           Read gradient vector
     */
-    wn = blockSize*localSize(wrank, wsize, n/blockSize);
-    double *grad = malloc(wn * sizeof(double)), *gradp = grad, dummy;
+    double *grad = malloc(local_n * sizeof(double)), *gradp = grad, dummy;
     tmp = cJSON_GetObjectItemCaseSensitive(jopts, "gradFile");
     gradFile = catStrings(dataPath, tmp->valuestring);
     if(wrank ==0)
         printf("Opening file %s for a vector of length %i\n", gradFile, n);
     fp = fopen(gradFile, "r");
-    for(i=0; i<n; i++){
-        if(indexRank(i/blockSize, wsize, n/blockSize) == wrank)
+    for(k=0; k<n; k++){
+        if(indexRank(k/blockSize, wsize, n/blockSize) == wrank)
             nread = fscanf(fp, "%le", gradp++);
         else
             nread = fscanf(fp, "%le", &dummy);
         if(nread < 1) {
             fprintf(stderr, "%i:  Error reading %s on line %i\n",
-                    wrank, gradFile, i);
+                    wrank, gradFile, k);
             break;
         }
     }
-    assert(wn == gradp - grad);
+    assert(local_n == gradp - grad);
     fclose(fp);
 
 
@@ -254,19 +255,18 @@ int main(int argc, char **argv){
     }
     if(wrank ==0)
         printf(" with %i nonzero elements.\n", gauge.nonzeros);
-    assert(gauge.rows == abs(gaugeDimension));
-    assert(gauge.columns == abs(n));
-
+    assert(gauge.rows == gaugeDimension);
+    assert(gauge.columns == n);
 #ifdef USE_BLOCK
-    gauge.descr = 'g';  // General matrix
     gauge.blockSize = blockSize;
+    gauge.descr = 'g';  // General matrix
     sparseMatrixRead(fp, gaugep, gaugeFile, wrank);
     sortMatrix(gaugep, chunkSize);
-#elif defined(USE_MKL)
+#elif defined(USE_MKL) && !defined(USE_MPI)
+    gauge.blockSize = blockSize;
     gauge.descr.type = SPARSE_MATRIX_TYPE_GENERAL;
     gauge.descr.mode = SPARSE_FILL_MODE_LOWER;
     gauge.descr.diag = SPARSE_DIAG_NON_UNIT;
-    gauge.blockSize = blockSize;
     sparseMatrixRead(fp, gaugep, gaugeFile, wrank);
 #else
     gauge.descr = 'g';  // Symmetric matrix, with only one triangle stored.
@@ -282,25 +282,25 @@ int main(int argc, char **argv){
 
     /* Solve it!  */
 
-    double *shifts = malloc(n * sizeof(double));
+    double *shifts = malloc(local_n * sizeof(double));
     double *absVals, *vecs;
     int nvals;
     tmp = cJSON_GetObjectItemCaseSensitive(jopts, "dynamicPartOptions");
     assert(tmp != NULL);
-    dynamicInit(gaugep, tmp, mpicomp);
-    eigenInit(hessp);
+    dynamicInit(local_gaugeDimension, local_n, gaugep, tmp, mpicomp);
     // Debug print:
 #if 0
-    testOp(hessp, grad);
+    testOp(hessp, local_n, grad, mpicomp);
 #endif
     tmp = cJSON_GetObjectItemCaseSensitive(jopts, "largeShiftOptions");
     assert(tmp != NULL);
-    largeShiftsCheckpoint(grad, tmp, &absVals, &vecs, &nvals, mpicomp);
-    cutoffNullspace(n, nvals, jopts, grad, &absVals, &vecs, &nLargeShifts);
-    linearInit(hessp, vecs, nLargeShifts);
+    largeShifts(hessp, tmp, local_n, grad, &absVals, &vecs, &nvals, mpicomp);
+    cutoffNullspace(local_n, nvals, jopts, grad, &absVals, &vecs,
+                    &nLargeShifts, mpicomp);
+    linearInit(hessp, local_n, vecs, nLargeShifts, mpicomp);
     tmp = cJSON_GetObjectItemCaseSensitive(jopts, "linearSolveOptions");
     assert(tmp != NULL);
-    linearSolve(n, grad, tmp, shifts);
+    linearSolve(local_n, grad, tmp, shifts);
     dynamicClose();
 
 
@@ -310,19 +310,35 @@ int main(int argc, char **argv){
     time(&t2);
     if(wrank ==0)
         printf("Opening output file %s\n", argv[2]);
-    fp = fopen(argv[2], "w");
-    for(i=0; i<n; i++){
-        fprintf(fp, "%.17e\n", shifts[i]);
+    for(i=0; i<wsize; i++) {
+        if(wrank == i) {
+            fp = fopen(argv[2], wrank==0?"w":"a");
+            for(k=0; k<local_n; k++) {
+                fprintf(fp, "%.17e\n", shifts[k]);
+            }
+            fclose(fp);
+        }
+#ifdef USE_MPI
+        MPI_Barrier(mpicom);
+#endif
     }
-    fclose(fp);
     time(&tf);
     tcpu += clock()-t1;
+    toverall = clock()-tt1;
+#ifdef USE_MPI
+    MPI_Allreduce(MPI_IN_PLACE, &tcpu, 1, MPI_LONG,
+                  MPI_SUM, MPI_COMM_WORLD);
+    MPI_Allreduce(MPI_IN_PLACE, &toverall, 1, MPI_LONG,
+                  MPI_SUM, MPI_COMM_WORLD);
+#endif
     twall += tf - t2;
-    printf("%s:  input/output in %.2f sec (%li wall)\n",
-           __FILE__, tcpu/(float) CLOCKS_PER_SEC, twall);
-    printf("%s:  overall time %.2f sec (%li wall)\n",
-           __FILE__, (clock()-tt1)/(float) CLOCKS_PER_SEC, tf-tt2);
-    fflush(stdout);
+    if(wrank==0) {
+        printf("%s:  input/output in %.2f sec (%li wall)\n",
+               __FILE__, tcpu/(float) CLOCKS_PER_SEC, twall);
+        printf("%s:  overall time %.2f sec (%li wall)\n",
+               __FILE__, (toverall)/(float) CLOCKS_PER_SEC, tf-tt2);
+        fflush(stdout);
+    }
 
 
     sparseMatrixFree(hessp);

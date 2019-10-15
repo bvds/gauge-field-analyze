@@ -60,76 +60,17 @@ struct {
     int sumNcol;
     int maxNcol;
     clock_t tcpu_mv;
+    void *mpicomp;
 } eigenData;
 
-void eigenInit(SparseMatrix *hess) {
-    eigenData.matrix = hess;
-}
-
-/*
-   Wrapper to optionally read/write checkpoint file.
-   For debugging.
-*/
-
-void largeShiftsCheckpoint(double *initialVector, cJSON *options,
-                           double **vals, double **vecs, int *nvals,
-                           void *mpicomp) {
-    cJSON *tmp;
-    char *checkpoint;
-    FILE *fp;
-    int k;
-    mat_int i, nn, n = eigenData.matrix->rows;
-    tmp = cJSON_GetObjectItemCaseSensitive(options, "readCheckpoint");
-    if(tmp == NULL) {
-        largeShifts(initialVector, options, vals, vecs, nvals, mpicomp);
-        tmp = cJSON_GetObjectItemCaseSensitive(options, "writeCheckpoint");
-        if(tmp != NULL) {
-            checkpoint = tmp->valuestring;
-            printf("Opening output file %s\n", checkpoint);
-            if((fp = fopen(checkpoint, "w")) == NULL) {
-                fprintf(stderr, "Can't open file %s\n", checkpoint);
-                exit(555);
-            }
-            fprintf(fp,"%u %u\n", n, *nvals);
-            for(i=0; i<n; i++){
-                fprintf(fp, "%.17e\n", (*vals)[i]);
-            }
-            for(i=0; i<*nvals*n; i++){
-                fprintf(fp, "%.17e\n", (*vecs)[i]);
-            }
-            fclose(fp);
-        }
-    } else {
-        checkpoint = tmp->valuestring;
-        printf("Opening input file %s\n", checkpoint);
-        if((fp = fopen(checkpoint, "r")) == NULL) {
-            fprintf(stderr, "Can't open file %s\n", checkpoint);
-            exit(555);
-        }
-        k = fscanf(fp, "%u%d", &nn, nvals);
-        assert(nn==n);
-        assert(k==2);
-        *vals = malloc(n*sizeof(double));
-        *vecs = malloc(n*(*nvals)*sizeof(double));
-        for(i=0; i<n; i++) {
-            k = fscanf(fp, "%le", (*vals)+i);
-            assert(k==1);
-        }
-        for(i=0; i<n*(*nvals); i++) {
-            k = fscanf(fp, "%le", (*vecs)+i);
-            assert(k==1);
-        }
-        fclose(fp);
-    }
-}
 
 /*
   Returns the absolute values of the lowest eigenvalues of
   the Hessian.
  */
-void largeShifts(double *initialVector, cJSON *options,
-		 double **eval, double **evec, int *nvals,
-                 void *mpicomp) {
+void largeShifts(SparseMatrix *hess, cJSON *options,
+                 const mat_int nrow, double *initialVector,
+		 double **eval, double **evec, int *nvals, void *mpicomp) {
 #ifdef USE_PRIMME
     primme_params primme;
     double *rnorm;   /* Array with the computed eigenpairs residual norms */
@@ -139,19 +80,23 @@ void largeShifts(double *initialVector, cJSON *options,
     const int lwrk = 0;
     const int iguess = 1; // Use supplies the intial vector in evec
     double *wrk = NULL;
-    int mev, maxlan, maxmv;
+    int mev, maxlan, maxmv, wrank;
     double tol = -1.0; // Use default tolerance: sqrt(machine epsilon)
     /* Strategies 3 & 4 are for matrices where the matrix-vector 
        multiply is relatively expensive.  */
     int restart = 4;
     trl_info info;
-    int k;
+    mat_int k;
 #endif
-    SparseMatrix *hess = eigenData.matrix;
-    int nrow = hess->rows; // number of rows on this processor
     int ned = 1;  // number of requested eigenpairs.
     int lohi = -1; // lowest or highest abs value eigenpairs.
     int i, ierr, printDetails = 1;
+#ifdef USE_MPI
+    MPI_Comm mpicom = *((MPI_Comm *) mpicomp);
+    MPI_Comm_rank(mpicom, &wrank);
+#else
+    wrank = 0;
+#endif
     cJSON *tmp;
     clock_t t1;
     time_t t2, tf;
@@ -159,12 +104,13 @@ void largeShifts(double *initialVector, cJSON *options,
     t1 = clock();
     time(&t2);
     
+    eigenData.matrix = hess;
+    eigenData.mpicomp = mpicomp;
     eigenData.ops = 0;
     eigenData.sumNcol = 0;
     eigenData.maxNcol = 0;
     eigenData.tcpu_mv = 0;
 
-    assert(hess->columns == hess->rows);
     assert(eval != NULL);
     assert(evec != NULL);
 
@@ -184,7 +130,7 @@ void largeShifts(double *initialVector, cJSON *options,
     /* Set default values in PRIMME configuration struct */
     primme_initialize(&primme);
     primme.matrixMatvec = hessOpPrimme;
-    primme.n = hess->rows;
+    primme.n = nrow;
     primme.numEvals = ned;
     primme.target = lohi<0?primme_closest_abs:primme_largest_abs;
     primme.numTargetShifts = 1;
@@ -247,7 +193,7 @@ void largeShifts(double *initialVector, cJSON *options,
     }
 
     // Used by HessOp2
-    eigenData.z = MALLOC(hess->rows * sizeof(double));
+    eigenData.z = MALLOC(nrow * sizeof(double));
     mev = ned; // Allocate memory for the number of requested eigenpairs
     *eval = (double *) malloc(mev*sizeof(double));
     *evec = (double *) malloc(mev*nrow*sizeof(double));
@@ -256,8 +202,8 @@ void largeShifts(double *initialVector, cJSON *options,
     trl_set_iguess(&info, 0, iguess, 0, NULL);
     memset(*eval, 0, mev*sizeof(double));
     // Provide the initial vector
-    for( i=0; i<nrow; i++ ) {
-        (*evec)[i] = initialVector==NULL?1.0:initialVector[i];
+    for (k=0; k<nrow; k++ ) {
+        (*evec)[k] = initialVector==NULL?1.0:initialVector[k];
     }
 
     // call TRLAN to compute the eigenvalues
@@ -266,10 +212,9 @@ void largeShifts(double *initialVector, cJSON *options,
     *nvals = info.nec;
     ierr = info.stat;
     if(printDetails > 1) {
-        /* This estimate of flops doesn't include dynamicProject() call. 
-           Assuming 1 addition and 1 multiply per nonzero element,
+        /* This estimate of flops doesn't include the dynamicProject() call.
            2 matrix multiplies. */
-        trl_print_info(&info, 4*(hess->nonzeros));
+        trl_print_info(&info, 2*(hess->nonzeros));
     } else if(printDetails > 0) {
         trl_terse_info(&info, stdout);
     }
@@ -278,7 +223,11 @@ void largeShifts(double *initialVector, cJSON *options,
 #endif
 
     time(&tf);
-    if(printDetails > 0) {
+#ifdef USE_MPI
+    MPI_Allreduce(MPI_IN_PLACE, &eigenData.tcpu_mv, 1, MPI_LONG,
+                  MPI_SUM, mpicom);
+#endif
+    if(printDetails > 0 && wrank==0) {
         printf("largeShifts: ops=%i, sumNcol=%i, maxNcol=%i\n",
                eigenData.ops, eigenData.sumNcol, eigenData.maxNcol);
         printf("largeShifts: %i matrix-vector ops, "
@@ -295,17 +244,17 @@ void largeShifts(double *initialVector, cJSON *options,
     }
 
     if(ierr < 0 || *nvals < ned) {
-        fprintf(stderr, "large shift exit with stat=%i, "
+        fprintf(stderr, "%i:  large shift exit with stat=%i, "
                 "finding %i of %i eigenpairs.\n",
-               ierr, *nvals, ned);
+                wrank, ierr, *nvals, ned);
         exit(8);
     }
 
 #ifndef USE_PRIMME
     /* We have calculated eigenvalues for hess^2.
        Convert to abs(eigenvalues) of hess itself. */
-    for(k=0; k<*nvals; k++) {
-        (*eval)[k] = sqrt((*eval)[k]);
+    for(i=0; i<*nvals; i++) {
+        (*eval)[i] = sqrt((*eval)[i]);
     }
 #endif
 }
@@ -323,8 +272,6 @@ void hessOpPrimme(void *x, PRIMME_INT *ldx, void *y, PRIMME_INT *ldy,
 void hessOp(const int nrow, const int ncol,
             const double *xin, const int ldx,
 	    double *yout, const int ldy, void* mvparam) {
-    assert(eigenData.matrix->columns == abs(nrow));
-    assert(eigenData.matrix->rows == abs(nrow));
     assert(mvparam == NULL);
     int k;
     clock_t t0;
@@ -336,7 +283,8 @@ void hessOp(const int nrow, const int ncol,
 
     for(k=0; k<ncol; k++) {
         t0 = clock();
-        matrixVector(eigenData.matrix, xin+k*ldx, yout+k*ldy);
+        matrixVector(eigenData.matrix, nrow, xin+k*ldx, nrow, yout+k*ldy,
+                     eigenData.mpicomp);
         eigenData.tcpu_mv += clock() - t0;
         dynamicProject(nrow, yout+k*ldy, NULL);
     }
@@ -346,8 +294,6 @@ void hessOp(const int nrow, const int ncol,
 void hessOp2(const int nrow, const int ncol,
              const double *xin, const int ldx,
              double *yout, const int ldy, void* mvparam) {
-    assert(eigenData.matrix->columns == abs(nrow));
-    assert(eigenData.matrix->rows == abs(nrow));
     assert(mvparam == NULL);
     int k;
     clock_t t0;
@@ -359,12 +305,14 @@ void hessOp2(const int nrow, const int ncol,
 
     for(k=0; k<ncol; k++) {
         t0 = clock();
-        matrixVector(eigenData.matrix, xin+k*ldx, eigenData.z);
+        matrixVector(eigenData.matrix, nrow, xin+k*ldx, nrow, eigenData.z,
+                     eigenData.mpicomp);
         eigenData.tcpu_mv += clock() - t0;
         dynamicProject(nrow, eigenData.z, NULL);
         // Apply a second time
         t0 = clock();
-        matrixVector(eigenData.matrix, eigenData.z, yout+k*ldy);
+        matrixVector(eigenData.matrix, nrow, eigenData.z, nrow, yout+k*ldy,
+                     eigenData.mpicomp);
         eigenData.tcpu_mv += clock() - t0;
         // Use the fact that "in" and "out" can overlap.
         dynamicProject(nrow, yout+k*ldy, NULL);
@@ -372,15 +320,36 @@ void hessOp2(const int nrow, const int ncol,
 }
 
 // Debug print of dynamic part of hess.grad
-void testOp(SparseMatrix *hess, double *grad) {
+void testOp(SparseMatrix *hess, const mat_int nrow,
+            double *grad, void *mpicomp) {
     double *y;
-    mat_int i;
+    mat_int k;
+    int wrank, wsize, i;
+#ifdef USE_MPI
+    MPI_Comm mpicom = *((MPI_Comm *) mpicomp);
 
-    y = malloc(hess->rows * sizeof(double));
-    hessOp(hess->rows, 1, grad, 1, y, 1, NULL);
+    MPI_Comm_size(mpicom, &wsize);
+    MPI_Comm_rank(mpicom, &wrank);
+#else
+    wsize = 1;
+    wrank = 0;
+#endif
+
+    eigenData.matrix = hess;
+    eigenData.mpicomp = mpicomp;
+
+    y = malloc(nrow * sizeof(double));
+    hessOp(nrow, 1, grad, 1, y, 1, NULL);
     printf("Dynamic part of hess.grad\n");
-    for(i=0; i<hess->rows; i++) {
-        printf("  %le\n", y[i]);
+    for(i=0; i<wsize; i++) {
+        if(i == wrank) {
+            for(k = 0; k<nrow; k++) {
+                printf("  %le (%i:  %u)\n", y[k], i, k);
+            }
+        }
+#ifdef USE_MPI
+        MPI_Barrier(mpicom);
+#endif
     }
     free(y);
 }

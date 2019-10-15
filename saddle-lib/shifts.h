@@ -2,13 +2,15 @@
 #ifdef USE_MKL
 #include "mkl.h"
 #endif
-
+#include "fortran.h"
 
 /*
        Memory allocation
 */
 #ifdef USE_MPI
-// Worry about this later
+#include <mpi.h>
+/* TODO:  MPI has its own versions of memory allocation,
+   which may be more efficient for shared memory windows. */
 #define MALLOC(A) malloc(A)
 #define REALLOC(A, B) realloc(A, B)
 #define FREE(A) free(A)
@@ -29,86 +31,41 @@
 */
 // Index for sparse matrix rows/columns, nonzeros
 typedef unsigned int mat_int;
-
-#ifdef USE_BLOCK
-typedef struct {
-    double *value;
-    mat_int *i;
-    mat_int *j;
-    mat_int blocks;
-    mat_int blockSize;
-    mat_int nonzeros;
-    mat_int rows;
-    mat_int columns;
-    char descr;
-} SparseMatrix;
-#elif defined(USE_MKL)
-typedef struct {
-    sparse_matrix_t a;
-    struct matrix_descr descr;
-    double *value;
-    mat_int blockSize;
-    MKL_INT *i;
-    MKL_INT *j;
-    mat_int rows;
-    mat_int columns;
-    mat_int nonzeros;
-} SparseMatrix;
-#else
-typedef struct {
-    double *value;
-    mat_int *i;
-    mat_int *j;
-    char descr;
-    mat_int nonzeros;
-    mat_int rows;
-    mat_int columns;
-} SparseMatrix;
+#ifdef USE_MPI
+// For MPI calls, set matching type
+#define _MPI_MAT_INT MPI_UNSIGNED_INT
 #endif
 
-
-/*
-           FORTRAN to C data type matching
-*/
-typedef double doublereal;
-typedef int integer;
-typedef void fsub;  // gfortran convension
-typedef fsub (*U_fp)(); /* Unknown procedure type (function name) */
-typedef /* Subroutine */ fsub (*S_fp)();
-typedef doublereal (*D_fp)();
-typedef integer ftnlen;
-typedef integer logical;
-/* Used "nm minresqlpModule.o" to determine this */
-#define MINRESQLP __minresqlpmodule_MOD_minresqlp
-#define DGEMV dgemv_
-#define DNRM2 dnrm2_
-#define DAXPY daxpy_
-
-extern int MINRESQLP(
-    const integer *n, S_fp aprod, const doublereal *b,
-    const doublereal *shift, S_fp msolve, S_fp userOrtho, const logical *disable,
-    const integer *nout, const integer *itnlim, const doublereal *rtol,
-    const doublereal *abstol,
-    const doublereal *maxxnorm, const doublereal *trancond,
-    const doublereal *acondLim,
-    doublereal *x, integer *istop, integer *itn, doublereal *rnorm,
-    doublereal *arnorm, doublereal *xnorm, doublereal *anorm,
-    doublereal *acond);
-// BLAS2 routine
-extern int DGEMV(const char *, const integer *, const integer *,
-                 const doublereal *, const doublereal *, const integer *,
-                 const doublereal *, const integer *, const doublereal *,
-                 doublereal *, const integer *);
-extern doublereal DNRM2(const integer *, const doublereal *, const integer *);
-extern int DAXPY(const integer *n,  const doublereal *alpha,
-                 const doublereal *x, const integer *incx,
-                 const doublereal *y, const integer *incy); 
+typedef struct {
+    mat_int nonzeros;
+    mat_int rows;
+    mat_int columns;
+    double *value;
+#ifdef USE_BLOCK
+    mat_int *i;
+    mat_int *j;
+    char descr;
+    mat_int blocks;
+    mat_int blockSize;
+#elif defined(USE_MKL) && !defined(USE_MPI)
+    MKL_INT *i;
+    MKL_INT *j;
+    struct matrix_descr descr;
+    sparse_matrix_t a;
+    mat_int blockSize;
+#else
+    mat_int *i;
+    mat_int *j;
+    char descr;
+#endif
+} SparseMatrix;
 
 
 /*
             dynamic.c
  */
-void dynamicInit(SparseMatrix *gauge, cJSON *options, void *mpicomp);
+void dynamicInit(const mat_int nrow, const mat_int ncol,
+                 SparseMatrix *gauge, cJSON *options, void *mpicomp);
 void dynamicProject(const integer n, double *v, double *normDiff);
 void gaugeOp(const int nrow, const int ncol, const double *xin, const int ldx,
              double *yout, const int ldy, void* mvparam);
@@ -120,36 +77,35 @@ void dynamicClose();
 /*
               eigensystem.c
  */
+void largeShifts(SparseMatrix *hess, cJSON *options,
+                 const mat_int nrow, double *initialVector,
+		 double **eval, double **evec, int *nvals, void *mpicomp);
 void hessOp(const int nrow, const int ncol,
             const double *xin, const int ldx,
 	    double *yout, const int ldy, void* mvparam);
 void hessOp2(const int nrow, const int ncol,
              const double *xin, const int ldx,
              double *yout, const int ldy, void* mvparam);
-void eigenInit(SparseMatrix *hess);
-void largeShiftsCheckpoint(double *initialVector, cJSON *options,
-                           double **vals, double **vecs, int *nvals,
-                           void *mpicomp);
-void largeShifts(double *initialVector, cJSON *options,
-		 double **vals, double **vecs, int *nvals,
-                 void *mpicomp);
-void testOp(SparseMatrix *hess, double *grad);
+void testOp(SparseMatrix *hess, const mat_int nrow,
+            double *grad, void *mpicomp);
 
 
 /*
          cutoff.c
 */
-void cutoffNullspace(mat_int n, mat_int nvals, cJSON *options,
+void cutoffNullspace(mat_int n, int nvals, cJSON *options,
                      double *grad,
-                     double **vals, double **vecs, mat_int *nLargeShifts);
+                     double **vals, double **vecs, int *nLargeShifts,
+                     void *mpicom);
 
 
 /*
             linear.c
  */
-void linearInit(SparseMatrix *hess, double *vecs, int nvecs);
-void hessProduct(integer *vectorLength, doublereal *x, doublereal *y);
-void linearSolve(integer n, double *b, cJSON *options, double *x);
+void linearInit(SparseMatrix *hess, const mat_int nrow, double *vecs,
+                int nvecs, void *mpicomp);
+void hessProduct(integer *n, doublereal *x, doublereal *y);
+void linearSolve(const integer n, double *b, cJSON *options, double *x);
 void userOrtho(char *action, integer *n, double *y);
 void largeShiftProject(integer n, double *y);
 
@@ -170,6 +126,8 @@ void rankSanityTest(mat_int n);
 void sparseMatrixRead(FILE *fp, SparseMatrix *mat, char *fileName, int wrank);
 void sparseMatrixFree(SparseMatrix *mat);
 void matrixVector(const SparseMatrix *a,
-                  const doublereal *in, doublereal *out);
+                  const mat_int lin, const doublereal *in,
+                  const mat_int lout, doublereal *out, void *mpicomp);
 void vectorMatrix(const SparseMatrix *a,
-                  const doublereal *in, doublereal *out);
+                  const mat_int lin, const doublereal *in,
+                  const mat_int lout, doublereal *out, void *mpicomp);

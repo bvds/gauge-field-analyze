@@ -29,7 +29,8 @@
 
 struct {
     SparseMatrix *matrix;
-    cJSON *options;
+    integer nrow;
+    mat_int ncol;
     doublereal *z;
     doublereal *x;
     doublereal *b;
@@ -44,24 +45,35 @@ struct {
     int printDetails;
     doublereal minEigenvalue;
     // doublereal maxEigenvalue;
-} gaugeData;
+    integer itnlim;
+    doublereal rtol;
+    doublereal *rtolp;
+    void *mpicomp;
+    } gaugeData;
 
 
-
-void dynamicInit(SparseMatrix *gauge, cJSON *options, void *mpicomp) {
+/*
+  nrow is the number of rows on this processor
+  ncol is the number of columns on this processor
+*/
+void dynamicInit(const mat_int nrow, const mat_int ncol,
+                 SparseMatrix *gauge, cJSON *options, void *mpicomp) {
     // Let trlan figure out the work array allocation.
     const int lwrk = 0; double *wrk = NULL;
-    int mev, maxlan, lohi, ned, maxmv;
+    int mev, maxlan, lohi, ned, maxmv, wrank=0;
     double tol = -1.0; // Use default tolerance: sqrt(machine epsilon)
     double *eval, *evec;
-    int nrow; // number of rows on this processor
     int restart = 3; // restart strategy
     trl_info info;
     cJSON *tmp;
     int i;
+#ifdef USE_MPI
+    MPI_Comm_rank(MPI_COMM_WORLD, &wrank);
+#endif
 
     gaugeData.matrix = gauge;
-    gaugeData.options = options;
+    gaugeData.nrow = nrow;
+    gaugeData.ncol = ncol;
     gaugeData.tcpu = 0;
     gaugeData.twall = 0;
     gaugeData.count = 0;
@@ -69,6 +81,7 @@ void dynamicInit(SparseMatrix *gauge, cJSON *options, void *mpicomp) {
     gaugeData.matVec = 0;
     gaugeData.maxItn = 0;
     gaugeData.printDetails = 0;
+    gaugeData.mpicomp = mpicomp;
 
     tmp  = cJSON_GetObjectItemCaseSensitive(options, "printDetails");
     if(cJSON_IsNumber(tmp)) {
@@ -77,10 +90,26 @@ void dynamicInit(SparseMatrix *gauge, cJSON *options, void *mpicomp) {
         gaugeData.printDetails = cJSON_IsTrue(tmp)?1:0;
     }
 
+    /*
+       The gauge configurations are single precision,
+       so rtol is normally about 1e-7.
+    */
+    tmp  = cJSON_GetObjectItemCaseSensitive(options, "rTolerance");
+    if(cJSON_IsNumber(tmp)) {
+        gaugeData.rtol = tmp->valuedouble;
+        gaugeData.rtolp = &gaugeData.rtol;
+    } else {
+        gaugeData.rtolp = NULL;
+    }
 
-    gaugeData.b = MALLOC(gauge->rows*sizeof(double));
-    gaugeData.x = MALLOC(gauge->rows*sizeof(double));
-    gaugeData.z = MALLOC(gauge->columns*sizeof(*gaugeData.z));
+    tmp  = cJSON_GetObjectItemCaseSensitive(options, "maxIterations");
+    gaugeData.itnlim = (cJSON_IsNumber(tmp)?tmp->valueint:
+                        // Default value appropriate for reorthogonalization
+                        (integer) gauge->rows);
+
+    gaugeData.b = MALLOC(nrow*sizeof(double));
+    gaugeData.x = MALLOC(nrow*sizeof(double));
+    gaugeData.z = MALLOC(ncol*sizeof(*gaugeData.z));
 
     /* Calculate the smallest eigenvalue of gaugeProduct.  
        This will inform the stopping condition for MINRES.
@@ -89,13 +118,12 @@ void dynamicInit(SparseMatrix *gauge, cJSON *options, void *mpicomp) {
        but had very slow convergence for large matrices.
     */
     lohi = -1;
-    nrow = gauge->rows;
     ned = 1;
     // Uses same maxIterations as MINRES.
-    tmp  = cJSON_GetObjectItemCaseSensitive(gaugeData.options, "maxIterations");
-    maxmv = cJSON_IsNumber(tmp)?tmp->valueint:ned*nrow;
-    tmp  = cJSON_GetObjectItemCaseSensitive(gaugeData.options, "maxLanczosVecs");
-    maxlan = cJSON_IsNumber(tmp)?tmp->valueint:nrow;
+    tmp  = cJSON_GetObjectItemCaseSensitive(options, "maxIterations");
+    maxmv = cJSON_IsNumber(tmp)?tmp->valueint:(int) nrow*ned;
+    tmp  = cJSON_GetObjectItemCaseSensitive(options, "maxLanczosVecs");
+    maxlan = cJSON_IsNumber(tmp)?tmp->valueint:(int) nrow;
 
     mev = ned; // Allocate memory for the number of requested eigenpairs
     eval = malloc(mev*sizeof(double));
@@ -106,12 +134,12 @@ void dynamicInit(SparseMatrix *gauge, cJSON *options, void *mpicomp) {
     // call TRLAN to compute the eigenvalues
     trlan(gaugeOp, NULL, &info, nrow, mev, eval, evec, nrow, lwrk, wrk);
     if(gaugeData.printDetails > 1) {
-        // 2 matrix multplies, with 1 add and 1 multiply per nonzero element.
-        trl_print_info(&info, 4*(gauge->nonzeros));
+        // 2 matrix multiplies.
+        trl_print_info(&info, 2*(gauge->nonzeros));
     } else if(gaugeData.printDetails > 0) {
         trl_terse_info(&info, stdout);
     }
-    if(gaugeData.printDetails > 0) {
+    if(gaugeData.printDetails > 0 && wrank==0) {
         printf("Gauge matrix extreme eigenvalues found:\n");
         for(i=0; i<info.nec; i++) {
             printf("  %le\n", eval[i]);
@@ -122,8 +150,9 @@ void dynamicInit(SparseMatrix *gauge, cJSON *options, void *mpicomp) {
         gaugeData.minEigenvalue = eval[0];
         // gaugeData.maxEigenvalue = eval[info.nec-1];
     } else {
-        printf("trlan exit with stat=%i, finding %i of %i eigenpairs.\n",
-               info.stat, info.nec, info.ned);
+        fprintf(stderr, "%i:  trlan exit with stat=%i, "
+                "finding %i of %i eigenpairs.\n",
+                wrank, info.stat, info.nec, info.ned);
         exit(8);
     }
 
@@ -135,47 +164,44 @@ void dynamicProject(const integer n, double *v, double *normDiff) {
     // Explicit value for these, so we can force MINRES alogrithm.
     doublereal trancond, acondlim = 1.0e15;
     logical *disablep = NULL;
-    integer rr, nout, *noutp = NULL, istop, itn, itnlim;
-    cJSON *tmp;
+    integer nout, *noutp = NULL, istop, itn;
     doublereal rnorm, arnorm, xnorm, anorm, acond,
-        rtol, *rtolp = NULL, abstol, *abstolp = NULL;
+        abstol, *abstolp = NULL;
     doublereal normv;
     const integer one=1;
     const doublereal minusone = -1.0;
+    int wrank;
+#ifdef USE_MPI
+    MPI_Comm mpicom = *((MPI_Comm *) gaugeData.mpicomp);
+    MPI_Comm_rank(MPI_COMM_WORLD, &wrank);
+#else
+    wrank = 0;
+#endif
     clock_t t1;
     time_t t2, tf;
+
+    assert(gaugeData.ncol == (mat_int) n);
 
     t1 = clock();
     time(&t2);
 
-    tmp  = cJSON_GetObjectItemCaseSensitive(gaugeData.options, "maxIterations");
-    if(cJSON_IsNumber(tmp)){
-        itnlim = tmp->valueint;
-    } else {
-        // Appropriate for reorthogonalization
-        itnlim = n;
-    }
-    /* 
-       The gauge configurations are single precision,
-       so rtol is normally about 1e-7.
-    */
-    tmp  = cJSON_GetObjectItemCaseSensitive(gaugeData.options, "rTolerance");
-    if(cJSON_IsNumber(tmp)) {
-        rtol = tmp->valuedouble;
-        rtolp = &rtol;
-    }
     /*
       Tolerance of the projection relative to the initial vector.
       For now, tie this to rTolerance.  May want separate flag?
     */
-    if(rtolp != NULL) {
+    if(gaugeData.rtolp != NULL) {
         normv = DNRM2(&n, v, &one);
-        abstol = rtol*normv*sqrt(gaugeData.minEigenvalue);
+#ifdef USE_MPI
+        MPI_Allreduce(MPI_IN_PLACE, &normv, 1, MPI_DOUBLE_PRECISION,
+                      MPI_SUM, mpicom);
+#endif
+        abstol = gaugeData.rtol*normv*sqrt(gaugeData.minEigenvalue);
         abstolp = &abstol;
 #if 0
-        printf("Setting abstolp=%le normin=%le val=%le sqrt=%le\n",
-               abstol, normin, gaugeData.minEigenvalue,
-               sqrt(gaugeData.minEigenvalue));
+        if(wrank == 0)
+            printf("Setting abstolp=%le normin=%le val=%le sqrt=%le\n",
+                   abstol, normin, gaugeData.minEigenvalue,
+                   sqrt(gaugeData.minEigenvalue));
 #endif
     }
     if(gaugeData.printDetails > 2) {
@@ -183,24 +209,28 @@ void dynamicProject(const integer n, double *v, double *normDiff) {
         noutp = &nout;
     }
 
-    // Sanity test for gaugeData.z
-    assert(abs(n) == gaugeData.matrix->columns);
-
-    matrixVector(gaugeData.matrix, v, gaugeData.b);
+    matrixVector(gaugeData.matrix, n, v,
+                 gaugeData.nrow, gaugeData.b,
+                 gaugeData.mpicomp);
 
     trancond = acondlim; // Always use MINRES
-    rr = gaugeData.matrix->rows;
-    MINRESQLP(&rr, gaugeProduct, gaugeData.b,
-              &shift, NULL, NULL, disablep, noutp, &itnlim,
-              rtolp, abstolp, maxxnormp, &trancond, &acondlim,
+    MINRESQLP(&gaugeData.nrow, gaugeProduct, gaugeData.b,
+              &shift, NULL, NULL, disablep, noutp, &gaugeData.itnlim,
+              gaugeData.rtolp, abstolp, maxxnormp, &trancond, &acondlim,
               gaugeData.x, &istop, &itn, &rnorm, &arnorm,
               &xnorm, &anorm, &acond);
 
-    vectorMatrix(gaugeData.matrix, gaugeData.x, gaugeData.z);
+    vectorMatrix(gaugeData.matrix,
+                 gaugeData.nrow, gaugeData.x,
+                 n, gaugeData.z, gaugeData.mpicomp);
     // This could be combined with the above matrix product, BLAS style.
     DAXPY(&n, &minusone, gaugeData.z, &one, v, &one);
     if(normDiff != NULL){
         *normDiff = DNRM2(&n, gaugeData.z, &one);
+#ifdef USE_MPI
+        MPI_Allreduce(MPI_IN_PLACE, normDiff, 1, MPI_DOUBLE,
+                      MPI_SUM, mpicom);
+#endif
     }
 
     time(&tf);
@@ -216,14 +246,27 @@ void dynamicProject(const integer n, double *v, double *normDiff) {
     }
 
     if(istop >= 9) {
-        fprintf(stderr, "MINRES returned with istop=%i in %s, exiting.\n",
-               istop, __FILE__);
+        fprintf(stderr, "%i: MINRES returned with istop=%i in %s, exiting.\n",
+                wrank, istop, __FILE__);
         exit(7);
     }
 }
 
 void dynamicClose() {
-    if(gaugeData.printDetails > 0){
+    int wrank;
+#ifdef USE_MPI
+    MPI_Comm mpicom = *((MPI_Comm *) gaugeData.mpicomp);
+    MPI_Comm_rank(MPI_COMM_WORLD, &wrank);
+    MPI_Allreduce(MPI_IN_PLACE, &gaugeData.tcpu, 1, MPI_LONG,
+                  MPI_SUM, mpicom);
+    MPI_Allreduce(MPI_IN_PLACE, &gaugeData.tcpu_vm, 1, MPI_LONG,
+                  MPI_SUM, mpicom);
+    MPI_Allreduce(MPI_IN_PLACE, &gaugeData.tcpu_mv, 1, MPI_LONG,
+                  MPI_SUM, mpicom);
+#else
+    wrank = 0;
+#endif
+    if(gaugeData.printDetails > 0 && wrank == 0){
         printf("dynamicProject:  %i calls (%i usertol), "
                "%i matrix-vector ops, max itn %i\n"
                "                 in %.2f sec (%li wall)\n",
@@ -245,22 +288,24 @@ void dynamicClose() {
 /* Interface for Trlan.
    The extra parameter mvparam is not used in this case. */
 void gaugeOp(const int nrow, const int ncol, const double *xin, const int ldx,
-	    double *yout, const int ldy, void* mvparam) {
-    assert(gaugeData.matrix->rows == abs(nrow));
+             double *yout, const int ldy, void* mvparam) {
     assert(mvparam == NULL);
     int k;
+    integer n = nrow;
 
     for(k=0; k<ncol; k++) {
-        gaugeProduct(&nrow, xin+k*ldx, yout+k*ldy);
+        gaugeProduct(&n, xin+k*ldx, yout+k*ldy);
     }
 }
 
 void gaugeProduct(const integer *vectorLength, const doublereal *x,
-                 doublereal *y) {
+                  doublereal *y) {
     clock_t t0 = clock(), t1;
-    assert(abs(*vectorLength) == gaugeData.matrix->rows);
-    vectorMatrix(gaugeData.matrix, x, gaugeData.z);
+    mat_int vl = *vectorLength;
+    vectorMatrix(gaugeData.matrix, vl, x,
+                 gaugeData.ncol, gaugeData.z, gaugeData.mpicomp);
     gaugeData.tcpu_vm += (t1=clock()) - t0;
-    matrixVector(gaugeData.matrix, gaugeData.z, y);
+    matrixVector(gaugeData.matrix,
+                 gaugeData.ncol, gaugeData.z, vl, y, gaugeData.mpicomp);
     gaugeData.tcpu_mv += clock() - t1;
 }
