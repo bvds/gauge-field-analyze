@@ -50,9 +50,20 @@ void rankSanityTest(mat_int n) {
 }
 
 
-void sparseMatrixRead(FILE *fp, SparseMatrix *mat, char *fileName, int wrank) {
+void sparseMatrixRead(FILE *fp, SparseMatrix *mat, char *fileName,
+                      int blockSize, _MPI_Comm mpicom) {
     mat_int k;
     int nread;
+#ifdef USE_MPI
+    int wrank, wsize;
+
+    mat->mpicom = mpicom;
+    MPI_Comm_rank(mpicom, &wrank);
+    MPI_Comm_size(mpicom, &wsize);
+#else
+    int wrank = 0;
+    assert(mpicom == NULL);
+#endif
 #ifdef USE_BLOCK
     mat_int i, j, ii, jj, lastii = 0, blockCols = 0;
     mat_int *blockColp;
@@ -62,6 +73,8 @@ void sparseMatrixRead(FILE *fp, SparseMatrix *mat, char *fileName, int wrank) {
     int *blockColFlag;
     assert(mat->rows%block == 0);
     assert(mat->columns%block == 0);
+
+    mat->blockSize = blockSize;
     mat->blocks = 0;
     blockRowValue = malloc(mat->columns*block*sizeof(*blockRowValue));
     blockColFlag = malloc(maxBlockCol*sizeof(*blockColFlag));
@@ -143,6 +156,8 @@ void sparseMatrixRead(FILE *fp, SparseMatrix *mat, char *fileName, int wrank) {
 #elif defined(USE_MKL) && !defined(USE_MPI)
     sparse_status_t err;
     sparse_matrix_t coordMatrix;
+
+    mat->blockSize = blockSize;
     mat->i = MALLOC(mat->nonzeros * sizeof(*(mat->i)));
     mat->j = MALLOC(mat->nonzeros * sizeof(*(mat->j)));
     mat->value = MALLOC(mat->nonzeros * sizeof(*(mat->value)));
@@ -206,6 +221,16 @@ void sparseMatrixRead(FILE *fp, SparseMatrix *mat, char *fileName, int wrank) {
         }
     }
 #endif
+
+    /* As a first step, list range of matrix elements
+       local to this process.  */
+#ifdef USE_MPI
+    mat->lowerRow = blockSize*rankIndex(wrank, wsize, mat->rows/blockSize);
+    mat->lowerColumn = blockSize*
+        rankIndex(wrank, wsize, mat->columns/blockSize);
+#define MAX(A, B) (A>B?A:B)
+    mat->gather = malloc(MAX(mat->rows, mat->columns)*sizeof(*mat->gather));
+#endif
 }
 
 void sparseMatrixFree(SparseMatrix *mat) {
@@ -216,15 +241,21 @@ void sparseMatrixFree(SparseMatrix *mat) {
     FREE(mat->i);
     FREE(mat->j);
 #endif
+#ifdef USE_MPI
+    FREE(mat->gather);
+#endif
 }
 
 /* in and out must be distinct */
 void matrixVector(const SparseMatrix *a,
                   const mat_int lin, const doublereal *in,
-                  const mat_int lout, doublereal *out, void *mpicomp) {
+                  const mat_int lout, doublereal *out) {
 #ifdef USE_MPI
+    int wrank, wsize;
+    MPI_Comm mpicom = a->mpicom;
+    MPI_Comm_rank(mpicom, &wrank);
+    MPI_Comm_size(mpicom, &wsize);
 #else
-    assert(mpicomp == NULL);
     assert(lin == a->columns);
     assert(lout == a->rows);
 #endif
@@ -260,16 +291,38 @@ void matrixVector(const SparseMatrix *a,
         exit(69);
     }
 #else
-    mat_int i, j, k;
-    double value;
-    memset(out, 0, lout * sizeof(double));
+    mat_int i, j, k, lower, upper, offset;
+    int rank;
+    double value, *gather;
+    memset(out, 0, lout * sizeof(*out));
+
+#ifdef USE_MPI
+    gather = a->gather;
+    memcpy(gather + a->lowerColumn, in, lin*sizeof(*gather));
+    offset = 0;
+    for(rank=0; rank<wsize; rank++) {
+        j = lin;
+        MPI_Bcast(&j, 1, _MPI_MAT_INT, rank, mpicom);
+        if(rank==wrank)
+            assert(offset == a->lowerColumn);
+        MPI_Bcast(gather+offset, j, MPI_DOUBLE, rank, mpicom);
+        offset = offset + j;
+    }
+    lower = a->lowerRow;
+#else
+    lower = 0;
+    gather = in;
+#endif
+    upper = lower + lout;
+
     for(k=0; k<a->nonzeros; k++) {
         i = a->i[k];
         j = a->j[k];
         value = a->value[k];
-        out[i] += value * in[j];
-        if(a->descr == 's' && j != i) {
-            out[j] += value * in[i];
+        if(i >= lower && i < upper)
+            out[i-lower] += value * gather[j];
+        if(a->descr == 's' && j != i && j >= lower && j < upper) {
+                out[j-lower] += value * gather[i];
         }
     }
 #endif
@@ -277,10 +330,13 @@ void matrixVector(const SparseMatrix *a,
 
 void vectorMatrix(const SparseMatrix *a,
                   const mat_int lin, const doublereal *in,
-                  const mat_int lout, doublereal *out, void *mpicomp) {
+                  const mat_int lout, doublereal *out) {
 #ifdef USE_MPI
+    int wrank, wsize;
+    MPI_Comm mpicom = a->mpicom;
+    MPI_Comm_rank(mpicom, &wrank);
+    MPI_Comm_size(mpicom, &wsize);
 #else
-    assert(mpicomp == NULL);
     assert(lin == a->rows);
     assert(lout == a->columns);
 #endif
@@ -316,16 +372,38 @@ void vectorMatrix(const SparseMatrix *a,
         exit(68);
     }
 #else
-    mat_int i, j, k;
-    double value;
+    mat_int i, j, k, lower, upper, offset;
+    int rank;
+    double value, *gather;
     memset(out, 0, lout * sizeof(*out));
+
+#ifdef USE_MPI
+    gather = a->gather;
+    memcpy(gather + a->lowerRow, in, lin*sizeof(*gather));
+    offset = 0;
+    for(rank=0; rank<wsize; rank++) {
+        j = lin;
+        MPI_Bcast(&j, 1, _MPI_MAT_INT, rank, mpicom);
+        if(rank==wrank)
+            assert(offset == a->lowerRow);
+        MPI_Bcast(gather+offset, j, MPI_DOUBLE, rank, mpicom);
+        offset = offset + j;
+    }
+    lower = a->lowerColumn;
+#else
+    lower = 0;
+    gather = in;
+#endif
+    upper = lower + lout;
+
     for(k=0; k<a->nonzeros; k++) {
         i = a->i[k];
         j = a->j[k];
         value = a->value[k];
-        out[j] += value * in[i];
-        if(a->descr == 's' && i != j) {
-            out[i] += value * in[j];
+        if(j >= lower && j < upper)
+            out[j-lower] += value * gather[i];
+        if(a->descr == 's' && i != j && i >= lower && i < upper) {
+            out[i-lower] += value * gather[j];
         }
     }
 #endif

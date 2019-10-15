@@ -96,11 +96,13 @@ int main(int argc, char **argv){
         fprintf(stderr, "Failed to initialize MPI.");
         exit(321);
     }
-    MPI_Comm_size(MPI_COMM_WORLD, &wsize);
-    MPI_Comm_rank(MPI_COMM_WORLD, &wrank);
-    MPI_Comm mpicom = MPI_COMM_WORLD, *mpicomp = &mpicom;
+    MPI_Comm mpicom = MPI_COMM_WORLD;
+    MPI_Comm_size(mpicom, &wsize);
+    MPI_Comm_rank(mpicom, &wrank);
+    printf("Starting mpi:  %i of %i\n", wrank, wsize);
+    fflush(stdout);
 #else
-    void *mpicomp = NULL;
+    void *mpicom = NULL;
     wsize = 1;
     wrank = 0;
 #endif
@@ -183,19 +185,17 @@ int main(int argc, char **argv){
     assert(hess.rows == n);
     assert(hess.columns == n);
 #ifdef USE_BLOCK
-    hess.blockSize = blockSize;
     hess.descr = 's';  // Symmetric matrix, with only one triangle stored.
-    sparseMatrixRead(fp, hessp, hessFile, wrank);
+    sparseMatrixRead(fp, hessp, hessFile, blockSize, mpicom);
     sortMatrix(hessp, (chunkSize+1)/2);
 #elif defined(USE_MKL) && !defined(USE_MPI)
-    hess.blockSize = blockSize;
     hess.descr.type = SPARSE_MATRIX_TYPE_SYMMETRIC;
     hess.descr.mode = SPARSE_FILL_MODE_LOWER;
     hess.descr.diag = SPARSE_DIAG_NON_UNIT;
-    sparseMatrixRead(fp, hessp, hessFile, wrank);
+    sparseMatrixRead(fp, hessp, hessFile, blockSize, mpicom);
 #else
     hess.descr = 's';  // Symmetric matrix, with only one triangle stored.
-    sparseMatrixRead(fp, hessp, hessFile, wrank);
+    sparseMatrixRead(fp, hessp, hessFile, blockSize, mpicom);
     sortMatrix(hessp, (chunkSize+1)/2);
 #endif
     fclose(fp);
@@ -258,19 +258,17 @@ int main(int argc, char **argv){
     assert(gauge.rows == gaugeDimension);
     assert(gauge.columns == n);
 #ifdef USE_BLOCK
-    gauge.blockSize = blockSize;
     gauge.descr = 'g';  // General matrix
-    sparseMatrixRead(fp, gaugep, gaugeFile, wrank);
+    sparseMatrixRead(fp, gaugep, gaugeFile, blockSize, mpicom);
     sortMatrix(gaugep, chunkSize);
 #elif defined(USE_MKL) && !defined(USE_MPI)
-    gauge.blockSize = blockSize;
     gauge.descr.type = SPARSE_MATRIX_TYPE_GENERAL;
     gauge.descr.mode = SPARSE_FILL_MODE_LOWER;
     gauge.descr.diag = SPARSE_DIAG_NON_UNIT;
-    sparseMatrixRead(fp, gaugep, gaugeFile, wrank);
+    sparseMatrixRead(fp, gaugep, gaugeFile, blockSize, mpicom);
 #else
     gauge.descr = 'g';  // Symmetric matrix, with only one triangle stored.
-    sparseMatrixRead(fp, gaugep, gaugeFile, wrank);
+    sparseMatrixRead(fp, gaugep, gaugeFile, blockSize, mpicom);
     sortMatrix(gaugep, chunkSize);
 #endif
     fclose(fp);
@@ -287,17 +285,17 @@ int main(int argc, char **argv){
     int nvals;
     tmp = cJSON_GetObjectItemCaseSensitive(jopts, "dynamicPartOptions");
     assert(tmp != NULL);
-    dynamicInit(local_gaugeDimension, local_n, gaugep, tmp, mpicomp);
+    dynamicInit(local_gaugeDimension, local_n, gaugep, tmp, mpicom);
     // Debug print:
 #if 0
-    testOp(hessp, local_n, grad, mpicomp);
+    testOp(hessp, local_n, grad, mpicom);
 #endif
     tmp = cJSON_GetObjectItemCaseSensitive(jopts, "largeShiftOptions");
     assert(tmp != NULL);
-    largeShifts(hessp, tmp, local_n, grad, &absVals, &vecs, &nvals, mpicomp);
+    largeShifts(hessp, tmp, local_n, grad, &absVals, &vecs, &nvals, mpicom);
     cutoffNullspace(local_n, nvals, jopts, grad, &absVals, &vecs,
-                    &nLargeShifts, mpicomp);
-    linearInit(hessp, local_n, vecs, nLargeShifts, mpicomp);
+                    &nLargeShifts, mpicom);
+    linearInit(hessp, local_n, vecs, nLargeShifts, mpicom);
     tmp = cJSON_GetObjectItemCaseSensitive(jopts, "linearSolveOptions");
     assert(tmp != NULL);
     linearSolve(local_n, grad, tmp, shifts);

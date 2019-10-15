@@ -33,15 +33,15 @@ struct {
 } minresOrtho;
 
 void linearInit(SparseMatrix *hess, const mat_int nrow,
-                double *vecs, int nvecs, void *mpicomp) {
+                double *vecs, int nvecs, _MPI_Comm mpicom) {
     hessData.nrow = nrow;  // For sanity checks
     hessData.matrix = hess;
     hessData.vecs = vecs;
     hessData.nvecs = nvecs;
 #ifdef USE_MPI
-    hessData.mpicom = *((MPI_Comm *) mpicomp);
+    hessData.mpicom = mpicom;
 #else
-    assert(mpicomp == NULL);
+    assert(mpicom == NULL);
 #endif
 }
 

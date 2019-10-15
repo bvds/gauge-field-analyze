@@ -48,7 +48,7 @@ struct {
     integer itnlim;
     doublereal rtol;
     doublereal *rtolp;
-    void *mpicomp;
+    _MPI_Comm mpicom;
     } gaugeData;
 
 
@@ -57,7 +57,7 @@ struct {
   ncol is the number of columns on this processor
 */
 void dynamicInit(const mat_int nrow, const mat_int ncol,
-                 SparseMatrix *gauge, cJSON *options, void *mpicomp) {
+                 SparseMatrix *gauge, cJSON *options, _MPI_Comm mpicom) {
     // Let trlan figure out the work array allocation.
     const int lwrk = 0; double *wrk = NULL;
     int mev, maxlan, lohi, ned, maxmv, wrank=0;
@@ -81,7 +81,7 @@ void dynamicInit(const mat_int nrow, const mat_int ncol,
     gaugeData.matVec = 0;
     gaugeData.maxItn = 0;
     gaugeData.printDetails = 0;
-    gaugeData.mpicomp = mpicomp;
+    gaugeData.mpicom = mpicom;
 
     tmp  = cJSON_GetObjectItemCaseSensitive(options, "printDetails");
     if(cJSON_IsNumber(tmp)) {
@@ -128,7 +128,7 @@ void dynamicInit(const mat_int nrow, const mat_int ncol,
     mev = ned; // Allocate memory for the number of requested eigenpairs
     eval = malloc(mev*sizeof(double));
     evec = malloc(mev*nrow*sizeof(double));
-    trl_init_info(&info, nrow, maxlan, lohi, ned, tol, restart, maxmv, mpicomp);
+    trl_init_info(&info, nrow, maxlan, lohi, ned, tol, restart, maxmv, &mpicom);
     memset(eval, 0, mev*sizeof(double));
 
     // call TRLAN to compute the eigenvalues
@@ -172,8 +172,8 @@ void dynamicProject(const integer n, double *v, double *normDiff) {
     const doublereal minusone = -1.0;
     int wrank;
 #ifdef USE_MPI
-    MPI_Comm mpicom = *((MPI_Comm *) gaugeData.mpicomp);
-    MPI_Comm_rank(MPI_COMM_WORLD, &wrank);
+    MPI_Comm mpicom = gaugeData.mpicom;
+    MPI_Comm_rank(mpicom, &wrank);
 #else
     wrank = 0;
 #endif
@@ -210,8 +210,7 @@ void dynamicProject(const integer n, double *v, double *normDiff) {
     }
 
     matrixVector(gaugeData.matrix, n, v,
-                 gaugeData.nrow, gaugeData.b,
-                 gaugeData.mpicomp);
+                 gaugeData.nrow, gaugeData.b);
 
     trancond = acondlim; // Always use MINRES
     MINRESQLP(&gaugeData.nrow, gaugeProduct, gaugeData.b,
@@ -222,7 +221,7 @@ void dynamicProject(const integer n, double *v, double *normDiff) {
 
     vectorMatrix(gaugeData.matrix,
                  gaugeData.nrow, gaugeData.x,
-                 n, gaugeData.z, gaugeData.mpicomp);
+                 n, gaugeData.z);
     // This could be combined with the above matrix product, BLAS style.
     DAXPY(&n, &minusone, gaugeData.z, &one, v, &one);
     if(normDiff != NULL){
@@ -255,8 +254,8 @@ void dynamicProject(const integer n, double *v, double *normDiff) {
 void dynamicClose() {
     int wrank;
 #ifdef USE_MPI
-    MPI_Comm mpicom = *((MPI_Comm *) gaugeData.mpicomp);
-    MPI_Comm_rank(MPI_COMM_WORLD, &wrank);
+    MPI_Comm mpicom = gaugeData.mpicom;
+    MPI_Comm_rank(mpicom, &wrank);
     MPI_Allreduce(MPI_IN_PLACE, &gaugeData.tcpu, 1, MPI_LONG,
                   MPI_SUM, mpicom);
     MPI_Allreduce(MPI_IN_PLACE, &gaugeData.tcpu_vm, 1, MPI_LONG,
@@ -303,9 +302,9 @@ void gaugeProduct(const integer *vectorLength, const doublereal *x,
     clock_t t0 = clock(), t1;
     mat_int vl = *vectorLength;
     vectorMatrix(gaugeData.matrix, vl, x,
-                 gaugeData.ncol, gaugeData.z, gaugeData.mpicomp);
+                 gaugeData.ncol, gaugeData.z);
     gaugeData.tcpu_vm += (t1=clock()) - t0;
     matrixVector(gaugeData.matrix,
-                 gaugeData.ncol, gaugeData.z, vl, y, gaugeData.mpicomp);
+                 gaugeData.ncol, gaugeData.z, vl, y);
     gaugeData.tcpu_mv += clock() - t1;
 }

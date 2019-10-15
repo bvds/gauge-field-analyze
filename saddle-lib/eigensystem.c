@@ -60,7 +60,6 @@ struct {
     int sumNcol;
     int maxNcol;
     clock_t tcpu_mv;
-    void *mpicomp;
 } eigenData;
 
 
@@ -70,7 +69,7 @@ struct {
  */
 void largeShifts(SparseMatrix *hess, cJSON *options,
                  const mat_int nrow, double *initialVector,
-		 double **eval, double **evec, int *nvals, void *mpicomp) {
+		 double **eval, double **evec, int *nvals, _MPI_Comm mpicom) {
 #ifdef USE_PRIMME
     primme_params primme;
     double *rnorm;   /* Array with the computed eigenpairs residual norms */
@@ -92,7 +91,6 @@ void largeShifts(SparseMatrix *hess, cJSON *options,
     int lohi = -1; // lowest or highest abs value eigenpairs.
     int i, ierr, printDetails = 1;
 #ifdef USE_MPI
-    MPI_Comm mpicom = *((MPI_Comm *) mpicomp);
     MPI_Comm_rank(mpicom, &wrank);
 #else
     wrank = 0;
@@ -105,7 +103,6 @@ void largeShifts(SparseMatrix *hess, cJSON *options,
     time(&t2);
     
     eigenData.matrix = hess;
-    eigenData.mpicomp = mpicomp;
     eigenData.ops = 0;
     eigenData.sumNcol = 0;
     eigenData.maxNcol = 0;
@@ -198,7 +195,7 @@ void largeShifts(SparseMatrix *hess, cJSON *options,
     *eval = (double *) malloc(mev*sizeof(double));
     *evec = (double *) malloc(mev*nrow*sizeof(double));
     trl_init_info(&info, nrow, maxlan, lohi, ned, tol, restart, maxmv,
-                  mpicomp);
+                  &mpicom);
     trl_set_iguess(&info, 0, iguess, 0, NULL);
     memset(*eval, 0, mev*sizeof(double));
     // Provide the initial vector
@@ -283,8 +280,7 @@ void hessOp(const int nrow, const int ncol,
 
     for(k=0; k<ncol; k++) {
         t0 = clock();
-        matrixVector(eigenData.matrix, nrow, xin+k*ldx, nrow, yout+k*ldy,
-                     eigenData.mpicomp);
+        matrixVector(eigenData.matrix, nrow, xin+k*ldx, nrow, yout+k*ldy);
         eigenData.tcpu_mv += clock() - t0;
         dynamicProject(nrow, yout+k*ldy, NULL);
     }
@@ -305,14 +301,12 @@ void hessOp2(const int nrow, const int ncol,
 
     for(k=0; k<ncol; k++) {
         t0 = clock();
-        matrixVector(eigenData.matrix, nrow, xin+k*ldx, nrow, eigenData.z,
-                     eigenData.mpicomp);
+        matrixVector(eigenData.matrix, nrow, xin+k*ldx, nrow, eigenData.z);
         eigenData.tcpu_mv += clock() - t0;
         dynamicProject(nrow, eigenData.z, NULL);
         // Apply a second time
         t0 = clock();
-        matrixVector(eigenData.matrix, nrow, eigenData.z, nrow, yout+k*ldy,
-                     eigenData.mpicomp);
+        matrixVector(eigenData.matrix, nrow, eigenData.z, nrow, yout+k*ldy);
         eigenData.tcpu_mv += clock() - t0;
         // Use the fact that "in" and "out" can overlap.
         dynamicProject(nrow, yout+k*ldy, NULL);
@@ -321,22 +315,20 @@ void hessOp2(const int nrow, const int ncol,
 
 // Debug print of dynamic part of hess.grad
 void testOp(SparseMatrix *hess, const mat_int nrow,
-            double *grad, void *mpicomp) {
+            double *grad, _MPI_Comm mpicom) {
     double *y;
     mat_int k;
     int wrank, wsize, i;
 #ifdef USE_MPI
-    MPI_Comm mpicom = *((MPI_Comm *) mpicomp);
-
     MPI_Comm_size(mpicom, &wsize);
     MPI_Comm_rank(mpicom, &wrank);
 #else
+    assert(mpicom == NULL);
     wsize = 1;
     wrank = 0;
 #endif
 
     eigenData.matrix = hess;
-    eigenData.mpicomp = mpicomp;
 
     y = malloc(nrow * sizeof(double));
     hessOp(nrow, 1, grad, 1, y, 1, NULL);

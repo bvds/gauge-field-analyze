@@ -17,7 +17,7 @@
 void cutoffNullspace(mat_int n, int nvals, cJSON *options,
                      double *grad,
                      double **vals, double **vecs, int *nLargeShifts,
-                     void *mpicomp) {
+                     _MPI_Comm mpicom) {
     mat_int j;
     int i, wrank;
     int na;
@@ -27,11 +27,9 @@ void cutoffNullspace(mat_int n, int nvals, cJSON *options,
     double zzz, rescale;
     cJSON *tmp;
 #ifdef USE_MPI
-    MPI_Comm mpicom = *((MPI_Comm *) mpicomp);
-
     MPI_Comm_rank(mpicom, &wrank);
 #else
-    assert(mpicomp == NULL);
+    assert(mpicom == NULL);
     wrank = 0;
 #endif
 
