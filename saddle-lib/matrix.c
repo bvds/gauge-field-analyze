@@ -67,22 +67,21 @@ void sparseMatrixRead(FILE *fp, SparseMatrix *mat, char *fileName,
 #ifdef USE_BLOCK
     mat_int i, j, ii, jj, lastii = 0, blockCols = 0;
     mat_int *blockColp;
-    const mat_int block = mat->blockSize,
-        maxBlockCol = mat->columns/block;
+    const mat_int maxBlockCol = mat->columns/blockSize;
     double value, *blockRowValue, *blockValuep;
     int *blockColFlag;
-    assert(mat->rows%block == 0);
-    assert(mat->columns%block == 0);
+    assert(mat->rows%blockSize == 0);
+    assert(mat->columns%blockSize == 0);
 
     mat->blockSize = blockSize;
     mat->blocks = 0;
-    blockRowValue = malloc(mat->columns*block*sizeof(*blockRowValue));
+    blockRowValue = malloc(mat->columns*blockSize*sizeof(*blockRowValue));
     blockColFlag = malloc(maxBlockCol*sizeof(*blockColFlag));
     blockColp = malloc(maxBlockCol*sizeof(*blockColp));
     mat->value = MALLOC(0);
     mat->i = MALLOC(0);
     mat->j = MALLOC(0);
-    memset(blockRowValue, 0, mat->columns*block*sizeof(double));
+    memset(blockRowValue, 0, mat->columns*blockSize*sizeof(double));
     memset(blockColFlag, 0, maxBlockCol*sizeof(*blockColFlag));
     for(j=0;; j++){
         if(j<mat->nonzeros) {
@@ -95,10 +94,10 @@ void sparseMatrixRead(FILE *fp, SparseMatrix *mat, char *fileName,
             ii -= 1; jj -= 1; // switch to zero-based indexing
             assert(ii>=lastii);
         }
-        if(j==mat->nonzeros || (lastii<ii && ii%block == 0)) {
+        if(j==mat->nonzeros || (lastii<ii && ii%blockSize == 0)) {
             // Retire block row and reset for a new one
             mat->value = REALLOC(mat->value,
-                     (mat->blocks + blockCols)*block*block*sizeof(double));
+                     (mat->blocks + blockCols)*blockSize*blockSize*sizeof(double));
             mat->i = REALLOC(mat->i,
                      (mat->blocks + blockCols)*sizeof(*mat->i));
             mat->j = REALLOC(mat->j,
@@ -109,12 +108,12 @@ void sparseMatrixRead(FILE *fp, SparseMatrix *mat, char *fileName,
                 printf("  %i %i mat->blocks=%i blockCols=%i\n",
                        j, k, mat->blocks, blockCols);
 #endif
-                blockValuep = blockRowValue+k*block*block;
-                memcpy(mat->value+block*block*mat->blocks,
-                       blockValuep, block*block*sizeof(double));
-                memset(blockValuep, 0, block*block*sizeof(double));
-                mat->i[mat->blocks] = (lastii/block)*block;
-                mat->j[mat->blocks] = k*block;
+                blockValuep = blockRowValue+k*blockSize*blockSize;
+                memcpy(mat->value+blockSize*blockSize*mat->blocks,
+                       blockValuep, blockSize*blockSize*sizeof(double));
+                memset(blockValuep, 0, blockSize*blockSize*sizeof(double));
+                mat->i[mat->blocks] = (lastii/blockSize)*blockSize;
+                mat->j[mat->blocks] = k*blockSize;
                 mat->blocks += 1;
                 blockColFlag[k] = 0;
             }
@@ -124,17 +123,17 @@ void sparseMatrixRead(FILE *fp, SparseMatrix *mat, char *fileName,
             break;
         lastii = ii;
         // Mark this block
-        k = jj/block;
+        k = jj/blockSize;
         if(!blockColFlag[k]) {
             blockColp[blockCols] = k;
             blockCols += 1;
             blockColFlag[k] = 1;
         }
         // Add value to this block
-        blockRowValue[(k*block + ii%block)*block + jj%block] = value;
+        blockRowValue[(k*blockSize + ii%blockSize)*blockSize + jj%blockSize] = value;
         /* fill diagonal blocks of symmetric matrix */
-        if(mat->descr == 's' && ii/block == k && ii!=jj) {
-            blockRowValue[(k*block + jj%block)*block + ii%block] = value;
+        if(mat->descr == 's' && ii/blockSize == k && ii!=jj) {
+            blockRowValue[(k*blockSize + jj%blockSize)*blockSize + ii%blockSize] = value;
         }
     }
     free(blockRowValue);
@@ -144,11 +143,11 @@ void sparseMatrixRead(FILE *fp, SparseMatrix *mat, char *fileName,
     printf("Print matrix for file %s\n", fileName);
     for(k=0; k<mat->blocks; k++) {
         printf("%i %i  ", mat->i[k] + 1, mat->j[k] + 1);
-        for(ii=0; ii<block; ii++) {
+        for(ii=0; ii<blockSize; ii++) {
             if(ii>0)
                 printf("    ");
-            for(jj=0; jj<block; jj++)
-                printf(" %.3e", mat->value[(k*block + ii)*block + jj]);
+            for(jj=0; jj<blockSize; jj++)
+                printf(" %.3e", mat->value[(k*blockSize + ii)*blockSize + jj]);
             printf("\n");
         }
     }
@@ -207,6 +206,7 @@ void sparseMatrixRead(FILE *fp, SparseMatrix *mat, char *fileName,
         exit(60);
     }
 #else
+    assert(blockSize > 0); // to suppress compiler warning
     mat->i = MALLOC(mat->nonzeros * sizeof(*mat->i));
     mat->j = MALLOC(mat->nonzeros * sizeof(*mat->j));
     mat->value = MALLOC(mat->nonzeros * sizeof(*mat->value));
@@ -260,23 +260,47 @@ void matrixVector(const SparseMatrix *a,
     assert(lout == a->rows);
 #endif
 #ifdef USE_BLOCK
-    size_t k;
+    mat_int i, j, k, lower, upper;
     double *matp = a->value;
     const integer n = a->blockSize, n2=n*n;
     const doublereal one=1.0;
     const integer inc=1;
     const char trans='T', normal='N';
+#ifdef USE_MPI
+    int rank;
+    double *gather = a->gather;
+    mat_int offset = 0;
+
+    memcpy(gather + a->lowerColumn, in, lin*sizeof(*gather));
+    for(rank=0; rank<wsize; rank++) {
+        j = lin;
+        MPI_Bcast(&j, 1, _MPI_MAT_INT, rank, mpicom);
+        if(rank==wrank)
+            assert(offset == a->lowerColumn);
+        MPI_Bcast(gather+offset, j, MPI_DOUBLE, rank, mpicom);
+        offset = offset + j;
+    }
+    lower = a->lowerRow;
+#else
+    const double *gather = in;
+
+    lower = 0;
+#endif
+    upper = lower + lout;
 
     memset(out, 0, lout * sizeof(double));
     for(k=0; k<a->blocks; k++, matp+=n2) {
+        i = a->i[k];
+        j = a->j[k];
+        if(i >= lower && i < upper)
         DGEMV(&trans, &n, &n, &one,
-              matp, &n, in + a->j[k], &inc, &one,
-              out + a->i[k], &inc);
+              matp, &n, gather + j, &inc, &one,
+              out + i - lower, &inc);
 
-        if(a->descr == 's' && a->i[k] != a->j[k]) {
+        if(a->descr == 's' && i != j && j >= lower && j < upper) {
             DGEMV(&normal, &n, &n, &one,
-                  matp, &n, in + a->i[k], &inc, &one,
-                  out + a->j[k], &inc);
+                  matp, &n, gather + i, &inc, &one,
+                  out + j - lower, &inc);
         }
     }
 #elif defined(USE_MKL) && !defined(USE_MPI)
@@ -291,15 +315,15 @@ void matrixVector(const SparseMatrix *a,
         exit(69);
     }
 #else
-    mat_int i, j, k, lower, upper, offset;
-    int rank;
-    double value, *gather;
-    memset(out, 0, lout * sizeof(*out));
+    mat_int i, j, k, lower, upper;
+    double value;
 
 #ifdef USE_MPI
-    gather = a->gather;
+    int rank;
+    double *gather = a->gather;
+    mat_int offset = 0;
+
     memcpy(gather + a->lowerColumn, in, lin*sizeof(*gather));
-    offset = 0;
     for(rank=0; rank<wsize; rank++) {
         j = lin;
         MPI_Bcast(&j, 1, _MPI_MAT_INT, rank, mpicom);
@@ -310,11 +334,13 @@ void matrixVector(const SparseMatrix *a,
     }
     lower = a->lowerRow;
 #else
+    const double *gather = in;
+
     lower = 0;
-    gather = in;
 #endif
     upper = lower + lout;
 
+    memset(out, 0, lout * sizeof(*out));
     for(k=0; k<a->nonzeros; k++) {
         i = a->i[k];
         j = a->j[k];
@@ -341,23 +367,48 @@ void vectorMatrix(const SparseMatrix *a,
     assert(lout == a->columns);
 #endif
 #ifdef USE_BLOCK
-    size_t k;
+    mat_int i, j, k, lower, upper;
     double *matp = a->value;
     const integer n = a->blockSize, n2 = n*n;
     const doublereal one=1.0;
     const integer inc=1;
     const char trans='T', normal='N';
 
+#ifdef USE_MPI
+    int rank;
+    double *gather = a->gather;
+    mat_int offset = 0;
+
+    memcpy(gather + a->lowerRow, in, lin*sizeof(*gather));
+    for(rank=0; rank<wsize; rank++) {
+        j = lin;
+        MPI_Bcast(&j, 1, _MPI_MAT_INT, rank, mpicom);
+        if(rank==wrank)
+            assert(offset == a->lowerRow);
+        MPI_Bcast(gather+offset, j, MPI_DOUBLE, rank, mpicom);
+        offset = offset + j;
+    }
+    lower = a->lowerColumn;
+#else
+    const double *gather = in;
+
+    lower = 0;
+#endif
+    upper = lower + lout;
+
     memset(out, 0, lout * sizeof(*out));
     for(k=0; k<a->blocks; k++, matp+=n2) {
-        DGEMV(&normal, &n, &n, &one,
-              matp, &n, in + a->i[k], &inc, &one,
-              out + a->j[k], &inc);
+        i = a->i[k];
+        j = a->j[k];
+        if(j >= lower && j < upper)
+            DGEMV(&normal, &n, &n, &one,
+                  matp, &n, gather + i, &inc, &one,
+                  out + j - lower, &inc);
 
-        if(a->descr == 's' && a->i[k] != a->j[k]) {
+        if(a->descr == 's' && i != j && i >= lower && i < upper) {
             DGEMV(&trans, &n, &n, &one,
-                  matp, &n, in + a->j[k], &inc, &one,
-                  out + a->i[k], &inc);
+                  matp, &n, gather + j, &inc, &one,
+                  out + i - lower, &inc);
         }
     }
 #elif defined(USE_MKL) && !defined(USE_MPI)
@@ -372,15 +423,14 @@ void vectorMatrix(const SparseMatrix *a,
         exit(68);
     }
 #else
-    mat_int i, j, k, lower, upper, offset;
-    int rank;
-    double value, *gather;
-    memset(out, 0, lout * sizeof(*out));
-
+    mat_int i, j, k, lower, upper;
+    double value;
 #ifdef USE_MPI
-    gather = a->gather;
+    int rank;
+    mat_int offset = 0;
+    double *gather = a->gather;
+
     memcpy(gather + a->lowerRow, in, lin*sizeof(*gather));
-    offset = 0;
     for(rank=0; rank<wsize; rank++) {
         j = lin;
         MPI_Bcast(&j, 1, _MPI_MAT_INT, rank, mpicom);
@@ -391,11 +441,13 @@ void vectorMatrix(const SparseMatrix *a,
     }
     lower = a->lowerColumn;
 #else
+    const double *gather = in;
+
     lower = 0;
-    gather = in;
 #endif
     upper = lower + lout;
 
+    memset(out, 0, lout * sizeof(*out));
     for(k=0; k<a->nonzeros; k++) {
         i = a->i[k];
         j = a->j[k];
