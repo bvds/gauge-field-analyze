@@ -96,7 +96,7 @@ void largeShifts(SparseMatrix *hess, cJSON *options,
     wrank = 0;
 #endif
     cJSON *tmp;
-    clock_t t1;
+    clock_t t1, t1f;
     time_t t2, tf;
 
     t1 = clock();
@@ -212,7 +212,7 @@ void largeShifts(SparseMatrix *hess, cJSON *options,
         /* This estimate of flops doesn't include the dynamicProject() call.
            2 matrix multiplies. */
         trl_print_info(&info, 2*(hess->nonzeros));
-    } else if(printDetails > 0) {
+    } else if(printDetails > 0 && wrank==0) {
         trl_terse_info(&info, stdout);
     }
 
@@ -220,8 +220,11 @@ void largeShifts(SparseMatrix *hess, cJSON *options,
 #endif
 
     time(&tf);
+    t1f = clock() - t1;
 #ifdef USE_MPI
     MPI_Allreduce(MPI_IN_PLACE, &eigenData.tcpu_mv, 1, MPI_LONG,
+                  MPI_SUM, mpicom);
+    MPI_Allreduce(MPI_IN_PLACE, &t1f, 1, MPI_LONG,
                   MPI_SUM, mpicom);
 #endif
     if(printDetails > 0 && wrank==0) {
@@ -234,7 +237,7 @@ void largeShifts(SparseMatrix *hess, cJSON *options,
 #else
                info.matvec, info.north,
 #endif
-               (clock()-t1)/(float) CLOCKS_PER_SEC, tf-t2);
+               t1f/(float) CLOCKS_PER_SEC, tf-t2);
         printf("largeShifts:  %.2fmv cpu sec for ops\n",
                eigenData.tcpu_mv/(float) CLOCKS_PER_SEC);
         fflush(stdout);

@@ -99,8 +99,6 @@ int main(int argc, char **argv){
     MPI_Comm mpicom = MPI_COMM_WORLD;
     MPI_Comm_size(mpicom, &wsize);
     MPI_Comm_rank(mpicom, &wrank);
-    printf("Starting mpi:  %i of %i\n", wrank, wsize);
-    fflush(stdout);
 #else
     void *mpicom = NULL;
     wsize = 1;
