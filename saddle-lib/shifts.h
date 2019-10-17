@@ -66,6 +66,9 @@ typedef struct {
     MPI_Comm mpicom;
     mat_int lowerColumn;
     double *gather;
+    double mpiTime;
+    double localTime;
+    int count;
 #endif
 } SparseMatrix;
 
@@ -137,6 +140,6 @@ void sparseMatrixRead(SparseMatrix *mat, char *fileName, char descr,
                       int tFlag, int blockSize, int chunkSize,
                       _MPI_Comm mpicom);
 void sparseMatrixFree(SparseMatrix *mat);
-void matrixVector(const SparseMatrix *a,
+void matrixVector(SparseMatrix *a,
                   const mat_int lin, const doublereal *in,
                   const mat_int lout, doublereal *out);

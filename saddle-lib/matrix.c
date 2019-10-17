@@ -139,6 +139,9 @@ void sparseMatrixRead(SparseMatrix *mat, char *fileName, char descr,
 #define MAX(A, B) (A>B?A:B)
     mat->gather = malloc(MAX(mat->rows, mat->columns)*
                          sizeof(*mat->gather));
+    mat->localTime = 0.0;
+    mat->mpiTime = 0.0;
+    mat->count = 0;
 #endif
 
 
@@ -402,7 +405,7 @@ void sparseMatrixFree(SparseMatrix *mat) {
 }
 
 /* in and out must be distinct */
-void matrixVector(const SparseMatrix *a,
+void matrixVector(SparseMatrix *a,
                   const mat_int lin, const doublereal *in,
                   const mat_int lout, doublereal *out) {
 #ifdef USE_MPI
@@ -423,9 +426,10 @@ void matrixVector(const SparseMatrix *a,
     const char trans='T';
 #ifdef USE_MPI
     int rank;
-    double *gather = a->gather;
+    double *gather = a->gather, t0, t1;
     mat_int offset = 0;
 
+    t0 = MPI_Wtime();
     memcpy(gather + a->lowerColumn, in, lin*sizeof(*gather));
     for(rank=0; rank<wsize; rank++) {
         j = lin;
@@ -436,6 +440,7 @@ void matrixVector(const SparseMatrix *a,
         offset = offset + j;
     }
     assert(offset == a->columns);
+    a->mpiTime += (t1 = MPI_Wtime()) - t0;
 #else
     const double *gather = in;
 #endif
@@ -448,6 +453,10 @@ void matrixVector(const SparseMatrix *a,
               matp, &n, gather + j, &inc, &one,
               out + i, &inc);
     }
+#ifdef USE_MPI
+    a->localTime += MPI_Wtime() - t1;
+    a->count += 1;
+#endif
 #elif defined(USE_MKL) && !defined(USE_MPI)
     sparse_status_t err;
     const double alpha = 1.0, beta=0.0;
@@ -467,9 +476,10 @@ void matrixVector(const SparseMatrix *a,
 
 #ifdef USE_MPI
     int rank;
-    double *gather = a->gather;
+    double *gather = a->gather, t0, t1;
     mat_int offset = 0;
 
+    t0 = MPI_Wtime();
     memcpy(gather + a->lowerColumn, in, lin*sizeof(*gather));
     for(rank=0; rank<wsize; rank++) {
         j = lin;
@@ -480,6 +490,7 @@ void matrixVector(const SparseMatrix *a,
         MPI_Bcast(gather+offset, j, MPI_DOUBLE, rank, mpicom);
         offset = offset + j;
     }
+    a->mpiTime += (t1 = MPI_Wtime()) - t0;
 #else
     const double *gather = in;
 #endif
@@ -491,5 +502,9 @@ void matrixVector(const SparseMatrix *a,
         value = a->value[k];
         out[i] += value * gather[j];
     }
+#ifdef USE_MPI
+    a->localTime += MPI_Wtime() - t1;
+    a->count += 1;
+#endif
 #endif
 }

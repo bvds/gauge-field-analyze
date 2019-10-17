@@ -247,6 +247,30 @@ int main(int argc, char **argv){
     time(&tf);
     tcpu += clock()-t1;
     toverall = clock()-tt1;
+
+#ifdef USE_MPI
+    MPI_Allreduce(MPI_IN_PLACE, &hess.localTime, 1, MPI_DOUBLE,
+                  MPI_SUM, MPI_COMM_WORLD);
+    MPI_Allreduce(MPI_IN_PLACE, &hess.mpiTime, 1, MPI_DOUBLE,
+                  MPI_SUM, MPI_COMM_WORLD);
+    MPI_Allreduce(MPI_IN_PLACE, &gauge.localTime, 1, MPI_DOUBLE,
+                  MPI_SUM, MPI_COMM_WORLD);
+    MPI_Allreduce(MPI_IN_PLACE, &gauge.mpiTime, 1, MPI_DOUBLE,
+                  MPI_SUM, MPI_COMM_WORLD);
+    MPI_Allreduce(MPI_IN_PLACE, &gaugeT.localTime, 1, MPI_DOUBLE,
+                  MPI_SUM, MPI_COMM_WORLD);
+    MPI_Allreduce(MPI_IN_PLACE, &gaugeT.mpiTime, 1, MPI_DOUBLE,
+                  MPI_SUM, MPI_COMM_WORLD);
+    if(wrank ==0 ) {
+        printf("Global hessian localTime=%.2f mpiTime=%.2f count=%i\n",
+               hess.localTime, hess.mpiTime, hess.count);
+        printf("Global gauge localTime=%.2f mpiTime=%.2f count=%i\n",
+               gauge.localTime, gauge.mpiTime, gauge.count);
+        printf("Global gaugeT localTime=%.2f mpiTime=%.2f count=%i\n",
+               gaugeT.localTime, gaugeT.mpiTime, gaugeT.count);
+    }
+#endif
+
 #ifdef USE_MPI
     MPI_Allreduce(MPI_IN_PLACE, &tcpu, 1, MPI_LONG,
                   MPI_SUM, MPI_COMM_WORLD);
