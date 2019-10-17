@@ -136,6 +136,8 @@ void dynamicInit(const mat_int nrow, const mat_int ncol,
     eval = malloc(mev*sizeof(double));
     evec = malloc(mev*nrow*sizeof(double));
     trl_init_info(&info, nrow, maxlan, lohi, ned, tol, restart, maxmv, mpicomp);
+    if(wrank != 0)
+        trl_set_debug(&info, 0, "dynamic-trlan-");
     memset(eval, 0, mev*sizeof(double));
 
     // call TRLAN to compute the eigenvalues

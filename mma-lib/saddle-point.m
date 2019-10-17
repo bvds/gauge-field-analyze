@@ -1,4 +1,4 @@
-2(*
+(*
   Define a basis of lattice degrees of freedom.
 
   Define operators on that basis for infinitesimal
@@ -351,6 +351,8 @@ Options[findDelta] = {dynamicPartMethod -> Automatic, printDetails -> False,
   storeBB -> False, debugProj -> False, externalAction -> Automatic,
   (* Only used by MKL version *)
   threads -> 2,
+  (* A numerical value will execute the MPI version *)
+  processes -> Automatic,
   (* This will result in just sorting rows and columns *)
   chunkSize -> 1,
   (* Roughly speaking, the relative error in the matrix norm of
@@ -494,7 +496,12 @@ findDelta[data:{hess_, grad_, gauge_}, opts:OptionsPattern[]] :=
     symbolString = (a_Symbol -> b_) :> SymbolName[a] -> b,
     outFile = "hess-grad-gauge.json",
     hessFile = "hess.mtx", gradFile = "grad.dat",
-    gaugeFile = "gauge.mtx", out, remoteHost, remotePath, remote},
+    gaugeFile = "gauge.mtx", out, remoteHost, remotePath, remote,
+    mpi = If[NumberQ[OptionValue[processes]],
+             Apply[Sequence, {"mpirun", "-np", ToString[OptionValue[processes]]}],
+             Nothing],
+    executable = If[NumberQ[OptionValue[processes]],
+                    "pshifts", "shifts"]},
    If[SymmetricMatrixQ[hess],
        Message[findDelta::symmetric]];
    (* Dump dimensions, constants, and options into JSON file.
@@ -533,7 +540,7 @@ findDelta[data:{hess_, grad_, gauge_}, opts:OptionsPattern[]] :=
    (* Run external program interactively *)
    If[action === Automatic,
       Run["rm -f shifts0.dat"];
-      out = RunProcess[{"saddle-lib/shifts",
+      out = RunProcess[{mpi, "saddle-lib/"<>executable,
                         "hess-grad-gauge.json", "shifts0.dat"}];
       Print[Style[out["StandardOutput"], FontColor -> Blue]];
       If[StringLength[out["StandardError"]]>0,
@@ -544,13 +551,14 @@ findDelta[data:{hess_, grad_, gauge_}, opts:OptionsPattern[]] :=
    (* Run external program on a remote host *)
    If[action == "remote",
       Run["rm -f shifts0.dat"];
-      remoteHost = "bvds@192.168.0.8";
+      remoteHost = "samson";
       remotePath = "lattice/gauge-field-analyze/saddle-lib";
       remote = remoteHost <> ":" <> remotePath;
-      Print["Running at ", remote];
+      Print["Running ", executable, " at ", remote];
       If[runRemote[{"scp", "hess-grad-gauge.json", hessFile, gradFile,
                     gaugeFile, remote}] != 0, Return[$Failed]];
-      If[runRemote[{"ssh", remoteHost, remotePath <> "/shifts",
+      If[runRemote[{"ssh", remoteHost, mpi,
+                    remotePath <> "/" <> executable,
                     remotePath <> "/hess-grad-gauge.json",
                     remotePath <> "/shifts0.dat"}] != 0, Return[$Failed]];
       If[runRemote[{"scp", remote <> "/shifts0.dat", "."}] != 0,

@@ -200,6 +200,8 @@ void largeShifts(SparseMatrix *hess, cJSON *options,
     *evec = (double *) malloc(mev*nrow*sizeof(double));
     trl_init_info(&info, nrow, maxlan, lohi, ned, tol, restart, maxmv,
                   mpicomp);
+    if(wrank != 0)
+        trl_set_debug(&info, 0, "eigensytem-trlan-");
     trl_set_iguess(&info, 0, iguess, 0, NULL);
     memset(*eval, 0, mev*sizeof(double));
     // Provide the initial vector
