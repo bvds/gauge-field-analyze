@@ -29,6 +29,7 @@
 
 struct {
     SparseMatrix *matrix;
+    SparseMatrix *matrixT;
     integer nrow;
     mat_int ncol;
     doublereal *z;
@@ -57,7 +58,8 @@ struct {
   ncol is the number of columns on this processor
 */
 void dynamicInit(const mat_int nrow, const mat_int ncol,
-                 SparseMatrix *gauge, cJSON *options, _MPI_Comm mpicom) {
+                 SparseMatrix *gauge, SparseMatrix *gaugeT,
+                 cJSON *options, _MPI_Comm mpicom) {
     // Let trlan figure out the work array allocation.
     const int lwrk = 0; double *wrk = NULL;
     int mev, maxlan, lohi, ned, maxmv, wrank=0;
@@ -68,10 +70,15 @@ void dynamicInit(const mat_int nrow, const mat_int ncol,
     cJSON *tmp;
     int i;
 #ifdef USE_MPI
-    MPI_Comm_rank(MPI_COMM_WORLD, &wrank);
+    MPI_Comm *mpicomp = &mpicom;
+    MPI_Comm_rank(mpicom, &wrank);
+#else
+    assert(mpicom == NULL);
+    void *mpicomp = NULL;
 #endif
 
     gaugeData.matrix = gauge;
+    gaugeData.matrixT = gaugeT;
     gaugeData.nrow = nrow;
     gaugeData.ncol = ncol;
     gaugeData.tcpu = 0;
@@ -128,7 +135,7 @@ void dynamicInit(const mat_int nrow, const mat_int ncol,
     mev = ned; // Allocate memory for the number of requested eigenpairs
     eval = malloc(mev*sizeof(double));
     evec = malloc(mev*nrow*sizeof(double));
-    trl_init_info(&info, nrow, maxlan, lohi, ned, tol, restart, maxmv, &mpicom);
+    trl_init_info(&info, nrow, maxlan, lohi, ned, tol, restart, maxmv, mpicomp);
     memset(eval, 0, mev*sizeof(double));
 
     // call TRLAN to compute the eigenvalues
@@ -219,7 +226,7 @@ void dynamicProject(const integer n, double *v, double *normDiff) {
               gaugeData.x, &istop, &itn, &rnorm, &arnorm,
               &xnorm, &anorm, &acond);
 
-    vectorMatrix(gaugeData.matrix,
+    matrixVector(gaugeData.matrixT,
                  gaugeData.nrow, gaugeData.x,
                  n, gaugeData.z);
     // This could be combined with the above matrix product, BLAS style.
@@ -301,7 +308,7 @@ void gaugeProduct(const integer *vectorLength, const doublereal *x,
                   doublereal *y) {
     clock_t t0 = clock(), t1;
     mat_int vl = *vectorLength;
-    vectorMatrix(gaugeData.matrix, vl, x,
+    matrixVector(gaugeData.matrixT, vl, x,
                  gaugeData.ncol, gaugeData.z);
     gaugeData.tcpu_vm += (t1=clock()) - t0;
     matrixVector(gaugeData.matrix,

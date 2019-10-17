@@ -50,7 +50,6 @@ typedef struct {
 #ifdef USE_BLOCK
     mat_int *i;
     mat_int *j;
-    char descr;
     mat_int blocks;
     mat_int blockSize;
 #elif defined(USE_MKL) && !defined(USE_MPI)
@@ -62,11 +61,9 @@ typedef struct {
 #else
     mat_int *i;
     mat_int *j;
-    char descr;
 #endif
 #ifdef USE_MPI
     MPI_Comm mpicom;
-    mat_int lowerRow;
     mat_int lowerColumn;
     double *gather;
 #endif
@@ -77,7 +74,8 @@ typedef struct {
             dynamic.c
  */
 void dynamicInit(const mat_int nrow, const mat_int ncol,
-                 SparseMatrix *gauge, cJSON *options, _MPI_Comm mpicom);
+                 SparseMatrix *gauge, SparseMatrix *gaugeT,
+                 cJSON *options, _MPI_Comm mpicom);
 void dynamicProject(const integer n, double *v, double *normDiff);
 void gaugeOp(const int nrow, const int ncol, const double *xin, const int ldx,
              double *yout, const int ldy, void* mvparam);
@@ -135,12 +133,10 @@ int indexRank(const mat_int i, const int wsize, const mat_int n);
 mat_int localSize(const unsigned int wrank, const int wsize, const mat_int n);
 mat_int rankIndex(const unsigned int wrank, const int wsize, const mat_int n);
 void rankSanityTest(mat_int n);
-void sparseMatrixRead(FILE *fp, SparseMatrix *mat, char *fileName,
-                      int blockSize, _MPI_Comm mpicom);
+void sparseMatrixRead(SparseMatrix *mat, char *fileName, char descr,
+                      int tFlag, int blockSize, int chunkSize,
+                      _MPI_Comm mpicom);
 void sparseMatrixFree(SparseMatrix *mat);
 void matrixVector(const SparseMatrix *a,
-                  const mat_int lin, const doublereal *in,
-                  const mat_int lout, doublereal *out);
-void vectorMatrix(const SparseMatrix *a,
                   const mat_int lin, const doublereal *in,
                   const mat_int lout, doublereal *out);

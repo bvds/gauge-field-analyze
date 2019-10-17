@@ -61,12 +61,10 @@ int main(int argc, char **argv){
     char *fdup, *dataPath, *hessFile, *gradFile, *gaugeFile;
     char *options;
     cJSON *jopts, *tmp;
-    int i, blockSize, nLargeShifts, wsize, wrank;
+    int i, blockSize, chunkSize, nLargeShifts, wsize, wrank;
     mat_int k, n, local_n, gaugeDimension, local_gaugeDimension;
     FILE *fp;
-    MM_typecode matcode;
     int nread;
-    mat_int chunkSize;
 #ifdef USE_MKL
     /*
       On the T480 laptop, calculations are limited by memory
@@ -154,50 +152,11 @@ int main(int argc, char **argv){
     */
     tmp = cJSON_GetObjectItemCaseSensitive(jopts, "hessFile");
     hessFile = catStrings(dataPath, tmp->valuestring);
-    SparseMatrix hess, *hessp = &hess;
-    if(wrank ==0)
-        printf("Opening file %s", hessFile);
-    if((fp = fopen(hessFile, "r")) == NULL) {
-        fprintf(stderr, "%i:  Could not open file %s\n", wrank, hessFile);
-        exit(44);
-    }
-    if (mm_read_banner(fp, &matcode) != 0) {
-        fprintf(stderr, "%i:  Could not process Matrix Market banner.\n",
-                wrank);
-        exit(701);
-    }
-    if(!(mm_is_real(matcode) && mm_is_matrix(matcode) && 
-         mm_is_coordinate(matcode))) {
-        fprintf(stderr, "%i:  Hessian should be real, coordinate.\n", wrank);
-        fprintf(stderr, "%i:  Market Market type: [%s]\n", wrank,
-                mm_typecode_to_str(matcode));
-        exit(702);
-    }
-    if (mm_read_mtx_crd_size(fp, &(hess.rows), &(hess.columns),
-                             &(hess.nonzeros)) !=0) {
-        fprintf(stderr, "%i:  Cannot read dimensions\n", wrank);
-        exit(703);
-    }
-    if(wrank ==0)
-        printf(" with %i nonzero elements.\n", hess.nonzeros);
+    SparseMatrix hess;
+    sparseMatrixRead(&hess, hessFile, 's', 0, blockSize,
+                     chunkSize, mpicom);
     assert(hess.rows == n);
     assert(hess.columns == n);
-#ifdef USE_BLOCK
-    hess.descr = 's';  // Symmetric matrix, with only one triangle stored.
-    sparseMatrixRead(fp, hessp, hessFile, blockSize, mpicom);
-    sortMatrix(hessp, (chunkSize+1)/2);
-#elif defined(USE_MKL) && !defined(USE_MPI)
-    hess.descr.type = SPARSE_MATRIX_TYPE_SYMMETRIC;
-    hess.descr.mode = SPARSE_FILL_MODE_LOWER;
-    hess.descr.diag = SPARSE_DIAG_NON_UNIT;
-    sparseMatrixRead(fp, hessp, hessFile, blockSize, mpicom);
-#else
-    hess.descr = 's';  // Symmetric matrix, with only one triangle stored.
-    sparseMatrixRead(fp, hessp, hessFile, blockSize, mpicom);
-    sortMatrix(hessp, (chunkSize+1)/2);
-#endif
-    fclose(fp);
-
 
 
     /*
@@ -229,48 +188,15 @@ int main(int argc, char **argv){
     */
     tmp = cJSON_GetObjectItemCaseSensitive(jopts, "gaugeFile");
     gaugeFile = catStrings(dataPath, tmp->valuestring);
-    SparseMatrix gauge, *gaugep = &gauge;
-    if(wrank ==0)
-        printf("Opening file %s", gaugeFile);
-    fp = fopen(gaugeFile, "r");
-    if (mm_read_banner(fp, &matcode) != 0) {
-        fprintf(stderr, "%i:  Could not process Matrix Market banner.\n",
-                wrank);
-        exit(701);
-    }
-    if(!(mm_is_real(matcode) && mm_is_matrix(matcode) && 
-         mm_is_coordinate(matcode) && mm_is_general(matcode))) {
-        fprintf(stderr, "%i:  Gauge matrix should be real, "
-                "general, coordinate.\n", wrank);
-        fprintf(stderr, "%i:  Market Market type: [%s]\n", wrank,
-                mm_typecode_to_str(matcode));
-        exit(702);
-    }
-    if (mm_read_mtx_crd_size(fp, &(gauge.rows), &(gauge.columns),
-                             &(gauge.nonzeros)) !=0) {
-        fprintf(stderr, "%i:  Cannot read dimensions\n", wrank);
-        exit(703);
-    }
-    if(wrank ==0)
-        printf(" with %i nonzero elements.\n", gauge.nonzeros);
+    SparseMatrix gauge, gaugeT;
+    sparseMatrixRead(&gauge, gaugeFile, 'g', 0, blockSize,
+                     chunkSize, mpicom);
+    sparseMatrixRead(&gaugeT, gaugeFile, 'g', 1, blockSize,
+                     chunkSize, mpicom);
     assert(gauge.rows == gaugeDimension);
     assert(gauge.columns == n);
-#ifdef USE_BLOCK
-    gauge.descr = 'g';  // General matrix
-    sparseMatrixRead(fp, gaugep, gaugeFile, blockSize, mpicom);
-    sortMatrix(gaugep, chunkSize);
-#elif defined(USE_MKL) && !defined(USE_MPI)
-    gauge.descr.type = SPARSE_MATRIX_TYPE_GENERAL;
-    gauge.descr.mode = SPARSE_FILL_MODE_LOWER;
-    gauge.descr.diag = SPARSE_DIAG_NON_UNIT;
-    sparseMatrixRead(fp, gaugep, gaugeFile, blockSize, mpicom);
-#else
-    gauge.descr = 'g';  // Symmetric matrix, with only one triangle stored.
-    sparseMatrixRead(fp, gaugep, gaugeFile, blockSize, mpicom);
-    sortMatrix(gaugep, chunkSize);
-#endif
-    fclose(fp);
-    fflush(stdout);
+    assert(gaugeT.columns == gaugeDimension);
+    assert(gaugeT.rows == n);
     time(&tf);
     tcpu += clock()-t1;
     twall += tf - t2; 
@@ -283,17 +209,17 @@ int main(int argc, char **argv){
     int nvals;
     tmp = cJSON_GetObjectItemCaseSensitive(jopts, "dynamicPartOptions");
     assert(tmp != NULL);
-    dynamicInit(local_gaugeDimension, local_n, gaugep, tmp, mpicom);
+    dynamicInit(local_gaugeDimension, local_n, &gauge, &gaugeT, tmp, mpicom);
     // Debug print:
 #if 0
-    testOp(hessp, local_n, grad, mpicom);
+    testOp(&hess, local_n, grad, mpicom);
 #endif
     tmp = cJSON_GetObjectItemCaseSensitive(jopts, "largeShiftOptions");
     assert(tmp != NULL);
-    largeShifts(hessp, tmp, local_n, grad, &absVals, &vecs, &nvals, mpicom);
+    largeShifts(&hess, tmp, local_n, grad, &absVals, &vecs, &nvals, mpicom);
     cutoffNullspace(local_n, nvals, jopts, grad, &absVals, &vecs,
                     &nLargeShifts, mpicom);
-    linearInit(hessp, local_n, vecs, nLargeShifts, mpicom);
+    linearInit(&hess, local_n, vecs, nLargeShifts, mpicom);
     tmp = cJSON_GetObjectItemCaseSensitive(jopts, "linearSolveOptions");
     assert(tmp != NULL);
     linearSolve(local_n, grad, tmp, shifts);
@@ -337,8 +263,9 @@ int main(int argc, char **argv){
     }
 
 
-    sparseMatrixFree(hessp);
-    sparseMatrixFree(gaugep);
+    sparseMatrixFree(&hess);
+    sparseMatrixFree(&gauge);
+    sparseMatrixFree(&gaugeT);
     free(fdup);
     free(absVals); free(vecs); free(shifts); free(grad);
     free(hessFile); free(gradFile); free(gaugeFile);

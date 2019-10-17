@@ -69,7 +69,8 @@ struct {
  */
 void largeShifts(SparseMatrix *hess, cJSON *options,
                  const mat_int nrow, double *initialVector,
-		 double **eval, double **evec, int *nvals, _MPI_Comm mpicom) {
+		 double **eval, double **evec, int *nvals,
+                 _MPI_Comm mpicom) {
 #ifdef USE_PRIMME
     primme_params primme;
     double *rnorm;   /* Array with the computed eigenpairs residual norms */
@@ -91,8 +92,11 @@ void largeShifts(SparseMatrix *hess, cJSON *options,
     int lohi = -1; // lowest or highest abs value eigenpairs.
     int i, ierr, printDetails = 1;
 #ifdef USE_MPI
+    MPI_Comm *mpicomp = &mpicom;
     MPI_Comm_rank(mpicom, &wrank);
 #else
+    assert(mpicom == NULL);
+    void *mpicomp = NULL;
     wrank = 0;
 #endif
     cJSON *tmp;
@@ -195,7 +199,7 @@ void largeShifts(SparseMatrix *hess, cJSON *options,
     *eval = (double *) malloc(mev*sizeof(double));
     *evec = (double *) malloc(mev*nrow*sizeof(double));
     trl_init_info(&info, nrow, maxlan, lohi, ned, tol, restart, maxmv,
-                  &mpicom);
+                  mpicomp);
     trl_set_iguess(&info, 0, iguess, 0, NULL);
     memset(*eval, 0, mev*sizeof(double));
     // Provide the initial vector
