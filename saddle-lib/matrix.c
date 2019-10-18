@@ -194,7 +194,7 @@ void sparseMatrixRead(SparseMatrix *mat, char *fileName, char descr,
         mat->blocks = mat->nonzeros;
 #endif
         sortMatrix(mat, 1);
-#if 1  // Sanity test
+#if 1  // Test that the rows are in order.
         for(k=0, i=0, j=0; k<mat->nonzeros && j<10; k++) {
             if((mat_int) mat->i[k]<i) {
                 if(j==0)

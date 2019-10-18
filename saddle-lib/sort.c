@@ -13,7 +13,9 @@ void makeChunkNumber(const SparseMatrix *mat,
                      const mat_int chunk);
 int indexCmp (const void * a, const void * b);
 
-mat_int *chunkNumber;
+// Type must accommodate n^2
+typedef unsigned long mat_index;
+mat_index *chunkNumber;
 
 /* Calculate index for each block of the matrix,
    so that "chunks" are continguous.
@@ -24,15 +26,17 @@ mat_int *chunkNumber;
    still be correctly ordered.
 */
 void makeChunkNumber(const SparseMatrix *mat,
-                         const mat_int chunk) {
-    mat_int i, j, k;
+                         const mat_int chunkIn) {
+    mat_index i, j;
+    mat_int k;
+    const mat_index chunk = chunkIn;
 #ifdef USE_BLOCK
     const mat_int b1 = mat->blockSize, n=mat->blocks;
 #else
     const mat_int b1 = 1, n = mat->nonzeros;
 #endif
     assert(chunk>0);
-    const mat_int columnChunks =
+    const mat_index columnChunks =
         (mat->columns/b1 + chunk - 1)/chunk;
 
     chunkNumber = malloc(n * sizeof(*chunkNumber));
@@ -49,7 +53,7 @@ void makeChunkNumber(const SparseMatrix *mat,
    https://stackoverflow.com/questions/31229657 */
 int indexCmp (const void * a, const void * b) {
     const mat_int ia = *(mat_int *)a,
-                       ib = *(mat_int *)b;
+        ib = *(mat_int *)b;
     return (chunkNumber[ia] > chunkNumber[ib]) -
         (chunkNumber[ib] > chunkNumber[ia]);
 }
@@ -86,8 +90,8 @@ printf("preCoords = {");
             printf(", ");
         if(k%10==-1)
             printf("\n");
-printf("{%i, %i, %i}", mat->i[k], mat->j[k],
-           chunkNumber[k]);
+        printf("{%i, %i, %l}", mat->i[k], mat->j[k],
+               chunkNumber[k]);
     }
     printf("};\n");
 #endif
@@ -95,7 +99,7 @@ printf("{%i, %i, %i}", mat->i[k], mat->j[k],
 
     /* Reorder matrix blocks in-place based on index
        See https://stackoverflow.com/questions/7365814 */
-    //  i_dst_first -> k
+    // i_dst_first -> k
     // i_src -> k1
     // i_dst -> k2
     for(k=0; k<n; k++) {
