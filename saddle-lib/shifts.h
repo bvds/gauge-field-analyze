@@ -41,18 +41,33 @@ typedef unsigned int mat_int;
 // For MPI calls, set matching type
 #define _MPI_MAT_INT MPI_UNSIGNED
 #endif
+#ifdef USE_TASK
+    typedef struct {
+        mat_int start;
+        mat_int end;
+        int doRank;
+        mat_int doSize;
+        int sendTo;
+        int receiveFrom;
+        mat_int receiveSize;
+    } TaskList;
+#endif
+
+/*  The more intuitive contstruct is actually undefined;
+    see http://lists.llvm.org/pipermail/cfe-commits/Week-of-Mon-20160118/147239.html
+*/
+#if defined(USE_MKL) && !defined(USE_MPI) && !defined(USE_BLOCK) && !defined(USE_TASK)
+#define USE_MKL_MATRIX 1
+#else
+#define USE_MKL_MATRIX 0
+#endif
 
 typedef struct {
     mat_int nonzeros;
     mat_int rows;
     mat_int columns;
     double *value;
-#ifdef USE_BLOCK
-    mat_int *i;
-    mat_int *j;
-    mat_int blocks;
-    mat_int blockSize;
-#elif defined(USE_MKL) && !defined(USE_MPI)
+#if USE_MKL_MATRIX
     MKL_INT *i;
     MKL_INT *j;
     struct matrix_descr descr;
@@ -62,13 +77,23 @@ typedef struct {
     mat_int *i;
     mat_int *j;
 #endif
+#ifdef USE_BLOCK
+    mat_int blocks;
+    mat_int blockSize;
+#endif
 #ifdef USE_MPI
     MPI_Comm mpicom;
-    mat_int lowerColumn;
-    double *gather;
     double mpiTime;
     double localTime;
     int count;
+#endif
+#ifdef USE_TASK
+    TaskList* task;
+    int taskCount;
+    double *gather[2];
+#else
+    double *gather;
+    mat_int lowerColumn;
 #endif
 } SparseMatrix;
 
@@ -126,7 +151,8 @@ void largeShiftProject(integer n, double *y);
 /*
          sort.c
 */
-void sortMatrix(SparseMatrix *mat, const mat_int chunk);
+void sortMatrixChunks(SparseMatrix *mat, const mat_int chunk);
+void sortMatrixLocal(SparseMatrix *mat, int wrank, int wsize);
 
 
 /*
@@ -135,6 +161,7 @@ void sortMatrix(SparseMatrix *mat, const mat_int chunk);
 int indexRank(const mat_int i, const int wsize, const mat_int n);
 mat_int localSize(const unsigned int wrank, const int wsize, const mat_int n);
 mat_int rankIndex(const unsigned int wrank, const int wsize, const mat_int n);
+mat_int maxLocalSize(const int wsize, const mat_int n);
 void rankSanityTest(mat_int n);
 void sparseMatrixRead(SparseMatrix *mat, char *fileName, char descr,
                       int tFlag, int blockSize, int chunkSize,

@@ -27,12 +27,17 @@ int indexRank(const mat_int i, const int wsize, const mat_int n) {
 mat_int localSize(const unsigned int wrank, const int wsize, const mat_int n) {
     return n/wsize + ((wrank<(n%wsize))?1:0);
 }
+// Lowest rank has maximum size
+mat_int maxLocalSize(const int wsize, const mat_int n) {
+    return localSize(0, wsize, n);
+}
 mat_int rankIndex(const unsigned int wrank, const int wsize, const mat_int n) {
     if(wrank < n%wsize)
         return wrank*(n/wsize + 1);
     else
         return wrank*(n/wsize) + n%wsize;
 }
+
 
 // Sanity tests for localSize, rankIndex, and indexRank
 void rankSanityTest(mat_int n) {
@@ -56,24 +61,26 @@ void sparseMatrixRead(SparseMatrix *mat, char *fileName, char descr,
                       int tFlag, int blockSize, int chunkSize,
                       _MPI_Comm mpicom) {
     mat_int i, j, k;
-#if defined(USE_BLOCK) || defined(USE_MPI) || !defined(USE_MKL)
+#if !USE_MKL_MATRIX
     mat_int l, lowerCount, upperCount, nz;
 #endif
     FILE *fp;
     MM_typecode matcode;
-    int nread, wrank;
+    int nread, wrank, wsize;
 #ifdef USE_MPI
     mat_int lower, upper;
-    int wsize;
 
     mat->mpicom = mpicom;
     MPI_Comm_rank(mpicom, &wrank);
     MPI_Comm_size(mpicom, &wsize);
 #else
     wrank = 0;
+    wsize = 1;
     assert(mpicom == NULL);
 #endif
 
+    // Currently this quantity is unused.
+    assert(chunkSize == 1);
 
     /*
            Read Matrix Market file into SparseMatrix
@@ -131,26 +138,11 @@ void sparseMatrixRead(SparseMatrix *mat, char *fileName, char descr,
 
 
     /*
-       Define quantities needed by matrixVector
-    */
-#ifdef USE_MPI
-    mat->lowerColumn = blockSize*
-        rankIndex(wrank, wsize, mat->columns/blockSize);
-#define MAX(A, B) (A>B?A:B)
-    mat->gather = malloc(MAX(mat->rows, mat->columns)*
-                         sizeof(*mat->gather));
-    mat->localTime = 0.0;
-    mat->mpiTime = 0.0;
-    mat->count = 0;
-#endif
-
-
-    /*
        Fill the other triangle of a symmetric matrix
 
        This assumes the matrix has no block structure assigned
     */
-#if defined(USE_BLOCK) || defined(USE_MPI) || !defined(USE_MKL)
+#if !USE_MKL_MATRIX
     if(descr == 's') {
         lowerCount = 0; upperCount = 0;
         for(k=0; k<mat->nonzeros; k++) {
@@ -193,8 +185,8 @@ void sparseMatrixRead(SparseMatrix *mat, char *fileName, char descr,
         mat->blockSize = 1;
         mat->blocks = mat->nonzeros;
 #endif
-        sortMatrix(mat, 1);
-#if 1  // Test that the rows are in order.
+        sortMatrixChunks(mat, 1);
+#if 1  // Verify that the rows are in order.
         for(k=0, i=0, j=0; k<mat->nonzeros && j<10; k++) {
             if((mat_int) mat->i[k]<i) {
                 if(j==0)
@@ -216,6 +208,8 @@ void sparseMatrixRead(SparseMatrix *mat, char *fileName, char descr,
     /*
         In the MPI case, filter out rows belonging to this
         process and shift row indices.
+
+        In the non-MPI case, this should do nothing.
     */
 #ifdef USE_MPI
     lower = blockSize*rankIndex(wrank, wsize, mat->rows/blockSize);
@@ -230,7 +224,7 @@ void sparseMatrixRead(SparseMatrix *mat, char *fileName, char descr,
     mat->i = REALLOC(mat->i, l*sizeof(*mat->i));
     mat->j = REALLOC(mat->j, l*sizeof(*mat->j));
     mat->value = REALLOC(mat->value, l*sizeof(*mat->value));
-    // Sanity test:  make sure no elements were dropped.
+    // Sanity test:  verify that no elements were dropped.
     MPI_Allreduce(&l, &nz, 1, _MPI_MAT_INT,
                   MPI_SUM, mpicom); 
     assert(nz == mat->nonzeros);
@@ -238,6 +232,9 @@ void sparseMatrixRead(SparseMatrix *mat, char *fileName, char descr,
 #endif
 
 
+    /* 
+       Divide matrix into blocks or create MKL block matrix 
+    */
 #ifdef USE_BLOCK
     mat_int ii = -1, jj = -1, lastii = 0, blockCols = 0;
     mat_int *ip = mat->i, *jp = mat->j;
@@ -332,8 +329,7 @@ void sparseMatrixRead(SparseMatrix *mat, char *fileName, char descr,
                mat->nonzeros);
 #endif
 
-    sortMatrix(mat, chunkSize);
-#elif defined(USE_MKL) && !defined(USE_MPI)
+#elif USE_MKL_MATRIX
     sparse_status_t err;
     sparse_matrix_t coordMatrix;
 
@@ -384,22 +380,162 @@ void sparseMatrixRead(SparseMatrix *mat, char *fileName, char descr,
         fprintf(stderr, "destroy failed %i\n", err);
         exit(60);
     }
-    assert(chunkSize > 0);  // Suppress compiler message
 #else
     assert(blockSize > 0);  // Suppress compiler message
-    sortMatrix(mat, chunkSize);
+#endif
+
+
+    /*
+      Sort matrix into local process blocks
+      Create schedule and shift column labels.
+
+      Currently, as defined in Mathematica, the basis 
+      is ordered according to one of the lattice dimensions.
+      If the number of processes is less than the 
+      length of the lattice, then the process of rank r will
+      only have nonzero matrix elements with processes rank 
+      (r-1)%wsize and (r+1)%wsize.
+
+      In the non-MPI case, this should work trivially.
+      In particular, the sort should have no effect.
+    */
+#ifdef USE_TASK
+    int needs, *allNeeds = malloc(wsize*sizeof(*allNeeds));
+    int p, q, r, jrank, lastJrank;
+    mat_int j0;
+    TaskList *task;
+#ifdef USE_BLOCK
+    const mat_int b1 = mat->blockSize, blocks = mat->blocks;
+#else
+    const mat_int b1 = 1, blocks = mat->nonzeros;
+#endif
+
+    for(p=0; p<2; p++)
+        mat->gather[p] = MALLOC(b1*maxLocalSize(wsize, mat->columns/b1)*
+                                sizeof(**mat->gather));
+
+    sortMatrixLocal(mat, wrank, wsize);
+
+    /* verify order, mark beginning and end of
+       each process block, and shift column indices.
+       Create row pointers. */
+    mat->task = malloc(wsize*sizeof(TaskList));
+    mat->task[0].start = 0;
+    for(k=0, mat->taskCount=0; ; k++) {
+        if(k < blocks) {
+            jrank = indexRank(mat->j[k]/b1, wsize, mat->columns/b1);
+            assert(k==0 || jrank >= lastJrank);
+            if(k==0 || jrank != lastJrank)
+                j0 = b1*rankIndex(jrank, wsize, mat->columns/b1);
+            mat->j[k] -= j0;
+        }
+        if(k==blocks || (k>0 && jrank > lastJrank)) {
+            // End of process block
+            mat->task[mat->taskCount].doRank = lastJrank;
+            mat->task[mat->taskCount].doSize =
+                b1*localSize(lastJrank, wsize, mat->columns/b1);
+            mat->task[mat->taskCount].end = k;
+            mat->taskCount++;
+            if(k == blocks)
+                break;
+            assert(mat->taskCount<wsize);
+            mat->task[mat->taskCount].start = k;
+        }
+        lastJrank = jrank;
+    }
+    /* Share the data needed by each process. */
+    for(p=0; p<wsize; p++){
+        if(p < mat->taskCount)
+            needs=mat->task[p].doRank;
+        else
+            needs=-1;
+        mat->task[p].sendTo = -1; // Don't send is default.
+        // Start receive for next round of work
+        if(p+1 < mat->taskCount && mat->task[p+1].doRank != wrank) {
+            mat->task[p].receiveFrom = mat->task[p+1].doRank;
+            mat->task[p].receiveSize = mat->task[p+1].doSize;
+        } else {
+            mat->task[p].receiveFrom = -1;
+            mat->task[p].receiveSize = 0;
+        }
+#ifdef USE_MPI
+        MPI_Allgather(&needs, 1, MPI_INT, allNeeds, 1, MPI_INT, mpicom);
+#else
+        allNeeds[0] = needs;
+#endif
+        for(q = 0; q<wsize; q++) {
+            if(allNeeds[q] == wrank && q!= wrank) {
+                /* True if each row starts with the
+                   process-local block and the process-local
+                   block is non-empty. */
+                assert(p>0);
+                /* Demand that the work is evenly distributed 
+                   across processes.  See comment below. */
+                assert(p-1 < mat->taskCount);
+                /* Only one send per task. True if the process-block
+                 structure is the same for each process. If needed, 
+                 one could extend this to the general case.
+
+                But, in that case, the work on each process must be 
+                fairly asymmetric and our overall strategy may not
+                be efficient anyway. */
+                assert(mat->task[p-1].sendTo == -1);
+                mat->task[p-1].sendTo = i;
+            }
+        }
+    }
+    free(allNeeds);
+
+    /* print out the results */
+    for(p = 0; p<wsize; p++) {
+        if(wrank == 0)
+            printf("task columns:  start, end, doRank, doSize, sendTo, "
+                  "receiveFrom, receiveSize\n");
+#ifdef USE_MPI
+        MPI_Barrier(mpicom);
+#endif
+        if(p == wrank) {
+            printf("%i:  Task list, taskCount=%i\n",
+                   wrank, mat->taskCount);
+            for(q=0; q<wsize; q++) {
+                task = mat->task + q;
+                printf("%i:  %i %i %i %i %i %i %i\n", wrank,
+                    task->start, task->end, task->doRank, task->doSize,
+                    task->sendTo, task->receiveFrom, task->receiveSize);
+            }
+        }
+    }
+#else
+    mat->gather = MALLOC(mat->columns*sizeof(*mat->gather));
+    mat->lowerColumn = blockSize*
+        rankIndex(wrank, wsize, mat->columns/blockSize);
+#endif
+
+
+    /* 
+       Initialize profiling associated with MPI
+    */
+#ifdef USE_MPI
+    mat->localTime = 0.0;
+    mat->mpiTime = 0.0;
+    mat->count = 0;
 #endif
 }
 
 void sparseMatrixFree(SparseMatrix *mat) {
-#if defined(USE_MKL) && !defined(USE_BLOCK) && !defined(USE_MPI)
+#if USE_MKL_MATRIX
     mkl_sparse_destroy(mat->a);
 #else
     FREE(mat->value);
     FREE(mat->i);
     FREE(mat->j);
 #endif
-#ifdef USE_MPI
+#ifdef USE_TASK
+    int i;
+    for(i=0; i<2; i++)
+        FREE(mat->gather[i]);
+    free(mat->task);
+#else
     FREE(mat->gather);
 #endif
 }
@@ -408,103 +544,141 @@ void sparseMatrixFree(SparseMatrix *mat) {
 void matrixVector(SparseMatrix *a,
                   const mat_int lin, const doublereal *in,
                   const mat_int lout, doublereal *out) {
-#ifdef USE_MPI
-    int wrank, wsize;
-    MPI_Comm mpicom = a->mpicom;
-    MPI_Comm_rank(mpicom, &wrank);
-    MPI_Comm_size(mpicom, &wsize);
-#else
-    assert(lin == a->columns);
-    assert(lout == a->rows);
-#endif
-#ifdef USE_BLOCK
-    mat_int i, j, k;
-    double *matp = a->value;
-    const integer n = a->blockSize, n2=n*n;
-    const doublereal one=1.0;
-    const integer inc=1;
-    const char trans='T';
-#ifdef USE_MPI
-    int rank;
-    double *gather = a->gather, t0, t1;
-    mat_int offset = 0;
-
-    t0 = MPI_Wtime();
-    memcpy(gather + a->lowerColumn, in, lin*sizeof(*gather));
-    for(rank=0; rank<wsize; rank++) {
-        j = lin;
-        MPI_Bcast(&j, 1, _MPI_MAT_INT, rank, mpicom);
-        if(rank==wrank)
-            assert(offset == a->lowerColumn);
-        MPI_Bcast(gather+offset, j, MPI_DOUBLE, rank, mpicom);
-        offset = offset + j;
-    }
-    assert(offset == a->columns);
-    a->mpiTime += (t1 = MPI_Wtime()) - t0;
-#else
-    const double *gather = in;
-#endif
-
-    memset(out, 0, lout * sizeof(double));
-    for(k=0; k<a->blocks; k++, matp+=n2) {
-        i = a->i[k];
-        j = a->j[k];
-        DGEMV(&trans, &n, &n, &one,
-              matp, &n, gather + j, &inc, &one,
-              out + i, &inc);
-    }
-#ifdef USE_MPI
-    a->localTime += MPI_Wtime() - t1;
-    a->count += 1;
-#endif
-#elif defined(USE_MKL) && !defined(USE_MPI)
+#if USE_MKL_MATRIX
     sparse_status_t err;
     const double alpha = 1.0, beta=0.0;
     double d;
 
+    assert(lin == a->columns);
+    assert(lout == a->rows);
     if((err=mkl_sparse_d_dotmv(SPARSE_OPERATION_NON_TRANSPOSE,
                   alpha, a->a, a->descr, in, beta, out, &d)) !=
-                              SPARSE_STATUS_SUCCESS) {
+       SPARSE_STATUS_SUCCESS) {
         fprintf(stderr, "mkl_sparse_d_dotmv failed %i\n", err);
-#include <signal.h>
-        raise(SIGINT);
         exit(69);
     }
-#else
-    mat_int i, j, k;
-    double value;
-
+#else // USE_MKL_MATRIX
+    int p, wsize;
+    mat_int i, j, k, start, end;
 #ifdef USE_MPI
-    int rank;
-    double *gather = a->gather, t0, t1;
-    mat_int offset = 0;
-
-    t0 = MPI_Wtime();
-    memcpy(gather + a->lowerColumn, in, lin*sizeof(*gather));
-    for(rank=0; rank<wsize; rank++) {
-        j = lin;
-        MPI_Bcast(&j, 1, _MPI_MAT_INT, rank, mpicom);
-        if(rank==wrank) {
-            assert(offset == a->lowerColumn);
-        }
-        MPI_Bcast(gather+offset, j, MPI_DOUBLE, rank, mpicom);
-        offset = offset + j;
-    }
-    a->mpiTime += (t1 = MPI_Wtime()) - t0;
+    double *gather;
+    int wrank;
+    MPI_Comm mpicom = a->mpicom;
+    MPI_Comm_rank(mpicom, &wrank);
+    MPI_Comm_size(mpicom, &wsize);
+    double t0, t1;
+#ifdef USE_TASK
+    MPI_Request sent, received[2];
 #else
-    const double *gather = in;
+    mat_int offset = 0;
+    int rank;
+#endif
+#else // USE_MPI
+    assert(lin == a->columns);
+    assert(lout == a->rows);
+    wsize = 1;
+    const double *gather;
+#endif
+#ifdef USE_TASK
+    TaskList *task;
+    int taskCount = a->taskCount;
+#else
+    int taskCount = 1;
+#endif
+#ifdef USE_BLOCK
+    double *ap;
+    const integer b1 = a->blockSize, b2=b1*b1;
+    const doublereal one=1.0;
+    const integer inc=1;
+    const char trans='T';
 #endif
 
-    memset(out, 0, lout * sizeof(*out));
-    for(k=0; k<a->nonzeros; k++) {
-        i = a->i[k];
-        j = a->j[k];
-        value = a->value[k];
-        out[i] += value * gather[j];
-    }
+
+    memset(out, 0, lout * sizeof(double));
+    for(p = 0; p < taskCount; p++) {
+#ifdef USE_TASK
+        task = a->task + p;
+#endif
+
+        /* Gather and send input vector */
+
 #ifdef USE_MPI
-    a->localTime += MPI_Wtime() - t1;
+        t0 = MPI_Wtime();
+#ifdef USE_TASK
+        if(task->sendTo != -1) {
+            MPI_Isend(in, lin, MPI_DOUBLE,
+               task->sendTo, MPI_ANY_TAG, mpicom, &sent);
+        }
+        if(task->receiveFrom != -1) {
+            // Cycle through the two gather arrays.
+            MPI_Irecv(a->gather[(p+1)%2], task->receiveSize, MPI_DOUBLE,
+                      task->receiveFrom, MPI_ANY_TAG, mpicom,
+                      received + ((p+1)%2));
+        }
+        if(task->doRank != wrank && task->doRank != -1)
+            MPI_Wait(received+(p%2), MPI_STATUS_IGNORE);
+        gather = a->gather[p%2];
+#else // USE_TASK
+        /* The strategy used here is very inefficient.
+           It is intended only for debugging. */
+        gather = a->gather;
+        memcpy(gather + a->lowerColumn, in, lin*sizeof(*gather));
+        for(rank=0; rank<wsize; rank++) {
+            j = lin;
+            MPI_Bcast(&j, 1, _MPI_MAT_INT, rank, mpicom);
+            if(rank==wrank) {
+#if 0
+                printf("%i:  offset=%i lowerColumn=%i\n",
+                    wrank, offset, a->lowerColumn);
+#endif
+                assert(offset == a->lowerColumn);
+            }
+            MPI_Bcast(gather+offset, j, MPI_DOUBLE, rank, mpicom);
+            offset = offset + j;
+        }
+        assert(offset == a->columns);
+#endif  // USE_TASK
+        a->mpiTime += (t1=MPI_Wtime()) - t0;
+#else // USE_MPI
+        gather = in;
+#endif // USE_MPI
+
+        /* For a given task, do matrix-vector multiply */
+#ifdef USE_TASK
+        if(task->doRank)
+            continue;
+        start = task->start;
+        end = task->end;
+#else // USE_TASK
+        start = 0;
+#ifdef USE_BLOCK
+        end = a->blocks;
+#else
+        end = a->nonzeros;
+#endif // USE_BLOCK
+#endif // USE_TASK
+#ifdef USE_BLOCK
+        for(k=start, ap=a->value + start; k<end; k++, ap += b2) {
+            i = a->i[k];
+            j = a->j[k];
+            DGEMV(&trans, &b1, &b1, &one,
+                  ap, &b1, gather + j, &inc, &one,
+                  out + i, &inc);
+        }
+#else
+        for(k=start; k<end; k++) {
+            i = a->i[k];
+            j = a->j[k];
+            out[i] += a->value[k] * gather[j];
+        }
+#endif
+#ifdef USE_MPI
+        a->localTime += MPI_Wtime() - t1;
+#endif
+        } // loop over tasks
+
+#ifdef USE_MPI
     a->count += 1;
 #endif
-#endif
+#endif  // MKL or not
 }

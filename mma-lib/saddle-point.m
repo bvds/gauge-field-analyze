@@ -496,7 +496,9 @@ findDelta[data:{hess_, grad_, gauge_}, opts:OptionsPattern[]] :=
     symbolString = (a_Symbol -> b_) :> SymbolName[a] -> b,
     outFile = "hess-grad-gauge.json",
     hessFile = "hess.mtx", gradFile = "grad.dat",
-    gaugeFile = "gauge.mtx", out, remoteHost, remotePath, remote,
+    gaugeFile = "gauge.mtx", out, remote,
+    remoteHost = "samson",
+    remotePath = "lattice/gauge-field-analyze/saddle-lib",
     mpi = If[NumberQ[OptionValue[processes]],
              Apply[Sequence, {"mpirun", "-np", ToString[OptionValue[processes]]}],
              Nothing],
@@ -551,8 +553,6 @@ findDelta[data:{hess_, grad_, gauge_}, opts:OptionsPattern[]] :=
    (* Run external program on a remote host *)
    If[action == "remote",
       Run["rm -f shifts0.dat"];
-      remoteHost = "samson";
-      remotePath = "lattice/gauge-field-analyze/saddle-lib";
       remote = remoteHost <> ":" <> remotePath;
       Print["Running ", executable, " at ", remote];
       If[runRemote[{"scp", "hess-grad-gauge.json", hessFile, gradFile,
@@ -567,7 +567,9 @@ findDelta[data:{hess_, grad_, gauge_}, opts:OptionsPattern[]] :=
    If[action === "detach",
       Run["rm -f shifts1.log shifts1.err shifts1.dat"];
       Print["Starting up and detaching."];
-      Run["(saddle-lib/shifts hess-grad-gauge.json shifts1.dat 2> shifts1.err 1> shifts1.log&); echo \"started\""]];
+      Run[mpi, "(saddle-lib/" <> executable, "hess-grad-gauge.json",
+          "shifts1.dat 2> shifts1.err 1> shifts1.log&);",
+          "echo \"started\""]];
    (* Read after detached program has run. *)
    If[action === "read",
       Print[Style[ReadString["shifts1.log"], FontColor -> Blue]];
