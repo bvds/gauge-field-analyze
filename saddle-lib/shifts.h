@@ -46,7 +46,6 @@ typedef unsigned int mat_int;
         mat_int start;
         mat_int end;
         int doRank;
-        mat_int doSize;
         int sendTo;
         int receiveFrom;
         mat_int receiveSize;
@@ -152,7 +151,7 @@ void largeShiftProject(integer n, double *y);
          sort.c
 */
 void sortMatrixChunks(SparseMatrix *mat, const mat_int chunk);
-void sortMatrixLocal(SparseMatrix *mat, int wrank, int wsize);
+void sortMatrixLocal(SparseMatrix *mat, int wrank, int wsize, int debug);
 
 
 /*
@@ -165,8 +164,9 @@ mat_int maxLocalSize(const int wsize, const mat_int n);
 void rankSanityTest(mat_int n);
 void sparseMatrixRead(SparseMatrix *mat, char *fileName, char descr,
                       int tFlag, int blockSize, int chunkSize,
-                      _MPI_Comm mpicom);
+                      int debug, _MPI_Comm mpicom);
 void sparseMatrixFree(SparseMatrix *mat);
 void matrixVector(SparseMatrix *a,
                   const mat_int lin, const doublereal *in,
                   const mat_int lout, doublereal *out);
+void testMatrixVector(SparseMatrix *mat, double *in);

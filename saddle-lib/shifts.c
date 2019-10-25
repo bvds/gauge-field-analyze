@@ -154,7 +154,7 @@ int main(int argc, char **argv){
     hessFile = catStrings(dataPath, tmp->valuestring);
     SparseMatrix hess;
     sparseMatrixRead(&hess, hessFile, 's', 0, blockSize,
-                     chunkSize, mpicom);
+                     chunkSize, 0, mpicom);
     assert(hess.rows == n);
     assert(hess.columns == n);
 
@@ -190,9 +190,9 @@ int main(int argc, char **argv){
     gaugeFile = catStrings(dataPath, tmp->valuestring);
     SparseMatrix gauge, gaugeT;
     sparseMatrixRead(&gauge, gaugeFile, 'g', 0, blockSize,
-                     chunkSize, mpicom);
+                     chunkSize, 0, mpicom);
     sparseMatrixRead(&gaugeT, gaugeFile, 'g', 1, blockSize,
-                     chunkSize, mpicom);
+                     chunkSize, 0, mpicom);
     assert(gauge.rows == gaugeDimension);
     assert(gauge.columns == n);
     assert(gaugeT.columns == gaugeDimension);
@@ -201,6 +201,10 @@ int main(int argc, char **argv){
     tcpu += clock()-t1;
     twall += tf - t2; 
 
+#if 0 // Debug:  Test matrix-vector multiplication, printing result  
+    testMatrixVector(&gauge, grad);
+    exit(0);
+#endif
 
     /* Solve it!  */
 
@@ -210,7 +214,7 @@ int main(int argc, char **argv){
     tmp = cJSON_GetObjectItemCaseSensitive(jopts, "dynamicPartOptions");
     assert(tmp != NULL);
     dynamicInit(local_gaugeDimension, local_n, &gauge, &gaugeT, tmp, mpicom);
-    // Debug print:
+    // Debug:  Test hessOp, printing result.
 #if 0
     testOp(&hess, local_n, grad, mpicom);
 #endif

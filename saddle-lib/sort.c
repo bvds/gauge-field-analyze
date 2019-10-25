@@ -9,8 +9,9 @@
 #include <assert.h>
 #include "shifts.h"
 
-void doSortMatrix(SparseMatrix *mat);
+void doSortMatrix(SparseMatrix *mat, int debug);
 int indexCmp (const void * a, const void * b);
+void printCoordinates(SparseMatrix *mat, char* variableName, int rankFlag);
 
 // Type must accommodate n^2
 typedef unsigned long mat_index;
@@ -46,7 +47,7 @@ void sortMatrixChunks(SparseMatrix *mat,
             j/chunk)*chunk + i%chunk)*chunk + j%chunk;
     }
 
-    doSortMatrix(mat);
+    doSortMatrix(mat, 0);
     free(elementRank);
 }
 
@@ -62,16 +63,14 @@ void sortMatrixChunks(SparseMatrix *mat,
 
   For a single process, this should just sort blocks
   by row and column.
-
-  **** Not tested ****
 */
-void sortMatrixLocal(SparseMatrix *mat, int wrank, int wsize) {
+void sortMatrixLocal(SparseMatrix *mat, int wrank, int wsize, int debug) {
     mat_index i, j, j0;
     mat_int k;
     int jrank;
     const mat_index cols = mat->columns;
 #ifdef USE_BLOCK
-    const mat_int b1 = mat->blockSize, n=mat->blocks;
+    const mat_int b1 = mat->blockSize, n = mat->blocks;
 #else
     const mat_int b1 = 1, n = mat->nonzeros;
 #endif
@@ -86,13 +85,15 @@ void sortMatrixLocal(SparseMatrix *mat, int wrank, int wsize) {
         assert(i < localRows);
         jrank = indexRank(j/b1, wsize, mat->columns/b1);
         j0 = b1*rankIndex(jrank, wsize, mat->columns/b1);
-
-        elementRank[k] = localRows*((j0 - localj0)%cols) +
+        /* C standard for mod of negative numbers is screwy.
+           add cols to avoid issue. */
+        elementRank[k] = localRows*((cols + j0 - localj0)%cols) +
             i*b1*localSize(jrank, wsize, mat->columns/b1) +
             j - j0;
+        assert(elementRank[k] < localRows*cols);
     }
 
-    doSortMatrix(mat);
+    doSortMatrix(mat, debug);
     free(elementRank);
 }
 
@@ -109,7 +110,7 @@ int indexCmp (const void * a, const void * b) {
 /*
   Sort matrix blocks so based on a given elementRank.
 */
-void doSortMatrix(SparseMatrix *mat) {
+void doSortMatrix(SparseMatrix *mat, int debug) {
     mat_int k, k1, k2, *index;
     mat_int holdi, holdj;
 #ifdef USE_BLOCK
@@ -121,24 +122,13 @@ void doSortMatrix(SparseMatrix *mat) {
 #endif
     double *holdValue = malloc(b2*sizeof(*holdValue));
 
+    if(debug>1)
+        printCoordinates(mat, "preCoords", 1); // elementRank label
     // Create index by sorting with respect to elementRank
     index = malloc(n*sizeof(*index));
     for(k=0; k<n; k++)
         index[k] = k;
     qsort(index, n, sizeof(*index), indexCmp);
-#if 0
-    // Print mathematica format coordinates
-printf("preCoords = {");
-    for(k=0; k<n; k++) {
-        if(k>0)
-            printf(", ");
-        if(k%10==9)
-            printf("\n");
-        printf("{%i, %i, %lu}", mat->i[k], mat->j[k],
-               elementRank[k]);
-    }
-    printf("};\n");
-#endif
 
     /* Reorder matrix blocks in-place based on index
        See https://stackoverflow.com/questions/7365814 */
@@ -176,19 +166,37 @@ printf("preCoords = {");
         index[k2] = k2;
     }
 
-#if 0
+    if(debug>0)
+        printCoordinates(mat, "postCoords", 0); // actual order
+
+    free(holdValue);
+    free(index);
+}
+
+
+/*
+   debug print
+   print coordinates in Mathematica format.
+*/
+void printCoordinates(SparseMatrix *mat, char* variableName, int rankFlag) {
+    mat_int k;
+#ifdef USE_BLOCK
+    const mat_int n = mat->blocks,
+        blockSize = mat->blockSize;
+#else
+    const mat_int n = mat->nonzeros,
+        blockSize = 1;
+#endif
     // Print mathematica format coordinates
-printf("postCoords = {");
+    printf("blockSize=%i;\n", blockSize);
+    printf("%s = {", variableName);
     for(k=0; k<n; k++) {
         if(k>0)
             printf(", ");
         if(k%10==9)
             printf("\n");
-printf("{%i, %i, %i}", mat->i[k], mat->j[k], k);
+        printf("{%i, %i, %li}", mat->i[k], mat->j[k],
+               rankFlag?elementRank[k]:k);
     }
     printf("};\n");
-#endif
-
-    free(holdValue);
-    free(index);
 }

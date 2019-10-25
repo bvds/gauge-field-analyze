@@ -11,12 +11,22 @@ PRIMMEDIR = ../../linear-algebra/primme
 CFLAGS = -fPIC  -I$(TRLANDIR)/INC -g -Wall -Wextra -pedantic -std=gnu11
 LFLAGS =  -L$(TRLANDIR) -L/usr/local/lib -lcjson -lgfortran
 SLFLAGS = -lnutrlan
+#
 #  Need to add fortran libraries needed by MINRES-QLP
 #  Use "ldd minresqlptest_mpi" to view libraries.
 PLFLAGS = -lmpi_mpifh -lmpi_usempif08 -lnutrlan_mpi
 #
 #  On AMD Epyc, add flags suggested by
 #  http://www.prace-ri.eu/best-practice-guide-amd-epyc
+#
+#  Possible additional flags, some associated with prefetching:
+#   -ffast-math -ftree-vectorize -fopenmp -fprefetch-loop-arrays -mprefetchwt1
+#  These need to be tested emprically because they might
+#  interfere with hardware prefetching.
+#
+#  glibc 2.22+ a vectorized version of the libm library is available.
+#  Use -lmvec instead of -lm, also need flags -ftree-vectorize
+#  -funsafe-math-optimizations and -ffast-math.
 #
 ifeq ($(shell lscpu|grep -m 1 -c -i epyc),1)
 CFLAGS += -O3 -march=znver1 -mtune=znver1 -mfma -mavx2 -m3dnow -fomit-frame-pointer
@@ -28,11 +38,11 @@ endif
 #           of USE_BLOCK and USE_TASK, for both 4 and 8 processes.
 #         Need valgrind check in parallel case.
 #
-#CFLAGS += -DUSE_BLOCK
+CFLAGS += -DUSE_BLOCK
 #
 #   Use task manager to control sparse matrix-vector products
 #
-#CFLAGS += -DUSE_TASK
+CFLAGS += -DUSE_TASK
 #
 #   Use Intel MKL for BLAS
 #   Also, use MKL for sparse matrix storage if the flags
