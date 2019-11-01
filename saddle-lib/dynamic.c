@@ -114,8 +114,8 @@ void dynamicInit(const mat_int nrow, const mat_int ncol,
                         // Default value appropriate for reorthogonalization
                         (integer) gauge->rows);
 
-    gaugeData.b = MALLOC(nrow*sizeof(double));
-    gaugeData.x = MALLOC(nrow*sizeof(double));
+    gaugeData.b = MALLOC(nrow*sizeof(*gaugeData.b));
+    gaugeData.x = MALLOC(nrow*sizeof(*gaugeData.x));
     gaugeData.z = MALLOC(ncol*sizeof(*gaugeData.z));
 
     /* Calculate the smallest eigenvalue of gaugeProduct.  
@@ -310,6 +310,9 @@ void gaugeProduct(const integer *vectorLength, const doublereal *x,
                   doublereal *y) {
     clock_t t0 = clock(), t1;
     mat_int vl = *vectorLength;
+
+    assert(gaugeData.nrow == *vectorLength);
+
     matrixVector(gaugeData.matrixT, vl, x,
                  gaugeData.ncol, gaugeData.z);
     gaugeData.tcpu_vm += (t1=clock()) - t0;

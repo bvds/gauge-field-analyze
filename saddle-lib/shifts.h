@@ -52,7 +52,7 @@ typedef unsigned int mat_int;
     } TaskList;
 #endif
 
-/*  The more intuitive contstruct is actually undefined;
+/*  The more intuitive construct is actually undefined;
     see http://lists.llvm.org/pipermail/cfe-commits/Week-of-Mon-20160118/147239.html
 */
 #if defined(USE_MKL) && !defined(USE_MPI) && !defined(USE_BLOCK) && !defined(USE_TASK)

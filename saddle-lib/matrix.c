@@ -495,7 +495,7 @@ void sparseMatrixRead(SparseMatrix *mat, char *fileName, char descr,
     */
 #ifdef USE_TASK
     int needs, *allNeeds = malloc(wsize*sizeof(*allNeeds));
-    int p, q, jrank, lastJrank;
+    int p, q, jrank = -1, lastJrank = -1;
     mat_int j0;
 #ifdef USE_BLOCK
     const mat_int b1 = mat->blockSize, blocks = mat->blocks;
@@ -530,19 +530,19 @@ void sparseMatrixRead(SparseMatrix *mat, char *fileName, char descr,
                           fileName, tFlag, mpicom);
     }
 
-    /* verify order, mark beginning and end of
+    /* Verify order, mark beginning and end of
        each process block, and shift column indices for each block. */
     mat->task = malloc(wsize*sizeof(TaskList));
     mat->task[0].start = 0;
     for(k=0, mat->taskCount=0; ; k++) {
         if(k < blocks) {
             jrank = indexRank(mat->j[k]/b1, wsize, mat->columns/b1);
-            /* Verify jrank-wrank is non-decreasing
+            /* Verify (jrank-wrank)%wsize is non-decreasing
                This is not, strictly speaking, necessary, but it
-               does verify that sortMatrixLocal is working as 
+               does verify that sortMatrixLocal() is working as
                intended. */
-            /* C standard for mod of negative numbers is screwy.
-               add wsize to avoid issue. */
+            /* The C standard for mod of negative numbers is screwy:
+               add wsize to get normal behavior. */
             if(k>0 && (wsize+jrank-wrank)%wsize <
                (wsize+lastJrank-wrank)%wsize) {
                 fprintf(stderr, "%i:  Expect non-decreasing rank.\n", wrank);
@@ -558,6 +558,7 @@ void sparseMatrixRead(SparseMatrix *mat, char *fileName, char descr,
             // End of process block
             mat->task[mat->taskCount].doRank = lastJrank;
             mat->task[mat->taskCount].end = k;
+            mat->task[mat->taskCount].sendTo = -1; // Don't send is default.
             mat->taskCount++;
             if(k == blocks)
                 break;
@@ -568,12 +569,6 @@ void sparseMatrixRead(SparseMatrix *mat, char *fileName, char descr,
     }
     /* Share the data needed by each process. */
     for(p=0; p<wsize; p++){
-        if(p < mat->taskCount)
-            needs=mat->task[p].doRank;
-        else
-            needs=-1;
-        // printf("%i:  p=%i needs=%i\n", wrank, p, needs);
-        mat->task[p].sendTo = -1; // Don't send is default.
         // Start receive for next round of work
         if(p+1 < mat->taskCount && mat->task[p+1].doRank != wrank) {
             mat->task[p].receiveFrom = mat->task[p+1].doRank;
@@ -583,13 +578,18 @@ void sparseMatrixRead(SparseMatrix *mat, char *fileName, char descr,
             mat->task[p].receiveFrom = -1;
             mat->task[p].receiveSize = 0;
         }
+        if(p < mat->taskCount)
+            needs=mat->task[p].doRank;
+        else
+            needs=-1;
+        // printf("%i:  p=%i needs=%i\n", wrank, p, needs);
 #ifdef USE_MPI
         MPI_Allgather(&needs, 1, MPI_INT, allNeeds, 1, MPI_INT, mpicom);
 #else
         allNeeds[0] = needs;
 #endif
         for(q = 0; q<wsize; q++) {
-            if(allNeeds[q] == wrank && q!= wrank) {
+            if(allNeeds[q] == wrank && q != wrank) {
                 /* Verify that each row starts with the
                    process-local block and the process-local
                    block is non-empty. */
@@ -687,9 +687,9 @@ void matrixVector(SparseMatrix *a,
     MPI_Comm mpicom = a->mpicom;
     MPI_Comm_rank(mpicom, &wrank);
     MPI_Comm_size(mpicom, &wsize);
+    MPI_Request sent = MPI_REQUEST_NULL, received = MPI_REQUEST_NULL;
     double t0, t1;
 #ifdef USE_TASK
-    MPI_Request sent = MPI_REQUEST_NULL, received = MPI_REQUEST_NULL;
     const double *gather;
 #else
     mat_int offset = 0;
@@ -727,9 +727,6 @@ void matrixVector(SparseMatrix *a,
 #ifdef USE_MPI
         t0 = MPI_Wtime();
 #ifdef USE_TASK
-        // Verify any pending operations are complete
-        MPI_Wait(&sent, MPI_STATUS_IGNORE);
-        MPI_Wait(&received, MPI_STATUS_IGNORE);
         if(task->sendTo != -1) {
             MPI_Isend(in, lin, MPI_DOUBLE,
                task->sendTo, p+1, mpicom, &sent);
@@ -801,9 +798,16 @@ void matrixVector(SparseMatrix *a,
         }
 #endif
 #ifdef USE_MPI
+        /* Verify that any pending messages are complete
+           before starting the next task or exiting.
+           Note that subsequent code may modifies the in array. */
+        MPI_Wait(&sent, MPI_STATUS_IGNORE);
+        MPI_Wait(&received, MPI_STATUS_IGNORE);
+
         a->localTime += MPI_Wtime() - t1;
 #endif
         } // loop over tasks
+
 
 #ifdef USE_MPI
     a->count += 1;
