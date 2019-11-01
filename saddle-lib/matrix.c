@@ -109,6 +109,8 @@ void printMatrixBlocks(SparseMatrix *mat, int wrank, int wsize,
     for(rank=0; rank<wsize; rank++) {
 #ifdef USE_MPI
         MPI_Barrier(mpicom);
+#else
+	assert(mpicom == NULL);
 #endif
         if(rank==wrank) {
             printf("%i:  Print matrix for %s, tFlag=%i:\n",
@@ -140,6 +142,8 @@ void printTasks(SparseMatrix *mat, int wsize, int wrank, _MPI_Comm mpicom) {
     for(p = 0; p<wsize; p++) {
 #ifdef USE_MPI
         MPI_Barrier(mpicom);
+#else
+	assert(mpicom == NULL);
 #endif
         if(p == wrank) {
             if(wrank == 0)
@@ -496,7 +500,7 @@ void sparseMatrixRead(SparseMatrix *mat, char *fileName, char descr,
 #ifdef USE_TASK
     int needs, *allNeeds = malloc(wsize*sizeof(*allNeeds));
     int p, q, jrank = -1, lastJrank = -1;
-    mat_int j0;
+    mat_int j0 = 0;
 #ifdef USE_BLOCK
     const mat_int b1 = mat->blockSize, blocks = mat->blocks;
 #else
@@ -680,28 +684,26 @@ void matrixVector(SparseMatrix *a,
         exit(69);
     }
 #else // USE_MKL_MATRIX
-    int p, wsize;
+    int p;
     mat_int i, j, k, start, end;
 #ifdef USE_MPI
     int wrank;
     MPI_Comm mpicom = a->mpicom;
-    MPI_Comm_rank(mpicom, &wrank);
-    MPI_Comm_size(mpicom, &wsize);
     MPI_Request sent = MPI_REQUEST_NULL, received = MPI_REQUEST_NULL;
     double t0, t1;
 #ifdef USE_TASK
     const double *gather;
 #else
     mat_int offset = 0;
-    int rank;
+    int rank, wsize;
     double *gather;
+    MPI_Comm_size(mpicom, &wsize);
 #endif
 #else // USE_MPI
+    const double *gather;
     assert(lin == a->columns);
     assert(lout == a->rows);
-    wsize = 1;
-    const double *gather;
-#endif
+#endif // USE_MPI
 #ifdef USE_TASK
     TaskList *task;
     int taskCount = a->taskCount;
@@ -716,6 +718,11 @@ void matrixVector(SparseMatrix *a,
     const char trans='T';
 #endif
 
+
+#ifdef USE_MPI
+    MPI_Comm_rank(mpicom, &wrank);
+    t0 = MPI_Wtime();
+#endif
     memset(out, 0, lout * sizeof(double));
     for(p = 0; p < taskCount; p++) {
 #ifdef USE_TASK
@@ -725,7 +732,6 @@ void matrixVector(SparseMatrix *a,
         /* Gather and send input vector */
 
 #ifdef USE_MPI
-        t0 = MPI_Wtime();
 #ifdef USE_TASK
         if(task->sendTo != -1) {
             MPI_Isend(in, lin, MPI_DOUBLE,
@@ -798,18 +804,19 @@ void matrixVector(SparseMatrix *a,
         }
 #endif
 #ifdef USE_MPI
-        /* Verify that any pending messages are complete
-           before starting the next task or exiting.
-           Note that subsequent code may modifies the in array. */
-        MPI_Wait(&sent, MPI_STATUS_IGNORE);
-        MPI_Wait(&received, MPI_STATUS_IGNORE);
+        a->localTime += (t0 = MPI_Wtime()) - t1;
 
-        a->localTime += MPI_Wtime() - t1;
+        /* Verify that any current messages are complete
+           before starting the next task or exiting.
+	   Subsequent code may modify the 'in' array. */
+        MPI_Wait(&received, MPI_STATUS_IGNORE);
+	MPI_Wait(&sent, MPI_STATUS_IGNORE);
 #endif
         } // loop over tasks
 
 
 #ifdef USE_MPI
+    a->mpiTime += MPI_Wtime() - t0;
     a->count += 1;
 #endif
 #endif  // MKL or not
