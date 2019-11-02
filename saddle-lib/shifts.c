@@ -24,6 +24,8 @@
 #include "mmio.h"
 #ifdef USE_MKL
 #include "mkl_spblas.h"
+#else
+#include "blis/cblas.h"
 #endif
 
 
@@ -64,22 +66,7 @@ int main(int argc, char **argv){
     int i, blockSize, chunkSize, nLargeShifts, wsize, wrank;
     mat_int k, n, local_n, gaugeDimension, local_gaugeDimension;
     FILE *fp;
-    int nread;
-#ifdef USE_MKL
-    /*
-      On the T480 laptop, calculations are limited by memory
-      latency/bandwidth:  too many threads causes thread 
-      contention.
-
-      8^3 lattice, nc=3 total execution time:
-      Threads    cpu time   wall time
-      1          884s       884s
-      2          1362s      682s
-      3          2042s      683s
-      4          2878s      722s
-    */
-    int threads;
-#endif
+    int nread, threads;
     long int twall = 0, tcpu = 0, toverall;
     clock_t t1, tt1;
     time_t t2, tt2, tf;
@@ -138,12 +125,28 @@ int main(int argc, char **argv){
     chunkSize = cJSON_IsNumber(tmp)?tmp->valueint:1;
     assert(chunkSize > 0);
 
-#ifdef USE_MKL
     tmp = cJSON_GetObjectItemCaseSensitive(jopts, "threads");
     threads = cJSON_IsNumber(tmp)?tmp->valueint:1;
+#ifdef USE_MKL
+    /*
+      On the T480 laptop, calculations are limited by memory
+      latency/bandwidth:  too many threads causes thread 
+      contention.
+
+      8^3 lattice, nc=3 total execution time:
+      Threads    cpu time   wall time
+      1          884s       884s
+      2          1362s      682s
+      3          2042s      683s
+      4          2878s      722s
+    */
     if(wrank ==0)
         printf("Setting MKL to %i threads\n", threads);
     mkl_set_num_threads_local(threads);
+#else
+    if(wrank ==0)
+        printf("Setting Blis to %i threads\n", threads);
+    bli_thread_set_num_threads(threads);
 #endif
 
 
@@ -252,28 +255,9 @@ int main(int argc, char **argv){
     tcpu += clock()-t1;
     toverall = clock()-tt1;
 
-#ifdef USE_MPI
-    MPI_Allreduce(MPI_IN_PLACE, &hess.localTime, 1, MPI_DOUBLE,
-                  MPI_SUM, MPI_COMM_WORLD);
-    MPI_Allreduce(MPI_IN_PLACE, &hess.mpiTime, 1, MPI_DOUBLE,
-                  MPI_SUM, MPI_COMM_WORLD);
-    MPI_Allreduce(MPI_IN_PLACE, &gauge.localTime, 1, MPI_DOUBLE,
-                  MPI_SUM, MPI_COMM_WORLD);
-    MPI_Allreduce(MPI_IN_PLACE, &gauge.mpiTime, 1, MPI_DOUBLE,
-                  MPI_SUM, MPI_COMM_WORLD);
-    MPI_Allreduce(MPI_IN_PLACE, &gaugeT.localTime, 1, MPI_DOUBLE,
-                  MPI_SUM, MPI_COMM_WORLD);
-    MPI_Allreduce(MPI_IN_PLACE, &gaugeT.mpiTime, 1, MPI_DOUBLE,
-                  MPI_SUM, MPI_COMM_WORLD);
-    if(wrank ==0 ) {
-        printf("Global hessian localTime=%.2f mpiTime=%.2f count=%i\n",
-               hess.localTime, hess.mpiTime, hess.count);
-        printf("Global gauge localTime=%.2f mpiTime=%.2f count=%i\n",
-               gauge.localTime, gauge.mpiTime, gauge.count);
-        printf("Global gaugeT localTime=%.2f mpiTime=%.2f count=%i\n",
-               gaugeT.localTime, gaugeT.mpiTime, gaugeT.count);
-    }
-#endif
+    sparseMatrixStats(&hess, "hessian");
+    sparseMatrixStats(&gauge, "gauge");
+    sparseMatrixStats(&gaugeT, "gaugeT");
 
 #ifdef USE_MPI
     MPI_Allreduce(MPI_IN_PLACE, &tcpu, 1, MPI_LONG,
@@ -289,7 +273,6 @@ int main(int argc, char **argv){
                __FILE__, (toverall)/(float) CLOCKS_PER_SEC, tf-tt2);
         fflush(stdout);
     }
-
 
     sparseMatrixFree(&hess);
     sparseMatrixFree(&gauge);

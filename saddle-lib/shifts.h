@@ -84,8 +84,10 @@ typedef struct {
     MPI_Comm mpicom;
     double mpiTime;
     double localTime;
-    int count;
+#else
+    long int tcpu;
 #endif
+    int count;
 #ifdef USE_TASK
     TaskList* task;
     int taskCount;
@@ -165,6 +167,7 @@ void rankSanityTest(mat_int n);
 void sparseMatrixRead(SparseMatrix *mat, char *fileName, char descr,
                       int tFlag, int blockSize, int chunkSize,
                       int debug, _MPI_Comm mpicom);
+void sparseMatrixStats(SparseMatrix *mat, char *matrixName);
 void sparseMatrixFree(SparseMatrix *mat);
 void matrixVector(SparseMatrix *a,
                   const mat_int lin, const doublereal *in,

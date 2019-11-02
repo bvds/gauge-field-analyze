@@ -97,8 +97,7 @@ void testMatrixVector(SparseMatrix *mat, double *in) {
 }
 
 void printMatrixBlocks(SparseMatrix *mat, int wrank, int wsize,
-                       mat_int blockSize, char *fileName, int tFlag,
-                       _MPI_Comm mpicom) {
+                       mat_int blockSize, char *fileName, int tFlag) {
     int rank;
     mat_int k, ii, jj;
 #ifdef USE_BLOCK
@@ -108,9 +107,7 @@ void printMatrixBlocks(SparseMatrix *mat, int wrank, int wsize,
 #endif
     for(rank=0; rank<wsize; rank++) {
 #ifdef USE_MPI
-        MPI_Barrier(mpicom);
-#else
-	assert(mpicom == NULL);
+        MPI_Barrier(mat->mpicom);
 #endif
         if(rank==wrank) {
             printf("%i:  Print matrix for %s, tFlag=%i:\n",
@@ -135,15 +132,13 @@ void printMatrixBlocks(SparseMatrix *mat, int wrank, int wsize,
     }
 }
 
-void printTasks(SparseMatrix *mat, int wsize, int wrank, _MPI_Comm mpicom) {
+void printTasks(SparseMatrix *mat, int wsize, int wrank) {
 #ifdef USE_TASK
     int p, q;
     TaskList *task;
     for(p = 0; p<wsize; p++) {
 #ifdef USE_MPI
-        MPI_Barrier(mpicom);
-#else
-	assert(mpicom == NULL);
+        MPI_Barrier(mat->mpicom);
 #endif
         if(p == wrank) {
             if(wrank == 0)
@@ -424,8 +419,7 @@ void sparseMatrixRead(SparseMatrix *mat, char *fileName, char descr,
         printf("%i:  Create block matrix, blocks=%i, blockSize=%i from %i nonzeros\n",
             wrank, mat->blocks, mat->blockSize, mat->nonzeros);
     if(debug>1)
-        printMatrixBlocks(mat, wrank, wsize, blockSize,
-                          fileName, tFlag, mpicom);
+        printMatrixBlocks(mat, wrank, wsize, blockSize, fileName, tFlag);
 
 #elif USE_MKL_MATRIX
     sparse_status_t err;
@@ -530,8 +524,7 @@ void sparseMatrixRead(SparseMatrix *mat, char *fileName, char descr,
     }
     if(debug>1) {
         printf("%i:  Block matrix after localSort\n", wrank);
-        printMatrixBlocks(mat, wrank, wsize, blockSize,
-                          fileName, tFlag, mpicom);
+        printMatrixBlocks(mat, wrank, wsize, blockSize, fileName, tFlag);
     }
 
     /* Verify order, mark beginning and end of
@@ -627,10 +620,9 @@ void sparseMatrixRead(SparseMatrix *mat, char *fileName, char descr,
     free(allNeeds);
 
     if(debug>1)
-        printMatrixBlocks(mat, wrank, wsize, blockSize,
-                          fileName, tFlag, mpicom);
+        printMatrixBlocks(mat, wrank, wsize, blockSize, fileName, tFlag);
     if(debug>0)
-        printTasks(mat, wsize, wrank, mpicom);
+        printTasks(mat, wsize, wrank);
 #else
     mat->gather = MALLOC(mat->columns*sizeof(*mat->gather));
     mat->lowerColumn = blockSize*
@@ -644,9 +636,70 @@ void sparseMatrixRead(SparseMatrix *mat, char *fileName, char descr,
 #ifdef USE_MPI
     mat->localTime = 0.0;
     mat->mpiTime = 0.0;
-    mat->count = 0;
+#else
+    mat->tcpu = 0;
 #endif
+    mat->count = 0;
 }
+
+
+/*
+  Print stats associated with matrix, so far
+*/
+void sparseMatrixStats(SparseMatrix *mat, char *matrixName) {
+  int wrank, wsize;
+  double nb, b1, opRate;
+  double localTime, mpiTime;
+
+#ifdef USE_MPI
+    MPI_Comm_size(mat->mpicom, &wsize);
+    MPI_Comm_rank(mat->mpicom, &wrank);
+    localTime = mat->localTime;
+    mpiTime = mat->mpiTime;
+#else
+    wsize = 1;
+    wrank = 0;
+    localTime = mat->tcpu/(float) CLOCKS_PER_SEC;
+    mpiTime = 0;
+#endif
+#ifdef USE_BLOCK
+    nb = mat->blocks;
+    b1 = mat->blockSize;
+#else
+    nb = mat->nonzeros;
+    b1=1;
+#endif
+
+#ifdef USE_MPI
+    MPI_Allreduce(MPI_IN_PLACE, &localTime, 1, MPI_DOUBLE,
+                  MPI_SUM, mat->mpicom);
+    MPI_Allreduce(MPI_IN_PLACE, &mpiTime, 1, MPI_DOUBLE,
+                  MPI_SUM, mat->mpicom);
+    MPI_Allreduce(MPI_IN_PLACE, &nb, 1, MPI_DOUBLE,
+                  MPI_SUM, mat->mpicom);
+#endif
+    opRate = 1.0e-9*mat->count*nb*wsize/localTime;
+    if(wrank ==0 ) {
+        printf("Matrix %s ops=%i, total process localTime=%.2f mpiTime=%.2f\n",
+               matrixName, mat->count, localTime, mpiTime);
+               /*
+                  Theoretical max flops is 2.2GHz*16cores*8flops/core = 281 GFLOP/s
+
+                  According to https://www.dell.com/support/article/us/en/04/sln313856/
+                  we should expect roughly 126-130 GB/s for one socket
+                  and 32 GB/s for one NUMA node.
+                  They used 2400MHz memory, while I have 2666MHz memory.
+               */
+        printf("    global %.1f GFLOP/s, stream1=%.1f GB/s, stream2=%.1f GB/s\n",
+               2*b1*b1*opRate,  // multiply and add
+	       /* optimal block compressed sparse row matrix storage
+		  ignore row sums, since they are kept in cache */
+	       opRate*(b1*(b1+1)*sizeof(double)+sizeof(mat_int)),
+	       // non-optimal block coordinate sparse matrix storage
+	       opRate*(b1*(b1+3)*sizeof(double)+2*sizeof(mat_int)));
+    }
+}
+
 
 void sparseMatrixFree(SparseMatrix *mat) {
 #if USE_MKL_MATRIX
@@ -698,8 +751,9 @@ void matrixVector(SparseMatrix *a,
     int rank, wsize;
     double *gather;
     MPI_Comm_size(mpicom, &wsize);
-#endif
+#endif // USE_TASK
 #else // USE_MPI
+    long int t0;
     const double *gather;
     assert(lin == a->columns);
     assert(lout == a->rows);
@@ -718,10 +772,11 @@ void matrixVector(SparseMatrix *a,
     const char trans='T';
 #endif
 
-
 #ifdef USE_MPI
     MPI_Comm_rank(mpicom, &wrank);
     t0 = MPI_Wtime();
+#else
+    t0 = clock();
 #endif
     memset(out, 0, lout * sizeof(double));
     for(p = 0; p < taskCount; p++) {
@@ -817,7 +872,9 @@ void matrixVector(SparseMatrix *a,
 
 #ifdef USE_MPI
     a->mpiTime += MPI_Wtime() - t0;
-    a->count += 1;
+#else
+    a->tcpu += clock() - t0;
 #endif
 #endif  // MKL or not
+    a->count += 1;
 }

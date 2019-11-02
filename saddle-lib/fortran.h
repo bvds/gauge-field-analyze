@@ -27,7 +27,7 @@ extern int MINRESQLP(
     doublereal *x, integer *istop, integer *itn, doublereal *rnorm,
     doublereal *arnorm, doublereal *xnorm, doublereal *anorm,
     doublereal *acond);
-// BLAS2 routine
+// BLAS2 routines
 extern int DGEMV(const char *, const integer *, const integer *,
                  const doublereal *, const doublereal *, const integer *,
                  const doublereal *, const integer *, const doublereal *,
