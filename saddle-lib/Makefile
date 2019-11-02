@@ -67,8 +67,16 @@ LFLAGS +=  $(MKLROOT)/lib/intel64/libmkl_blas95_lp64.a $(MKLROOT)/lib/intel64/li
 #LFLAGS += -L$(MKLROOT)/lib/intel64 -lmkl_blas95_lp64 -lmkl_lapack95_lp64 -Wl,--no-as-needed -lmkl_rt -lpthread -ldl
 #LFLAGS += -L$(MKLROOT)/lib/intel64  -lmkl_blas95_lp64 -lmkl_lapack95_lp64 -Wl,--no-as-needed -lmkl_intel_lp64 -lmkl_gnu_thread -lmkl_core -lgomp -lpthread -ldl
 else
+ifeq (1,0)  # Use blis or not
+CFLAGS += -DUSE_BLIS
 LFLAGS += -lflame -lblis -lm
-#LFLAGS += -llapack -lblas -lm
+else
+ifeq (1,1) # Use OpenBlas
+LFLAGS += -lflame -L/opt/OpenBLAS/lib/ -lopenblas -lm
+else
+LFLAGS += -llapack -lblas -lm
+endif
+endif
 endif
 #
 #  Optionally, use Jacobi-Davidson library PRIMME

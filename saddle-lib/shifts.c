@@ -24,8 +24,10 @@
 #include "mmio.h"
 #ifdef USE_MKL
 #include "mkl_spblas.h"
-#else
+#elif defined(USE_BLIS)
 #include "blis/cblas.h"
+#else
+#include "/opt/OpenBLAS/include/cblas.h"
 #endif
 
 
@@ -143,10 +145,14 @@ int main(int argc, char **argv){
     if(wrank ==0)
         printf("Setting MKL to %i threads\n", threads);
     mkl_set_num_threads_local(threads);
-#else
+#elif defined(USE_BLIS)
     if(wrank ==0)
         printf("Setting Blis to %i threads\n", threads);
     bli_thread_set_num_threads(threads);
+#else
+    if(wrank ==0)
+        printf("Setting OpenBLAS to %i threads\n", threads);
+    openblas_set_num_threads(threads);
 #endif
 
 
