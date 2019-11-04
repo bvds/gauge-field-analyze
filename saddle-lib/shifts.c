@@ -26,7 +26,7 @@
 #include "mkl_spblas.h"
 #elif defined(USE_BLIS)
 #include "blis/cblas.h"
-#else
+#elif defined(USE_OPENBLAS)
 #include "/opt/OpenBLAS/include/cblas.h"
 #endif
 
@@ -149,10 +149,12 @@ int main(int argc, char **argv){
     if(wrank ==0)
         printf("Setting Blis to %i threads\n", threads);
     bli_thread_set_num_threads(threads);
-#else
+#elif defined(USE_OPENBLAS)
     if(wrank ==0)
         printf("Setting OpenBLAS to %i threads\n", threads);
     openblas_set_num_threads(threads);
+#else
+    assert(threads != 0);  // Suppress compiler warning
 #endif
 
 

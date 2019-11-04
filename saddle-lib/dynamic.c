@@ -62,13 +62,13 @@ void dynamicInit(const mat_int nrow, const mat_int ncol,
                  cJSON *options, _MPI_Comm mpicom) {
     // Let trlan figure out the work array allocation.
     const int lwrk = 0; double *wrk = NULL;
-    int mev, maxlan, lohi, ned, maxmv, wrank=0;
+    int i, mev, maxlan, lohi, ned, maxmv, wrank=0;
     double tol = -1.0; // Use default tolerance: sqrt(machine epsilon)
     double *eval, *evec;
     int restart = 3; // restart strategy
+    mat_int nonzeros = gauge->blocks*gauge->blockSize*gauge->blockSize;
     trl_info info;
     cJSON *tmp;
-    int i;
 #ifdef USE_MPI
     MPI_Comm *mpicomp = &mpicom;
     MPI_Comm_rank(mpicom, &wrank);
@@ -143,8 +143,8 @@ void dynamicInit(const mat_int nrow, const mat_int ncol,
     // call TRLAN to compute the eigenvalues
     trlan(gaugeOp, NULL, &info, nrow, mev, eval, evec, nrow, lwrk, wrk);
     if(gaugeData.printDetails > 1) {
-        // 2 matrix multiplies.
-        trl_print_info(&info, 2*(gauge->nonzeros));
+        // 2 matrix multiplies, + and * as FLOPS
+        trl_print_info(&info, 4*nonzeros);
     } else if(gaugeData.printDetails > 0) {
         trl_terse_info(&info, stdout);
     }

@@ -30,11 +30,7 @@ void sortMatrixChunks(SparseMatrix *mat,
     mat_index i, j;
     mat_int k;
     const mat_index chunk = chunkIn;
-#ifdef USE_BLOCK
-    const mat_int b1 = mat->blockSize, n=mat->blocks;
-#else
-    const mat_int b1 = 1, n = mat->nonzeros;
-#endif
+    const mat_int b1 = mat->blockSize, n = mat->blocks;
     assert(chunk>0);
     const mat_index columnChunks =
         (mat->columns/b1 + chunk - 1)/chunk;
@@ -69,11 +65,7 @@ void sortMatrixLocal(SparseMatrix *mat, int wrank, int wsize, int debug) {
     mat_int k;
     int jrank;
     const mat_index cols = mat->columns;
-#ifdef USE_BLOCK
     const mat_int b1 = mat->blockSize, n = mat->blocks;
-#else
-    const mat_int b1 = 1, n = mat->nonzeros;
-#endif
     const mat_index localRows = b1*localSize(wrank, wsize, mat->rows/b1);
     const mat_index localj0 = b1*rankIndex(wrank, wsize, mat->columns/b1);
 
@@ -113,13 +105,8 @@ int indexCmp (const void * a, const void * b) {
 void doSortMatrix(SparseMatrix *mat, int debug) {
     mat_int k, k1, k2, *index;
     mat_int holdi, holdj;
-#ifdef USE_BLOCK
     const mat_int n = mat->blocks,
         b2 = mat->blockSize * mat->blockSize;
-#else
-    const mat_int n = mat->nonzeros,
-        b2 = 1;
-#endif
     double *holdValue = malloc(b2*sizeof(*holdValue));
 
     if(debug>1)
@@ -180,17 +167,10 @@ void doSortMatrix(SparseMatrix *mat, int debug) {
 */
 void printCoordinates(SparseMatrix *mat, char* variableName, int rankFlag) {
     mat_int k;
-#ifdef USE_BLOCK
-    const mat_int n = mat->blocks,
-        blockSize = mat->blockSize;
-#else
-    const mat_int n = mat->nonzeros,
-        blockSize = 1;
-#endif
     // Print mathematica format coordinates
-    printf("blockSize=%i;\n", blockSize);
+    printf("blockSize=%i;\n", mat->blockSize);
     printf("%s = {", variableName);
-    for(k=0; k<n; k++) {
+    for(k=0; k<mat->blocks; k++) {
         if(k>0)
             printf(", ");
         if(k%10==9)

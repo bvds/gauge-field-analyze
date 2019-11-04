@@ -71,11 +71,7 @@ void testMatrixVector(SparseMatrix *mat, double *in) {
     wsize = 1;
     wrank = 0;
 #endif
-#ifdef USE_BLOCK
     const int b1 = mat->blockSize;
-#else
-    const int b1 = 1;
-#endif
 
     nrow = b1*localSize(wrank, wsize, mat->rows/b1);
     ncol = b1*localSize(wrank, wsize, mat->columns/b1);
@@ -97,14 +93,10 @@ void testMatrixVector(SparseMatrix *mat, double *in) {
 }
 
 void printMatrixBlocks(SparseMatrix *mat, int wrank, int wsize,
-                       mat_int blockSize, char *fileName, int tFlag) {
+                       char *fileName, int tFlag) {
     int rank;
     mat_int k, ii, jj;
-#ifdef USE_BLOCK
-    mat_int n = mat->blocks;
-#else
-    mat_int n = mat->nonzeros;
-#endif
+    mat_int n = mat->blocks, b1 = mat->blockSize;
     for(rank=0; rank<wsize; rank++) {
 #ifdef USE_MPI
         MPI_Barrier(mat->mpicom);
@@ -114,26 +106,20 @@ void printMatrixBlocks(SparseMatrix *mat, int wrank, int wsize,
                    wrank, fileName, tFlag);
             for(k=0; k<n; k++) {
                 printf("%i:  %i %i  ", wrank, mat->i[k], mat->j[k]);
-                for(ii=0; ii<blockSize; ii++) {
+                for(ii=0; ii<b1; ii++) {
                     if(ii>0)
                         printf("%i:      ", wrank);
-                    for(jj=0; jj<blockSize; jj++)
-                        printf(" %.3f", mat->value[(k*blockSize + ii)*blockSize + jj]);
+                    for(jj=0; jj<b1; jj++)
+                        printf(" %.3f", mat->value[(k*b1 + ii)*b1 + jj]);
                     printf("\n");
                 }
             }
-#ifdef USE_BLOCK
-            if(mat->blocks*mat->blockSize*mat->blockSize != mat->nonzeros)
-                printf("block elements=%u nonzeros=%i\n",
-                       mat->blocks*mat->blockSize*mat->blockSize,
-                       mat->nonzeros);
-#endif
         }
     }
 }
 
-void printTasks(SparseMatrix *mat, int wsize, int wrank) {
 #ifdef USE_TASK
+void printTasks(SparseMatrix *mat, int wsize, int wrank) {
     int p, q;
     TaskList *task;
     for(p = 0; p<wsize; p++) {
@@ -152,8 +138,8 @@ void printTasks(SparseMatrix *mat, int wsize, int wrank) {
             }
         }
     }
-#endif
 }
+#endif
 
 
 void sparseMatrixRead(SparseMatrix *mat, char *fileName, char descr,
@@ -161,7 +147,7 @@ void sparseMatrixRead(SparseMatrix *mat, char *fileName, char descr,
                       int debug, _MPI_Comm mpicom) {
     mat_int i, j, k;
 #if !USE_MKL_MATRIX
-    mat_int l, lowerCount, upperCount, nz;
+    mat_int l, lowerCount, upperCount, blocks;
 #endif
     FILE *fp;
     MM_typecode matcode;
@@ -210,19 +196,20 @@ void sparseMatrixRead(SparseMatrix *mat, char *fileName, char descr,
                 wrank, mm_typecode_to_str(matcode));
         exit(702);
     }
+    mat->blockSize = 1;  // The Matrix Market file has no block structure
     if (mm_read_mtx_crd_size(fp,
                              tFlag?&mat->columns:&mat->rows,
                              tFlag?&mat->rows:&mat->columns,
-                             &mat->nonzeros) !=0) {
+                             &mat->blocks) != 0) {
         fprintf(stderr, "%i:  Cannot read dimensions\n", wrank);
         exit(703);
     }
     if(wrank ==0)
-        printf(" with %i nonzero elements.\n", mat->nonzeros);
-    mat->i = MALLOC(mat->nonzeros * sizeof(*mat->i));
-    mat->j = MALLOC(mat->nonzeros * sizeof(*mat->j));
-    mat->value = MALLOC(mat->nonzeros * sizeof(*mat->value));
-    for(k=0; k<mat->nonzeros; k++){
+        printf(" with %i nonzero elements.\n", mat->blocks);
+    mat->i = MALLOC(mat->blocks * sizeof(*mat->i));
+    mat->j = MALLOC(mat->blocks * sizeof(*mat->j));
+    mat->value = MALLOC(mat->blocks * sizeof(*mat->value));
+    for(k=0; k<mat->blocks; k++){
         nread = fscanf(fp, "%u%u%le", tFlag?&j:&i,
                        tFlag?&i:&j, mat->value+k);
          // switch to zero-based indexing, possible type conversion
@@ -239,12 +226,12 @@ void sparseMatrixRead(SparseMatrix *mat, char *fileName, char descr,
     /*
        Fill the other triangle of a symmetric matrix
 
-       This assumes the matrix has no block structure assigned
     */
 #if !USE_MKL_MATRIX
     if(descr == 's') {
+        assert(mat->blockSize == 1);  // assume no block structure
         lowerCount = 0; upperCount = 0;
-        for(k=0; k<mat->nonzeros; k++) {
+        for(k=0; k<mat->blocks; k++) {
             if(mat->i[k] > mat->j[k])
                 lowerCount++;
             if(mat->i[k] < mat->j[k])
@@ -252,19 +239,22 @@ void sparseMatrixRead(SparseMatrix *mat, char *fileName, char descr,
         }
         // Verify only one triangle is filled
         assert(lowerCount == 0 || upperCount == 0);
-        nz = mat->nonzeros + lowerCount + upperCount;
-        mat->i = REALLOC(mat->i, nz * sizeof(*mat->i));
-        mat->j = REALLOC(mat->j, nz * sizeof(*mat->j));
-        mat->value = REALLOC(mat->value, nz * sizeof(*mat->value));
-        for(k=0, l=mat->nonzeros; k<mat->nonzeros; k++)
+        blocks = mat->blocks + lowerCount + upperCount;
+        mat->i = REALLOC(mat->i, blocks * sizeof(*mat->i));
+        mat->j = REALLOC(mat->j, blocks * sizeof(*mat->j));
+        mat->value = REALLOC(mat->value, blocks * sizeof(*mat->value));
+        for(k=0, l=mat->blocks; k<mat->blocks; k++)
             if(mat->i[k] != mat->j[k]) {
                 mat->i[l] = mat->j[k];
                 mat->j[l] = mat->i[k];
                 mat->value[l] = mat->value[k];
                 l++;
             }
-        assert(l == nz);
-        mat->nonzeros = nz;
+        assert(l == blocks);
+        if(debug>0 && wrank==0)
+            printf("Fill symmetric matrix, blocks %i -> %i\n",
+                   mat->blocks, blocks);
+        mat->blocks = blocks;
     }
 #endif
 
@@ -279,14 +269,9 @@ void sparseMatrixRead(SparseMatrix *mat, char *fileName, char descr,
       as the block creation algorithm.
     */
     if(tFlag || descr=='s') {
-#ifdef USE_BLOCK
-        // Current matrix structure (needed for sort routine)
-        mat->blockSize = 1;
-        mat->blocks = mat->nonzeros;
-#endif
         sortMatrixChunks(mat, 1);
 #if 1  // Verify that the rows are in order.
-        for(k=0, i=0, j=0; k<mat->nonzeros && j<10; k++) {
+        for(k=0, i=0, j=0; k<mat->blocks && j<10; k++) {
             if((mat_int) mat->i[k]<i) {
                 if(j==0)
                     fprintf(stderr, "%i:  Sorted matrix %s, "
@@ -306,14 +291,18 @@ void sparseMatrixRead(SparseMatrix *mat, char *fileName, char descr,
 
     /*
         In the MPI case, filter out rows belonging to this
-        process and shift row indices.
+        process and shift row indices.  Even when blocks have
+        not been assigned, make sure blocks are not divided
+        between processes.
 
         In the non-MPI case, this should do nothing.
     */
 #ifdef USE_MPI
     lower = blockSize*rankIndex(wrank, wsize, mat->rows/blockSize);
     upper = lower + blockSize*localSize(wrank, wsize, mat->rows/blockSize);
-    for(k=0, l=0; k<mat->nonzeros; k++)
+    // One could expand this to handle the general case.
+    assert(mat->blockSize == 1);
+    for(k=0, l=0; k<mat->blocks; k++)
         if(mat->i[k] >= lower && mat->i[k] < upper) {
             mat->i[l] = mat->i[k] - lower;
             mat->j[l] = mat->j[k];
@@ -324,15 +313,15 @@ void sparseMatrixRead(SparseMatrix *mat, char *fileName, char descr,
     mat->j = REALLOC(mat->j, l*sizeof(*mat->j));
     mat->value = REALLOC(mat->value, l*sizeof(*mat->value));
     // Sanity test:  verify that no elements were dropped.
-    MPI_Allreduce(&l, &nz, 1, _MPI_MAT_INT,
+    MPI_Allreduce(&l, &blocks, 1, _MPI_MAT_INT,
                   MPI_SUM, mpicom); 
-    assert(nz == mat->nonzeros);
+    assert(blocks == mat->blocks);
     if(debug>0) {
         printf("%i:  local rows from %i to %i\n", wrank,
             mat->rows, upper-lower);
-        printf("%i:  nonzeros from %i to %i\n", wrank, mat->nonzeros, l);
+        printf("%i:  nonzeros from %i to %i\n", wrank, mat->blocks, l);
     }
-    mat->nonzeros = l;
+    mat->blocks = l;
 #endif
 
 
@@ -347,11 +336,12 @@ void sparseMatrixRead(SparseMatrix *mat, char *fileName, char descr,
     double value = 0.0, *blockRowValue, *blockValuep;
     double *valuep = mat->value;
     int *blockColFlag;
+    assert(mat->blockSize == 1);
     assert(mat->rows%blockSize == 0);
     assert(mat->columns%blockSize == 0);
 
     mat->blockSize = blockSize;
-    mat->blocks = 0;
+    blocks = 0;
     blockRowValue = malloc(mat->columns*blockSize*sizeof(*blockRowValue));
     blockColFlag = malloc(maxBlockCol*sizeof(*blockColFlag));
     blockColp = malloc(maxBlockCol*sizeof(*blockColp));
@@ -361,41 +351,41 @@ void sparseMatrixRead(SparseMatrix *mat, char *fileName, char descr,
     memset(blockRowValue, 0, mat->columns*blockSize*sizeof(double));
     memset(blockColFlag, 0, maxBlockCol*sizeof(*blockColFlag));
     for(j=0;; j++){
-        if(j<mat->nonzeros) {
+        if(j<mat->blocks) {
             ii = ip[j];
             jj = jp[j];
             value = valuep[j];
             if(ii<lastii)
                 printf("%i:  matrix %s bad order ii=%i lastii=%i jj=%i j=%i nonzeros=%i\n",
-                       wrank, fileName, ii, lastii, jj, j, mat->nonzeros);
+                       wrank, fileName, ii, lastii, jj, j, mat->blocks);
             assert(ii>=lastii);
         }
-        if(j==mat->nonzeros || (lastii<ii && ii%blockSize == 0)) {
+        if(j==mat->blocks || (lastii<ii && ii%blockSize == 0)) {
             // Retire block row and reset for a new one
             mat->value = REALLOC(mat->value,
-                     (mat->blocks + blockCols)*blockSize*blockSize*sizeof(double));
+                     (blocks + blockCols)*blockSize*blockSize*sizeof(double));
             mat->i = REALLOC(mat->i,
-                     (mat->blocks + blockCols)*sizeof(*mat->i));
+                     (blocks + blockCols)*sizeof(*mat->i));
             mat->j = REALLOC(mat->j,
-                     (mat->blocks + blockCols)*sizeof(*mat->j));
+                     (blocks + blockCols)*sizeof(*mat->j));
             for(i=0; i<blockCols; i++) {
                 k = blockColp[i];
 #if 0
-                printf("  %i %i mat->blocks=%i blockCols=%i\n",
-                       j, k, mat->blocks, blockCols);
+                printf("  %i %i blocks=%i blockCols=%i\n",
+                       j, k, blocks, blockCols);
 #endif
                 blockValuep = blockRowValue+k*blockSize*blockSize;
-                memcpy(mat->value+blockSize*blockSize*mat->blocks,
+                memcpy(mat->value+blockSize*blockSize*blocks,
                        blockValuep, blockSize*blockSize*sizeof(double));
                 memset(blockValuep, 0, blockSize*blockSize*sizeof(double));
-                mat->i[mat->blocks] = (lastii/blockSize)*blockSize;
-                mat->j[mat->blocks] = k*blockSize;
-                mat->blocks += 1;
+                mat->i[blocks] = (lastii/blockSize)*blockSize;
+                mat->j[blocks] = k*blockSize;
+                blocks += 1;
                 blockColFlag[k] = 0;
             }
             blockCols = 0;
         }
-        if(j==mat->nonzeros)
+        if(j==mat->blocks)
             break;
         lastii = ii;
         // Mark this block
@@ -409,6 +399,8 @@ void sparseMatrixRead(SparseMatrix *mat, char *fileName, char descr,
         blockRowValue[(k*blockSize + ii%blockSize)*blockSize +
                       jj%blockSize] = value;
     }
+    l = mat->blocks;
+    mat->blocks = blocks;
     free(blockRowValue);
     free(blockColFlag);
     free(blockColp);
@@ -417,14 +409,16 @@ void sparseMatrixRead(SparseMatrix *mat, char *fileName, char descr,
     FREE(valuep);
     if(debug>0)
         printf("%i:  Create block matrix, blocks=%i, blockSize=%i from %i nonzeros\n",
-            wrank, mat->blocks, mat->blockSize, mat->nonzeros);
+            wrank, mat->blocks, mat->blockSize, l);
     if(debug>1)
-        printMatrixBlocks(mat, wrank, wsize, blockSize, fileName, tFlag);
+        printMatrixBlocks(mat, wrank, wsize, fileName, tFlag);
 
 #elif USE_MKL_MATRIX
     sparse_status_t err;
     sparse_matrix_t coordMatrix;
 
+    if(debug>0)
+        printf("Create MKL BSR format matrix\n");
     mat->blockSize = blockSize;
     if(descr == 's') {
         mat->descr.type = SPARSE_MATRIX_TYPE_SYMMETRIC;
@@ -438,7 +432,7 @@ void sparseMatrixRead(SparseMatrix *mat, char *fileName, char descr,
     }
     /* Create MKL data structure */
     if((err=mkl_sparse_d_create_coo(&coordMatrix, SPARSE_INDEX_BASE_ZERO,
-              mat->rows, mat->columns, mat->nonzeros,
+              mat->rows, mat->columns, mat->blocks,
                                mat->i, mat->j, mat->value)) !=
            SPARSE_STATUS_SUCCESS) {
         fprintf(stderr, "mkl_sparse_d_create_coo failed %i\n", err);
@@ -495,11 +489,7 @@ void sparseMatrixRead(SparseMatrix *mat, char *fileName, char descr,
     int needs, *allNeeds = malloc(wsize*sizeof(*allNeeds));
     int p, q, jrank = -1, lastJrank = -1;
     mat_int j0 = 0;
-#ifdef USE_BLOCK
-    const mat_int b1 = mat->blockSize, blocks = mat->blocks;
-#else
-    const mat_int b1 = 1, blocks = mat->nonzeros;
-#endif
+    const mat_int b1 = mat->blockSize;
 
     for(p=0; p<2; p++)
         mat->gather[p] = MALLOC(b1*maxLocalSize(wsize, mat->columns/b1)*
@@ -524,7 +514,7 @@ void sparseMatrixRead(SparseMatrix *mat, char *fileName, char descr,
     }
     if(debug>1) {
         printf("%i:  Block matrix after localSort\n", wrank);
-        printMatrixBlocks(mat, wrank, wsize, blockSize, fileName, tFlag);
+        printMatrixBlocks(mat, wrank, wsize, fileName, tFlag);
     }
 
     /* Verify order, mark beginning and end of
@@ -532,7 +522,7 @@ void sparseMatrixRead(SparseMatrix *mat, char *fileName, char descr,
     mat->task = malloc(wsize*sizeof(TaskList));
     mat->task[0].start = 0;
     for(k=0, mat->taskCount=0; ; k++) {
-        if(k < blocks) {
+        if(k < mat->blocks) {
             jrank = indexRank(mat->j[k]/b1, wsize, mat->columns/b1);
             /* Verify (jrank-wrank)%wsize is non-decreasing
                This is not, strictly speaking, necessary, but it
@@ -551,13 +541,13 @@ void sparseMatrixRead(SparseMatrix *mat, char *fileName, char descr,
                 j0 = b1*rankIndex(jrank, wsize, mat->columns/b1);
             mat->j[k] -= j0;
         }
-        if(k==blocks || (k>0 && jrank != lastJrank)) {
+        if(k == mat->blocks || (k>0 && jrank != lastJrank)) {
             // End of process block
             mat->task[mat->taskCount].doRank = lastJrank;
             mat->task[mat->taskCount].end = k;
             mat->task[mat->taskCount].sendTo = -1; // Don't send is default.
             mat->taskCount++;
-            if(k == blocks)
+            if(k == mat->blocks)
                 break;
             assert(mat->taskCount<wsize);
             mat->task[mat->taskCount].start = k;
@@ -620,9 +610,11 @@ void sparseMatrixRead(SparseMatrix *mat, char *fileName, char descr,
     free(allNeeds);
 
     if(debug>1)
-        printMatrixBlocks(mat, wrank, wsize, blockSize, fileName, tFlag);
+        printMatrixBlocks(mat, wrank, wsize, fileName, tFlag);
     if(debug>0)
+#ifdef USE_TASK
         printTasks(mat, wsize, wrank);
+#endif
 #else
     mat->gather = MALLOC(mat->columns*sizeof(*mat->gather));
     mat->lowerColumn = blockSize*
@@ -662,13 +654,8 @@ void sparseMatrixStats(SparseMatrix *mat, char *matrixName) {
     localTime = mat->tcpu/(float) CLOCKS_PER_SEC;
     mpiTime = 0;
 #endif
-#ifdef USE_BLOCK
     nb = mat->blocks;
     b1 = mat->blockSize;
-#else
-    nb = mat->nonzeros;
-    b1=1;
-#endif
 
 #ifdef USE_MPI
     MPI_Allreduce(MPI_IN_PLACE, &localTime, 1, MPI_DOUBLE,
@@ -837,11 +824,7 @@ void matrixVector(SparseMatrix *a,
         end = task->end;
 #else // USE_TASK
         start = 0;
-#ifdef USE_BLOCK
         end = a->blocks;
-#else
-        end = a->nonzeros;
-#endif // USE_BLOCK
 #endif // USE_TASK
 #ifdef USE_BLOCK
         for(k=start, ap=a->value + b2*start; k<end; k++, ap += b2) {

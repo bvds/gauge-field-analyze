@@ -35,7 +35,7 @@
 /*
       Sparse matrix data structures
 */
-// Index for sparse matrix rows/columns, nonzeros
+// Index for sparse matrix rows/columns, nonzero elements
 typedef unsigned int mat_int;
 #ifdef USE_MPI
 // For MPI calls, set matching type
@@ -62,7 +62,8 @@ typedef unsigned int mat_int;
 #endif
 
 typedef struct {
-    mat_int nonzeros;
+    mat_int blocks;
+    mat_int blockSize;
     mat_int rows;
     mat_int columns;
     double *value;
@@ -71,14 +72,9 @@ typedef struct {
     MKL_INT *j;
     struct matrix_descr descr;
     sparse_matrix_t a;
-    mat_int blockSize;
 #else
     mat_int *i;
     mat_int *j;
-#endif
-#ifdef USE_BLOCK
-    mat_int blocks;
-    mat_int blockSize;
 #endif
 #ifdef USE_MPI
     MPI_Comm mpicom;

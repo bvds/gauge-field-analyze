@@ -91,6 +91,7 @@ void largeShifts(SparseMatrix *hess, cJSON *options,
     int ned = 1;  // number of requested eigenpairs.
     int lohi = -1; // lowest or highest abs value eigenpairs.
     int i, ierr, printDetails = 1;
+    mat_int nonzeros = hess->blocks*hess->blockSize*hess->blockSize;
 #ifdef USE_MPI
     MPI_Comm *mpicomp = &mpicom;
     MPI_Comm_rank(mpicom, &wrank);
@@ -216,8 +217,8 @@ void largeShifts(SparseMatrix *hess, cJSON *options,
     ierr = info.stat;
     if(printDetails > 1) {
         /* This estimate of flops doesn't include the dynamicProject() call.
-           2 matrix multiplies. */
-        trl_print_info(&info, 2*(hess->nonzeros));
+           2 matrix multiplies. + and * as FLOPS. */
+        trl_print_info(&info, 4*nonzeros);
     } else if(printDetails > 0 && wrank==0) {
         trl_terse_info(&info, stdout);
     }
