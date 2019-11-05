@@ -706,12 +706,12 @@ void sparseMatrixStats(SparseMatrix *mat, char *matrixName) {
                   and 32 GB/s for one NUMA node.
                   They used 2400MHz memory, while I have 2666MHz memory.
                */
-        printf("    global %.1f GFLOP/s, stream=%.1f GB/s GB/s\n",
+        printf("    global %.1f GFLOP/s, stream=%.1f GB/s\n",
                2*b1*b1*nb*opRate,  // multiply and add
 	       /* optimal block compressed sparse row matrix storage
 		  ignore row sums, since they are kept in cache */
-	       opRate*(nb*(b1*b1*sizeof(double)+sizeof(mat_int)) +
-                       +(mat->rows+mat->columns)*sizeof(double)));
+	       opRate*(nb*(b1*(b1+1)*sizeof(double)+sizeof(mat_int)) +
+                       mat->rows*sizeof(double)));
     }
 }
 
