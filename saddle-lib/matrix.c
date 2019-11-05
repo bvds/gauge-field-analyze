@@ -6,6 +6,7 @@
 #ifdef USE_MPI
 #include <mpi.h>
 #endif
+#include <omp.h>
 #include "shifts.h"
 #ifdef USE_MKL
 #include "mkl_spblas.h"
@@ -225,7 +226,6 @@ void sparseMatrixRead(SparseMatrix *mat, char *fileName, char descr,
 
     /*
        Fill the other triangle of a symmetric matrix
-
     */
 #if !USE_MKL_MATRIX
     if(descr == 's') {
@@ -519,10 +519,13 @@ void sparseMatrixRead(SparseMatrix *mat, char *fileName, char descr,
     }
 
     /* Verify order, mark beginning and end of
-       each process block, and shift column indices for each block. */
+       each process block, and shift column indices for each block.
+       Also, create row pointers.
+    */
+    mat->ip = MALLOC((mat->blocks+1)*sizeof(*mat->ip));
     mat->task = malloc(wsize*sizeof(TaskList));
     mat->task[0].start = 0;
-    for(k=0, mat->taskCount=0; ; k++) {
+    for(k=0, mat->taskCount=0, mat->iCount=0; ; k++) {
         if(k < mat->blocks) {
             jrank = indexRank(mat->j[k]/colPart, wsize, mat->partitions);
             /* Verify (jrank-wrank)%wsize is non-decreasing.
@@ -545,16 +548,24 @@ void sparseMatrixRead(SparseMatrix *mat, char *fileName, char descr,
         if(k == mat->blocks || (k>0 && jrank != lastJrank)) {
             // End of process block
             mat->task[mat->taskCount].doRank = lastJrank;
-            mat->task[mat->taskCount].end = k;
+            mat->task[mat->taskCount].end = mat->iCount;
             mat->task[mat->taskCount].sendTo = -1; // Don't send is default.
             mat->taskCount++;
             if(k == mat->blocks)
                 break;
             assert(mat->taskCount < wsize);
-            mat->task[mat->taskCount].start = k;
+            mat->task[mat->taskCount].start = mat->iCount;
+        }
+        // at this point, k<mat->blocks
+        if(k==0 || mat->i[k] != mat->i[k-1] || jrank != lastJrank) {
+            assert(mat->iCount <= k); // Don't improperly over-write mat->i
+            mat->ip[mat->iCount] = k;
+            mat->i[mat->iCount] = mat->i[k];
+            mat->iCount++;
         }
         lastJrank = jrank;
     }
+
     /* Share the data needed by each process. */
     for(p=0; p<wsize; p++){
         // Start receive for next round of work
@@ -617,8 +628,28 @@ void sparseMatrixRead(SparseMatrix *mat, char *fileName, char descr,
 #else // USE_TASK
     mat->gather = MALLOC(mat->columns*sizeof(*mat->gather));
     mat->lowerColumn = colPart*rankIndex(wrank, wsize, mat->partitions);
-#endif // USE_TASK
 
+    /* Create row pointers */
+    mat->ip = MALLOC((mat->blocks+1)*sizeof(*mat->ip));
+    for(k=0, mat->iCount=0; k<mat->blocks; k++) {
+        if(k==0 || mat->i[k] != mat->i[k-1]) {
+            assert(mat->iCount <= k); // Don't mangle mat->i
+            mat->ip[mat->iCount] = k;
+            mat->i[mat->iCount] = mat->i[k];
+            mat->iCount++;
+        }
+    }
+#endif // USE_TASK
+    mat->ip[mat->iCount] = mat->blocks;
+    mat->i = realloc(mat->i, mat->iCount*sizeof(*mat->i));
+    mat->ip = realloc(mat->ip, (mat->iCount+1)*sizeof(*mat->ip));
+    if(debug>1) {
+        printf("%i:  Matrix blocks=%i\n", wrank, mat->blocks);
+        for(k=0; k<mat->iCount; k++) {
+            printf("%i:  k=%3i ip=%3i,%3i i=%3i\n",
+               wrank, k, mat->ip[k], mat->ip[k+1], mat->i[k]);
+        }
+    }
 
     /* 
        Initialize profiling associated with MPI
@@ -663,7 +694,7 @@ void sparseMatrixStats(SparseMatrix *mat, char *matrixName) {
     MPI_Allreduce(MPI_IN_PLACE, &nb, 1, MPI_DOUBLE,
                   MPI_SUM, mat->mpicom);
 #endif
-    opRate = 1.0e-9*mat->count*nb*wsize/localTime;
+    opRate = 1.0e-9*mat->count*wsize/localTime;
     if(wrank ==0 ) {
         printf("Matrix %s ops=%i, total process localTime=%.2f mpiTime=%.2f\n",
                matrixName, mat->count, localTime, mpiTime);
@@ -675,13 +706,12 @@ void sparseMatrixStats(SparseMatrix *mat, char *matrixName) {
                   and 32 GB/s for one NUMA node.
                   They used 2400MHz memory, while I have 2666MHz memory.
                */
-        printf("    global %.1f GFLOP/s, stream1=%.1f GB/s, stream2=%.1f GB/s\n",
-               2*b1*b1*opRate,  // multiply and add
+        printf("    global %.1f GFLOP/s, stream=%.1f GB/s GB/s\n",
+               2*b1*b1*nb*opRate,  // multiply and add
 	       /* optimal block compressed sparse row matrix storage
 		  ignore row sums, since they are kept in cache */
-	       opRate*(b1*(b1+1)*sizeof(double)+sizeof(mat_int)),
-	       // non-optimal block coordinate sparse matrix storage
-	       opRate*(b1*(b1+3)*sizeof(double)+2*sizeof(mat_int)));
+	       opRate*(nb*(b1*b1*sizeof(double)+sizeof(mat_int)) +
+                       +(mat->rows+mat->columns)*sizeof(double)));
     }
 }
 
@@ -693,6 +723,7 @@ void sparseMatrixFree(SparseMatrix *mat) {
     FREE(mat->value);
     FREE(mat->i);
     FREE(mat->j);
+    FREE(mat->ip);
 #endif
 #ifdef USE_TASK
     int i;
@@ -723,7 +754,8 @@ void matrixVector(SparseMatrix *a,
     }
 #else // USE_MKL_MATRIX
     int p;
-    mat_int i, j, k, start, end;
+    mat_int row, j, k, start, end;
+    double *outp, *ap;
 #ifdef USE_MPI
     int wrank;
     MPI_Comm mpicom = a->mpicom;
@@ -750,7 +782,6 @@ void matrixVector(SparseMatrix *a,
     int taskCount = 1;
 #endif
 #ifdef USE_BLOCK
-    double *ap;
     const integer b1 = a->blockSize, b2=b1*b1;
     const doublereal one=1.0;
     const integer inc=1;
@@ -820,23 +851,33 @@ void matrixVector(SparseMatrix *a,
         end = task->end;
 #else // USE_TASK
         start = 0;
-        end = a->blocks;
+        end = a->iCount;
 #endif // USE_TASK
+
+    /* Start parallel threads.  If this has a high overhead,
+       then it may not be worth it. */
+#pragma omp parallel default(shared) private(row, outp, j, k, ap)
+{
+        // Loop over rows
+#pragma omp for schedule(static, 1)
+        for(row=start; row<end; row++) {
+            outp = out + a->i[row];
 #ifdef USE_BLOCK
-        for(k=start, ap=a->value + b2*start; k<end; k++, ap += b2) {
-            i = a->i[k];
-            j = a->j[k];
-            DGEMV(&trans, &b1, &b1, &one,
-                  ap, &b1, gather + j, &inc, &one,
-                  out + i, &inc);
-        }
+            for(k=a->ip[row], ap=a->value + b2*a->ip[row];
+                k<a->ip[row+1]; k++, ap += b2) {
+                j = a->j[k];
+                DGEMV(&trans, &b1, &b1, &one,
+                      ap, &b1, gather + j, &inc, &one,
+                      outp, &inc);
+            }
 #else
-        for(k=start; k<end; k++) {
-            i = a->i[k];
-            j = a->j[k];
-            out[i] += a->value[k] * gather[j];
-        }
+            for(k=a->ip[row], ap=a->value; k<a->ip[row+1]; k++) {
+                j = a->j[k];
+                *outp += ap[k] * gather[j];
+            }
 #endif
+        } // loop over rows
+} // omp parallel
 #ifdef USE_MPI
         a->localTime += (t0 = MPI_Wtime()) - t1;
 
@@ -851,7 +892,6 @@ void matrixVector(SparseMatrix *a,
 #endif // USE_TASK
 #endif
     } // loop over tasks
-
 
 #ifdef USE_MPI
     a->mpiTime += MPI_Wtime() - t0;

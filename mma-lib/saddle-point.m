@@ -349,8 +349,8 @@ Options[findDelta] = {dynamicPartMethod -> Automatic, printDetails -> False,
   Method -> Automatic, rescaleCutoff -> 1, dampingFactor -> 1,
   storePairs -> False, storeHess -> False, largeShiftOptions -> {},
   storeBB -> False, debugProj -> False, externalAction -> Automatic,
-  (* Used by BLAS libraries *)
-  threads -> 1,
+  (* Used by BLAS libraries and matrixVector() *)
+  threads -> 2,
   (* A numerical value will execute the MPI version *)
   processes -> Automatic,
   (* This will result in just sorting rows and columns *)

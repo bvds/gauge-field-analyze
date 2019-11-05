@@ -64,8 +64,8 @@ typedef unsigned int mat_int;
 typedef struct {
     mat_int blocks;
     mat_int blockSize;
-    mat_int rows;
-    mat_int columns;
+    mat_int rows;       // global number of rows
+    mat_int columns;    // global number of columns
     mat_int partitions;
     double *value;
 #if USE_MKL_MATRIX
@@ -76,6 +76,8 @@ typedef struct {
 #else
     mat_int *i;
     mat_int *j;
+    mat_int *ip;        // beginning and end of a row
+    mat_int iCount;     // local number of distinct rows
 #endif
 #ifdef USE_MPI
     MPI_Comm mpicom;

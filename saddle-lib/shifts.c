@@ -5,7 +5,7 @@
     Example usage:
     ./shifts ../hess-grad-gauge.json ../shifts.dat
     Valgrind debugging example:
-    valgrind --tool=memcheck --leak-check=yes --show-reachable=yes --num-callers=20 --track-fds=yes ./shifts ../hess-grad-gauge.json ../shifts.dat
+    valgrind --tool=memcheck --leak-check=yes --show-reachable=yes --num-callers=20 --track-fds=yes ./shifts ../hess-grad-gauge.json junk.dat
 
       scp hess-grad-gauge.json hess.mtx gauge.mtx grad.dat bvds@192.168.0.35:lattice/gauge-field-analyze/
 
@@ -20,6 +20,7 @@
 #include <libgen.h> // POSIX
 #include <assert.h>
 #include <time.h>
+#include <omp.h>
 #include "shifts.h"
 #include "mmio.h"
 #ifdef USE_MKL
@@ -137,6 +138,10 @@ int main(int argc, char **argv){
 
     tmp = cJSON_GetObjectItemCaseSensitive(jopts, "threads");
     threads = cJSON_IsNumber(tmp)?tmp->valueint:1;
+    omp_set_dynamic(0);     // Explicitly disable dynamic teams
+    omp_set_num_threads(threads);
+    if(wrank ==0)
+        printf("Setting OpenMP to %i threads\n", threads);
 #ifdef USE_MKL
     /*
       On the T480 laptop, calculations are limited by memory

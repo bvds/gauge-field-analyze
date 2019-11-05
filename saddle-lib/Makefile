@@ -8,8 +8,8 @@ PRIMMEDIR = ../../linear-algebra/primme
 #
 #
 #                                 -g -Wall -O3
-CFLAGS = -fPIC  -I$(TRLANDIR)/INC -g -Wall -Wextra -pedantic -std=gnu11
-LFLAGS =  -L$(TRLANDIR) -L/usr/local/lib -lcjson -lgfortran
+CFLAGS = -fPIC  -I$(TRLANDIR)/INC -g -Wall -Wextra -pedantic -std=gnu11 -fopenmp
+LFLAGS =  -L$(TRLANDIR) -L/usr/local/lib -lcjson -lgfortran -lgomp
 SLFLAGS = -lnutrlan
 #
 #  Need to add fortran libraries needed by MINRES-QLP
