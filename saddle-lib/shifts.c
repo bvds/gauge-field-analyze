@@ -66,7 +66,8 @@ int main(int argc, char **argv){
     char *options;
     cJSON *jopts, *tmp;
     int i, blockSize, chunkSize, nLargeShifts, wsize, wrank;
-    mat_int k, n, local_n, gaugeDimension, local_gaugeDimension;
+    mat_int k, n, partitions, local_n,
+        gaugeDimension, local_gaugeDimension;
     FILE *fp;
     int nread, threads;
     long int twall = 0, tcpu = 0, toverall;
@@ -104,25 +105,32 @@ int main(int argc, char **argv){
         printf("Opening file %s", argv[1]);
     options = readFile(argv[1]);
     jopts = cJSON_Parse(options);
-    n = cJSON_GetObjectItemCaseSensitive(jopts, "n")->valueint;
     /* Needed for calculation of the cutoff.
        In the parallel case, local size should be
        a multiple of blockSize.  */
     blockSize = cJSON_GetObjectItemCaseSensitive(jopts, "blockSize")->valueint;
+    n = cJSON_GetObjectItemCaseSensitive(jopts, "n")->valueint;
     assert(n%blockSize == 0);
-    rankSanityTest(n/blockSize);
-    local_n = blockSize*localSize(wrank, wsize, n/blockSize);
-    assert(wsize>1 || local_n ==n );
     gaugeDimension = cJSON_GetObjectItemCaseSensitive(
                                jopts, "gaugeDimension")->valueint;
-    assert(n%gaugeDimension == 0);
-    rankSanityTest(gaugeDimension/blockSize);
-    local_gaugeDimension = blockSize*localSize(wrank, wsize,
-                                               gaugeDimension/blockSize);
+    assert(gaugeDimension%blockSize == 0);
+    tmp = cJSON_GetObjectItemCaseSensitive(jopts, "partitions");
+    partitions = cJSON_IsNumber(tmp) && tmp->valueint>0?
+        (mat_int) tmp->valueint:gaugeDimension/blockSize;
+    assert(n%partitions == 0);
+    assert((n/partitions)%blockSize == 0);
+    assert(gaugeDimension%partitions == 0);
+    assert((gaugeDimension/partitions)%blockSize == 0);
+    rankSanityTest(partitions);
+    local_n = n/partitions*localSize(wrank, wsize, partitions);
+    local_gaugeDimension = gaugeDimension/partitions*
+        localSize(wrank, wsize, partitions);
+    assert(wsize>1 || local_n == n);
     assert(wsize>1 || local_gaugeDimension == gaugeDimension);
     if(wrank ==0)
-        printf(" n=%i, blockSize=%i, gauge=%i\n", n, blockSize, gaugeDimension);
-    // Not used if using the MKL matrix.
+        printf(" n=%i, gauge=%i blockSize=%i partitions=%i\n",
+               n, gaugeDimension, blockSize, partitions);
+    // Not used currently
     tmp = cJSON_GetObjectItemCaseSensitive(jopts, "chunkSize");
     chunkSize = cJSON_IsNumber(tmp)?tmp->valueint:1;
     assert(chunkSize > 0);
@@ -164,7 +172,7 @@ int main(int argc, char **argv){
     tmp = cJSON_GetObjectItemCaseSensitive(jopts, "hessFile");
     hessFile = catStrings(dataPath, tmp->valuestring);
     SparseMatrix hess;
-    sparseMatrixRead(&hess, hessFile, 's', 0, blockSize,
+    sparseMatrixRead(&hess, hessFile, 's', 0, blockSize, partitions,
                      chunkSize, 0, mpicom);
     assert(hess.rows == n);
     assert(hess.columns == n);
@@ -180,7 +188,7 @@ int main(int argc, char **argv){
         printf("Opening file %s for a vector of length %i\n", gradFile, n);
     fp = fopen(gradFile, "r");
     for(k=0; k<n; k++){
-        if(indexRank(k/blockSize, wsize, n/blockSize) == wrank)
+        if(indexRank(k/(n/partitions), wsize, partitions) == wrank)
             nread = fscanf(fp, "%le", gradp++);
         else
             nread = fscanf(fp, "%le", &dummy);
@@ -200,9 +208,9 @@ int main(int argc, char **argv){
     tmp = cJSON_GetObjectItemCaseSensitive(jopts, "gaugeFile");
     gaugeFile = catStrings(dataPath, tmp->valuestring);
     SparseMatrix gauge, gaugeT;
-    sparseMatrixRead(&gauge, gaugeFile, 'g', 0, blockSize,
+    sparseMatrixRead(&gauge, gaugeFile, 'g', 0, blockSize, partitions,
                      chunkSize, 0, mpicom);
-    sparseMatrixRead(&gaugeT, gaugeFile, 'g', 1, blockSize,
+    sparseMatrixRead(&gaugeT, gaugeFile, 'g', 1, blockSize, partitions,
                      chunkSize, 0, mpicom);
     assert(gauge.rows == gaugeDimension);
     assert(gauge.columns == n);

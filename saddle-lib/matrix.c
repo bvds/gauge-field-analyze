@@ -71,10 +71,9 @@ void testMatrixVector(SparseMatrix *mat, double *in) {
     wsize = 1;
     wrank = 0;
 #endif
-    const int b1 = mat->blockSize;
 
-    nrow = b1*localSize(wrank, wsize, mat->rows/b1);
-    ncol = b1*localSize(wrank, wsize, mat->columns/b1);
+    nrow = (mat->rows/mat->partitions)*localSize(wrank, wsize, mat->partitions);
+    ncol = (mat->columns/mat->partitions)*localSize(wrank, wsize, mat->partitions);
     y = malloc(nrow * sizeof(double));
     matrixVector(mat, ncol, in, nrow, y);
     for(i=0; i<wsize; i++) {
@@ -128,12 +127,12 @@ void printTasks(SparseMatrix *mat, int wsize, int wrank) {
 #endif
         if(p == wrank) {
             if(wrank == 0)
-                printf("task columns:\n    task, start, end, "
-                       "doRank, sendTo, receiveFrom, receiveSize\n");
+                printf("task columns:\n    task, doRank, start, end, "
+                       "sendTo, receiveFrom, receiveSize\n");
             for(q=0; q<mat->taskCount; q++) {
                 task = mat->task + q;
-                printf("%i:  %i %i %i %i %i %i %i\n", wrank, q,
-                    task->start, task->end, task->doRank,
+                printf("%2i:  %2i %2i %3i %3i %3i %3i %3i\n", wrank, q,
+                       task->doRank, task->start, task->end,
                        task->sendTo, task->receiveFrom, task->receiveSize);
             }
         }
@@ -143,7 +142,7 @@ void printTasks(SparseMatrix *mat, int wsize, int wrank) {
 
 
 void sparseMatrixRead(SparseMatrix *mat, char *fileName, char descr,
-                      int tFlag, int blockSize, int chunkSize,
+                      int tFlag, int blockSize, mat_int partitions, int chunkSize,
                       int debug, _MPI_Comm mpicom) {
     mat_int i, j, k;
 #if !USE_MKL_MATRIX
@@ -164,9 +163,10 @@ void sparseMatrixRead(SparseMatrix *mat, char *fileName, char descr,
     assert(mpicom == NULL);
 #endif
 
+    mat->partitions = partitions;
     // Currently this quantity is unused.
     assert(chunkSize == 1);
-
+    
     /*
            Read Matrix Market file into SparseMatrix
     */
@@ -292,14 +292,15 @@ void sparseMatrixRead(SparseMatrix *mat, char *fileName, char descr,
     /*
         In the MPI case, filter out rows belonging to this
         process and shift row indices.  Even when blocks have
-        not been assigned, make sure blocks are not divided
+        not been assigned, make sure blocks are not divided 
         between processes.
 
         In the non-MPI case, this should do nothing.
     */
 #ifdef USE_MPI
-    lower = blockSize*rankIndex(wrank, wsize, mat->rows/blockSize);
-    upper = lower + blockSize*localSize(wrank, wsize, mat->rows/blockSize);
+    mat_int rowPart = mat->rows/mat->partitions;
+    lower = rowPart*rankIndex(wrank, wsize, mat->partitions);
+    upper = lower + rowPart*localSize(wrank, wsize, mat->partitions);
     // One could expand this to handle the general case.
     assert(mat->blockSize == 1);
     for(k=0, l=0; k<mat->blocks; k++)
@@ -485,14 +486,14 @@ void sparseMatrixRead(SparseMatrix *mat, char *fileName, char descr,
       In the non-MPI case, this should work trivially.
       In particular, the sort should have no effect.
     */
+    const mat_int colPart = mat->columns/mat->partitions;
 #ifdef USE_TASK
     int needs, *allNeeds = malloc(wsize*sizeof(*allNeeds));
     int p, q, jrank = -1, lastJrank = -1;
     mat_int j0 = 0;
-    const mat_int b1 = mat->blockSize;
 
     for(p=0; p<2; p++)
-        mat->gather[p] = MALLOC(b1*maxLocalSize(wsize, mat->columns/b1)*
+        mat->gather[p] = MALLOC(colPart*maxLocalSize(wsize, mat->partitions)*
                                 sizeof(*mat->value));
 
     /* For the debug print, processes take turns sorting the matrix.
@@ -523,8 +524,8 @@ void sparseMatrixRead(SparseMatrix *mat, char *fileName, char descr,
     mat->task[0].start = 0;
     for(k=0, mat->taskCount=0; ; k++) {
         if(k < mat->blocks) {
-            jrank = indexRank(mat->j[k]/b1, wsize, mat->columns/b1);
-            /* Verify (jrank-wrank)%wsize is non-decreasing
+            jrank = indexRank(mat->j[k]/colPart, wsize, mat->partitions);
+            /* Verify (jrank-wrank)%wsize is non-decreasing.
                This is not, strictly speaking, necessary, but it
                does verify that sortMatrixLocal() is working as
                intended. */
@@ -538,8 +539,8 @@ void sparseMatrixRead(SparseMatrix *mat, char *fileName, char descr,
                 exit(55);
             }
             if(k==0 || jrank != lastJrank)
-                j0 = b1*rankIndex(jrank, wsize, mat->columns/b1);
-            mat->j[k] -= j0;
+                j0 = colPart*rankIndex(jrank, wsize, mat->partitions);
+            mat->j[k] -= j0;  // shift j-index
         }
         if(k == mat->blocks || (k>0 && jrank != lastJrank)) {
             // End of process block
@@ -549,7 +550,7 @@ void sparseMatrixRead(SparseMatrix *mat, char *fileName, char descr,
             mat->taskCount++;
             if(k == mat->blocks)
                 break;
-            assert(mat->taskCount<wsize);
+            assert(mat->taskCount < wsize);
             mat->task[mat->taskCount].start = k;
         }
         lastJrank = jrank;
@@ -560,15 +561,15 @@ void sparseMatrixRead(SparseMatrix *mat, char *fileName, char descr,
         if(p+1 < mat->taskCount && mat->task[p+1].doRank != wrank) {
             mat->task[p].receiveFrom = mat->task[p+1].doRank;
             mat->task[p].receiveSize =
-                b1*localSize(mat->task[p+1].doRank, wsize, mat->columns/b1);
+                colPart*localSize(mat->task[p+1].doRank, wsize, mat->partitions);
         } else {
             mat->task[p].receiveFrom = -1;
             mat->task[p].receiveSize = 0;
         }
         if(p < mat->taskCount)
-            needs=mat->task[p].doRank;
+            needs = mat->task[p].doRank;
         else
-            needs=-1;
+            needs = -1;
         // printf("%i:  p=%i needs=%i\n", wrank, p, needs);
 #ifdef USE_MPI
         MPI_Allgather(&needs, 1, MPI_INT, allNeeds, 1, MPI_INT, mpicom);
@@ -581,15 +582,15 @@ void sparseMatrixRead(SparseMatrix *mat, char *fileName, char descr,
                    process-local block and the process-local
                    block is non-empty. */
                 if(p == 0) {
-                    fprintf(stderr, "%i:  matrix %s%s q=%i allNeeds[q]=%i\n",
+                    fprintf(stderr, "%i:  matrix %s%s, allNeeds[%i]=%i\n",
                             wrank, fileName, tFlag?"T":"", q, allNeeds[q]);
                     exit(77);
                 }
                 /* Demand that the work is evenly distributed 
                    across processes.  See comment below. */
                 assert(p-1 < mat->taskCount);
-                /* Only one send per task. True if the process-block
-                 structure is the same for each process. If needed, 
+                /* Max of one send per task. True if the process-block
+                 structure is fairly even across processes. If needed,
                  one could extend this to the general case.
 
                 But, in that case, the work on each process must be 
@@ -612,14 +613,11 @@ void sparseMatrixRead(SparseMatrix *mat, char *fileName, char descr,
     if(debug>1)
         printMatrixBlocks(mat, wrank, wsize, fileName, tFlag);
     if(debug>0)
-#ifdef USE_TASK
         printTasks(mat, wsize, wrank);
-#endif
-#else
+#else // USE_TASK
     mat->gather = MALLOC(mat->columns*sizeof(*mat->gather));
-    mat->lowerColumn = blockSize*
-        rankIndex(wrank, wsize, mat->columns/blockSize);
-#endif
+    mat->lowerColumn = colPart*rankIndex(wrank, wsize, mat->partitions);
+#endif // USE_TASK
 
 
     /* 
@@ -729,10 +727,10 @@ void matrixVector(SparseMatrix *a,
 #ifdef USE_MPI
     int wrank;
     MPI_Comm mpicom = a->mpicom;
-    MPI_Request sent = MPI_REQUEST_NULL, received = MPI_REQUEST_NULL;
     double t0, t1;
 #ifdef USE_TASK
     const double *gather;
+    MPI_Request sent = MPI_REQUEST_NULL, received = MPI_REQUEST_NULL;
 #else
     mat_int offset = 0;
     int rank, wsize;
@@ -818,8 +816,6 @@ void matrixVector(SparseMatrix *a,
         /* For a given task, do matrix-vector multiply */
 
 #ifdef USE_TASK
-        if(task->doRank == -1)
-            continue;
         start = task->start;
         end = task->end;
 #else // USE_TASK
@@ -844,13 +840,17 @@ void matrixVector(SparseMatrix *a,
 #ifdef USE_MPI
         a->localTime += (t0 = MPI_Wtime()) - t1;
 
+#ifdef USE_TASK
         /* Verify that any current messages are complete
            before starting the next task or exiting.
 	   Subsequent code may modify the 'in' array. */
-        MPI_Wait(&received, MPI_STATUS_IGNORE);
-	MPI_Wait(&sent, MPI_STATUS_IGNORE);
+        if(task->sendTo != -1)
+            MPI_Wait(&sent, MPI_STATUS_IGNORE);
+        if(task->receiveFrom != -1)
+            MPI_Wait(&received, MPI_STATUS_IGNORE);
+#endif // USE_TASK
 #endif
-        } // loop over tasks
+    } // loop over tasks
 
 
 #ifdef USE_MPI

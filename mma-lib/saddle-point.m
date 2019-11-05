@@ -517,7 +517,7 @@ findDelta[data:{hess_, grad_, gauge_}, opts:OptionsPattern[]] :=
    If[action =!= "read",
       Export[outFile, {
           "blockSize" -> nc^2 - 1,
-          "nd" -> nd,
+          "partitions" -> latticeDimensions[[-1]],
           "n" -> Length[grad],
           "gaugeDimension" -> Length[gauge],
           "rescaleCutoff" -> zzz,
