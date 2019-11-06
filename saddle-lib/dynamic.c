@@ -145,7 +145,7 @@ void dynamicInit(const mat_int nrow, const mat_int ncol,
     if(gaugeData.printDetails > 1) {
         // 2 matrix multiplies, + and * as FLOPS
         trl_print_info(&info, 4*nonzeros);
-    } else if(gaugeData.printDetails > 0) {
+    } else if(gaugeData.printDetails > 0 && wrank==0) {
         trl_terse_info(&info, stdout);
     }
     if(gaugeData.printDetails > 0 && wrank==0) {
