@@ -349,11 +349,13 @@ Options[findDelta] = {dynamicPartMethod -> Automatic, printDetails -> False,
   Method -> Automatic, rescaleCutoff -> 1, dampingFactor -> 1,
   storePairs -> False, storeHess -> False, largeShiftOptions -> {},
   storeBB -> False, debugProj -> False, externalAction -> Automatic,
-  (* Used by BLAS libraries and matrixVector() *)
+  (* Used by BLAS libraries and matrixVector()
+     Extensive benchmarking shows 2 threads * maximum MPI processes
+     is optimal. *)
   threads -> 2,
   (* A numerical value will execute the MPI version *)
   processes -> Automatic,
-  (* This will result in just sorting rows and columns *)
+  (* Not used. *)
   chunkSize -> 1,
   (* Roughly speaking, the relative error in the matrix norm of
      one link goes as Norm[shift]^3/48. *)

@@ -138,7 +138,8 @@ int main(int argc, char **argv){
 
     tmp = cJSON_GetObjectItemCaseSensitive(jopts, "threads");
     threads = cJSON_IsNumber(tmp)?tmp->valueint:1;
-    omp_set_dynamic(0);     // Explicitly disable dynamic teams
+    /* Tried disabling dynamic teams,
+       but this degraded performance. */
     omp_set_num_threads(threads);
     if(wrank ==0)
         printf("Setting OpenMP to %i threads\n", threads);

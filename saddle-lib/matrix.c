@@ -699,9 +699,14 @@ void sparseMatrixStats(SparseMatrix *mat, char *matrixName) {
         printf("Matrix %s ops=%i, total process localTime=%.2f mpiTime=%.2f\n",
                matrixName, mat->count, localTime, mpiTime);
                /*
+                  For AMD EPYC 7301 16-Core Processor:
                   Theoretical max flops is 2.2GHz*16cores*8flops/core = 281 GFLOP/s
 
-                  According to https://www.dell.com/support/article/us/en/04/sln313856/
+                  Theoretical memory bandwidth is 2.666GHz*8bytes/channel*8channels
+                  = 170.62GB/s.
+
+                  According to the STREAM benchmark at
+                  https://www.dell.com/support/article/us/en/04/sln313856/
                   we should expect roughly 126-130 GB/s for one socket
                   and 32 GB/s for one NUMA node.
                   They used 2400MHz memory, while I have 2666MHz memory.
@@ -844,7 +849,7 @@ void matrixVector(SparseMatrix *a,
         gather = in;
 #endif // USE_MPI
 
-        /* For a given task, do matrix-vector multiply */
+        /* For a given task, perform matrix-vector multiply */
 
 #ifdef USE_TASK
         start = task->start;
@@ -854,30 +859,33 @@ void matrixVector(SparseMatrix *a,
         end = a->iCount;
 #endif // USE_TASK
 
-    /* Start parallel threads.  If this has a high overhead,
-       then it may not be worth it. */
+        /* Loop over rows
+
+          Including the loop over tasks inside the omp parallel
+          block crashed. */
 #pragma omp parallel default(shared) private(row, outp, j, k, ap)
-{
-        // Loop over rows
-#pragma omp for schedule(static, 1)
-        for(row=start; row<end; row++) {
-            outp = out + a->i[row];
+        {
+            /* Using schedule(static, 1) and disabling dynamic teams
+               significantly degraded performance.  */
+#pragma omp for
+            for(row=start; row<end; row++) {
+                outp = out + a->i[row];
 #ifdef USE_BLOCK
-            for(k=a->ip[row], ap=a->value + b2*a->ip[row];
-                k<a->ip[row+1]; k++, ap += b2) {
-                j = a->j[k];
-                DGEMV(&trans, &b1, &b1, &one,
-                      ap, &b1, gather + j, &inc, &one,
-                      outp, &inc);
-            }
+                for(k=a->ip[row], ap=a->value + b2*a->ip[row];
+                    k<a->ip[row+1]; k++, ap += b2) {
+                    j = a->j[k];
+                    DGEMV(&trans, &b1, &b1, &one,
+                          ap, &b1, gather + j, &inc, &one,
+                          outp, &inc);
+                }
 #else
-            for(k=a->ip[row], ap=a->value; k<a->ip[row+1]; k++) {
-                j = a->j[k];
-                *outp += ap[k] * gather[j];
-            }
+                for(k=a->ip[row], ap=a->value; k<a->ip[row+1]; k++) {
+                    j = a->j[k];
+                    *outp += ap[k] * gather[j];
+                }
 #endif
-        } // loop over rows
-} // omp parallel
+            } // loop over rows
+        } // omp parallel
 #ifdef USE_MPI
         a->localTime += (t0 = MPI_Wtime()) - t1;
 
@@ -890,7 +898,7 @@ void matrixVector(SparseMatrix *a,
         if(task->receiveFrom != -1)
             MPI_Wait(&received, MPI_STATUS_IGNORE);
 #endif // USE_TASK
-#endif
+#endif // USE_MPI
     } // loop over tasks
 
 #ifdef USE_MPI
