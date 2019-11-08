@@ -65,7 +65,7 @@ void dynamicInit(const mat_int nrow, const mat_int ncol,
     int i, mev, maxlan, lohi, ned, maxmv, wrank=0;
     double tol = -1.0; // Use default tolerance: sqrt(machine epsilon)
     double *eval, *evec;
-    int restart = 3; // restart strategy
+    int restart;
     mat_int nonzeros = gauge->blocks*gauge->blockSize*gauge->blockSize;
     trl_info info;
     cJSON *tmp;
@@ -131,6 +131,9 @@ void dynamicInit(const mat_int nrow, const mat_int ncol,
     maxmv = cJSON_IsNumber(tmp)?tmp->valueint:(int) nrow*ned;
     tmp  = cJSON_GetObjectItemCaseSensitive(options, "maxLanczosVecs");
     maxlan = cJSON_IsNumber(tmp)?tmp->valueint:(int) nrow;
+    // Choose strategy good for expensive matrix-vector product.
+    tmp  = cJSON_GetObjectItemCaseSensitive(options, "restartStrategy");
+    restart = cJSON_IsNumber(tmp)?tmp->valuedouble:4;
 
     mev = ned; // Allocate memory for the number of requested eigenpairs
     eval = malloc(mev*sizeof(double));

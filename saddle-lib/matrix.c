@@ -700,10 +700,13 @@ void sparseMatrixStats(SparseMatrix *mat, char *matrixName) {
                matrixName, mat->count, localTime, mpiTime);
                /*
                   For AMD EPYC 7301 16-Core Processor:
-                  Theoretical max flops is 2.2GHz*16cores*8flops/core = 281 GFLOP/s
+                  Theoretical max flopss is:
+                     2.2GHz*16cores*8flops/core = 281 GFLOP/s
+                  We count addition and multiplication as separate flops.
 
-                  Theoretical memory bandwidth is 2.666GHz*8bytes/channel*8channels
-                  = 170.62GB/s.
+                  Theoretical memory bandwidth is 
+                     2.666GHz*8bytes/channel*8channels = 170.62GB/s.
+                  STREAM benchmark is memory reads plus writes.
 
                   According to the STREAM benchmark at
                   https://www.dell.com/support/article/us/en/04/sln313856/

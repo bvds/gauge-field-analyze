@@ -80,17 +80,14 @@ void largeShifts(SparseMatrix *hess, cJSON *options,
     const int lwrk = 0;
     const int iguess = 1; // Use supplies the intial vector in evec
     double *wrk = NULL;
-    int mev, maxlan, maxmv, wrank;
-    double tol = -1.0; // Use default tolerance: sqrt(machine epsilon)
-    /* Strategies 3 & 4 are for matrices where the matrix-vector 
-       multiply is relatively expensive.  */
-    int restart = 4;
+    int mev, maxlan, maxmv, wrank, restart;
+    double tol;
     trl_info info;
     mat_int k;
 #endif
     int ned = 1;  // number of requested eigenpairs.
     int lohi = -1; // lowest or highest abs value eigenpairs.
-    int i, ierr, printDetails = 1;
+    int i, ierr, printDetails;
     mat_int nonzeros = hess->blocks*hess->blockSize*hess->blockSize;
 #ifdef USE_MPI
     MPI_Comm *mpicomp = &mpicom;
@@ -123,11 +120,12 @@ void largeShifts(SparseMatrix *hess, cJSON *options,
         lohi = tmp->valueint<0?-1:1;
     }
     tmp  = cJSON_GetObjectItemCaseSensitive(options, "printDetails");
-    if(cJSON_IsNumber(tmp)) {
+    if(cJSON_IsNumber(tmp))
         printDetails = tmp->valueint;
-    } else if(cJSON_IsBool(tmp)) {
+    else if(cJSON_IsBool(tmp))
         printDetails = cJSON_IsTrue(tmp)?1:0;
-    }    
+    else
+        printDetails = 0;
 #ifdef USE_PRIMME
     /* Set default values in PRIMME configuration struct */
     primme_initialize(&primme);
@@ -185,14 +183,16 @@ void largeShifts(SparseMatrix *hess, cJSON *options,
     } else {
         maxlan = hess->rows;  // Since we do reorthogonalization.
     }
+    /* Strategies 3 & 4 are for matrices where the matrix-vector 
+       multiply is relatively expensive.  
+       Benchmark test for 16^3, nc=3 lattice show 7 is fastest, with
+       roughly 50% going to restarts and reorthogonalization
+       and 50% to matrixVector().  */
     tmp  = cJSON_GetObjectItemCaseSensitive(options, "restartStrategy");
-    if(cJSON_IsNumber(tmp)) {
-        restart = tmp->valuedouble;
-    }
+    restart = cJSON_IsNumber(tmp)?tmp->valuedouble:7;
+    // Default is to use the default tolerance: sqrt(machine epsilon)
     tmp  = cJSON_GetObjectItemCaseSensitive(options, "rTolerance");
-    if(cJSON_IsNumber(tmp)) {
-        tol = tmp->valuedouble;
-    }
+    tol = cJSON_IsNumber(tmp)?tmp->valuedouble:-1.0; 
 
     // Used by HessOp2
     eigenData.z = MALLOC(nrow * sizeof(double));

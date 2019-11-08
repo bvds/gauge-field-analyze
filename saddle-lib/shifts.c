@@ -28,7 +28,7 @@
 #elif defined(USE_BLIS)
 #include "blis/cblas.h"
 #elif defined(USE_OPENBLAS)
-#include "/opt/OpenBLAS/include/cblas.h"
+#include "cblas.h"
 #endif
 
 
@@ -138,11 +138,6 @@ int main(int argc, char **argv){
 
     tmp = cJSON_GetObjectItemCaseSensitive(jopts, "threads");
     threads = cJSON_IsNumber(tmp)?tmp->valueint:1;
-    /* Tried disabling dynamic teams,
-       but this degraded performance. */
-    omp_set_num_threads(threads);
-    if(wrank ==0)
-        printf("Setting OpenMP to %i threads\n", threads);
 #ifdef USE_MKL
     /*
       On the T480 laptop, calculations are limited by memory
@@ -156,20 +151,23 @@ int main(int argc, char **argv){
       3          2042s      683s
       4          2878s      722s
     */
-    if(wrank ==0)
-        printf("Setting MKL to %i threads\n", threads);
     mkl_set_num_threads_local(threads);
+    char libName[] = " & MKL";
 #elif defined(USE_BLIS)
-    if(wrank ==0)
-        printf("Setting Blis to %i threads\n", threads);
     bli_thread_set_num_threads(threads);
+    char libName[] = " & Blis";
 #elif defined(USE_OPENBLAS)
-    if(wrank ==0)
-        printf("Setting OpenBLAS to %i threads\n", threads);
     openblas_set_num_threads(threads);
+    char libName[] = " & OpenBLAS";
 #else
-    assert(threads != 0);  // Suppress compiler warning
+    char libName[] = "";
 #endif
+    /* Tried disabling dynamic teams,
+       but this degraded performance. */
+    omp_set_num_threads(threads);
+    if(wrank ==0)
+        printf("Setting OpenMP%s to %i threads\n",
+               libName, threads);
 
 
     /*

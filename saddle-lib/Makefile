@@ -8,8 +8,8 @@ PRIMMEDIR = ../../linear-algebra/primme
 #
 #
 #                                 -g -Wall -O3
-CFLAGS = -fPIC  -I$(TRLANDIR)/INC -g -Wall -Wextra -pedantic -std=gnu11 -fopenmp
-LFLAGS =  -L$(TRLANDIR) -L/usr/local/lib -lcjson -lgfortran -lgomp
+CFLAGS = -fPIC -I$(TRLANDIR)/INC -g -Wall -Wextra -pedantic -std=gnu11 -fopenmp
+LFLAGS =  -L$(TRLANDIR) -L/usr/local/lib -lcjson -lgomp
 SLFLAGS = -lnutrlan
 #
 #  Need to add fortran libraries needed by MINRES-QLP
@@ -20,7 +20,7 @@ PLFLAGS = -lmpi_mpifh -lmpi_usempif08 -lnutrlan_mpi
 #  http://www.prace-ri.eu/best-practice-guide-amd-epyc
 #
 #  Possible additional flags, some associated with prefetching:
-#   -ffast-math -ftree-vectorize -fopenmp -fprefetch-loop-arrays -mprefetchwt1
+#   -ffast-math -ftree-vectorize -fprefetch-loop-arrays -mprefetchwt1
 #  These need to be tested emprically because they might
 #  interfere with hardware prefetching.
 #
@@ -30,6 +30,9 @@ PLFLAGS = -lmpi_mpifh -lmpi_usempif08 -lnutrlan_mpi
 #
 ifeq ($(shell lscpu|grep -m 1 -c -i epyc),1)
 CFLAGS += -O3 -march=znver1 -mtune=znver1 -mfma -mavx2 -m3dnow -fomit-frame-pointer
+LLAPACK = -lflame
+else
+LLAPACK = -llapack
 endif
 #
 #   Use block-sparse coordinate format for sparse matrices
@@ -47,10 +50,10 @@ CFLAGS += -DUSE_TASK
 #        BLAS choices
 #
 ifeq (1,1) # Use OpenBlas
-CFLAGS += -DUSE_OPENBLAS
-LFLAGS += -lflame -L/opt/OpenBLAS/lib/ -lopenblas -lm
+CFLAGS += -I/opt/OpenBLAS/include/ -DUSE_OPENBLAS
+LFLAGS += $(LLAPACK) -L/opt/OpenBLAS/lib/ -lopenblas
 #
-else ifeq (1, 0) #   Use Intel MKL
+else ifeq (1,0) #   Use Intel MKL
 #   Also, use MKL for sparse matrix storage if the flags
 #   USE_MPI, USE_BLOCK, and USE_TASK have not been set.
 #   This gives a substantial gain relative to default BLAS and
@@ -66,18 +69,21 @@ CFLAGS += -DUSE_MKL -m64 -I$(MKLROOT)/include
 #  Looks like dynamic linking doesn't work well if the routine
 #  is called by Mathematica.
 #  Use static links:
-LFLAGS +=  $(MKLROOT)/lib/intel64/libmkl_blas95_lp64.a $(MKLROOT)/lib/intel64/libmkl_lapack95_lp64.a -Wl,--start-group $(MKLROOT)/lib/intel64/libmkl_intel_lp64.a $(MKLROOT)/lib/intel64/libmkl_gnu_thread.a $(MKLROOT)/lib/intel64/libmkl_core.a -Wl,--end-group -lgomp -lpthread -lm -ldl
+LFLAGS +=  $(MKLROOT)/lib/intel64/libmkl_blas95_lp64.a $(MKLROOT)/lib/intel64/libmkl_lapack95_lp64.a -Wl,--start-group $(MKLROOT)/lib/intel64/libmkl_intel_lp64.a $(MKLROOT)/lib/intel64/libmkl_gnu_thread.a $(MKLROOT)/lib/intel64/libmkl_core.a -Wl,--end-group -lgomp -ldl
 #  Dynamic:
-#LFLAGS += -L$(MKLROOT)/lib/intel64 -lmkl_blas95_lp64 -lmkl_lapack95_lp64 -Wl,--no-as-needed -lmkl_rt -lpthread -ldl
-#LFLAGS += -L$(MKLROOT)/lib/intel64  -lmkl_blas95_lp64 -lmkl_lapack95_lp64 -Wl,--no-as-needed -lmkl_intel_lp64 -lmkl_gnu_thread -lmkl_core -lgomp -lpthread -ldl
+#LFLAGS += -L$(MKLROOT)/lib/intel64 -lmkl_blas95_lp64 -lmkl_lapack95_lp64 -Wl,--no-as-needed -lmkl_rt -lgomp -ldl
+#LFLAGS += -L$(MKLROOT)/lib/intel64  -lmkl_blas95_lp64 -lmkl_lapack95_lp64 -Wl,--no-as-needed -lmkl_intel_lp64 -lmkl_gnu_thread -lmkl_core -lgomp -ldl
 #
 else ifeq (1,0)  # Use Blis
 CFLAGS += -DUSE_BLIS
-LFLAGS += -lflame -lblis -lm
+LFLAGS += $(LLAPACK) -lblis
 #
 else
-LFLAGS += -llapack -lblas -lm
+LFLAGS += $(LLAPACK) -lblas
 endif
+# These need to be at the end
+LFLAGS += -lgfortran -lm
+#
 #
 #  Optionally, use Jacobi-Davidson library PRIMME
 #

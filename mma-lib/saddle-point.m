@@ -189,13 +189,13 @@ gaugeTransformShifts[rootGaugeField_, fixed_: - 1] :=
 
 (* Hessian and gradient *)
 
-Options[latticeHessian] = {allLinks -> True, fixedDir -> -1,
-                           fullMatrix -> True};
+Options[latticeHessian] = {allLinks -> True, fixedDir -> 0,
+                           fullMatrix -> False};
 latticeHessian::usage = "Set allLinks to False to compare with \
 single-link code.  Option fixedDir>0 will apply a constant shift to \
 any link a given Polyakov loop winding in that direction, compatible \
 with choosing an Axial gauge in that direction.
-Set the option fullMatrix to False to only compute one triangle";
+Set the option fullMatrix to True to explicitly compute the upper triangle of the matrix.";
 latticeHessian[getRootLink_, OptionsPattern[]] :=
  Block[{fixed = OptionValue[fixedDir]},
  (* Adding elements to a SparseArray one at a time is very inefficient
@@ -347,7 +347,7 @@ findDelta::asymmetric = "Hessian must be symmetric unless Method->\"External\"."
 findDelta::symmetric = "Since Method->\"External\", you can set fullMatrix -> False.";
 Options[findDelta] = {dynamicPartMethod -> Automatic, printDetails -> False,
   Method -> Automatic, rescaleCutoff -> 1, dampingFactor -> 1,
-  storePairs -> False, storeHess -> False, largeShiftOptions -> {},
+  storePairs -> True, storeHess -> False, largeShiftOptions -> {},
   storeBB -> False, debugProj -> False, externalAction -> Automatic,
   (* Used by BLAS libraries and matrixVector()
      Extensive benchmarking shows 2 threads * maximum MPI processes
