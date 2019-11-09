@@ -521,7 +521,11 @@ void sparseMatrixRead(SparseMatrix *mat, char *fileName, char descr,
     /* Verify order, mark beginning and end of
        each process block, and shift column indices for each block.
        Also, create row pointers.
+
+       iTemp handles cases where mat->iCount > k, which
+       can happen, for instance, if the first blocks are zero.
     */
+    mat_int *iTemp = MALLOC((mat->blocks + wsize)*sizeof(*iTemp));
     mat->ip = MALLOC((mat->blocks+1)*sizeof(*mat->ip));
     mat->task = malloc(wsize*sizeof(TaskList));
     mat->task[0].start = 0;
@@ -558,13 +562,15 @@ void sparseMatrixRead(SparseMatrix *mat, char *fileName, char descr,
         }
         // at this point, k<mat->blocks
         if(k==0 || mat->i[k] != mat->i[k-1] || jrank != lastJrank) {
-            assert(mat->iCount <= k); // Don't improperly over-write mat->i
             mat->ip[mat->iCount] = k;
-            mat->i[mat->iCount] = mat->i[k];
+            iTemp[mat->iCount] = mat->i[k];
             mat->iCount++;
         }
         lastJrank = jrank;
     }
+    mat->i = realloc(mat->i, mat->iCount*sizeof(*mat->i));
+    memcpy(mat->i, iTemp, mat->iCount*sizeof(*mat->i));
+    FREE(iTemp);
 
     /* Share the data needed by each process. */
     for(p=0; p<wsize; p++){
@@ -597,7 +603,7 @@ void sparseMatrixRead(SparseMatrix *mat, char *fileName, char descr,
                             wrank, fileName, tFlag?"T":"", q, allNeeds[q]);
                     exit(77);
                 }
-                /* Demand that the work is evenly distributed 
+                /* Demand that the work is fairly evenly distributed 
                    across processes.  See comment below. */
                 assert(p-1 < mat->taskCount);
                 /* Max of one send per task. True if the process-block
@@ -639,9 +645,9 @@ void sparseMatrixRead(SparseMatrix *mat, char *fileName, char descr,
             mat->iCount++;
         }
     }
+    mat->i = realloc(mat->i, mat->iCount*sizeof(*mat->i));
 #endif // USE_TASK
     mat->ip[mat->iCount] = mat->blocks;
-    mat->i = realloc(mat->i, mat->iCount*sizeof(*mat->i));
     mat->ip = realloc(mat->ip, (mat->iCount+1)*sizeof(*mat->ip));
     if(debug>1) {
         printf("%i:  Matrix blocks=%i\n", wrank, mat->blocks);
