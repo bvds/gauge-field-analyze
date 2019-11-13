@@ -23,8 +23,9 @@ printMemory[n_] := EngineeringForm[N[ByteCount[n]], 3];
 
 (* Shift cutoff *)
 
-applyCutoff1::usage = "Rescale shifts for a single link.  Large zzz \
-removes the cutoff.  When Norm[shift]=Pi, there is an inflection \
+applyCutoff1::usage = "Rescale shifts for a single link.  \
+A large value for zzz removes the cutoff.  \
+When Norm[shift]=Pi, there is an inflection \
 point in the associated color matrix meaning that the quadratic \
 approximation becomes qualitatively different than the full matrix \
 exponential.  Thus, we set shift to zero when Norm[shift]>=Pi.  The \
@@ -42,7 +43,8 @@ applyCutoff1[hess_?VectorQ, grad_, cutoff_: 1, zzz_: 1] :=
     Norm[shift] < cutoff  zzz, shift,
     True, (cutoff/Norm[shift]) shift ]]];
 shiftNorm[shifts_] := Max[Map[Norm, Partition[shifts, nc^2 - 1]]];
-compareVectors[a_, b_] := {{(shiftNorm[a]+shiftNorm[b])/2, 1-shiftNorm[a]/shiftNorm[b]},
+compareVectors[a_, b_] := {{(shiftNorm[a]+shiftNorm[b])/2,
+                            1-shiftNorm[a]/shiftNorm[b]},
                            {(Norm[a]+Norm[b])/2, 1-Norm[a]/Norm[b]},
                            Block[{cos = a.b/(Norm[a] Norm[b])},
                                  {cos, Sqrt[(1+cos) (1-cos)]}]};
@@ -346,7 +348,7 @@ findDelta::dynamicPartMethod = "Only dynamicPartMethod = Automatic is supported.
 findDelta::asymmetric = "Hessian must be symmetric unless Method->\"External\".";
 findDelta::symmetric = "Since Method->\"External\", you can set fullMatrix -> False.";
 Options[findDelta] = {dynamicPartMethod -> Automatic, printDetails -> False,
-  Method -> Automatic, rescaleCutoff -> 1, dampingFactor -> 1,
+  Method -> Automatic, removeCutoff -> 1, dampingFactor -> 1,
   storePairs -> True, storeHess -> False, largeShiftOptions -> {},
   storeBB -> False, debugProj -> False, externalAction -> Automatic,
   (* Used by BLAS libraries and matrixVector()
@@ -359,14 +361,13 @@ Options[findDelta] = {dynamicPartMethod -> Automatic, printDetails -> False,
   chunkSize -> 1,
   (* Roughly speaking, the relative error in the matrix norm of
      one link goes as Norm[shift]^3/48. *)
-  largeShiftCutoff -> 2, cutoffValue -> 2};
+  largeShiftCutoff -> 2, rescaleCutoff -> 2};
 SetAttributes[findDelta, HoldFirst];
 
 (* Dense matrix version (default) *)
 findDelta[{hess_, grad_, gauge_}, OptionsPattern[]] :=
-  Block[{hessp, gradp, zzz = OptionValue[rescaleCutoff],
-    cutoff = OptionValue[cutoffValue],
-    damping = OptionValue[dampingFactor], values, oo, proj, shifts},
+  Block[{hessp, gradp, zzz = OptionValue[removeCutoff],
+         damping = OptionValue[dampingFactor], values, oo, proj, shifts},
     If[Not[SymmetricMatrixQ[hess, Tolerance->256*$MachineEpsilon]],
        Message[findDelta::asymmetric];
        Return[$Failed]];
@@ -393,15 +394,14 @@ findDelta[{hess_, grad_, gauge_}, OptionsPattern[]] :=
     If[OptionValue[storePairs],
        pairs0 = Transpose[{values, oo.gradp}];
        shifts0 = shifts];
-    -damping applyCutoff2[shifts, cutoff, zzz]] /;
+    -damping applyCutoff2[shifts, OptionValue[rescaleCutoff], zzz]] /;
   OptionValue[Method] === Automatic || OptionValue[Method] === "Dense";
 
 (* Version using mathematica versions of MINRES/MINRES-QLP
    and Lanczos eigensystem solvers. *)
 findDelta[{hess_, grad_, gauge_}, opts:OptionsPattern[]] :=
- Block[{zzz = OptionValue[rescaleCutoff],
+ Block[{zzz = OptionValue[removeCutoff],
     minresFun = minresLabels[methodName[OptionValue[Method]]],
-    cutoff = OptionValue[cutoffValue],
     damping = OptionValue[dampingFactor], result, shifts, dp, dp0,
     smallProj, smallProj0, tinit = SessionTime[],
         tdp = 0, tsp = 0, tdot = 0, countdp = 0, countdot = 0, countsp = 0,
@@ -443,7 +443,7 @@ findDelta[{hess_, grad_, gauge_}, opts:OptionsPattern[]] :=
          orthoSubspace -> dp,
 	 initialVector -> grad, printDetails -> 1];
      Module[{largeShiftSpace = cutoffNullspace[Sqrt[vals], vecs.grad, vecs,
-         OptionValue[largeShiftCutoff], OptionValue[rescaleCutoff]]},
+         OptionValue[largeShiftCutoff], zzz]},
 	    If[Length[largeShiftSpace] > 0,
 	       (# - (largeShiftSpace.#).largeShiftSpace)&, Identity]]];
    smallProj = (addTime[tsp, countsp++; smallProj0[#]]&);
@@ -471,7 +471,7 @@ findDelta[{hess_, grad_, gauge_}, opts:OptionsPattern[]] :=
    If[OptionValue[storePairs],
       pairs0 = Null;
       shifts0 = shifts];
-   -damping applyCutoff2[shifts, cutoff, zzz]] /;
+   -damping applyCutoff2[shifts, OptionValue[rescaleCutoff], zzz]] /;
  KeyExistsQ[minresLabels, methodName[OptionValue[Method]]];
 
 runRemote[command_] :=
@@ -490,8 +490,7 @@ runRemote[command_] :=
    https://github.com/DaveGamble/cJSON
  *)
 findDelta[data:{hess_, grad_, gauge_}, opts:OptionsPattern[]] :=
-    Block[{zzz = OptionValue[rescaleCutoff],
-    cutoff = OptionValue[cutoffValue],
+    Block[{zzz = OptionValue[removeCutoff],
     damping = OptionValue[dampingFactor], shifts,
     action = OptionValue[externalAction],
     tinit = SessionTime[],
@@ -522,7 +521,7 @@ findDelta[data:{hess_, grad_, gauge_}, opts:OptionsPattern[]] :=
           "partitions" -> latticeDimensions[[-1]],
           "n" -> Length[grad],
           "gaugeDimension" -> Length[gauge],
-          "rescaleCutoff" -> zzz,
+          "removeCutoff" -> zzz,
           "largeShiftCutoff" ->
               OptionValue[largeShiftCutoff]/.Infinity -> 10.0^20,
           "dynamicPartOptions" ->
@@ -586,7 +585,7 @@ findDelta[data:{hess_, grad_, gauge_}, opts:OptionsPattern[]] :=
       If[OptionValue[storePairs],
          pairs0 = Null;
          shifts0 = shifts];
-      -damping applyCutoff2[shifts, cutoff, zzz], Null]] /;
+      -damping applyCutoff2[shifts, OptionValue[rescaleCutoff], zzz], Null]] /;
  methodName[OptionValue[Method]] === "External";
 
 SetAttributes[applyDelta, HoldFirst];

@@ -24,7 +24,7 @@ void cutoffNullspace(mat_int n, int nvals, cJSON *options,
     int firstValue = -1;
     int lastValue = -1;
     double norm2, vecnorm2,  maxnorm2, vecdotgrad;
-    double zzz, rescale;
+    double cutoff, zzz;
     cJSON *tmp;
 #ifdef USE_MPI
     MPI_Comm_rank(mpicom, &wrank);
@@ -37,9 +37,9 @@ void cutoffNullspace(mat_int n, int nvals, cJSON *options,
     assert(cJSON_IsNumber(tmp));
     na = tmp->valueint;
     tmp  = cJSON_GetObjectItemCaseSensitive(options, "largeShiftCutoff");
+    cutoff = cJSON_IsNumber(tmp)?tmp->valuedouble:1.0;
+    tmp  = cJSON_GetObjectItemCaseSensitive(options, "removeCutoff");
     zzz = cJSON_IsNumber(tmp)?tmp->valuedouble:1.0;
-    tmp  = cJSON_GetObjectItemCaseSensitive(options, "rescaleCutoff");
-    rescale = cJSON_IsNumber(tmp)?tmp->valuedouble:1.0;
 
     // Color blocks should be evenly divided among processes
     assert(n%na == 0);
@@ -77,7 +77,7 @@ void cutoffNullspace(mat_int n, int nvals, cJSON *options,
 #endif
         /* If eigenvectors are normalized, then vecnorm2
            is not needed. */
-        if(zzz>0.0 && zzz * rescale * fabs((*vals)[i]) * vecnorm2 <=
+        if(cutoff * zzz * fabs((*vals)[i]) * vecnorm2 <=
            fabs(vecdotgrad) * sqrt(maxnorm2)) {
             if(firstValue < 0)
                 firstValue = i;
