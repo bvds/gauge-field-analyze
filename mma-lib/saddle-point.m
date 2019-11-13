@@ -349,7 +349,7 @@ findDelta::asymmetric = "Hessian must be symmetric unless Method->\"External\"."
 findDelta::symmetric = "Since Method->\"External\", you can set fullMatrix -> False.";
 Options[findDelta] = {dynamicPartMethod -> Automatic, printDetails -> False,
   Method -> Automatic, removeCutoff -> 1, dampingFactor -> 1,
-  storePairs -> True, storeHess -> False, largeShiftOptions -> {},
+  storeHess -> False, largeShiftOptions -> {},
   storeBB -> False, debugProj -> False, externalAction -> Automatic,
   (* Used by BLAS libraries and matrixVector()
      Extensive benchmarking shows 2 threads * maximum MPI processes
@@ -367,7 +367,7 @@ SetAttributes[findDelta, HoldFirst];
 (* Dense matrix version (default) *)
 findDelta[{hess_, grad_, gauge_}, OptionsPattern[]] :=
   Block[{hessp, gradp, zzz = OptionValue[removeCutoff],
-         damping = OptionValue[dampingFactor], values, oo, proj, shifts},
+         damping = OptionValue[dampingFactor], values, oo, proj},
     If[Not[SymmetricMatrixQ[hess, Tolerance->256*$MachineEpsilon]],
        Message[findDelta::asymmetric];
        Return[$Failed]];
@@ -384,17 +384,15 @@ findDelta[{hess_, grad_, gauge_}, OptionsPattern[]] :=
     (* Debug print to compare with call to testOp(...) in shifts.c *)
     If[False, Print["Dynamic hess.grad: ", hess.grad]];
     {values, oo} = Eigensystem[Normal[hessp]];
-    shifts = applyCutoff3[values, oo.gradp, oo.proj,
+    stepShifts = applyCutoff3[values, oo.gradp, oo.proj,
 	OptionValue[largeShiftCutoff], zzz].oo.proj;
     Print["shifts norms and rescale:  ",
-	  {shiftNorm[shifts], Norm[shifts],
-	   shifts.hess.shifts/shifts.grad}];
+	  {shiftNorm[stepShifts], Norm[stepShifts],
+	   stepShifts.hess.stepShifts/stepShifts.grad}];
     If[OptionValue[storeHess],
-       hess0 = hess; grad0 = grad; proj0 = proj; oo0 = oo];
-    If[OptionValue[storePairs],
-       pairs0 = Transpose[{values, oo.gradp}];
-       shifts0 = shifts];
-    -damping applyCutoff2[shifts, OptionValue[rescaleCutoff], zzz]] /;
+       hess0 = hess; grad0 = grad; proj0 = proj; oo0 = oo;
+       pairs0 = Transpose[{values, oo.gradp}]];
+    -damping applyCutoff2[stepShifts, OptionValue[rescaleCutoff], zzz]] /;
   OptionValue[Method] === Automatic || OptionValue[Method] === "Dense";
 
 (* Version using mathematica versions of MINRES/MINRES-QLP
@@ -402,7 +400,7 @@ findDelta[{hess_, grad_, gauge_}, OptionsPattern[]] :=
 findDelta[{hess_, grad_, gauge_}, opts:OptionsPattern[]] :=
  Block[{zzz = OptionValue[removeCutoff],
     minresFun = minresLabels[methodName[OptionValue[Method]]],
-    damping = OptionValue[dampingFactor], result, shifts, dp, dp0,
+    damping = OptionValue[dampingFactor], result, dp, dp0,
     smallProj, smallProj0, tinit = SessionTime[],
         tdp = 0, tsp = 0, tdot = 0, countdp = 0, countdot = 0, countsp = 0,
         countGauge = dynamicPartCounter},
@@ -453,13 +451,13 @@ findDelta[{hess_, grad_, gauge_}, opts:OptionsPattern[]] :=
      smallProj[dp[grad]], methodOptions[OptionValue[Method]],
      Apply[Sequence,
       FilterRules[{maxLanczosVecs -> 5000, printDetails -> 1},
-       Options[minresFun]]]]; shifts = result[[1]];
+       Options[minresFun]]]]; stepShifts = result[[1]];
    (* Verify result is in the subspace *)
    If[False,
       Print["Result overlap with small shift subspace, \
             dynamicPart, and both:  ",
-	    {shifts.smallProj[shifts], shifts.dp[shifts],
-	     shifts.smallProj[dp[shifts]]}/shifts.shifts]];
+	    {stepShifts.smallProj[stepShifts], stepShifts.dp[stepShifts],
+	     stepShifts.smallProj[dp[stepShifts]]}/stepShifts.stepShifts]];
    Print["findDelta time (seconds):  dynamic part=", tdp,
          ", small shifts=", tsp, ", A=", tdot, ", total=",
          SessionTime[] - tinit];
@@ -467,19 +465,22 @@ findDelta[{hess_, grad_, gauge_}, opts:OptionsPattern[]] :=
          " (gauge transform=", dynamicPartCounter - countGauge,
          "), small shifts=", countsp, ", A=", countdot];
    If[OptionValue[storeHess],
-      hess0 = hess; grad0 = grad; proj0 = Null; oo0 = Null];
-   If[OptionValue[storePairs],
-      pairs0 = Null;
-      shifts0 = shifts];
-   -damping applyCutoff2[shifts, OptionValue[rescaleCutoff], zzz]] /;
+      hess0 = hess; grad0 = grad; proj0 = Null; oo0 = Null;
+      pairs0 = Null];
+   -damping applyCutoff2[stepShifts, OptionValue[rescaleCutoff], zzz]] /;
  KeyExistsQ[minresLabels, methodName[OptionValue[Method]]];
 
-runRemote[command_] :=
+SetAttributes[runRemote, HoldRest];
+runRemote[command_, output_:None, error_:None] :=
     Block[{out = RunProcess[command,
                (* Path to scp, ssh ... *)
                ProcessEnvironment -> <|"PATH"->"/usr/bin:/usr/local/bin"|>]},
+          If[output =!= None,
+             output = out["StandardOutput"]];
           If[StringLength[out["StandardOutput"]]>0,
              Print[Style[out["StandardOutput"], FontColor -> Blue]]];
+          If[error =!= None,
+             error = out["StandardError"]];
           If[StringLength[out["StandardError"]]>0,
              Print[Style[out["StandardError"], FontColor -> Red]]];
           If[out["ExitCode"] != 0,
@@ -491,11 +492,12 @@ runRemote[command_] :=
  *)
 findDelta[data:{hess_, grad_, gauge_}, opts:OptionsPattern[]] :=
     Block[{zzz = OptionValue[removeCutoff],
-    damping = OptionValue[dampingFactor], shifts,
+    damping = OptionValue[dampingFactor],
     action = OptionValue[externalAction],
     tinit = SessionTime[],
     symbolString = (a_Symbol -> b_) :> SymbolName[a] -> b,
     outFile = "hess-grad-gauge.json",
+    shiftFile = "shifts.dat",       
     hessFile = "hess.mtx", gradFile = "grad.dat",
     gaugeFile = "gauge.mtx", out, remote,
     remoteHost = "samson",
@@ -542,50 +544,48 @@ findDelta[data:{hess_, grad_, gauge_}, opts:OptionsPattern[]] :=
       Apply[Clear, Unevaluated[data]]];
    (* Run external program interactively *)
    If[action === Automatic,
-      Run["rm -f shifts0.dat"];
+      Run["rm", "-f", shiftFile];
       out = RunProcess[{mpi, "saddle-lib/"<>executable,
-                        "hess-grad-gauge.json", "shifts0.dat"}];
-      Print[Style[out["StandardOutput"], FontColor -> Blue]];
+                        outFile, shiftFile}];
+      Print[Style[output = out["StandardOutput"], FontColor -> Blue]];
       If[StringLength[out["StandardError"]]>0,
-         Print[Style[out["StandardError"], FontColor -> Red]]];
+         Print[Style[error = out["StandardError"], FontColor -> Red]]];
       If[out["ExitCode"] != 0,
          Message[findDelta::external, out["ExitCode"]];
          Return[$Failed]]];
    (* Run external program on a remote host *)
    If[action == "remote",
-      Run["rm -f shifts0.dat"];
+      Run["rm" ,"-f", shiftFile];
       remote = remoteHost <> ":" <> remotePath;
       Print["Running ", executable, " at ", remote];
-      If[runRemote[{"scp", "hess-grad-gauge.json", hessFile, gradFile,
+      If[runRemote[{"scp", outFile, hessFile, gradFile,
                     gaugeFile, remote}] != 0, Return[$Failed]];
       If[runRemote[{"ssh", remoteHost, mpi,
                     remotePath <> "/" <> executable,
-                    remotePath <> "/hess-grad-gauge.json",
-                    remotePath <> "/shifts0.dat"}] != 0, Return[$Failed]];
-      If[runRemote[{"scp", remote <> "/shifts0.dat", "."}] != 0,
+                    remotePath <> "/" <> outFile,
+                    remotePath <> "/" <> shiftFile},
+                   output, error] != 0, Return[$Failed]];
+      If[runRemote[{"scp", remote <> "/" <> shiftFile, "."}] != 0,
          Return[$Failed]]];
    (* Start up external program and detach *)
    If[action === "detach",
       Run["rm -f shifts1.log shifts1.err shifts1.dat"];
       Print["Starting up and detaching."];
-      Run[mpi, "(saddle-lib/" <> executable, "hess-grad-gauge.json",
+      Run[mpi, "(saddle-lib/" <> executable, outFile,
           "shifts1.dat 2> shifts1.err 1> shifts1.log&);",
           "echo \"started\""]];
    (* Read after detached program has run. *)
    If[action === "read",
-      Print[Style[ReadString["shifts1.log"], FontColor -> Blue]];
-      Print[Style[ReadString["shifts1.err"], FontColor -> Red]]];
+      Print[Style[output = ReadString["shifts1.log"], FontColor -> Blue]];
+      Print[Style[error = ReadString["shifts1.err"], FontColor -> Red]]];
    (* Read results *)
    Print["findDelta shifts time (seconds):  total=", SessionTime[] - tinit];
    (* Read shifts from external file *)
    If[action =!= "write" && action =!=  "detach",
-      shifts = ReadList[
-          If[action === "read", "shifts1.dat", "shifts0.dat"],
+      stepShifts = ReadList[
+          If[action === "read", "shifts1.dat", shiftFile],
           Number];
-      If[OptionValue[storePairs],
-         pairs0 = Null;
-         shifts0 = shifts];
-      -damping applyCutoff2[shifts, OptionValue[rescaleCutoff], zzz], Null]] /;
+      -damping applyCutoff2[stepShifts, OptionValue[rescaleCutoff], zzz], Null]] /;
  methodName[OptionValue[Method]] === "External";
 
 SetAttributes[applyDelta, HoldFirst];
@@ -605,21 +605,23 @@ subspace orthogonal to all gauge transforms.  This should be the most \
 correct method.  Can apply this to both dense and sparse systems.";
 (* For passing options through to subfunctions: 
 https://mathematica.stackexchange.com/questions/353/functions-with-options/ *)
-Options[latticeSaddlePointStep] =
- Join[Options[findDelta], Options[latticeHessian]];
+Options[latticeSaddlePointStep] = Join[
+    Options[findDelta], Options[latticeHessian],
+    {stepFile -> None}];
 latticeSaddlePointStep[opts:OptionsPattern[]] :=
- Block[{hess, grad, gauge, delta, tmpGaugeField,
+ Block[{hess, grad, gauge, delta, gaugeField0,
+        options = {opts}, output = "", error = "", stepShifts,
 	t0 = SessionTime[], t1, t2, t3,
         action = OptionValue[externalAction]},
-  tmpGaugeField = makeRootLattice[];
+  gaugeField0 = makeRootLattice[];
   If[action =!= "read",
      {hess, grad} = latticeHessian[
-         getLink[tmpGaugeField],
+         getLink[gaugeField0],
          Apply[Sequence, FilterRules[{opts}, Options[latticeHessian]]]];
      Print["Constructed hess, grad"];
      gauge = If[OptionValue[fixedDir] > -1,
                 gaugeTransformShifts[
-                    tmpGaugeField, OptionValue[fixedDir]], None];
+                    gaugeField0, OptionValue[fixedDir]], None];
      Print["Constructed gauge"]];
   t1 = SessionTime[];
   (* Debug prints *)
@@ -643,8 +645,13 @@ latticeSaddlePointStep[opts:OptionsPattern[]] :=
       False, Print["delta, first link:  ", Take[delta, nc^2 - 1]]];
   t2 = SessionTime[];
   If[action =!= "write",
-     applyDelta[tmpGaugeField, delta, OptionValue[fixedDir]]];
+     applyDelta[gaugeField0, delta, OptionValue[fixedDir]];
+     If[StringQ[OptionValue[stepFile]],
+        Print["Saving step to ", OptionValue[stepFile]];
+        DeleteFile[OptionValue[stepFile]];
+        Save[OptionValue[stepFile],
+             {output, error, options, delta, stepShifts, gaugeField0}]]];
   t3 = SessionTime[];
   Print["latticeSaddlePointStep times:  ",
 	{t1 - t0, t2 - t1, t3 - t2}];
-  tmpGaugeField];
+  gaugeField0];
