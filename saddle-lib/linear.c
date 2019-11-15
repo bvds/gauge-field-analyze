@@ -2,7 +2,6 @@
 #include <stdio.h>
 #include <string.h>
 #include <assert.h>
-#include <time.h>
 #include "shifts.h"
 /*
   Project out infinitesimal gauge transforms from
@@ -55,13 +54,14 @@ void linearSolve(integer n, double *b, cJSON *options, double *x) {
     cJSON *tmp;
     doublereal rnorm, arnorm, xnorm, anorm, acond,
         rtol, *rtolp = NULL, *abstolp = NULL;
-    int printDetails = 0, wrank;
-    unsigned long tcpu;
-    clock_t t1;
-    time_t t2, tf;
+    int printDetails, wrank;
+#ifdef USE_MPI
+    int wsize;
+#endif
+    TIME_TYPE t2, tf;
+    double time = 0.0;
 
-    t1 = clock();
-    time(&t2);
+    SET_TIME(t2);
 
     tmp  = cJSON_GetObjectItemCaseSensitive(options, "maxIterations");
     itnlim = cJSON_IsNumber(tmp)?(mat_int) tmp->valueint:
@@ -75,12 +75,7 @@ void linearSolve(integer n, double *b, cJSON *options, double *x) {
         rtol = tmp->valuedouble;
         rtolp = &rtol;
     }
-    tmp  = cJSON_GetObjectItemCaseSensitive(options, "printDetails");
-    if(cJSON_IsNumber(tmp)) {
-        printDetails = tmp->valueint;
-    } else if(cJSON_IsBool(tmp)) {
-        printDetails = cJSON_IsTrue(tmp)?1:0;
-    }
+    printDetails = getPrintDetails(options, 1);
     if(printDetails>1) {
         nout = 6;  // Write to stdout
         noutp = &nout;
@@ -127,22 +122,22 @@ void linearSolve(integer n, double *b, cJSON *options, double *x) {
     free(minresOrtho.vecs);
     minresOrtho.nvecs = 0;
 
-    time(&tf);
-    tcpu = clock() - t1;
+    ADD_TIME(time, tf, t2);
 #ifdef USE_MPI
     MPI_Comm_rank(hessData.mpicom, &wrank);
-    MPI_Allreduce(MPI_IN_PLACE, &tcpu, 1, MPI_LONG,
+    MPI_Comm_size(hessData.mpicom, &wsize);
+    /*  Averaging is a bit silly
+        Maybe finding the max and min would make more sense. */
+    MPI_Allreduce(MPI_IN_PLACE, &time, 1, MPI_DOUBLE,
                   MPI_SUM, hessData.mpicom);
+    time /= wsize;
 #else
     wrank = 0;
 #endif
-    if(printDetails > 0 && wrank==0) {
+    if(printDetails > 0 && wrank==0)
         printf("linearSolve:  %i iterations, %i reorthogonalizations "
-               "in %.2f sec (%li wall)\n",
-               itn, minresOrtho.count,
-               tcpu/(float) CLOCKS_PER_SEC, tf-t2);
-        fflush(stdout);
-    }
+               "in %.2f s\n",
+               itn, minresOrtho.count, time);
 
     if(istop >= 7) {
         fprintf(stderr, "%i:  MINRES returned with istop=%i in %s, exiting.\n",

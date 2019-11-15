@@ -38,7 +38,6 @@
 #include <stdlib.h>
 #include <string.h>
 #include <float.h>
-#include <time.h>
 #include <math.h>
 #include <assert.h>
 
@@ -59,7 +58,7 @@ struct {
     int ops;
     int sumNcol;
     int maxNcol;
-    clock_t tcpu_mv;
+    double time_mv;
 } eigenData;
 
 
@@ -90,25 +89,26 @@ void largeShifts(SparseMatrix *hess, cJSON *options,
     int i, ierr, printDetails;
     mat_int nonzeros = hess->blocks*hess->blockSize*hess->blockSize;
 #ifdef USE_MPI
+    int wsize;
     MPI_Comm *mpicomp = &mpicom;
     MPI_Comm_rank(mpicom, &wrank);
+    MPI_Comm_size(mpicom, &wsize);
 #else
     assert(mpicom == NULL);
     void *mpicomp = NULL;
     wrank = 0;
 #endif
     cJSON *tmp;
-    clock_t t1, t1f;
-    time_t t2, tf;
+    TIME_TYPE t2, tf;
+    double t1f = 0.0;
 
-    t1 = clock();
-    time(&t2);
+    SET_TIME(t2);
     
     eigenData.matrix = hess;
     eigenData.ops = 0;
     eigenData.sumNcol = 0;
     eigenData.maxNcol = 0;
-    eigenData.tcpu_mv = 0;
+    eigenData.time_mv = 0.0;
 
     assert(eval != NULL);
     assert(evec != NULL);
@@ -119,13 +119,7 @@ void largeShifts(SparseMatrix *hess, cJSON *options,
         ned = abs(tmp->valueint);
         lohi = tmp->valueint<0?-1:1;
     }
-    tmp  = cJSON_GetObjectItemCaseSensitive(options, "printDetails");
-    if(cJSON_IsNumber(tmp))
-        printDetails = tmp->valueint;
-    else if(cJSON_IsBool(tmp))
-        printDetails = cJSON_IsTrue(tmp)?1:0;
-    else
-        printDetails = 0;
+    printDetails = getPrintDetails(options, 1);
 #ifdef USE_PRIMME
     /* Set default values in PRIMME configuration struct */
     primme_initialize(&primme);
@@ -226,29 +220,32 @@ void largeShifts(SparseMatrix *hess, cJSON *options,
     FREE(eigenData.z);
 #endif
 
-    time(&tf);
-    t1f = clock() - t1;
+    ADD_TIME(t1f, tf, t2);
 #ifdef USE_MPI
-    MPI_Allreduce(MPI_IN_PLACE, &eigenData.tcpu_mv, 1, MPI_LONG,
+    /*  Averaging is a bit silly
+        Maybe finding the max and min would make more sense. */
+    MPI_Allreduce(MPI_IN_PLACE, &eigenData.time_mv, 1, MPI_DOUBLE,
                   MPI_SUM, mpicom);
-    MPI_Allreduce(MPI_IN_PLACE, &t1f, 1, MPI_LONG,
+    MPI_Allreduce(MPI_IN_PLACE, &t1f, 1, MPI_DOUBLE,
                   MPI_SUM, mpicom);
+    eigenData.time_mv /= wsize;
+    t1f /= wsize;
 #endif
     if(printDetails > 0 && wrank==0) {
         printf("largeShifts: ops=%i, sumNcol=%i, maxNcol=%i\n",
                eigenData.ops, eigenData.sumNcol, eigenData.maxNcol);
         printf("largeShifts: %i matrix-vector ops, "
-               "%i reorthogonalizations in %.2f sec (%li wall)\n",
+               "%i reorthogonalizations in %.2f s\n",
 #ifdef USE_PRIMME
                0, 0,
 #else
                info.matvec, info.north,
 #endif
-               t1f/(float) CLOCKS_PER_SEC, tf-t2);
-        printf("largeShifts:  %.2fmv cpu sec for ops\n",
-               eigenData.tcpu_mv/(float) CLOCKS_PER_SEC);
-        fflush(stdout);
+               t1f);
     }
+    if(printDetails > 1 && wrank==0)
+        printf("largeShifts:  %.2fmv s for ops\n",
+               eigenData.time_mv);
 
     if(ierr < 0 || *nvals < ned) {
         fprintf(stderr, "%i:  large shift exit with stat=%i, "
@@ -281,7 +278,7 @@ void hessOp(const int nrow, const int ncol,
 	    double *yout, const int ldy, void* mvparam) {
     assert(mvparam == NULL);
     int k;
-    clock_t t0;
+    TIME_TYPE t0, t1;
 
     eigenData.ops += 1;
     eigenData.sumNcol += ncol;
@@ -289,9 +286,9 @@ void hessOp(const int nrow, const int ncol,
         eigenData.maxNcol = ncol;
 
     for(k=0; k<ncol; k++) {
-        t0 = clock();
+        SET_TIME(t0);
         matrixVector(eigenData.matrix, nrow, xin+k*ldx, nrow, yout+k*ldy);
-        eigenData.tcpu_mv += clock() - t0;
+        ADD_TIME(eigenData.time_mv, t1, t0);
         dynamicProject(nrow, yout+k*ldy, NULL);
     }
 }
@@ -302,7 +299,7 @@ void hessOp2(const int nrow, const int ncol,
              double *yout, const int ldy, void* mvparam) {
     assert(mvparam == NULL);
     int k;
-    clock_t t0;
+    TIME_TYPE t0, t1;
 
     eigenData.ops += 1;
     eigenData.sumNcol += ncol;
@@ -310,14 +307,14 @@ void hessOp2(const int nrow, const int ncol,
         eigenData.maxNcol = ncol;
 
     for(k=0; k<ncol; k++) {
-        t0 = clock();
+        SET_TIME(t0);
         matrixVector(eigenData.matrix, nrow, xin+k*ldx, nrow, eigenData.z);
-        eigenData.tcpu_mv += clock() - t0;
+        ADD_TIME(eigenData.time_mv, t1, t0);
         dynamicProject(nrow, eigenData.z, NULL);
         // Apply a second time
-        t0 = clock();
+        SET_TIME(t0);
         matrixVector(eigenData.matrix, nrow, eigenData.z, nrow, yout+k*ldy);
-        eigenData.tcpu_mv += clock() - t0;
+        ADD_TIME(eigenData.time_mv, t1, t0);
         // Use the fact that "in" and "out" can overlap.
         dynamicProject(nrow, yout+k*ldy, NULL);
     }

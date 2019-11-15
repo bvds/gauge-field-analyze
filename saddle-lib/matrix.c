@@ -2,10 +2,6 @@
 #include <stdlib.h>
 #include <string.h>
 #include <assert.h>
-#include <time.h>
-#ifdef USE_MPI
-#include <mpi.h>
-#endif
 #include <omp.h>
 #include "shifts.h"
 #ifdef USE_MKL
@@ -143,8 +139,8 @@ void printTasks(SparseMatrix *mat, int wsize, int wrank) {
 
 
 void sparseMatrixRead(SparseMatrix *mat, char *fileName, char descr,
-                      int tFlag, int blockSize, mat_int partitions, int chunkSize,
-                      int debug, _MPI_Comm mpicom) {
+                      int tFlag, int blockSize, mat_int partitions,
+                      int chunkSize, int debug, _MPI_Comm mpicom) {
     mat_int i, j, k;
 #if !USE_MKL_MATRIX
     mat_int l, lowerCount, upperCount, blocks;
@@ -171,7 +167,7 @@ void sparseMatrixRead(SparseMatrix *mat, char *fileName, char descr,
     /*
            Read Matrix Market file into SparseMatrix
     */
-    if(wrank ==0)
+    if(wrank ==0 && debug>2)
         printf("Opening file %s", fileName);
     if((fp = fopen(fileName, "r")) == NULL) {
         fprintf(stderr, "%i:  Could not open file %s\n",
@@ -205,7 +201,7 @@ void sparseMatrixRead(SparseMatrix *mat, char *fileName, char descr,
         fprintf(stderr, "%i:  Cannot read dimensions\n", wrank);
         exit(703);
     }
-    if(wrank ==0)
+    if(wrank ==0 && debug>2)
         printf(" with %i nonzero elements.\n", mat->blocks);
     mat->i = MALLOC(mat->blocks * sizeof(*mat->i));
     mat->j = MALLOC(mat->blocks * sizeof(*mat->j));
@@ -251,7 +247,7 @@ void sparseMatrixRead(SparseMatrix *mat, char *fileName, char descr,
                 l++;
             }
         assert(l == blocks);
-        if(debug>0 && wrank==0)
+        if(debug>2 && wrank==0)
             printf("Fill symmetric matrix, blocks %i -> %i\n",
                    mat->blocks, blocks);
         mat->blocks = blocks;
@@ -317,7 +313,7 @@ void sparseMatrixRead(SparseMatrix *mat, char *fileName, char descr,
     MPI_Allreduce(&l, &blocks, 1, _MPI_MAT_INT,
                   MPI_SUM, mpicom); 
     assert(blocks == mat->blocks);
-    if(debug>0) {
+    if(debug>2) {
         printf("%i:  local rows from %i to %i\n", wrank,
             mat->rows, upper-lower);
         printf("%i:  nonzeros from %i to %i\n", wrank, mat->blocks, l);
@@ -408,17 +404,17 @@ void sparseMatrixRead(SparseMatrix *mat, char *fileName, char descr,
     FREE(ip);
     FREE(jp);
     FREE(valuep);
-    if(debug>0)
+    if(debug>2)
         printf("%i:  Create block matrix, blocks=%i, blockSize=%i from %i nonzeros\n",
             wrank, mat->blocks, mat->blockSize, l);
-    if(debug>1)
+    if(debug>3)
         printMatrixBlocks(mat, wrank, wsize, fileName, tFlag);
 
 #elif USE_MKL_MATRIX
     sparse_status_t err;
     sparse_matrix_t coordMatrix;
 
-    if(debug>0)
+    if(debug>2)
         printf("Create MKL BSR format matrix\n");
     mat->blockSize = blockSize;
     if(descr == 's') {
@@ -499,7 +495,7 @@ void sparseMatrixRead(SparseMatrix *mat, char *fileName, char descr,
     /* For the debug print, processes take turns sorting the matrix.
        In the debug print case, change 2 flags in sort.c, examine
        results in Mathematica notebook test-sort.nb. */
-    if(debug>1) { // debug print
+    if(debug>3) { // debug print
         for(p=0; p<wsize; p++) {
 #ifdef USE_MPI
             MPI_Barrier(mpicom);
@@ -513,7 +509,7 @@ void sparseMatrixRead(SparseMatrix *mat, char *fileName, char descr,
         // Normal case
         sortMatrixLocal(mat, wrank, wsize, 0);
     }
-    if(debug>1) {
+    if(debug>3) {
         printf("%i:  Block matrix after localSort\n", wrank);
         printMatrixBlocks(mat, wrank, wsize, fileName, tFlag);
     }
@@ -627,9 +623,9 @@ void sparseMatrixRead(SparseMatrix *mat, char *fileName, char descr,
     }
     free(allNeeds);
 
-    if(debug>1)
+    if(debug>3)
         printMatrixBlocks(mat, wrank, wsize, fileName, tFlag);
-    if(debug>0)
+    if(debug>2)
         printTasks(mat, wsize, wrank);
 #else // USE_TASK
     mat->gather = MALLOC(mat->columns*sizeof(*mat->gather));
@@ -649,7 +645,7 @@ void sparseMatrixRead(SparseMatrix *mat, char *fileName, char descr,
 #endif // USE_TASK
     mat->ip[mat->iCount] = mat->blocks;
     mat->ip = realloc(mat->ip, (mat->iCount+1)*sizeof(*mat->ip));
-    if(debug>1) {
+    if(debug>3) {
         printf("%i:  Matrix blocks=%i\n", wrank, mat->blocks);
         for(k=0; k<mat->iCount; k++) {
             printf("%i:  k=%3i ip=%3i,%3i i=%3i\n",
@@ -660,12 +656,8 @@ void sparseMatrixRead(SparseMatrix *mat, char *fileName, char descr,
     /* 
        Initialize profiling associated with MPI
     */
-#ifdef USE_MPI
     mat->localTime = 0.0;
     mat->mpiTime = 0.0;
-#else
-    mat->tcpu = 0;
-#endif
     mat->count = 0;
 }
 
@@ -674,35 +666,37 @@ void sparseMatrixRead(SparseMatrix *mat, char *fileName, char descr,
   Print stats associated with matrix, so far
 */
 void sparseMatrixStats(SparseMatrix *mat, char *matrixName) {
-  int wrank, wsize;
-  double nb, b1, opRate;
-  double localTime, mpiTime;
+    int wrank;
+    double nb, b1, opRate;
+    double localTime, mpiTime;
 
 #ifdef USE_MPI
+    int wsize;
     MPI_Comm_size(mat->mpicom, &wsize);
     MPI_Comm_rank(mat->mpicom, &wrank);
+#else
+    wrank = 0;
+#endif
     localTime = mat->localTime;
     mpiTime = mat->mpiTime;
-#else
-    wsize = 1;
-    wrank = 0;
-    localTime = mat->tcpu/(float) CLOCKS_PER_SEC;
-    mpiTime = 0;
-#endif
     nb = mat->blocks;
     b1 = mat->blockSize;
 
 #ifdef USE_MPI
+    MPI_Allreduce(MPI_IN_PLACE, &nb, 1, MPI_DOUBLE,
+                  MPI_SUM, mat->mpicom);
+    /*  Averaging is a bit silly
+        Maybe finding the max and min would make more sense. */
     MPI_Allreduce(MPI_IN_PLACE, &localTime, 1, MPI_DOUBLE,
                   MPI_SUM, mat->mpicom);
     MPI_Allreduce(MPI_IN_PLACE, &mpiTime, 1, MPI_DOUBLE,
                   MPI_SUM, mat->mpicom);
-    MPI_Allreduce(MPI_IN_PLACE, &nb, 1, MPI_DOUBLE,
-                  MPI_SUM, mat->mpicom);
+    localTime /= wsize;
+    mpiTime /= wsize;
 #endif
-    opRate = 1.0e-9*mat->count*wsize/localTime;
+    opRate = 1.0e-9*mat->count/localTime;
     if(wrank ==0 ) {
-        printf("Matrix %s ops=%i, total process localTime=%.2f mpiTime=%.2f\n",
+        printf("Matrix %s ops=%i, localTime=%.2f s, mpiTime=%.2f s\n",
                matrixName, mat->count, localTime, mpiTime);
                /*
                   For AMD EPYC 7301 16-Core Processor:
@@ -773,22 +767,21 @@ void matrixVector(SparseMatrix *a,
 #ifdef USE_MPI
     int wrank;
     MPI_Comm mpicom = a->mpicom;
-    double t0, t1;
 #ifdef USE_TASK
     const double *gather;
     MPI_Request sent = MPI_REQUEST_NULL, received = MPI_REQUEST_NULL;
-#else
+#else // USE_TASK
     mat_int offset = 0;
     int rank, wsize;
     double *gather;
     MPI_Comm_size(mpicom, &wsize);
 #endif // USE_TASK
 #else // USE_MPI
-    long int t0;
     const double *gather;
     assert(lin == a->columns);
     assert(lout == a->rows);
 #endif // USE_MPI
+    TIME_TYPE t0, t1;
 #ifdef USE_TASK
     TaskList *task;
     int taskCount = a->taskCount;
@@ -802,13 +795,11 @@ void matrixVector(SparseMatrix *a,
     const char trans='T';
 #endif
 
+    memset(out, 0, lout * sizeof(double));
+    SET_TIME(t0);
 #ifdef USE_MPI
     MPI_Comm_rank(mpicom, &wrank);
-    t0 = MPI_Wtime();
-#else
-    t0 = clock();
 #endif
-    memset(out, 0, lout * sizeof(double));
     for(p = 0; p < taskCount; p++) {
 #ifdef USE_TASK
         task = a->task + p;
@@ -853,10 +844,10 @@ void matrixVector(SparseMatrix *a,
         }
         assert(offset == a->columns);
 #endif  // USE_TASK
-        a->mpiTime += (t1=MPI_Wtime()) - t0;
 #else // USE_MPI
         gather = in;
 #endif // USE_MPI
+        ADD_TIME(a->mpiTime, t1, t0);
 
         /* For a given task, perform matrix-vector multiply */
 
@@ -895,9 +886,8 @@ void matrixVector(SparseMatrix *a,
 #endif
             } // loop over rows
         } // omp parallel
+        ADD_TIME(a->localTime, t0, t1);
 #ifdef USE_MPI
-        a->localTime += (t0 = MPI_Wtime()) - t1;
-
 #ifdef USE_TASK
         /* Verify that any current messages are complete
            before starting the next task or exiting.
@@ -910,11 +900,7 @@ void matrixVector(SparseMatrix *a,
 #endif // USE_MPI
     } // loop over tasks
 
-#ifdef USE_MPI
-    a->mpiTime += MPI_Wtime() - t0;
-#else
-    a->tcpu += clock() - t0;
-#endif
+    ADD_TIME(a->mpiTime, t1, t0);
 #endif  // MKL or not
     a->count += 1;
 }

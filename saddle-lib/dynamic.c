@@ -2,7 +2,6 @@
 #include <stdio.h>
 #include <string.h>
 #include <assert.h>
-#include <time.h>
 #include <math.h>
 #include "shifts.h"
 #include "trlan.h"
@@ -35,10 +34,9 @@ struct {
     doublereal *z;
     doublereal *x;
     doublereal *b;
-    unsigned long int tcpu;
-    unsigned long int tcpu_mv;
-    unsigned long int tcpu_vm;
-    unsigned long int twall;
+    double time_mv;
+    double time_vm;
+    double time;
     mat_int count;
     mat_int usertol;
     mat_int matVec;
@@ -81,21 +79,16 @@ void dynamicInit(const mat_int nrow, const mat_int ncol,
     gaugeData.matrixT = gaugeT;
     gaugeData.nrow = nrow;
     gaugeData.ncol = ncol;
-    gaugeData.tcpu = 0;
-    gaugeData.twall = 0;
+    gaugeData.time = 0.0;
+    gaugeData.time_mv = 0.0;
+    gaugeData.time_vm = 0.0;
     gaugeData.count = 0;
     gaugeData.usertol = 0;
     gaugeData.matVec = 0;
     gaugeData.maxItn = 0;
-    gaugeData.printDetails = 0;
+    gaugeData.printDetails = getPrintDetails(options, 1);
     gaugeData.mpicom = mpicom;
 
-    tmp  = cJSON_GetObjectItemCaseSensitive(options, "printDetails");
-    if(cJSON_IsNumber(tmp)) {
-        gaugeData.printDetails = tmp->valueint;
-    } else if(cJSON_IsBool(tmp)) {
-        gaugeData.printDetails = cJSON_IsTrue(tmp)?1:0;
-    }
 
     /*
        The gauge configurations are single precision,
@@ -189,13 +182,11 @@ void dynamicProject(const integer n, double *v, double *normDiff) {
 #else
     wrank = 0;
 #endif
-    clock_t t1;
-    time_t t2, tf;
+    TIME_TYPE t2, tf;
 
     assert(gaugeData.ncol == (mat_int) n);
 
-    t1 = clock();
-    time(&t2);
+    SET_TIME(t2);
 
     /*
       Tolerance of the projection relative to the initial vector.
@@ -244,9 +235,7 @@ void dynamicProject(const integer n, double *v, double *normDiff) {
 #endif
     }
 
-    time(&tf);
-    gaugeData.tcpu += clock()-t1;
-    gaugeData.twall += tf - t2;
+    ADD_TIME(gaugeData.time, tf, t2);
     gaugeData.count += 1;
     gaugeData.matVec += itn;
     if(itn > gaugeData.maxItn) {
@@ -266,30 +255,34 @@ void dynamicProject(const integer n, double *v, double *normDiff) {
 void dynamicClose() {
     int wrank;
 #ifdef USE_MPI
+    int wsize;
     MPI_Comm mpicom = gaugeData.mpicom;
     MPI_Comm_rank(mpicom, &wrank);
-    MPI_Allreduce(MPI_IN_PLACE, &gaugeData.tcpu, 1, MPI_LONG,
+    MPI_Comm_size(mpicom, &wsize);
+    /*  Averaging is a bit silly
+        Maybe finding the max and min would make more sense. */
+    MPI_Allreduce(MPI_IN_PLACE, &gaugeData.time, 1, MPI_DOUBLE,
                   MPI_SUM, mpicom);
-    MPI_Allreduce(MPI_IN_PLACE, &gaugeData.tcpu_vm, 1, MPI_LONG,
+    MPI_Allreduce(MPI_IN_PLACE, &gaugeData.time_vm, 1, MPI_DOUBLE,
                   MPI_SUM, mpicom);
-    MPI_Allreduce(MPI_IN_PLACE, &gaugeData.tcpu_mv, 1, MPI_LONG,
+    MPI_Allreduce(MPI_IN_PLACE, &gaugeData.time_mv, 1, MPI_DOUBLE,
                   MPI_SUM, mpicom);
+    gaugeData.time /= wsize;
+    gaugeData.time_mv /= wsize;
+    gaugeData.time_vm /= wsize;
 #else
     wrank = 0;
 #endif
-    if(gaugeData.printDetails > 0 && wrank == 0){
+    if(gaugeData.printDetails > 0 && wrank == 0)
         printf("dynamicProject:  %i calls (%i usertol), "
                "%i matrix-vector ops, max itn %i\n"
-               "                 in %.2f sec (%li wall)\n",
+               "                 in %.2f s\n",
                gaugeData.count, gaugeData.usertol, gaugeData.matVec,
-               gaugeData.maxItn,
-               gaugeData.tcpu/(float) CLOCKS_PER_SEC, gaugeData.twall);
-        printf("dynamicProject:  %.2fvm + %.2fmv = %.2ftotal cpu sec for ops\n",
-               gaugeData.tcpu_vm/(float) CLOCKS_PER_SEC,
-               gaugeData.tcpu_mv/(float) CLOCKS_PER_SEC,
-               (gaugeData.tcpu_vm+gaugeData.tcpu_mv)/(float) CLOCKS_PER_SEC);
-        fflush(stdout);
-    }
+               gaugeData.maxItn, gaugeData.time);
+    if(gaugeData.printDetails > 1 && wrank == 0)
+        printf("dynamicProject:  %.2fvm + %.2fmv = %.2f s for ops\n",
+               gaugeData.time_vm, gaugeData.time_mv,
+               gaugeData.time_vm + gaugeData.time_mv);
 
     FREE(gaugeData.z);
     FREE(gaugeData.b);
@@ -311,15 +304,16 @@ void gaugeOp(const int nrow, const int ncol, const double *xin, const int ldx,
 
 void gaugeProduct(const integer *vectorLength, const doublereal *x,
                   doublereal *y) {
-    clock_t t0 = clock(), t1;
+    TIME_TYPE t0, t1;
     mat_int vl = *vectorLength;
 
     assert(gaugeData.nrow == *vectorLength);
 
+    SET_TIME(t0);
     matrixVector(gaugeData.matrixT, vl, x,
                  gaugeData.ncol, gaugeData.z);
-    gaugeData.tcpu_vm += (t1=clock()) - t0;
+    ADD_TIME(gaugeData.time_vm, t1, t0);
     matrixVector(gaugeData.matrix,
                  gaugeData.ncol, gaugeData.z, vl, y);
-    gaugeData.tcpu_mv += clock() - t1;
+    ADD_TIME(gaugeData.time_vm, t0, t1);
 }

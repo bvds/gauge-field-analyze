@@ -7,7 +7,14 @@
 #ifdef USE_MPI
 #include <mpi.h>
 #define _MPI_Comm MPI_Comm
+#define TIME_TYPE double
+#define SET_TIME(A) A=MPI_Wtime()
+#define ADD_TIME(A,B,C) do{B=MPI_Wtime();A+=B-C;}while(0)
 #else
+#include <sys/time.h>
+#define TIME_TYPE struct timeval
+#define SET_TIME(A) gettimeofday(&A,NULL)
+#define ADD_TIME(A,B,C) do{gettimeofday(&B,NULL);(A)+=tdiff(B,C);}while(0)
 #define _MPI_Comm void *
 #endif
 
@@ -81,11 +88,9 @@ typedef struct {
 #endif
 #ifdef USE_MPI
     MPI_Comm mpicom;
+#endif
     double mpiTime;
     double localTime;
-#else
-    long int tcpu;
-#endif
     int count;
 #ifdef USE_TASK
     TaskList* task;
@@ -96,6 +101,15 @@ typedef struct {
     mat_int lowerColumn;
 #endif
 } SparseMatrix;
+
+
+/*
+            shifts.c
+*/
+int getPrintDetails(cJSON *jopts, int defaultLevel);
+#ifndef USE_MPI
+double tdiff(struct timeval t1, struct timeval t0);
+#endif
 
 
 /*

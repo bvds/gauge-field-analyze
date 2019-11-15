@@ -19,7 +19,6 @@
 #include <string.h>
 #include <libgen.h> // POSIX
 #include <assert.h>
-#include <time.h>
 #include <omp.h>
 #include "shifts.h"
 #include "mmio.h"
@@ -61,6 +60,22 @@ char *readFile(char *filename) {
     return buffer;
 }
 
+int getPrintDetails(cJSON *jopts, int defaultLevel) {
+    cJSON *tmp = cJSON_GetObjectItemCaseSensitive(jopts, "printDetails");
+    if(cJSON_IsNumber(tmp))
+        return tmp->valueint;
+    else if(cJSON_IsBool(tmp))
+        return cJSON_IsTrue(tmp)?defaultLevel:0;
+    else
+        return defaultLevel;
+}
+
+#ifndef USE_MPI
+double tdiff(struct timeval t1, struct timeval t0) {
+    return 1.0e-6 * (double) (t1.tv_usec - t0.tv_usec) +
+        (double) (t1.tv_sec - t0.tv_sec);
+}
+#endif
 
 int main(int argc, char **argv){
     char *fdup, *dataPath, *hessFile, *gradFile, *gaugeFile;
@@ -70,13 +85,9 @@ int main(int argc, char **argv){
     mat_int k, n, partitions, local_n,
         gaugeDimension, local_gaugeDimension;
     FILE *fp;
-    int nread, threads;
-    long int twall = 0, tcpu = 0, toverall;
-    clock_t t1, tt1;
-    time_t t2, tt2, tf;
-
-    t1 = clock(); tt1 = t1;
-    time(&t2); tt2 = t2;
+    int nread, threads, printDetails;
+    TIME_TYPE t0, t1, t2;
+    double tio = 0.0, tcalc = 0.0;
 
 
     /* Initialize MPI */
@@ -94,6 +105,7 @@ int main(int argc, char **argv){
     wrank = 0;
 #endif
 
+    SET_TIME(t0);
 
     /* Read JSON file and use options */
     if(argc <2) {
@@ -102,10 +114,9 @@ int main(int argc, char **argv){
     }
     fdup = strdup(argv[1]);
     dataPath = dirname(fdup);
-    if(wrank ==0)
-        printf("Opening file %s", argv[1]);
     options = readFile(argv[1]);
     jopts = cJSON_Parse(options);
+    printDetails = getPrintDetails(jopts, 3);
     /* Needed for calculation of the cutoff.
        In the parallel case, local size should be
        a multiple of blockSize.  */
@@ -128,9 +139,10 @@ int main(int argc, char **argv){
         localSize(wrank, wsize, partitions);
     assert(wsize>1 || local_n == n);
     assert(wsize>1 || local_gaugeDimension == gaugeDimension);
-    if(wrank ==0)
-        printf(" n=%i, gauge=%i blockSize=%i partitions=%i\n",
-               n, gaugeDimension, blockSize, partitions);
+    if(wrank == 0 && printDetails > 2)
+        printf("Parameter file %s:  n=%i gauge=%i "
+               "blockSize=%i partitions=%i\n",
+               argv[1], n, gaugeDimension, blockSize, partitions);
     // Not used currently
     tmp = cJSON_GetObjectItemCaseSensitive(jopts, "chunkSize");
     chunkSize = cJSON_IsNumber(tmp)?tmp->valueint:1;
@@ -165,7 +177,7 @@ int main(int argc, char **argv){
     /* Tried disabling dynamic teams,
        but this degraded performance. */
     omp_set_num_threads(threads);
-    if(wrank ==0)
+    if(wrank == 0 && printDetails > 2)
         printf("Setting OpenMP%s to %i threads\n",
                libName, threads);
 
@@ -177,7 +189,7 @@ int main(int argc, char **argv){
     hessFile = catStrings(dataPath, tmp->valuestring);
     SparseMatrix hess;
     sparseMatrixRead(&hess, hessFile, 's', 0, blockSize, partitions,
-                     chunkSize, 0, mpicom);
+                     chunkSize, printDetails, mpicom);
     assert(hess.rows == n);
     assert(hess.columns == n);
 
@@ -188,7 +200,7 @@ int main(int argc, char **argv){
     double *grad = malloc(local_n * sizeof(double)), *gradp = grad, dummy;
     tmp = cJSON_GetObjectItemCaseSensitive(jopts, "gradFile");
     gradFile = catStrings(dataPath, tmp->valuestring);
-    if(wrank ==0)
+    if(wrank == 0 && printDetails > 2)
         printf("Opening file %s for a vector of length %i\n", gradFile, n);
     fp = fopen(gradFile, "r");
     for(k=0; k<n; k++){
@@ -213,17 +225,15 @@ int main(int argc, char **argv){
     gaugeFile = catStrings(dataPath, tmp->valuestring);
     SparseMatrix gauge, gaugeT;
     sparseMatrixRead(&gauge, gaugeFile, 'g', 0, blockSize, partitions,
-                     chunkSize, 0, mpicom);
+                     chunkSize, printDetails, mpicom);
     sparseMatrixRead(&gaugeT, gaugeFile, 'g', 1, blockSize, partitions,
-                     chunkSize, 0, mpicom);
+                     chunkSize, printDetails, mpicom);
     assert(gauge.rows == gaugeDimension);
     assert(gauge.columns == n);
     assert(gaugeT.columns == gaugeDimension);
     assert(gaugeT.rows == n);
-    time(&tf);
-    tcpu += clock()-t1;
-    twall += tf - t2; 
 
+    ADD_TIME(tio, t1, t0);
 #if 0 // Debug:  Test matrix-vector multiplication, printing result  
     testMatrixVector(&gauge, grad);
     exit(0);
@@ -255,9 +265,8 @@ int main(int argc, char **argv){
 
     /* output result */
 
-    t1 = clock();
-    time(&t2);
-    if(wrank ==0)
+    ADD_TIME(tcalc, t2, t1);
+    if(wrank == 0 && printDetails>2)
         printf("Opening output file %s\n", argv[2]);
     for(i=0; i<wsize; i++) {
         if(wrank == i) {
@@ -271,28 +280,27 @@ int main(int argc, char **argv){
         MPI_Barrier(mpicom);
 #endif
     }
-    time(&tf);
-    tcpu += clock()-t1;
-    toverall = clock()-tt1;
 
-    sparseMatrixStats(&hess, "hessian");
-    sparseMatrixStats(&gauge, "gauge");
-    sparseMatrixStats(&gaugeT, "gaugeT");
-
-#ifdef USE_MPI
-    MPI_Allreduce(MPI_IN_PLACE, &tcpu, 1, MPI_LONG,
-                  MPI_SUM, MPI_COMM_WORLD);
-    MPI_Allreduce(MPI_IN_PLACE, &toverall, 1, MPI_LONG,
-                  MPI_SUM, MPI_COMM_WORLD);
-#endif
-    twall += tf - t2;
-    if(wrank==0) {
-        printf("%s:  input/output in %.2f sec (%li wall)\n",
-               __FILE__, tcpu/(float) CLOCKS_PER_SEC, twall);
-        printf("%s:  overall time %.2f sec (%li wall)\n",
-               __FILE__, (toverall)/(float) CLOCKS_PER_SEC, tf-tt2);
-        fflush(stdout);
+    if(printDetails > 1) {
+        sparseMatrixStats(&hess, "hessian");
+        sparseMatrixStats(&gauge, "gauge");
+        sparseMatrixStats(&gaugeT, "gaugeT");
     }
+
+    ADD_TIME(tio, t0, t2);
+#ifdef USE_MPI
+    /* This averaging isn't really necessary ...
+       It might make more sense to find the maximum. */
+    MPI_Allreduce(MPI_IN_PLACE, &tio, 1, MPI_DOUBLE,
+                  MPI_SUM, MPI_COMM_WORLD);
+    MPI_Allreduce(MPI_IN_PLACE, &tcalc, 1, MPI_DOUBLE,
+                  MPI_SUM, MPI_COMM_WORLD);
+    tio /= wsize;
+    tcalc /= wsize;
+#endif
+    if(wrank==0 && printDetails > 0)
+        printf("%s:  init and i/o %.2f s, calculation %.2f s\n",
+               __FILE__, tio, tcalc);
 
     sparseMatrixFree(&hess);
     sparseMatrixFree(&gauge);
