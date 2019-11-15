@@ -612,7 +612,7 @@ correct method.  Can apply this to both dense and sparse systems.";
 https://mathematica.stackexchange.com/questions/353/functions-with-options/ *)
 Options[latticeSaddlePointStep] = Join[
     Options[findDelta], Options[latticeHessian],
-    {stepFile -> None}];
+    {stepFile -> None, returnShifts -> False}];
 latticeSaddlePointStep[opts:OptionsPattern[]] :=
  Block[{hess, grad, gauge, delta, gaugeField0,
         options = {opts}, output = "", error = "", stepShifts,
@@ -666,4 +666,6 @@ latticeSaddlePointStep[opts:OptionsPattern[]] :=
            <> "    matrices=", t1 - t0,
            " s, findDelta=", t2 - t1,
            " s, applyDelta=", t3 - t2, " s"]];
-  gaugeField0];
+  If[OptionValue[returnShifts],
+     {gaugeField0, stepShifts},
+     gaugeField0]];

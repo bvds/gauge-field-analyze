@@ -19,6 +19,14 @@ Cell[CellGroupData[{
 Cell["Library", \
 "Title",ExpressionUUID->"f375741d-7d1c-47d0-bfe3-71618e4fe201"],
 
+Cell["\<\
+For parallelization, I had to go to menu Evaluation->Parallel Kernel \
+Configuration and set the number manually.  Automatic launching of additional \
+kernels is broken?  Note that the parallelization is based on the leading \
+dimension of the table.
+Verify parallel kernels are running:\
+\>", "Text",ExpressionUUID->"88d0e5ea-1d3e-4d52-a580-cb9c96ec1520"],
+
 Cell[BoxData[
  RowBox[{
   RowBox[{"<<", "\"\<mma-lib/groups.m\>\""}], ";", 
@@ -57,34 +65,6 @@ Cell[CellGroupData[{
 
 Cell["Testing", \
 "Title",ExpressionUUID->"7e0331a4-4eb2-41b3-94e5-86dcad678450"],
-
-Cell[CellGroupData[{
-
-Cell["Parallel processors", \
-"Section",ExpressionUUID->"63a9bc23-9fb6-4c12-b542-f3b8411e669e"],
-
-Cell["\<\
-For parallelization, I had to go to menu Evaluation->Parallel Kernel \
-Configuration and set the number manually.  Automatic launching of additional \
-kernels is broken?  Note that the parallelization is based on the leading \
-dimension of the table.
-Verify parallel kernels are running:\
-\>", "Text",ExpressionUUID->"88d0e5ea-1d3e-4d52-a580-cb9c96ec1520"],
-
-Cell[CellGroupData[{
-
-Cell[BoxData[
- RowBox[{"ParallelEvaluate", "[", "$ProcessID", 
-  "]"}]], "Input",ExpressionUUID->"2a25af81-7ef4-4fd5-b30d-4d500f30628f"],
-
-Cell[BoxData[
- RowBox[{"{", 
-  RowBox[{
-  "25215", ",", "25218", ",", "25237", ",", "25273", ",", "25322", ",", 
-   "25379"}], 
-  "}"}]], "Output",ExpressionUUID->"d414f29b-e713-4151-a691-3937cb218eae"]
-}, Open  ]]
-}, Closed]],
 
 Cell[CellGroupData[{
 
@@ -965,7 +945,7 @@ Cell[BoxData[
          RowBox[{"x", ",", "0", ",", "maxx"}], "}"}], ",", 
         RowBox[{"PlotRange", "\[Rule]", "All"}]}], "]"}]}], "]"}]}]}], 
   "]"}]], "Input",ExpressionUUID->"8497e53e-6048-4af5-9f48-fddcf95862ec"]
-}, Closed]],
+}, Open  ]],
 
 Cell[CellGroupData[{
 
@@ -4957,73 +4937,81 @@ Cell[CellGroupData[{
 
 Cell[BoxData[
  RowBox[{
-  RowBox[{"gaugeFieldDynamicDense", "=", 
+  RowBox[{
+   RowBox[{"{", 
+    RowBox[{"gaugeFieldDynamicDense", ",", "shiftsDynamicDense"}], "}"}], "=", 
    RowBox[{"latticeSaddlePointStep", "[", 
-    RowBox[{"fullMatrix", "\[Rule]", "True"}], "]"}]}], ";", 
-  RowBox[{"shiftsDynamicDense", "=", "shifts0"}], 
+    RowBox[{
+     RowBox[{"fullMatrix", "\[Rule]", "True"}], ",", " ", 
+     RowBox[{"returnShifts", "\[Rule]", "True"}]}], "]"}]}], 
   ";"}]], "Input",ExpressionUUID->"536f9c31-c58c-453e-97fa-7a674202e049"],
 
 Cell[CellGroupData[{
 
 Cell[BoxData["\<\"Constructed hess, grad\"\>"], \
-"Print",ExpressionUUID->"4ff6a6b9-213a-4efc-b6a5-988cd91882e8"],
+"Print",ExpressionUUID->"8fad3a42-1760-4bb8-ace0-28e79b04d688"],
 
 Cell[BoxData["\<\"Constructed gauge\"\>"], \
-"Print",ExpressionUUID->"de333f08-20c1-4603-9d61-5d99f522656d"],
+"Print",ExpressionUUID->"513603e8-06f5-48da-814d-45ced162c210"],
 
 Cell[BoxData[
  InterpretationBox[
-  RowBox[{"\<\"applyCutoff3:  \"\>", "\[InvisibleSpace]", "14", 
-   "\[InvisibleSpace]", "\<\" of \"\>", "\[InvisibleSpace]", "1024", 
+  RowBox[{"\<\"applyCutoff3:  \"\>", "\[InvisibleSpace]", "48", 
+   "\[InvisibleSpace]", "\<\" of \"\>", "\[InvisibleSpace]", "8192", 
    "\[InvisibleSpace]", "\<\" zeros, between \"\>", "\[InvisibleSpace]", 
    RowBox[{"{", 
-    RowBox[{"994", ",", "1024"}], "}"}]}],
+    RowBox[{"8065", ",", "8192"}], "}"}]}],
   SequenceForm[
-  "applyCutoff3:  ", 14, " of ", 1024, " zeros, between ", {994, 1024}],
+  "applyCutoff3:  ", 48, " of ", 8192, " zeros, between ", {8065, 8192}],
   Editable->
-   False]], "Print",ExpressionUUID->"b55aae5d-463a-48ce-a4b1-e2f2fda10840"],
+   False]], "Print",ExpressionUUID->"733b79c6-fb5a-4725-8e83-40208f88b241"],
 
 Cell[BoxData[
  InterpretationBox[
   RowBox[{"\<\"shifts norms and rescale:  \"\>", "\[InvisibleSpace]", 
    RowBox[{"{", 
     RowBox[{
-    "8.320151887930548`", ",", "58.55902361053398`", ",", 
-     "0.9999999999999916`"}], "}"}]}],
+    "14.523101524383527`", ",", "242.48396374934833`", ",", 
+     "0.9999999999999427`"}], "}"}]}],
   SequenceForm[
-  "shifts norms and rescale:  ", {8.320151887930548, 58.55902361053398, 
-   0.9999999999999916}],
+  "shifts norms and rescale:  ", {14.523101524383527`, 242.48396374934833`, 
+   0.9999999999999427}],
   Editable->
-   False]], "Print",ExpressionUUID->"c5d23a4f-fbc2-4d76-9551-c01011a04462"],
+   False]], "Print",ExpressionUUID->"6b3842b8-9dfc-49f2-9734-c8155e16314a"],
 
 Cell[BoxData[
  InterpretationBox[
   RowBox[{"\<\"applyCutoff2: rescale maxNorm \"\>", "\[InvisibleSpace]", 
-   "8.320151887930548`", "\[InvisibleSpace]", "\<\" to \"\>", 
+   "14.523101524383527`", "\[InvisibleSpace]", "\<\" to \"\>", 
    "\[InvisibleSpace]", "2"}],
-  SequenceForm["applyCutoff2: rescale maxNorm ", 8.320151887930548, " to ", 2],
+  SequenceForm[
+  "applyCutoff2: rescale maxNorm ", 14.523101524383527`, " to ", 2],
   Editable->
-   False]], "Print",ExpressionUUID->"cdd1cce5-0092-4857-b009-a06280e51f0f"],
+   False]], "Print",ExpressionUUID->"e8300ecb-8046-47c2-a664-f8c248a0478b"],
 
 Cell[BoxData[
  InterpretationBox[
-  RowBox[{"\<\"latticeSaddlePointStep times:  \"\>", "\[InvisibleSpace]", 
-   RowBox[{"{", 
-    RowBox[{
-    "1.619281`6.359837217901022", ",", "0.951186`6.128780447340555", ",", 
-     "0.015583`4.343166068499974"}], "}"}]}],
+  RowBox[{"\<\"latticeSaddlePointStep times:\\n    matrices=\"\>", 
+   "\[InvisibleSpace]", "13.486709`7.280420984753061", 
+   "\[InvisibleSpace]", "\<\" s, findDelta=\"\>", "\[InvisibleSpace]", 
+   "456.634562`8.810083777342369", 
+   "\[InvisibleSpace]", "\<\" s, applyDelta=\"\>", "\[InvisibleSpace]", 
+   "0.174988`5.39352326530416", "\[InvisibleSpace]", "\<\" s\"\>"}],
   SequenceForm[
-  "latticeSaddlePointStep times:  ", {
-   1.619281`6.359837217901022, 0.951186`6.128780447340555, 
-    0.015583`4.343166068499974}],
+  "latticeSaddlePointStep times:\n    matrices=", 13.486709`7.280420984753061,
+    " s, findDelta=", 456.634562`8.810083777342369, " s, applyDelta=", 
+   0.174988`5.39352326530416, " s"],
   Editable->
-   False]], "Print",ExpressionUUID->"97f07be8-e90d-4c8a-9e6a-b3511db9ba0f"]
+   False]], "Print",ExpressionUUID->"9dfc6b8d-399c-4fec-a0bc-63939f219c07"]
 }, Open  ]]
 }, Open  ]],
 
 Cell[BoxData[
  RowBox[{
-  RowBox[{"gaugeFieldDynamicMinres1", "=", 
+  RowBox[{
+   RowBox[{"{", 
+    RowBox[{"gaugeFieldDynamicMinres1", ",", "shiftsDynamicMinres1"}], "}"}], 
+   "=", 
    RowBox[{"latticeSaddlePointStep", "[", 
     RowBox[{
      RowBox[{"fullMatrix", "\[Rule]", "True"}], ",", 
@@ -5047,8 +5035,8 @@ Cell[BoxData[
         RowBox[{"printDetails", "\[Rule]", "1"}], ",", " ", 
         RowBox[{"printsPerDecade", " ", "\[Rule]", " ", "10"}], ",", 
         RowBox[{"restartLanczos", "\[Rule]", "False"}]}], "}"}]}], ",", 
-     RowBox[{"Method", "\[Rule]", "\"\<MINRES\>\""}]}], "]"}]}], ";", 
-  RowBox[{"shiftsDynamicMinres1", "=", "shifts0"}], 
+     RowBox[{"Method", "\[Rule]", "\"\<MINRES\>\""}], ",", " ", 
+     RowBox[{"returnShifts", "\[Rule]", "True"}]}], "]"}]}], 
   ";"}]], "Input",ExpressionUUID->"51486604-b351-4829-8733-5524265d7cc1"],
 
 Cell[CellGroupData[{
@@ -5095,13 +5083,16 @@ Cell[CellGroupData[{
 
 Cell[BoxData[
  RowBox[{
-  RowBox[{"gaugeFieldDynamicMinres2", "=", 
+  RowBox[{
+   RowBox[{"{", 
+    RowBox[{"gaugeFieldDynamicMinres2", ",", "shiftsDynamicMinres2"}], "}"}], 
+   "=", 
    RowBox[{"latticeSaddlePointStep", "[", 
     RowBox[{
      RowBox[{"dynamicPartMethod", "\[Rule]", 
       RowBox[{"{", 
        RowBox[{"Automatic", ",", 
-        RowBox[{"maxLanczosVecs", "\[Rule]", "840"}], ",", 
+        RowBox[{"maxLanczosVecs", "\[Rule]", "1200"}], ",", 
         RowBox[{"maxIterations", "\[Rule]", 
          RowBox[{"400", "*", "1000"}]}], ",", 
         RowBox[{"rTolerance", "\[Rule]", 
@@ -5112,10 +5103,10 @@ Cell[BoxData[
       RowBox[{"{", 
        RowBox[{
         RowBox[{"eigenPairs", "\[Rule]", 
-         RowBox[{"-", "40"}]}], ",", 
+         RowBox[{"-", "140"}]}], ",", 
         RowBox[{"maxIterations", "\[Rule]", 
          RowBox[{"100", "*", "1000"}]}], ",", 
-        RowBox[{"maxLanczosVecs", "\[Rule]", "840"}], ",", 
+        RowBox[{"maxLanczosVecs", "\[Rule]", "1200"}], ",", 
         RowBox[{"restartStrategy", "\[Rule]", "4"}], ",", 
         RowBox[{"rTolerance", "\[Rule]", 
          RowBox[{"10.0", "^", 
@@ -5128,100 +5119,63 @@ Cell[BoxData[
         RowBox[{"rTolerance", " ", "\[Rule]", " ", 
          RowBox[{"10.0", "^", 
           RowBox[{"-", "9"}]}]}], ",", 
-        RowBox[{"maxLanczosVecs", "\[Rule]", "840"}]}], "}"}]}], ",", 
-     RowBox[{"externalAction", "\[Rule]", "\"\<remote\>\""}], ",", " ", 
-     RowBox[{"processes", "\[Rule]", "4"}]}], "]"}]}], ";", 
-  RowBox[{"shiftsDynamicMinres2", "=", "shifts0"}], 
+        RowBox[{"maxLanczosVecs", "\[Rule]", "1200"}]}], "}"}]}], ",", 
+     RowBox[{"externalAction", "\[Rule]", "\"\<remote\>\""}], ",", 
+     RowBox[{"printDetails", "\[Rule]", "2"}], ",", " ", 
+     RowBox[{"processes", "\[Rule]", "4"}], ",", 
+     RowBox[{"returnShifts", "\[Rule]", "True"}]}], "]"}]}], 
   ";"}]], "Input",ExpressionUUID->"59dbc176-9bfa-437d-861f-c9020524c00e"],
 
 Cell[CellGroupData[{
 
-Cell[BoxData["\<\"Constructed hess, grad\"\>"], \
-"Print",ExpressionUUID->"4d5f1541-4944-4cdd-9790-0eda9d39f000"],
-
-Cell[BoxData["\<\"Constructed gauge\"\>"], \
-"Print",ExpressionUUID->"086309d8-1a0d-470a-8102-949919451916"],
-
 Cell[BoxData[
- InterpretationBox[
-  RowBox[{"\<\"Running \"\>", "\[InvisibleSpace]", "\<\"pshifts\"\>", 
-   "\[InvisibleSpace]", "\<\" at \"\>", 
-   "\[InvisibleSpace]", \
-"\<\"samson:lattice/gauge-field-analyze/saddle-lib\"\>"}],
-  SequenceForm[
-  "Running ", "pshifts", " at ", 
-   "samson:lattice/gauge-field-analyze/saddle-lib"],
-  Editable->
-   False]], "Print",ExpressionUUID->"7d96c781-e0cc-42f5-bbde-c2b0d853bad6"],
-
-Cell[BoxData[
- StyleBox["\<\"Opening file \
-lattice/gauge-field-analyze/saddle-lib/hess-grad-gauge.json n=1536, gauge=512 \
-blockSize=8 partitions=4\\nSetting OpenMP & OpenBLAS to 2 threads\\nOpening \
-file lattice/gauge-field-analyze/saddle-lib/hess.mtx with 79680 nonzero \
-elements.\\nOpening file lattice/gauge-field-analyze/saddle-lib/grad.dat for \
-a vector of length 1536\\nOpening file \
-lattice/gauge-field-analyze/saddle-lib/gauge.mtx with 24576 nonzero elements.\
-\\nOpening file lattice/gauge-field-analyze/saddle-lib/gauge.mtx with 24576 \
-nonzero elements.\\nMAXLAN:       840, Restart:         4,   NED: -       1,  \
-    NEC:         1\\nMATVEC:       128,  Reorth:       128, Nloop:         1, \
- Nlocked:         0\\nTtotal:  0.020989,    T_op:  0.005524, Torth:  \
-0.006056,   Tstart:  0.000646\\nGauge matrix extreme eigenvalues found:\\n  \
-1.130975e+00\\nMAXLAN:       840, Restart:         4,   NED: -      40,      \
-NEC:        40\\nMATVEC:      1546,  Reorth:      1546, Nloop:         2,  \
-Nlocked:         0\\nTtotal: 10.621423,    T_op:  8.833723, Torth:  1.390662, \
-  Tstart:  0.254227\\nlargeShifts: ops=1546, sumNcol=1546, \
-maxNcol=1\\nlargeShifts: 1546 matrix-vector ops, 1546 reorthogonalizations in \
-43.17 sec (6 wall)\\nlargeShifts:  1.08mv cpu sec for ops\\ncutoffNullSpace:  \
-14 of 40 zeros between [0, 30]\\nlinearSolve:  460 iterations, 460 \
-reorthogonalizations in 6.36 sec (1 wall)\\ndynamicProject:  5562 calls (5364 \
-usertol), 103107 matrix-vector ops, max itn 29\\n                 in 45.16 \
-sec (7 wall)\\ndynamicProject:  14.46vm + 15.43mv = 29.88total cpu sec for \
-ops\\nOpening output file \
-lattice/gauge-field-analyze/saddle-lib/shifts0.dat\\nMatrix hessian ops=3556, \
-total process localTime=0.44 mpiTime=0.19\\n    global 10.4 GFLOP/s, \
-stream=47.4 GB/s\\nMatrix gauge ops=131045, total process localTime=4.91 \
-mpiTime=2.73\\n    global 5.3 GFLOP/s, stream=24.2 GB/s\\nMatrix gaugeT \
-ops=131045, total process localTime=4.49 mpiTime=3.11\\n    global 5.7 \
-GFLOP/s, stream=27.4 GB/s\\nshifts.c:  input/output in 0.53 sec (0 \
-wall)\\nshifts.c:  overall time 50.15 sec (7 wall)\\n\"\>",
+ StyleBox["\<\"MAXLAN:      1200, Restart:         4,   NED: -       1,      \
+NEC:         1\\nMATVEC:       256,  Reorth:       256, Nloop:         1,  \
+Nlocked:         0\\nTtotal:  0.098589,    T_op:  0.046788, Torth:  0.024663, \
+  Tstart:  0.001587\\nGauge matrix extreme eigenvalues found:\\n  \
+9.813780e-01\\nMAXLAN:      1200, Restart:         4,   NED: -     140,      \
+NEC:       140\\nMATVEC:     13769,  Reorth:     13769, Nloop:        34,  \
+Nlocked:       223\\nTtotal:390.206747,    T_op:233.434109, Torth:102.280591, \
+  Tstart: 50.743257\\nlargeShifts: ops=13769, sumNcol=13769, \
+maxNcol=1\\nlargeShifts: 13769 matrix-vector ops, 13769 reorthogonalizations \
+in 262.58 s\\ncutoffNullSpace:  48 of 140 zeros between [0, \
+127]\\nlinearSolve:  2996 iterations, 2996 reorthogonalizations in 23.43 \
+s\\ndynamicProject:  47303 calls (47125 usertol), 953736 matrix-vector ops, \
+max itn 32\\n                 in 189.25 s\\nMatrix hessian ops=30538, \
+localTime=5.58 s, mpiTime=1.31 s\\n    global 14.0 GFLOP/s, stream=63.9 \
+GB/s\\nMatrix gauge ops=1190507, localTime=38.68 s, mpiTime=13.22 s\\n    \
+global 12.1 GFLOP/s, stream=55.8 GB/s\\nMatrix gaugeT ops=1190507, \
+localTime=38.49 s, mpiTime=12.14 s\\n    global 12.2 GFLOP/s, stream=58.1 \
+GB/s\\nshifts.c:  init and i/o 0.90 s, calculation 286.07 s\\n\"\>",
   StripOnInput->False,
   FontColor->RGBColor[
-   0, 0, 1]]], "Print",ExpressionUUID->"667f7dbb-7699-432e-be2f-bf7380f1be0d"],
-
-Cell[BoxData[
- InterpretationBox[
-  RowBox[{"\<\"findDelta shifts time (seconds):  total=\"\>", 
-   "\[InvisibleSpace]", "8.761957`7.093116115344708"}],
-  SequenceForm[
-  "findDelta shifts time (seconds):  total=", 8.761957`7.093116115344708],
-  Editable->
-   False]], "Print",ExpressionUUID->"95fc490a-5197-4fd7-81f5-1db3b2d59728"],
+   0, 0, 1]]], "Print",ExpressionUUID->"fb7d1e06-9fbe-4335-a0c7-6fd0bb9f8303"],
 
 Cell[BoxData[
  InterpretationBox[
   RowBox[{"\<\"applyCutoff2: rescale maxNorm \"\>", "\[InvisibleSpace]", 
-   "8.32015035765992244997370236410511382887`17.07986453470801", 
+   "14.52326053816685715446577851896197896769`17.2316142687757", 
    "\[InvisibleSpace]", "\<\" to \"\>", "\[InvisibleSpace]", "2"}],
   SequenceForm[
   "applyCutoff2: rescale maxNorm ", 
-   8.32015035765992244997370236410511382887`17.07986453470801, " to ", 2],
+   14.52326053816685715446577851896197896769`17.2316142687757, " to ", 2],
   Editable->
-   False]], "Print",ExpressionUUID->"ed6cfb25-939d-48af-a608-1ec14b4191fa"],
+   False]], "Print",ExpressionUUID->"b5666167-58b8-43ba-bb4b-863e6402f989"],
 
 Cell[BoxData[
  InterpretationBox[
-  RowBox[{"\<\"latticeSaddlePointStep times:  \"\>", "\[InvisibleSpace]", 
-   RowBox[{"{", 
-    RowBox[{
-    "0.988943`6.1456862585911", ",", "8.767266`7.09337918113775", ",", 
-     "0.103326`5.16472461495419"}], "}"}]}],
+  RowBox[{"\<\"latticeSaddlePointStep times:\\n    matrices=\"\>", 
+   "\[InvisibleSpace]", "11.330928`7.204780477754959", 
+   "\[InvisibleSpace]", "\<\" s, findDelta=\"\>", "\[InvisibleSpace]", 
+   "300.931413`8.628982522163943", 
+   "\[InvisibleSpace]", "\<\" s, applyDelta=\"\>", "\[InvisibleSpace]", 
+   "0.870775`6.090420949760647", "\[InvisibleSpace]", "\<\" s\"\>"}],
   SequenceForm[
-  "latticeSaddlePointStep times:  ", {
-   0.988943`6.1456862585911, 8.767266`7.09337918113775, 
-    0.103326`5.16472461495419}],
+  "latticeSaddlePointStep times:\n    matrices=", 11.330928`7.204780477754959,
+    " s, findDelta=", 300.931413`8.628982522163943, " s, applyDelta=", 
+   0.870775`6.090420949760647, " s"],
   Editable->
-   False]], "Print",ExpressionUUID->"718d9d6e-4f4f-414e-8266-a777854a2cf3"]
+   False]], "Print",ExpressionUUID->"d45808f2-e167-4c4b-938f-e2eb4bff1745"]
 }, Open  ]]
 }, Open  ]],
 
@@ -5236,14 +5190,14 @@ Cell[BoxData[
  RowBox[{"{", 
   RowBox[{
    RowBox[{"{", 
-    RowBox[{"8.320151122795234`", ",", 
-     RowBox[{"-", "1.8392343403839106`*^-7"}]}], "}"}], ",", 
-   RowBox[{"{", 
-    RowBox[{"58.55902667253595`", ",", "1.0457830290633296`*^-7"}], "}"}], 
+    RowBox[{"14.523181031275193`", ",", "0.000010948903857554981`"}], "}"}], 
    ",", 
    RowBox[{"{", 
-    RowBox[{"0.9999999999996468`", ",", "8.404307754160362`*^-7"}], "}"}]}], 
-  "}"}]], "Output",ExpressionUUID->"584ee695-edfb-49c6-ba8b-1f15f7661800"]
+    RowBox[{"242.48427243469956`", ",", "2.5460204504668127`*^-6"}], "}"}], 
+   ",", 
+   RowBox[{"{", 
+    RowBox[{"0.999999999129307`", ",", "0.0000417299164100466`"}], "}"}]}], 
+  "}"}]], "Output",ExpressionUUID->"a9c5f717-839c-4d6a-bfc6-a8ff051a179c"]
 }, Open  ]],
 
 Cell[CellGroupData[{
@@ -5258,8 +5212,8 @@ Cell[BoxData[
    RowBox[{"Flatten", "[", "gaugeFieldDynamicDense", "]"}], 
    "]"}]}]], "Input",ExpressionUUID->"39c9283e-457a-4349-8fa1-24512c337fda"],
 
-Cell[BoxData["3.625847731994595`*^-7"], \
-"Output",ExpressionUUID->"891a2bd2-fe9f-4d9e-b342-426899bd8dc0"]
+Cell[BoxData["0.000014634912771459215`"], \
+"Output",ExpressionUUID->"ee72a553-41f3-4f1c-a093-26db8367ba1f"]
 }, Open  ]]
 }, Open  ]],
 
@@ -5274,12 +5228,14 @@ Cell[BoxData[
  RowBox[{
   RowBox[{"axialDirection", "=", "2"}], ";", 
   RowBox[{"setAxialGauge", "[", "axialDirection", "]"}], ";", 
-  RowBox[{"gaugeFieldAxialDense", "=", 
+  RowBox[{
+   RowBox[{"{", 
+    RowBox[{"gaugeFieldAxialDense", ",", "shiftsAxialDense"}], "}"}], "=", 
    RowBox[{"latticeSaddlePointStep", "[", 
     RowBox[{
      RowBox[{"storePairs", "\[Rule]", "True"}], ",", 
-     RowBox[{"fixedDir", "\[Rule]", "axialDirection"}]}], "]"}]}], ";", 
-  RowBox[{"shiftsAxialDense", "=", "shifts0"}], 
+     RowBox[{"fixedDir", "\[Rule]", "axialDirection"}], ",", 
+     RowBox[{"returnShifts", "\[Rule]", "True"}]}], "]"}]}], 
   ";"}]], "Input",ExpressionUUID->"27031bc6-d002-4f25-97cb-dc127f58d7b9"],
 
 Cell[CellGroupData[{
@@ -5342,7 +5298,9 @@ Cell[BoxData[
 
 Cell[BoxData[
  RowBox[{
-  RowBox[{"gaugeFieldAxialMinres1", "=", 
+  RowBox[{
+   RowBox[{"{", 
+    RowBox[{"gaugeFieldAxialMinres1", ",", "shiftsAxialMinres1"}], "}"}], "=", 
    RowBox[{"latticeSaddlePointStep", "[", 
     RowBox[{
      RowBox[{"storePairs", "\[Rule]", "True"}], ",", 
@@ -5363,8 +5321,8 @@ Cell[BoxData[
          RowBox[{"10.0", "^", 
           RowBox[{"-", "7"}]}]}], ",", 
         RowBox[{"printDetails", "\[Rule]", "False"}]}], "}"}]}], ",", 
-     RowBox[{"debugProj", "\[Rule]", "False"}]}], "]"}]}], ";", 
-  RowBox[{"shiftsAxialMinres1", "=", "shifts0"}], 
+     RowBox[{"debugProj", "\[Rule]", "False"}], ",", 
+     RowBox[{"returnShifts", "\[Rule]", "True"}]}], "]"}]}], 
   ";"}]], "Input",ExpressionUUID->"e1c1e35e-adf6-450a-ba7c-246e4d956c9f"],
 
 Cell[BoxData[
@@ -5380,7 +5338,9 @@ Cell[BoxData[
 
 Cell[BoxData[
  RowBox[{
-  RowBox[{"gaugeFieldAxialMinres2", "=", 
+  RowBox[{
+   RowBox[{"{", 
+    RowBox[{"gaugeFieldAxialMinres2", ",", "shiftsAxialMinres2"}], "}"}], "=", 
    RowBox[{"latticeSaddlePointStep", "[", 
     RowBox[{
      RowBox[{"storePairs", "\[Rule]", "True"}], ",", 
@@ -5415,8 +5375,8 @@ Cell[BoxData[
         RowBox[{"rTolerance", " ", "\[Rule]", " ", 
          RowBox[{"10.0", "^", 
           RowBox[{"-", "9"}]}]}]}], "}"}]}], ",", 
-     RowBox[{"fullMatrix", "\[Rule]", "False"}]}], "]"}]}], ";", 
-  RowBox[{"shiftsAxialMinres2", "=", "shifts0"}], 
+     RowBox[{"fullMatrix", "\[Rule]", "False"}], ",", 
+     RowBox[{"returnShifts", "\[Rule]", "True"}]}], "]"}]}], 
   ";"}]], "Input",ExpressionUUID->"4fc05328-fcbb-484d-9e04-57c21a581db6"],
 
 Cell[CellGroupData[{
@@ -6647,6 +6607,11 @@ Cell[BoxData[
 
 Cell[BoxData[
  RowBox[{"<<", 
+  "\"\<../data/3-3/periodic-16-15-3.m\>\""}]], \
+"Input",ExpressionUUID->"e986ad07-c948-4c03-8cda-e575a71c2b40"],
+
+Cell[BoxData[
+ RowBox[{"<<", 
   "\"\<../data/3-3/periodic-22-42-1.m\>\""}]], \
 "Input",ExpressionUUID->"53db7ba8-c629-4d00-bb4a-7a9f18d8901c"],
 
@@ -6752,7 +6717,7 @@ Cell[BoxData[
 Cell[BoxData["0"], \
 "Output",ExpressionUUID->"aa2b8576-80a9-4f99-98fc-fa836f6b670e"]
 }, Open  ]]
-}, Closed]],
+}, Open  ]],
 
 Cell[CellGroupData[{
 
@@ -6867,8 +6832,8 @@ Cell[BoxData[
       RowBox[{
       "3", ",", "6", ",", "170.", ",", "0.07017369456939337`", ",", 
        "18.102497926494276`", ",", "0.0038764647207436133`"}], "}"}]}], 
-    "}"}]}], 
-  "]"}]], "Input",ExpressionUUID->"2c71e24c-1758-4d56-9b36-3a519ff2564c"],
+    "}"}]}], "]"}]], \
+"Input",ExpressionUUID->"2c71e24c-1758-4d56-9b36-3a519ff2564c"],
 
 Cell[BoxData[
  TagBox[GridBox[{
@@ -10097,7 +10062,7 @@ Cell[BoxData[
    RowBox[{"{", ".05", "}"}]}], 
   "]"}]], "Input",ExpressionUUID->"770947f2-51a0-402a-9e5d-f2552a61e205"]
 }, Open  ]]
-}, Closed]]
+}, Open  ]]
 }, Open  ]],
 
 Cell[CellGroupData[{
@@ -10237,7 +10202,7 @@ Cell[BoxData[
 }, Open  ]]
 },
 WindowSize->{985, 642},
-WindowMargins->{{Automatic, 24}, {16, Automatic}},
+WindowMargins->{{Automatic, 1}, {31, Automatic}},
 PrivateNotebookOptions->{"FileOutlineCache"->False},
 TrackCellChangeTimes->False,
 FrontEndVersion->"11.2 for Linux x86 (64-bit) (September 10, 2017)",
