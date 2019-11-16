@@ -22,19 +22,19 @@
        Memory allocation
 */
 #ifdef USE_MPI
-/* TODO:  MPI has its own versions of memory allocation,
-   which may be more efficient for shared memory windows. */
-#define MALLOC(A) malloc(A)
-#define REALLOC(A, B) realloc(A, B)
-#define FREE(A) free(A)
-#elif defined(USE_MKL)
-#define MALLOC_ALIGN 64
-#define MALLOC(A) mkl_malloc(A, MALLOC_ALIGN)
-#define REALLOC(A, B) mkl_realloc(A, B)
-#define FREE(A) mkl_free(A)
+/* MPI has its own versions of memory allocation,
+   which may allow memory mapping for access. 
+
+   Some of the vectors accessed by MPI in matrixVector() 
+   come from external library routines:
+   MINRESQLP(... hessProduct(... x, y) ... userOrtho(... y) ...)
+   MINRESQLP(... gaugeProduct(... x ...) ...)
+   trlan(hessOp2(... xin ... yout ...), dynamicProject(... v ...) ...)
+*/
+#define MALLOC(A, B) MPI_Alloc_mem(B,MPI_INFO_NULL,&(A))
+#define FREE(A) MPI_Free_mem(A)
 #else
-#define MALLOC(A) malloc(A)
-#define REALLOC(A, B) realloc(A, B)
+#define MALLOC(A, B) A=malloc(B)
 #define FREE(A) free(A)
 #endif
 

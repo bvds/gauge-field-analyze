@@ -107,9 +107,9 @@ void dynamicInit(const mat_int nrow, const mat_int ncol,
                         // Default value appropriate for reorthogonalization
                         (integer) gauge->rows);
 
-    gaugeData.b = MALLOC(nrow*sizeof(*gaugeData.b));
-    gaugeData.x = MALLOC(nrow*sizeof(*gaugeData.x));
-    gaugeData.z = MALLOC(ncol*sizeof(*gaugeData.z));
+    gaugeData.b = malloc(nrow*sizeof(*gaugeData.b));
+    MALLOC(gaugeData.x, nrow*sizeof(*gaugeData.x));
+    MALLOC(gaugeData.z, ncol*sizeof(*gaugeData.z));
 
     /* Calculate the smallest eigenvalue of gaugeProduct.  
        This will inform the stopping condition for MINRES.
@@ -284,9 +284,9 @@ void dynamicClose() {
                gaugeData.time_vm, gaugeData.time_mv,
                gaugeData.time_vm + gaugeData.time_mv);
 
-    FREE(gaugeData.z);
-    FREE(gaugeData.b);
+    free(gaugeData.b);
     FREE(gaugeData.x);
+    FREE(gaugeData.z);
 }
 
 /* Interface for Trlan.

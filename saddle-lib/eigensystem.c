@@ -189,7 +189,7 @@ void largeShifts(SparseMatrix *hess, cJSON *options,
     tol = cJSON_IsNumber(tmp)?tmp->valuedouble:-1.0; 
 
     // Used by HessOp2
-    eigenData.z = MALLOC(nrow * sizeof(double));
+    MALLOC(eigenData.z, nrow * sizeof(double));
     mev = ned; // Allocate memory for the number of requested eigenpairs
     *eval = (double *) malloc(mev*sizeof(double));
     *evec = (double *) malloc(mev*nrow*sizeof(double));
@@ -315,7 +315,6 @@ void hessOp2(const int nrow, const int ncol,
         SET_TIME(t0);
         matrixVector(eigenData.matrix, nrow, eigenData.z, nrow, yout+k*ldy);
         ADD_TIME(eigenData.time_mv, t1, t0);
-        // Use the fact that "in" and "out" can overlap.
         dynamicProject(nrow, yout+k*ldy, NULL);
     }
 }
