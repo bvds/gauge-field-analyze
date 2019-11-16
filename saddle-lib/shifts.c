@@ -92,8 +92,9 @@ int main(int argc, char **argv){
 
     /* Initialize MPI */
 #ifdef USE_MPI
-    if(MPI_Init(&argc, &argv) != MPI_SUCCESS) {
-        fprintf(stderr, "Failed to initialize MPI.");
+    MPI_Init_thread(&argc, &argv, MPI_THREAD_FUNNELED, &i);
+    if(i != MPI_THREAD_FUNNELED) {
+        fprintf(stderr, "Warning MPI did not provide MPI_THREAD_FUNNELED\n");
         exit(321);
     }
     MPI_Comm mpicom = MPI_COMM_WORLD;
