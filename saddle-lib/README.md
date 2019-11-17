@@ -1,4 +1,14 @@
-#  Apply Krylov-space methods to saddle-point step
+#  Find the saddle point of a quadratic function
+
+Use Krylov-space methods to find the saddle-point of a
+quadratic function given the Hessian matrix, gradient vector,
+and some number of linear constraints.  In addition, remove
+eigenvectors where there is no nearby saddle-point.
+
+In the case of lattice gauge theory, gauge transforms represent
+directions where the action is invariant.  Since we want to find
+points that are nearby in link-field space, we disallow directions
+associated with gauge transforms.
 
 1. Use MINRES/MINRES-QLP to project out shifts associated with infinitesimal
 gauge transforms.
@@ -9,8 +19,8 @@ shifts where the quadratic expansion is no longer valid.
 respect to infinitesimal gauge transforms and the large shifts.
 
 Since, in both cases, we need to modify the code to add
-orthgonalization against previous vectors, we use the original
-routines, rather than something embedded in a library.
+orthgonalization against previous vectors, we modify the original
+routines, rather than use a version embedded in a library.
 Eventually, one might combine steps 2 and 3 so that the Lanzos
 tri-diagonalization is not repeated.
 
@@ -30,19 +40,22 @@ After downloading these, you will need to compile the
 associated libraries.
 Then modify `Makefile` to point to these libraries.
 
-### CentOs
+### BLAS libraries
 
-On CentOs, had to provide a link for the LAPACK and BLAS libraries like this:  `sudo ln -s liblapack.so.3 liblapack.so`
+The code has been tested against various versions of the
+BLAS libraries.  It appears that OpenBLAS is the fastest.
 
-### Intel MKL
+1. OpenBLAS.  Compile from source (GitHub) and install in `/opt` (default).
 
-One can link to the Intel Math Kernel Library
+2. Blis.  Compile from source (GitHub) and install in `/usr/local` (default).
+
+3.  Intel MKL. Install the libaray in `/opt` (default).
+One can also link to the Intel Math Kernel Library
 for the sparse matrix-vector multiplications.
-*  Onstall the library in the default directory (`/opt`)
-*  The dynamic linker needs to find the library:
-   *  Create file `/etc/ld.so.conf.d/mkl.conf`
-      containing `/opt/intel/mkl/lib/intel64`
-   *  run `sudo ldconfig`
+The dynamic linker needs to find the library:
+     *  Create file `/etc/ld.so.conf.d/mkl.conf`
+        containing `/opt/intel/mkl/lib/intel64`
+     *  run `sudo ldconfig`
 
 ### LibRSB
 

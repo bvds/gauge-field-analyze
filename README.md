@@ -1,24 +1,23 @@
-# Chroma-generated gauge configuration analysis
+# SU(N) gauge field analysis
 
-## Running
+This repository contains code to analyze SU(N) lattice gauge
+theory field configurations.  The strategy is to
+look at 3 and 4 dimensions in large N limit, paying special
+attention to saddle points of the action.  It has three components:
 
-```
-gauge-analyze [input_config] [output]
- - [input_config]  the QDP config stored in the SciDAC file format (.lime)
- - [output] name of the output file in Mathematica format
-```
+1.  A number of Mathematica notebooks (`gauge.nb` being the
+central file) containing test code and a number of analyses.
+2.  A Mathematica library [`mma-lib`](mma-lib) for analyzing
+gauge field configurations.
+3.  C++ code for converting Chroma-generated gauge
+configurations into Mathematica format.  See "gauge-analyze" below.
+4.  C code for finding the saddle-point of a quadratic function,
+given the Hessian matrix, the gradient vector, and some number of linear
+constraints.  See [`saddle-lib`](saddle-lib).
 
-Converts a configuration stored in the SciDAC file format (also known as
-[lime](https://github.com/usqcd-software/c-lime)) to Mathematica-readable
-format.
+## gauge-analyze
 
-The input file is currently assumed to be created by the `purgaug` program in
-[chroma](https://github.com/JeffersonLab/chroma). This is because of the XML
-path to the string containing the lattice sizes is of a certain format. This
-will be extended in the future. The program only runs in serial, and
-running it in parallel will cause the program to abort.
-
-## Installation
+### Install
 
 Install [QDP++](https://github.com/usqcd-software/qdpxx)
 and packages `autoconf` and `g++`.
@@ -35,6 +34,33 @@ To build:
 
     ./congfigure [options]
     make
+
+
+### Run
+
+```
+ganalyze [input_config] [output]
+ - [input_config]  the QDP config stored in the SciDAC file format (.lime)
+ - [output] name of the output file in Mathematica format
+```
+
+Converts a configuration stored in the SciDAC file format (also known as
+[lime](https://github.com/usqcd-software/c-lime)) to Mathematica-readable
+format.
+
+The input file is currently assumed to be created by the `purgaug` program in
+[chroma](https://github.com/JeffersonLab/chroma). This is because of the XML
+path to the string containing the lattice sizes is of a certain format. This
+will be extended in the future. The program only runs in serial, and
+running it in parallel will cause the program to abort.
+
+Example commands to generate gauge configurations and create associated
+Mathematica input file:
+
+    cd ../data/3-3/
+    # create file periodic-16-28-in.xml
+    ../../chroma/3-3-build/mainprogs/main/purgaug -i periodic-16-28-in.xml -o periodic-16-28-out.xml
+    ../../gauge-field-analyze/programs/ganalyze periodic-16-28.ini.xml5 periodic-16-28-5.m
 
 
 ## Bibliography
