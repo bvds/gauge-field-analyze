@@ -49,13 +49,19 @@ BLAS libraries.  It appears that OpenBLAS is the fastest.
 
 2. Blis.  Compile from source (GitHub) and install in `/usr/local` (default).
 
-3.  Intel MKL. Install the libaray in `/opt` (default).
+3. Intel MKL. Install the libaray in `/opt` (default).
 One can also link to the Intel Math Kernel Library
 for the sparse matrix-vector multiplications.
-The dynamic linker needs to find the library:
+
+The dynamic linker needs to find the BLAS library at runtime.
+For example:
      *  Create file `/etc/ld.so.conf.d/mkl.conf`
         containing `/opt/intel/mkl/lib/intel64`
      *  run `sudo ldconfig`
+
+The results are consistent with [an AMD Threadripper benchmark](
+https://github.com/xianyi/OpenBLAS/issues/1461#issuecomment-469252560).
+
 
 ### LibRSB
 

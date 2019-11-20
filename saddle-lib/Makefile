@@ -37,10 +37,6 @@ endif
 #
 #   Use block-sparse coordinate format for sparse matrices
 #
-#  Oct 23 Status:  need to verify parallel case in Mma for combinations
-#           of USE_BLOCK and USE_TASK, for both 4 and 8 processes.
-#         Need valgrind check in parallel case.
-#
 CFLAGS += -DUSE_BLOCK
 #
 #   Use task manager to control sparse matrix-vector products

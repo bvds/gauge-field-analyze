@@ -86,13 +86,13 @@ void linearSolve(integer n, double *b, cJSON *options, double *x) {
     hessData.z = malloc(hessData.nvecs*sizeof(doublereal));
     if((minresOrtho.z = malloc(minresOrtho.maxVecs*
                                sizeof(doublereal))) == NULL) {
-        fprintf(stderr, "Can't allocate minresOrtho.z size %i*%li\n",
+        fprintf(stderr, "Can't allocate minresOrtho.z size %i*%li bytes\n",
                 minresOrtho.maxVecs, sizeof(doublereal));
         exit(124);
     }
     if((minresOrtho.vecs = malloc(minresOrtho.maxVecs*n*
                                   sizeof(doublereal))) == NULL) {
-        fprintf(stderr, "Can't allocate minresOrtho.vecs size %i*%i*%li\n",
+        fprintf(stderr, "Can't allocate minresOrtho.vecs size %i*%i*%li bytes\n",
                 minresOrtho.maxVecs, n, sizeof(doublereal));
         exit(125);
     }

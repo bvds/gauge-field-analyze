@@ -354,6 +354,7 @@ Options[findDelta] = {dynamicPartMethod -> Automatic, printDetails -> True,
   Method -> Automatic, removeCutoff -> 1, dampingFactor -> 1,
   storeHess -> False, largeShiftOptions -> {},
   storeBB -> False, debugProj -> False, externalAction -> Automatic,
+  remoteHost -> "samson",
   (* Used by BLAS libraries and matrixVector()
      Extensive benchmarking shows 2 threads * maximum MPI processes
      is optimal. *)
@@ -500,29 +501,35 @@ findDelta[data:{hess_, grad_, gauge_}, opts:OptionsPattern[]] :=
     tinit = SessionTime[],
     symbolString = (a_Symbol -> b_) :> SymbolName[a] -> b,
     debug = printLevel[OptionValue[printDetails], 3],
-    outFile = "hess-grad-gauge.json",
-    shiftFile = "shifts.dat",       
+    localPath = "",
+    configFile = "hess-grad-gauge.json",
+    shiftFile = "shifts.dat",
     hessFile = "hess.mtx", gradFile = "grad.dat",
     gaugeFile = "gauge.mtx", out, remote,
-    remoteHost = "samson",
+    remoteHost = OptionValue[remoteHost],
     remotePath = "lattice/gauge-field-analyze/saddle-lib",
     mpi = If[NumberQ[OptionValue[processes]],
              Apply[Sequence, {"mpirun", "-np", ToString[OptionValue[processes]]}],
              Nothing],
     executable = If[NumberQ[OptionValue[processes]],
                     "pshifts", "shifts"]},
+   remote = remoteHost <> ":" <> remotePath;
    If[SymmetricMatrixQ[hess],
        Message[findDelta::symmetric]];
+   If[action === "remote" || action == "detach" || action == "read",
+      localPath = remoteHost <> "/";
+      Run["mkdir -m 755 -p", localPath]];
    (* Dump dimensions, constants, and options into JSON file.
-     Dump matrices and vectors: 
+
+      Dump matrices and vectors: 
          hess, grad, gaugtransformationShifts
-     The methods themselves will be chosen at compile time
-     and we can always compare with the mathematica value.
+      The methods themselves will be chosen at compile time
+      and we can always compare with the mathematica value.
     *)
    If[methodName[OptionValue[dynamicPartMethod]] =!= Automatic,
       Message[findDelta::dynamicPartMethod]; Return[$Failed]];
    If[action =!= "read",
-      Export[outFile, {
+      Export[localPath <> configFile, {
           "blockSize" -> nc^2 - 1,
           "partitions" -> latticeDimensions[[-1]],
           "n" -> Length[grad],
@@ -531,10 +538,10 @@ findDelta[data:{hess_, grad_, gauge_}, opts:OptionsPattern[]] :=
           "largeShiftCutoff" ->
               OptionValue[largeShiftCutoff]/.Infinity -> 10.0^20,
           "dynamicPartOptions" ->
-               {methodOptions[OptionValue[dynamicPartMethod]]}/.symbolString,
+              {methodOptions[OptionValue[dynamicPartMethod]]}/.symbolString,
           "largeShiftOptions" -> OptionValue[largeShiftOptions]/.symbolString,
           "linearSolveOptions" ->
-	       {methodOptions[OptionValue[Method]]}/.symbolString,
+	      {methodOptions[OptionValue[Method]]}/.symbolString,
           "chunkSize" -> OptionValue[chunkSize],
           "threads" -> OptionValue[threads],
           "printDetails" -> OptionValue[printDetails],
@@ -543,15 +550,16 @@ findDelta[data:{hess_, grad_, gauge_}, opts:OptionsPattern[]] :=
           "gaugeFile" -> gaugeFile}];
       (* If the matrix is symmetric, the default is to export
         only the lower triangle. *)
-      Export[hessFile, hess];
-      Export[gradFile, grad];
-      Export[gaugeFile, gauge];
+      Export[localPath <> hessFile, hess];
+      Export[localPath <> gradFile, grad];
+      Export[localPath <> gaugeFile, gauge];
       Apply[Clear, Unevaluated[data]]];
    (* Run external program interactively *)
    If[action === Automatic,
-      Run["rm", "-f", shiftFile];
+      Run["rm", "-f", localPath <> shiftFile];
       out = RunProcess[{mpi, "saddle-lib/"<>executable,
-                        outFile, shiftFile}];
+                        localPath <> configFile,
+                        localPath <> shiftFile}];
       Print[Style[output = out["StandardOutput"], FontColor -> Blue]];
       If[StringLength[out["StandardError"]]>0,
          Print[Style[error = out["StandardError"], FontColor -> Red]]];
@@ -559,38 +567,61 @@ findDelta[data:{hess_, grad_, gauge_}, opts:OptionsPattern[]] :=
          Message[findDelta::external, out["ExitCode"]];
          Return[$Failed]]];
    (* Run external program on a remote host *)
-   If[action == "remote",
-      Run["rm" ,"-f", shiftFile];
-      remote = remoteHost <> ":" <> remotePath;
+   If[action == "remote" || action == "detach",
       If[debug > 2,
          Print["Running ", executable, " at ", remote]];
-      If[runRemote[{"scp", outFile, hessFile, gradFile,
-                    gaugeFile, remote}] != 0, Return[$Failed]];
+      If[runRemote[{"scp", localPath <> configFile,
+                    localPath <> hessFile, localPath <> gradFile,
+                    localPath <> gaugeFile,
+                    remote}] != 0, Return[$Failed]];
+      If[runRemote[{"ssh", remoteHost, "rm -f",
+                    remotePath <> "/" <> shiftFile}] != 0,
+         Return[$Failed]]];
+   (* Run external program on a remote host interactively *)
+   If[action == "remote",
       If[runRemote[{"ssh", remoteHost, mpi,
                     remotePath <> "/" <> executable,
-                    remotePath <> "/" <> outFile,
+                    remotePath <> "/" <> configFile,
                     remotePath <> "/" <> shiftFile},
-                   output, error] != 0, Return[$Failed]];
-      If[runRemote[{"scp", remote <> "/" <> shiftFile, "."}] != 0,
-         Return[$Failed]]];
+                   output, error] != 0, Return[$Failed]]];
    (* Start up external program and detach *)
-   If[action === "detach",
-      Run["rm -f shifts1.log shifts1.err shifts1.dat"];
-      If[debug > 2,
-         Print["Starting up and detaching."]];
-      Run[mpi, "(saddle-lib/" <> executable, outFile,
-          "shifts1.dat 2> shifts1.err 1> shifts1.log&);",
-          "echo \"started\""]];
-   (* Read after detached program has run. *)
-   If[action === "read",
-      Print[Style[output = ReadString["shifts1.log"], FontColor -> Blue]];
-      Print[Style[error = ReadString["shifts1.err"], FontColor -> Red]]];
+   If[action == "detach",
+      (* nohup is not relevant here, because there is no remote terminal.
+        We just need to make sure stdout and stderr are redirected.
+        For example:
+            ssh localhost "(cd lattice/gauge-field-analyze/saddle-lib; touch junk; sleep 10s 1>/dev/null 2>/dev/null; rm junk) 1>/dev/null 2>&1 &"
+       *)
+      If[runRemote[{
+          "ssh", remoteHost,
+          "(cd", remotePath, ";rm -f done;", mpi,
+          " ./" <> executable, configFile, shiftFile,
+          "1>shifts.log 2>shifts.err; touch done) >/dev/null 2>&1 &"
+          }] != 0, Return[$Failed]];
+      Block[{dt = 60, tt = 0},
+            Print["Starting external program."];
+            While[RunProcess[{"ssh", remoteHost, "test", "-e",
+                              remotePath <> "/" <> "done"},
+                             "ExitCode"] != 0,
+                  tt += dt;
+                  Pause[dt]];
+            Print["External program finished, ", tt, " s."]]];
+   If[action == "read" || action == "detach",
+      If[runRemote[{"scp",
+                    remote <> "/" <> "shifts.log",
+                    remote <> "/" <> "shifts.err",
+                    localPath}] != 0, Return[$Failed]];
+      Print[Style[output = ReadString[localPath <> "shifts.log"],
+                  FontColor -> Blue]];
+      error = ReadString[localPath <> "shifts.err"];
+      If[error =!= EndOfFile,
+         Print[Style[error, FontColor -> Red]]]];
    (* Read shifts from external file *)
-   If[action =!= "write" && action =!=  "detach",
-      stepShifts = ReadList[
-          If[action === "read", "shifts1.dat", shiftFile],
-          Number];
-      -damping applyCutoff2[stepShifts, OptionValue[rescaleCutoff], zzz], Null]] /;
+   If[action == "read" || action == "remote" || action == "detach",
+      If[runRemote[{"scp", remote <> "/" <> shiftFile,
+                    localPath}] != 0,
+         Return[$Failed]]];
+   stepShifts = ReadList[localPath <> shiftFile, Number];
+   -damping applyCutoff2[stepShifts, OptionValue[rescaleCutoff], zzz]] /;
  methodName[OptionValue[Method]] === "External";
 
 SetAttributes[applyDelta, HoldFirst];

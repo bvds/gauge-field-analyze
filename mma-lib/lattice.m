@@ -74,6 +74,7 @@ makeTrivialLattice[
 		     ConjugateTranspose[u]], {dir, nd}]],
       {i, latticeVolume[]}]]);
 
+
 polyakovLoop[dir_, anchor_] :=
   (* Simple loop. *)
   Block[{u = IdentityMatrix[nc]},
@@ -112,15 +113,32 @@ polyakovLoop[dir0_, anchor_, {dir1_}, {width1_}] :=
 
 loopThickness[] := beta Sqrt[2 Pi]/nc^2;
 
-polyakovLoopTallies["smeared"] :=
-  Block[{tallies = Association[{}]},
-	Do[If[dir0 != dir1, polyakovLoopAdd[tallies, dir0, dir1]],
-	   {dir0, nd}, {dir1, nd}]; tallies];
-polyakovLoopTallies["simple"] :=
-  Block[{tallies = Association[{}]},
-   Do[polyakovLoopAdd[tallies, dir], {dir, nd}]; tallies];
-
+(* The Polyakov loop correlators are tallied as
+  a function of the area enclosed by the two loops (ntl).
+  This allows easy generalization to non-cubic lattices. *)
 SetAttributes[polyakovLoopAdd, HoldFirst];
+polyakovLoopAdd[tallies_, dir_] :=
+ Block[{face = latticeDimensions, pp, nf}, face[[dir]] = 1;
+  nf = Apply[Times, face];
+  pp = Table[polyakovLoop[dir, latticeCoordinates[k, face]], {k, nf}];
+   Do[Block[{x1 = latticeCoordinates[k1, face],
+             x2 = latticeCoordinates[k2, face], ntL, z, lt},
+    (* Here, we use the shortest distance, including wrapping
+      around the lattice.  In arXiv:hep-lat/0107007v2, Teper
+      fits to a cosh().  That is, he includes the direct distance
+      plus wrapping any number of times around the lattice.
+      However, this makes things complicated if we want to
+      include off-axis separation or contributions from
+      the other direction transverse to the Polyakov loop.
+
+      ntL is the area enclosed by the Polyakov loops. *)
+    ntL = latticeDimensions[[dir]]*
+          Norm[Mod[x1 - x2 + face/2, face] - face/2];
+    lt = Lookup[tallies, ntL, {0, 0, 0}]; lt[[1]] += 1;
+    (* Imaginary part cancels out when averaging over face *)
+    z = Re[pp[[k1]] Conjugate[pp[[k2]]]]; lt[[2]] += z;
+    lt[[3]] += z^2; tallies[ntL] = lt], {k1, nf - 1},
+      {k2, k1 + 1, nf}]];
 polyakovLoopAdd[tallies_, dir0_, dir1_] :=
  Block[{face = latticeDimensions, pp,
    width1 = Floor[loopThickness[] + 0.5] + 1, skip, nf},
@@ -132,26 +150,26 @@ polyakovLoopAdd[tallies_, dir0_, dir1_] :=
       polyakovLoop[dir0, coords, {dir1}, {width1}], Null]], {k, nf}];
   Do[If[NumberQ[pp[[k1]]] && NumberQ[pp[[k2]]],
     Block[{x1 = latticeCoordinates[k1, face],
-      x2 = latticeCoordinates[k2, face], dx, z, lt},
+           x2 = latticeCoordinates[k2, face], dx, ntL, z, lt},
+     (* See comment above. *)
      dx = Mod[x1 - x2 + face/2, face] - face/2;
      If[2*dx[[dir1]]^2 < dx.dx,
-      lt = Lookup[tallies, Norm[dx], {0, 0, 0}]; lt[[1]] += 1;
-      (* Imaginary part cancels out when averaging over face *)
+        (* ntL is the area enclosed by the Polyakov loops. *)
+        ntL = latticeDimensions[[dir0]]*Norm[dx];
+        lt = Lookup[tallies, ntL, {0, 0, 0}]; lt[[1]] += 1;
+      (* The imaginary part cancels out when averaging over the face. *)
       z = Re[pp[[k1]] Conjugate[pp[[k2]]]]; lt[[2]] += z;
-      lt[[3]] += z^2; tallies[Norm[dx]] = lt]]],
+      lt[[3]] += z^2; tallies[ntL] = lt]]],
      {k1, nf - 1}, {k2, k1 + 1, nf}]];
-polyakovLoopAdd[tallies_, dir_] :=
- Block[{face = latticeDimensions, pp, nf}, face[[dir]] = 1;
-  nf = Apply[Times, face];
-  pp = Table[polyakovLoop[dir, latticeCoordinates[k, face]], {k, nf}];
-   Do[Block[{x1 = latticeCoordinates[k1, face],
-     x2 = latticeCoordinates[k2, face], dx, z, lt},
-    dx = Norm[Mod[x1 - x2 + face/2, face] - face/2];
-    lt = Lookup[tallies, dx, {0, 0, 0}]; lt[[1]] += 1;
-    (* Imaginary part cancels out when averaging over face *)
-    z = Re[pp[[k1]] Conjugate[pp[[k2]]]]; lt[[2]] += z;
-    lt[[3]] += z^2; tallies[dx] = lt], {k1, nf - 1},
-      {k2, k1 + 1, nf}]];
+
+polyakovLoopTallies["simple"] :=
+  Block[{tallies = Association[{}]},
+   Do[polyakovLoopAdd[tallies, dir], {dir, nd}]; tallies];
+polyakovLoopTallies["smeared"] :=
+  Block[{tallies = Association[{}]},
+	Do[If[dir0 != dir1, polyakovLoopAdd[tallies, dir0, dir1]],
+	   {dir0, nd}, {dir1, nd}]; tallies];
+
 talliesToAverageErrors[tallies_] :=
  Map[{#[[2]]/#[[1]],
     Sqrt[(#[[1]] #[[3]] - #[[2]]^2)/#[[1]]]/#[[1]]}&, tallies];
@@ -159,10 +177,10 @@ talliesToAverageErrors[tallies_] :=
 Options[exponentialModel] = {printResult -> False};
 exponentialModel[tallyData_, OptionsPattern[]] :=
     Block[(* Protect against any global definitions of model paramters. *)
-	{ff, aw, norm, x},
+	{ff, a2sigma, norm, c, x},
   ff = NonlinearModelFit[
     Map[{#[[1]], #[[2, 1]]}&, Normal[tallyData]],
-    norm Exp[-aw x], {norm, aw}, x,
+    norm Exp[-a2sigma x] + c, {{norm, 1}, {a2sigma, 0.01}, {c, 0}}, x,
     VarianceEstimatorFunction -> (1&),
     Weights -> Map[(1/#[[2, 2]]^2)&, Normal[tallyData]]];
   If[OptionValue[printResult], Print[ff["ParameterTable"]]]; ff];
