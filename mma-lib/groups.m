@@ -4,21 +4,30 @@
 randomSUMatrix[] := randomSUMatrix[nc];
 randomSUMatrix[n_] :=
  Block[{mat = RandomVariate[CircularUnitaryMatrixDistribution[n]]},
-  mat/Det[mat]^(1/n)]; centerSUMatrix[j_] := centerSUMatrix[j, nc];
+       mat*Exp[2 Pi I RandomInteger[n-1]/n]/Det[mat]^(1/n)];
+centerSUMatrix[j_] := centerSUMatrix[j, nc];
 centerSUMatrix[j_, n_] := IdentityMatrix[n] Exp[2 Pi I j/n];
 zeroMatrix[] := zeroMatrix[nc];
 zeroMatrix[n_] := Array[0&, {n, n}];
-matrixEqual[m1_, m2_, tol_: $MachineEpsilon] :=
+Options[matrixEqual] = {Tolerance -> $MachineEpsilon, "prefix" -> None};
+matrixEqual[m1_, m2_, OptionsPattern[]] :=
  Block[{norm = Norm[Flatten[m1 - m2], Infinity]},
-  If[norm < tol Sqrt[Length[m1] Length[m1[[1]]]], True,
-   Print["Matrices not equal, norm:  ", norm]; False]];
-SUMatrixQ[mat_?SquareMatrixQ, tol_: $MachineEpsilon] :=
+       If[norm < OptionValue[Tolerance] Sqrt[Length[m1] Length[m1[[1]]]],
+          True,
+          Print[If[StringQ[OptionValue["prefix"]],
+                   OptionValue["prefix"] <> ":  ", ""] <>
+                "Matrices not equal, norm:  ", norm]; False]];
+Options[SUMatrixQ] = Options[matrixEqual];
+SUMatrixQ[mat_?SquareMatrixQ, OptionsPattern[]] :=
  Block[{diffs = {Det[mat] - 1,
      mat.ConjugateTranspose[mat] - IdentityMatrix[Length[mat]]},
    norm}, norm = Norm[Flatten[diffs], Infinity];
-  If[norm < tol Length[mat], True,
-   Print["Not SU matrix, error:  ", norm]; Print["Details:  ", diffs];
-   False]];
+          If[norm < OptionValue[Tolerance] Length[mat], True,
+             Print[If[StringQ[OptionValue["prefix"]],
+                      OptionValue["prefix"] <> ":  ", ""] <>
+                     "Not SU matrix, error:  ", norm];
+             Print["Details:  ", diffs];
+             False]];
 
 suGenerators::usage = "Construct the generators for SU(N), caching the result.
 Normalization Tr[T_a T_b] = delta_{ab}/2.";
@@ -51,12 +60,10 @@ centerPhases[mat_] :=(* Used for some testing *)
     Length[phases]}, {j, Length[phases]}];
   Sort[phases, Order[Abs[#1], Abs[#2]]&]];
 
-SUPower::usage = "Take some power of an SU(N) matrix with the property that U^z, as a function of z is a smooth map onto the group manifold.";
-SUPower::phaseSum = "Invalid determinant, total phase = `1`";
-Options[SUPower] := {Tolerance -> 10^-5};
-SUPower[mat_, power_, OptionsPattern[]] :=
- Block[{values, vectors, phases, phaseSum, fix, delta, result,
-	debug = False},
+Options[getPhases] = {Tolerance -> 10^-5, "debug"->False};
+getPhases::phaseSum = "Invalid determinant, total phase = `1`";
+getPhases[mat_, OptionsPattern[]]:= Block[{values, vectors, phases, phaseSum,
+                         fix=True, delta},
   {values, vectors} = Eigensystem[mat];
   phases = Arg[values]; phaseSum = Total[phases];
   (* Gram-Schmidt orthogonalization, for algebraic cases. *)
@@ -64,15 +71,41 @@ SUPower[mat_, power_, OptionsPattern[]] :=
   (* Sanity check.  QDP++ default is single precision,
   so we set the default tolerance high. *)
   If[Abs[Mod[phaseSum + Pi, 2 Pi] - Pi] > OptionValue[Tolerance],
-   Message[SUPower::phaseSum, phaseSum]; Return[$Failed]];
+   Message[getPhases::phaseSum, phaseSum]; Return[$Failed]];
   (* If the total is nonzero, need to shift *)
   If[phaseSum != 0, phases[[1]] -= phaseSum;
    While[fix, fix = False;
     Do[If[phases[[i]] - phases[[j]] > 2*Pi,
       delta = Floor[(phases[[i]] - phases[[j]] + 2*Pi)/(4*Pi)];
       phases[[i]] -= 2*Pi*delta; phases[[j]] += 2*Pi*delta;
+      If[OptionValue["debug"], Print["Fixing phases ", {i,j}]];
       fix = True], {i, Length[mat]}, {j, Length[mat]}]]];
+  {phases, vectors}];
+SUPower::usage = "Take some power of an SU(N) matrix with the property that U^z, as a function of z is a smooth map onto the group manifold.  The analogous Mathematica function MatrixPower[] uses a different convention for the branch taken in the complex plane.";
+Options[SUPower] = Options[getPhases];
+SUPower[mat_, power_, opts:OptionsPattern[]] :=
+ Block[{vectors, phases, result},
+  {phases, vectors} = getPhases[mat, opts];
   result = Transpose[vectors].DiagonalMatrix[
      Exp[I*phases*power]].Conjugate[vectors];
-  If[debug && Not[SUMatrixQ[result]], Print["matrix power not SU"]];
+  If[OptionValue["debug"] && Not[SUMatrixQ[result, OptionValue[Tolerance]]],
+     Print["matrix power not SU"]];
   result];
+SULog::usage = "Take the logaritm of an SU(N) matrix, choosing the root such that the resulting matrix is traceless and has eigenvalues that obey Abs[lamda_i-lambda_j] <= 2 Pi.  The analogous Mathematica function MatrixLog[] uses a different convention for the branch taken in the complex plane.";
+Options[SULog] = Options[getPhases];
+SULog[mat_, opts:OptionsPattern[]] :=
+ Block[{vectors, phases},
+  {phases, vectors} = getPhases[mat, opts];
+  Transpose[vectors].DiagonalMatrix[I phases].Conjugate[vectors]];
+
+composeDeltaLink[delta1_, delta2_] := 
+  Block[{uroot = SUPower[MatrixExp[I delta1.suGenerators[]], 0.5], w},
+    w = SULog[uroot.MatrixExp[I delta2.suGenerators[]].uroot]; 
+   2*Im[Map[Tr, suGenerators[].w]]];
+composeDelta::usage = "Project two tangent space vectors onto the lattice link groups, multiply using the square root convection, and project result back onto the tangent space.";
+composeDelta[delta1_, delta2_] := 
+ Apply[Join, 
+  MapThread[composeDeltaLink, 
+   Map[Partition[#, nc^2 - 1] &, {delta1, delta2}], 2]]; 
+composeDelta[delta1_, delta2_, delta3__] := 
+ composeDelta[composeDelta[delta1, delta2], delta3];

@@ -361,6 +361,8 @@ Options[findDelta] = {dynamicPartMethod -> Automatic, printDetails -> True,
   threads -> 2,
   (* A numerical value will execute the MPI version *)
   processes -> Automatic,
+  (* Currently, hard-coded for a single AMD Epyc processor. *)
+  mpiFlags -> None,
   (* Not used. *)
   chunkSize -> 1,
   (* Roughly speaking, the relative error in the matrix norm of
@@ -494,6 +496,7 @@ runRemote[command_, output_:None, error_:None] :=
 (* External version.
    https://github.com/DaveGamble/cJSON
  *)
+findDelta::poorMpiFlags = "These flag values are probably not very good.";
 findDelta[data:{hess_, grad_, gauge_}, opts:OptionsPattern[]] :=
     Block[{zzz = OptionValue[removeCutoff],
     damping = OptionValue[dampingFactor],
@@ -508,12 +511,31 @@ findDelta[data:{hess_, grad_, gauge_}, opts:OptionsPattern[]] :=
     gaugeFile = "gauge.mtx", out, remote,
     remoteHost = OptionValue[remoteHost],
     remotePath = "lattice/gauge-field-analyze/saddle-lib",
-    mpi = If[NumberQ[OptionValue[processes]],
-             Apply[Sequence, {"mpirun", "-np", ToString[OptionValue[processes]]}],
-             Nothing],
     executable = If[NumberQ[OptionValue[processes]],
-                    "pshifts", "shifts"]},
+                    "pshifts", "shifts"],
+    mpi},
    remote = remoteHost <> ":" <> remotePath;
+   mpi = If[NumberQ[OptionValue[processes]],
+            Apply[Sequence,
+                  {"mpirun",
+                   "-np", ToString[OptionValue[processes]],
+                   If[debug > 1, "--report-bindings", Nothing],
+                   Which[OptionValue[mpiFlags] === None,
+                         Nothing,
+                         StringQ[OptionValue[mpiFlags]],
+                         OptionValue[mpiFlags],
+                         OptionValue[processes]<=4,
+                         (* This seems to be the default for OpenMPI. *)
+                         "--map-by numa", 
+                         OptionValue[processes]<=8,
+                         "--map-by l3cache",
+                         (* In general, we want to bind np/8 consecutive
+                           processes to each L3 cache.
+                           The following does this for np=16. *)
+                         True,
+                         Message[findDelta::poorMpiFlags];
+                         "--map-by core --bind-to l3cache"]}],
+            Nothing];
    If[SymmetricMatrixQ[hess],
        Message[findDelta::symmetric]];
    If[action === "remote" || action == "detach" || action == "read",
