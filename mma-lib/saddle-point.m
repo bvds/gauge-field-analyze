@@ -507,6 +507,7 @@ findDelta[data:{hess_, grad_, gauge_}, opts:OptionsPattern[]] :=
     localPath = "",
     configFile = "hess-grad-gauge.json",
     shiftFile = "shifts.dat",
+    outFile = "out.json",
     hessFile = "hess.mtx", gradFile = "grad.dat",
     gaugeFile = "gauge.mtx", out, remote,
     remoteHost = OptionValue[remoteHost],
@@ -578,10 +579,11 @@ findDelta[data:{hess_, grad_, gauge_}, opts:OptionsPattern[]] :=
       Apply[Clear, Unevaluated[data]]];
    (* Run external program interactively *)
    If[action === Automatic,
-      Run["rm", "-f", localPath <> shiftFile];
+      Run["rm", "-f", localPath <> shiftFile, localPath <> outFile];
       out = RunProcess[{mpi, "saddle-lib/"<>executable,
                         localPath <> configFile,
-                        localPath <> shiftFile}];
+                        localPath <> shiftFile,
+                        localPath <> outFile}];
       Print[Style[output = out["StandardOutput"], FontColor -> Blue]];
       If[StringLength[out["StandardError"]]>0,
          Print[Style[error = out["StandardError"], FontColor -> Red]]];
@@ -597,14 +599,16 @@ findDelta[data:{hess_, grad_, gauge_}, opts:OptionsPattern[]] :=
                     localPath <> gaugeFile,
                     remote}] != 0, Return[$Failed]];
       If[runRemote[{"ssh", remoteHost, "rm -f",
-                    remotePath <> "/" <> shiftFile}] != 0,
+                    remotePath <> "/" <> shiftFile,
+                    remotePath <> "/" <> outFile}] != 0,
          Return[$Failed]]];
    (* Run external program on a remote host interactively *)
    If[action == "remote",
       If[runRemote[{"ssh", remoteHost, mpi,
                     remotePath <> "/" <> executable,
                     remotePath <> "/" <> configFile,
-                    remotePath <> "/" <> shiftFile},
+                    remotePath <> "/" <> shiftFile,
+                    remotePath <> "/" <> outFile},
                    output, error] != 0, Return[$Failed]]];
    (* Start up external program and detach *)
    If[action == "detach",
@@ -616,7 +620,7 @@ findDelta[data:{hess_, grad_, gauge_}, opts:OptionsPattern[]] :=
       If[runRemote[{
           "ssh", remoteHost,
           "(cd", remotePath, ";rm -f done;", mpi,
-          " ./" <> executable, configFile, shiftFile,
+          " ./" <> executable, configFile, shiftFile, outFile,
           "1>shifts.log 2>shifts.err; touch done) >/dev/null 2>&1 &"
           }] != 0, Return[$Failed]];
       Block[{dt = 60, tt = 0},
@@ -640,8 +644,10 @@ findDelta[data:{hess_, grad_, gauge_}, opts:OptionsPattern[]] :=
    (* Read shifts from external file *)
    If[action == "read" || action == "remote" || action == "detach",
       If[runRemote[{"scp", remote <> "/" <> shiftFile,
+                    remote <> "/" <> outFile,
                     localPath}] != 0,
          Return[$Failed]]];
+   stepOut = Import[localPath <> outFile];
    stepShifts = ReadList[localPath <> shiftFile, Number];
    -damping applyCutoff2[stepShifts, OptionValue[rescaleCutoff], zzz]] /;
  methodName[OptionValue[Method]] === "External";
@@ -668,7 +674,8 @@ Options[latticeSaddlePointStep] = Join[
     {stepFile -> None, returnShifts -> False}];
 latticeSaddlePointStep[opts:OptionsPattern[]] :=
  Block[{hess, grad, gauge, delta, gaugeField0,
-        options = {opts}, output = "", error = "", stepShifts,
+        options = {opts}, output = "", error = "",
+        stepOut = None, stepShifts,
 	t0 = SessionTime[], t1, t2, t3,
         debug = printLevel[OptionValue[printDetails], 3],
         action = OptionValue[externalAction]},
@@ -712,7 +719,8 @@ latticeSaddlePointStep[opts:OptionsPattern[]] :=
            Print["Saving step to ", OptionValue[stepFile]]];
         DeleteFile[OptionValue[stepFile]];
         Save[OptionValue[stepFile],
-             {output, error, options, delta, stepShifts, gaugeField0}]]];
+             {output, error, options, stepOut,
+              delta, stepShifts, gaugeField0}]]];
   t3 = SessionTime[];
   If[debug > 1,
      Print["latticeSaddlePointStep times:\n"
@@ -720,5 +728,5 @@ latticeSaddlePointStep[opts:OptionsPattern[]] :=
            " s, findDelta=", t2 - t1,
            " s, applyDelta=", t3 - t2, " s"]];
   If[OptionValue[returnShifts],
-     {gaugeField0, stepShifts},
+     {gaugeField0, stepShifts, stepOut},
      gaugeField0]];

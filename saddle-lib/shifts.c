@@ -3,14 +3,12 @@
     of a saddle-point search.
 
     Example usage:
-    ./shifts ../hess-grad-gauge.json ../shifts.dat
+    ./shifts hess-grad-gauge.json shifts.dat out.json
     Valgrind debugging example:
-    valgrind --tool=memcheck --leak-check=yes --show-reachable=yes --num-callers=20 --track-fds=yes ./shifts ../hess-grad-gauge.json junk.dat
-
-      scp hess-grad-gauge.json hess.mtx gauge.mtx grad.dat bvds@192.168.0.35:lattice/gauge-field-analyze/
+    valgrind --tool=memcheck --leak-check=yes --show-reachable=yes --num-callers=20 --track-fds=yes ./shifts ../hess-grad-gauge.json junk.dat junk.json
 
     Invoke gdb in parallel version:
-    mpirun -np 2 xterm -e gdb -ex run --args ./pshifts ../hess-grad-gauge.json junk.out
+    mpirun -np 2 xterm -e gdb -ex run --args ./pshifts ../hess-grad-gauge.json junk.out junk.json
 
 */
 
@@ -80,7 +78,7 @@ double tdiff(struct timeval t1, struct timeval t0) {
 int main(int argc, char **argv){
     char *fdup, *dataPath, *hessFile, *gradFile, *gaugeFile;
     char *options;
-    cJSON *jopts, *tmp;
+    cJSON *jopts, *tmp, *jout;
     int i, blockSize, chunkSize, nLargeShifts, wsize, wrank;
     mat_int k, n, partitions, local_n,
         gaugeDimension, local_gaugeDimension;
@@ -89,6 +87,7 @@ int main(int argc, char **argv){
     TIME_TYPE t0, t1, t2;
     double tio = 0.0, tcalc = 0.0;
 
+    jout = cJSON_CreateObject();
 
     /* Initialize MPI */
 #ifdef USE_MPI
@@ -256,7 +255,7 @@ int main(int argc, char **argv){
     assert(tmp != NULL);
     largeShifts(&hess, tmp, local_n, grad, &absVals, &vecs, &nvals, mpicom);
     cutoffNullspace(local_n, nvals, jopts, grad, &absVals, &vecs,
-                    &nLargeShifts, mpicom);
+                    &nLargeShifts, jout, mpicom);
     linearInit(&hess, local_n, vecs, nLargeShifts, mpicom);
     tmp = cJSON_GetObjectItemCaseSensitive(jopts, "linearSolveOptions");
     assert(tmp != NULL);
@@ -280,6 +279,15 @@ int main(int argc, char **argv){
 #ifdef USE_MPI
         MPI_Barrier(mpicom);
 #endif
+    }
+    if(wrank == 0) {
+        char *joutString = cJSON_Print(jout);
+        if(printDetails>2)
+            printf("Opening output file %s\n", argv[2]);
+        fp = fopen(argv[3], "w");
+        fprintf(fp, "%s\n", joutString);
+        fclose(fp);
+        free(joutString);
     }
 
     if(printDetails > 1) {
@@ -311,6 +319,7 @@ int main(int argc, char **argv){
     free(hessFile); free(gradFile); free(gaugeFile);
     cJSON_Delete(jopts);
     free(options);
+    cJSON_Delete(jout);
 #ifdef USE_MPI
     MPI_Finalize();
 #endif

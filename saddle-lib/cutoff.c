@@ -17,7 +17,7 @@
 void cutoffNullspace(mat_int n, int nvals, cJSON *options,
                      double *grad,
                      double **vals, double **vecs, int *nLargeShifts,
-                     _MPI_Comm mpicom) {
+                     cJSON *jout, _MPI_Comm mpicom) {
     mat_int j;
     int i, wrank;
     int na;
@@ -91,9 +91,12 @@ void cutoffNullspace(mat_int n, int nvals, cJSON *options,
     }
     *vals = realloc(*vals, (*nLargeShifts)*sizeof(double));
     *vecs = realloc(*vecs, n*(*nLargeShifts)*sizeof(double));
+
+    cJSON_AddNumberToObject(jout, "firstValue", firstValue); 
+    cJSON_AddNumberToObject(jout, "lastValue", lastValue); 
+    cJSON_AddNumberToObject(jout, "nvals", nvals); 
     if(wrank == 0) {
         printf("cutoffNullSpace:  %u of %u zeros between [%i, %i]\n",
                *nLargeShifts, nvals, firstValue, lastValue);
-        fflush(stdout);
     }
 }

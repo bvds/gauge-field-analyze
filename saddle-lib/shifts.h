@@ -148,7 +148,7 @@ void testOp(SparseMatrix *hess, const mat_int nrow,
 void cutoffNullspace(mat_int n, int nvals, cJSON *options,
                      double *grad,
                      double **vals, double **vecs, int *nLargeShifts,
-                     _MPI_Comm mpicom);
+                     cJSON *jout, _MPI_Comm mpicom);
 
 
 /*
