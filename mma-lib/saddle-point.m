@@ -165,7 +165,7 @@ gaugeTransformShifts::axial = "Not Axial gauge.";
 SetAttributes[gaugeTransformShifts, HoldFirst];
 gaugeTransformShifts[rootGaugeField_, fixed_: - 1] :=
  ParallelSum[
-  Block[{gaugeShifts = Association[], gen = suGenerators[],
+  Block[{gaugeShifts = Association[], gen = SUGenerators[],
     c2grad = coords2grad[fixed]},
    Do[Block[{coords = latticeCoordinates[i], gindex, index1, index2,
       u1, u2, ugu1, ugu2}, u1 = getLink[rootGaugeField][dir, coords];
@@ -210,8 +210,8 @@ latticeHessian[getRootLink_, OptionsPattern[]] :=
     SparseArray at the end. *)
  ParallelSum[
   Block[{hess = Association[], grad = Array[0.0&, nGrad[fixed]],
-    gen = suGenerators[] + 0.0 I,
-    sym = 0.5*Outer[(#1.#2 + #2.#1)&, suGenerators[], suGenerators[], 1] +
+    gen = SUGenerators[] + 0.0 I,
+    sym = 0.5*Outer[(#1.#2 + #2.#1)&, SUGenerators[], SUGenerators[], 1] +
 	  0.0 I,
     full = OptionValue[fullMatrix],
     coords},
@@ -659,7 +659,7 @@ applyDelta[tgf_, delta_, fixed_] :=
     Block[{coords = latticeCoordinates[i]},
      tgf[[dir, linearSiteIndex[coords]]] =
        getLink[tgf][dir, coords].
-       MatrixExp[I Take[delta, gradMap[dir, coords]].suGenerators[]].
+       MatrixExp[I Take[delta, gradMap[dir, coords]].SUGenerators[]].
        getLink[tgf][dir, coords]],
     {dir, nd}, {i, latticeVolume[]}]];
 

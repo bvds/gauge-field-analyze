@@ -48,7 +48,26 @@ averagePlaquette[] :=
     Chop[Sum[Re[plaquette[dir1, dir2, latticeCoordinates[k]]],
 	     {k, latticeVolume[]}, {dir1, 2, nd},
 	     {dir2, dir1 - 1}]*2/(latticeVolume[]*nc*nd*(nd - 1))];
-makeRootLattice[] := ParallelMap[SUPower[#, 0.5]&, gaugeField, {2}];
+makeRootLattice[] := makeRootLattice[gaugeField];
+makeRootLattice[gf_] := ParallelMap[SUPower[#, 0.5]&, gf, {2}];
+latticeDistance::usage = "Distance between two lattice configurations
+ using the Euclidean metric in the tangent space of
+ the first lattice, divided by the number of links.";
+latticeDistance[root1_, lattice2_]:=
+    Block[{y = Flatten[MapThread[
+        Norm[Map[Tr, 2 Im[SUGenerators[].SULog[
+            Block[{x=ConjugateTranspose[#1]}, x.#2.x]]]]]&,
+            {root1, lattice2}, 2]]},
+          Norm[y]/Length[y]];
+(* Return a function that evaluates distance from
+  lattice1.  So
+       latticeDistanceFrom[lattice1][lattice2] ==
+           latticeDistance[makeRootLattice[lattice1], lattice2]
+  This might be a memory hog, since the module variable
+  persists.  *)
+latticeDistanceFrom[lattice1_]:=
+    Module[{root1 = makeRootLattice[lattice1]},
+           latticeDistance[root1, #]&];
 
 makeTrivialLattice::usage =
   "All links identity for a given nd,nc,latticeDimensions.
@@ -61,7 +80,7 @@ makeTrivialLattice[
      MatrixExp[
       I Table[RandomReal[
           OptionValue[randomPerturbation]],
-	      {nc^2 - 1}] .suGenerators[]],
+	      {nc^2 - 1}] .SUGenerators[]],
      IdentityMatrix[nc]], {nd}, {latticeVolume[]}];
   Clear[linearSiteIndex];
   Do[linearSiteIndex[latticeCoordinates[i]] = i,

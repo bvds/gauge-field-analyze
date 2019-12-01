@@ -29,11 +29,11 @@ SUMatrixQ[mat_?SquareMatrixQ, OptionsPattern[]] :=
              Print["Details:  ", diffs];
              False]];
 
-suGenerators::usage = "Construct the generators for SU(N), caching the result.
+SUGenerators::usage = "Construct the generators for SU(N), caching the result.
 Normalization Tr[T_a T_b] = delta_{ab}/2.";
-suGenerators[] := suGenerators[nc];
-suGenerators[n_?IntegerQ] :=
- suGenerators[n] =
+SUGenerators[] := SUGenerators[nc];
+SUGenerators[n_?IntegerQ] :=
+ SUGenerators[n] =
   Join[Flatten[
     Table[If[(i == k1 && j == k2) || (i == k2 && j == k1), 1/2,
       0], {i, 2, n}, {j, i - 1}, {k1, n}, {k2, n}], 1],
@@ -43,12 +43,12 @@ suGenerators[n_?IntegerQ] :=
    Table[Which[k1 != k2, 0, k1 < i, 1/Sqrt[2 i (i - 1)],
      k1 == i, (1 - i)/Sqrt[2 i (i - 1)], True, 0], {i, 2, n}, {k1,
 	n}, {k2, n}]];
-suSymmetric::usage = "Construct the symmetric coefficients d_{a,b,c},
+SUSymmetric::usage = "Construct the symmetric coefficients d_{a,b,c},
 caching the result.  This tensor is sparse, but we will be inefficient for now.";
-suSymmetric[] := suSymmetric[nc];
-suSymmetric[n_?IntegerQ] :=
- suSymmetric[n] =
-  Block[{gen = suGenerators[n]},
+SUSymmetric[] := SUSymmetric[nc];
+SUSymmetric[n_?IntegerQ] :=
+ SUSymmetric[n] =
+  Block[{gen = SUGenerators[n]},
 	2 Outer[Tr[(#1.#2 + #2.#1).#3]&, gen, gen, gen, 1]];
 
 centerPhases[mat_] :=(* Used for some testing *)
@@ -97,15 +97,3 @@ SULog[mat_, opts:OptionsPattern[]] :=
  Block[{vectors, phases},
   {phases, vectors} = getPhases[mat, opts];
   Transpose[vectors].DiagonalMatrix[I phases].Conjugate[vectors]];
-
-composeDeltaLink[delta1_, delta2_] := 
-  Block[{uroot = SUPower[MatrixExp[I delta1.suGenerators[]], 0.5], w},
-    w = SULog[uroot.MatrixExp[I delta2.suGenerators[]].uroot]; 
-   2*Im[Map[Tr, suGenerators[].w]]];
-composeDelta::usage = "Project two tangent space vectors onto the lattice link groups, multiply using the square root convection, and project result back onto the tangent space.";
-composeDelta[delta1_, delta2_] := 
- Apply[Join, 
-  MapThread[composeDeltaLink, 
-   Map[Partition[#, nc^2 - 1] &, {delta1, delta2}], 2]]; 
-composeDelta[delta1_, delta2_, delta3__] := 
- composeDelta[composeDelta[delta1, delta2], delta3];

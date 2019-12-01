@@ -138,7 +138,7 @@ Cell[BoxData[
    RowBox[{
     RowBox[{"{", 
      RowBox[{"x", "=", 
-      RowBox[{"suGenerators", "[", "4", "]"}]}], "}"}], ",", 
+      RowBox[{"SUGenerators", "[", "4", "]"}]}], "}"}], ",", 
     RowBox[{"Table", "[", 
      RowBox[{
       RowBox[{"Tr", "[", 
@@ -523,9 +523,9 @@ Cell[BoxData[
             RowBox[{"Map", "[", 
              RowBox[{"Tr", ",", 
               RowBox[{
-               RowBox[{"suGenerators", "[", "]"}], ".", "w"}]}], "]"}], 
+               RowBox[{"SUGenerators", "[", "]"}], ".", "w"}]}], "]"}], 
             "]"}]}], ")"}], ".", 
-         RowBox[{"suGenerators", "[", "]"}]}]}], "]"}], "-", "u"}], "]"}]}]}],
+         RowBox[{"SUGenerators", "[", "]"}]}]}], "]"}], "-", "u"}], "]"}]}]}],
    "]"}]], "Input",ExpressionUUID->"2c002739-06e6-4e66-8511-b9f888d1600b"],
 
 Cell[BoxData["0"], \
@@ -986,7 +986,7 @@ Cell[BoxData[
         RowBox[{
          RowBox[{"nc", "^", "2"}], "-", "1"}]}], "}"}]}], "]"}], ".", 
     RowBox[{
-    "suGenerators", "[", 
+    "SUGenerators", "[", 
      "]"}]}]}]}]], \
 "Input",ExpressionUUID->"91a19e6a-2ac7-46fd-bc12-03dda9a4b9ce"],
 
@@ -1198,7 +1198,7 @@ Cell[BoxData[
         RowBox[{"i", ",", 
          RowBox[{
           RowBox[{"nc", "^", "2"}], "-", "1"}]}], "}"}]}], "]"}], ".", 
-     RowBox[{"suGenerators", "[", "]"}]}], 
+     RowBox[{"SUGenerators", "[", "]"}]}], 
     ")"}]}]}]], \
 "Input",ExpressionUUID->"9b04eb0b-2c48-4bdb-9045-6c21ab7b90f0"],
 
@@ -1482,7 +1482,7 @@ Cell[BoxData[
                 RowBox[{"(", 
                  RowBox[{"dir", "-", "1"}], ")"}]}]}], ")"}]}]}]}], "]"}], 
          ".", 
-         RowBox[{"suGenerators", "[", "]"}]}]}], "]"}], ".", 
+         RowBox[{"SUGenerators", "[", "]"}]}]}], "]"}], ".", 
       RowBox[{"SUPower", "[", 
        RowBox[{
         RowBox[{"gaugeField", "[", 
@@ -1601,7 +1601,7 @@ Cell[BoxData[{
        RowBox[{"MatrixExp", "[", 
         RowBox[{"I", " ", "Pi", " ", ".3", " ", 
          RowBox[{
-          RowBox[{"suGenerators", "[", "]"}], "[", 
+          RowBox[{"SUGenerators", "[", "]"}], "[", 
           RowBox[{"[", "1", "]"}], "]"}]}], "]"}]}], "]"}], ";", 
      RowBox[{"setLink", "[", 
       RowBox[{"1", ",", 
@@ -1610,7 +1610,7 @@ Cell[BoxData[{
        RowBox[{"MatrixExp", "[", 
         RowBox[{"I", " ", "Pi", " ", ".3", " ", 
          RowBox[{
-          RowBox[{"suGenerators", "[", "]"}], "[", 
+          RowBox[{"SUGenerators", "[", "]"}], "[", 
           RowBox[{"[", "2", "]"}], "]"}]}], "]"}]}], "]"}], ";", " ", 
      RowBox[{"setLink", "[", 
       RowBox[{"1", ",", 
@@ -1619,7 +1619,7 @@ Cell[BoxData[{
        RowBox[{"MatrixExp", "[", 
         RowBox[{"I", " ", "Pi", " ", ".3", " ", 
          RowBox[{
-          RowBox[{"suGenerators", "[", "]"}], "[", 
+          RowBox[{"SUGenerators", "[", "]"}], "[", 
           RowBox[{"[", "1", "]"}], "]"}]}], "]"}]}], "]"}], ";", 
      RowBox[{"setLink", "[", 
       RowBox[{"1", ",", 
@@ -1628,7 +1628,7 @@ Cell[BoxData[{
        RowBox[{"MatrixExp", "[", 
         RowBox[{"I", " ", "Pi", " ", ".3", " ", 
          RowBox[{
-          RowBox[{"suGenerators", "[", "]"}], "[", 
+          RowBox[{"SUGenerators", "[", "]"}], "[", 
           RowBox[{"[", "2", "]"}], "]"}]}], "]"}]}], "]"}], ";", " ", 
      RowBox[{"setLink", "[", 
       RowBox[{"3", ",", 
@@ -1637,7 +1637,7 @@ Cell[BoxData[{
        RowBox[{"MatrixExp", "[", 
         RowBox[{"I", " ", "Pi", " ", ".1", " ", 
          RowBox[{
-          RowBox[{"suGenerators", "[", "]"}], "[", 
+          RowBox[{"SUGenerators", "[", "]"}], "[", 
           RowBox[{"[", "2", "]"}], "]"}]}], "]"}]}], "]"}], ";", 
      RowBox[{"setLink", "[", 
       RowBox[{"3", ",", 
@@ -1646,7 +1646,7 @@ Cell[BoxData[{
        RowBox[{"MatrixExp", "[", 
         RowBox[{"I", " ", "Pi", " ", ".05", " ", 
          RowBox[{
-          RowBox[{"suGenerators", "[", "]"}], "[", 
+          RowBox[{"SUGenerators", "[", "]"}], "[", 
           RowBox[{"[", "3", "]"}], "]"}]}], "]"}]}], "]"}], ";", 
      RowBox[{"setLink", "[", 
       RowBox[{"2", ",", 
@@ -1655,7 +1655,7 @@ Cell[BoxData[{
        RowBox[{"MatrixExp", "[", 
         RowBox[{"I", " ", "Pi", " ", ".01", " ", 
          RowBox[{
-          RowBox[{"suGenerators", "[", "]"}], "[", 
+          RowBox[{"SUGenerators", "[", "]"}], "[", 
           RowBox[{"[", "1", "]"}], "]"}]}], "]"}]}], "]"}], ";", 
      RowBox[{"setLink", "[", 
       RowBox[{"2", ",", 
@@ -1664,7 +1664,7 @@ Cell[BoxData[{
        RowBox[{"MatrixExp", "[", 
         RowBox[{"I", " ", "Pi", " ", "0.001", " ", 
          RowBox[{
-          RowBox[{"suGenerators", "[", "]"}], "[", 
+          RowBox[{"SUGenerators", "[", "]"}], "[", 
           RowBox[{"[", "2", "]"}], "]"}]}], "]"}]}], "]"}]}], ",", 
     RowBox[{
      RowBox[{"gaugeField", "=", 
@@ -1725,7 +1725,7 @@ Cell[BoxData[
         RowBox[{"i", ",", 
          RowBox[{
           RowBox[{"nc", "^", "2"}], "-", "1"}]}], "}"}]}], "]"}], ".", 
-     RowBox[{"suGenerators", "[", "]"}]}], 
+     RowBox[{"SUGenerators", "[", "]"}]}], 
     ")"}]}]}]], \
 "Input",ExpressionUUID->"002ec141-0da2-4775-b9da-5bb60d049d8d"],
 
@@ -2142,7 +2142,7 @@ Cell[BoxData[
                   RowBox[{
                    RowBox[{"dir", "\[Equal]", "fDir"}], ",", "c2", ",", 
                    "coords"}], "]"}]}], "]"}]}]}], "]"}], ".", 
-            RowBox[{"suGenerators", "[", "]"}]}]}], "]"}], ".", 
+            RowBox[{"SUGenerators", "[", "]"}]}]}], "]"}], ".", 
          RowBox[{"SUPower", "[", 
           RowBox[{
            RowBox[{"getLink", "[", 
@@ -3336,7 +3336,7 @@ Cell[BoxData[
       RowBox[{"shift", "=", 
        RowBox[{"x", " ", 
         RowBox[{
-         RowBox[{"suGenerators", "[", "nc", "]"}], "[", 
+         RowBox[{"SUGenerators", "[", "nc", "]"}], "[", 
          RowBox[{"[", "1", "]"}], "]"}]}]}], "}"}], ",", 
      RowBox[{"Norm", "[", 
       RowBox[{
@@ -3424,7 +3424,7 @@ Cell[BoxData[
             RowBox[{"shift", "=", 
              RowBox[{"x", " ", 
               RowBox[{"rd", ".", 
-               RowBox[{"suGenerators", "[", "nc", "]"}]}]}]}], "}"}], ",", 
+               RowBox[{"SUGenerators", "[", "nc", "]"}]}]}]}], "}"}], ",", 
            RowBox[{
             RowBox[{"Norm", "[", 
              RowBox[{
@@ -3563,7 +3563,7 @@ Cell[BoxData[
          RowBox[{
           RowBox[{"sg", "=", 
            RowBox[{"shift", ".", 
-            RowBox[{"suGenerators", "[", "nc", "]"}]}]}], ";", 
+            RowBox[{"SUGenerators", "[", "nc", "]"}]}]}], ";", 
           RowBox[{"{", 
            RowBox[{
             RowBox[{"Norm", "[", 
@@ -4377,7 +4377,7 @@ Cell[BoxData[{
         RowBox[{"I", " ", "Pi", " ", 
          RowBox[{"RandomReal", "[", "]"}], " ", 
          RowBox[{
-          RowBox[{"suGenerators", "[", "]"}], "[", 
+          RowBox[{"SUGenerators", "[", "]"}], "[", 
           RowBox[{"[", "1", "]"}], "]"}]}], "]"}]}], "]"}]}], ",", 
     RowBox[{
      RowBox[{"gaugeField", "=", 
@@ -5170,8 +5170,8 @@ Cell[BoxData[
            RowBox[{"u", ".", "#1", ".", 
             RowBox[{"ConjugateTranspose", "[", "u", "]"}], ".", "#2"}], 
            "]"}]}], "&"}], ",", 
-        RowBox[{"suGenerators", "[", "]"}], ",", 
-        RowBox[{"suGenerators", "[", "]"}], ",", "1"}], "]"}], "]"}]}], ";", 
+        RowBox[{"SUGenerators", "[", "]"}], ",", 
+        RowBox[{"SUGenerators", "[", "]"}], ",", "1"}], "]"}], "]"}]}], ";", 
     RowBox[{"ff2", "=", 
      RowBox[{"Chop", "[", 
       RowBox[{"Outer", "[", 
@@ -5182,8 +5182,8 @@ Cell[BoxData[
            RowBox[{"u", ".", "u", ".", "#1", ".", 
             RowBox[{"ConjugateTranspose", "[", 
              RowBox[{"u", ".", "u"}], "]"}], ".", "#2"}], "]"}]}], "&"}], ",", 
-        RowBox[{"suGenerators", "[", "]"}], ",", 
-        RowBox[{"suGenerators", "[", "]"}], ",", "1"}], "]"}], "]"}]}], 
+        RowBox[{"SUGenerators", "[", "]"}], ",", 
+        RowBox[{"SUGenerators", "[", "]"}], ",", "1"}], "]"}], "]"}]}], 
     ";"}]}], "]"}]], \
 "Input",ExpressionUUID->"c854da1d-f86e-42fb-b758-43d172c442bf"],
 

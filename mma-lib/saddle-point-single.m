@@ -13,13 +13,13 @@ linkSaddlePointStep[u2Staples_, u1_, OptionsPattern[]] :=
    damping = OptionValue[dampingFactor], debug = False, 
    ff = u2Staples.u1, grad, mm, oo, values, deltas, sqrtU, 
    nc = Length[u2Staples]}, If[False, Print["cutoff:  ", cutoff]]; 
-  grad = Map[Tr[ff.#]&, suGenerators[]];
+  grad = Map[Tr[ff.#]&, SUGenerators[]];
   If[debug, Print["grad:  ", grad]];
   (* Solve linear system mm.shifts = -Im[grad], 
   paying careful attention to nullspace of mm.  
   Could equivalently use LDL^T factorization with symmetric pivoting.  *)
   mm = Re[Tr[ff]]/(2.0 Length[ff]) IdentityMatrix[Length[grad]] + 
-       suSymmetric[].Re[grad]/2.0;
+       SUSymmetric[].Re[grad]/2.0;
   {values, oo} = Eigensystem[mm];
   (* Using the fact that the periodicity of B_a is 4 Pi or less. *) 
   deltas = -damping applyCutoff1[values, oo.Im[grad], cutoff, zzz];
@@ -33,7 +33,7 @@ linkSaddlePointStep[u2Staples_, u1_, OptionsPattern[]] :=
      hess0 = If[MatrixQ[hess0], 
 		ArrayFlatten[{{hess0, 0}, {0, -mm}}], -mm]; 
      delta0 = Join[delta0, deltas.oo]];
-  {u1.MatrixExp[I deltas.oo.suGenerators[]], Max[Abs[deltas]]}]; 
+  {u1.MatrixExp[I deltas.oo.SUGenerators[]], Max[Abs[deltas]]}]; 
 
 linkSaddlePoint::usage = "Saddle point search for a single link.";
 Options[linkSaddlePoint] = 
