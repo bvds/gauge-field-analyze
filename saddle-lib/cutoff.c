@@ -18,13 +18,14 @@ void cutoffNullspace(mat_int n, int nvals, cJSON *options,
                      double *grad,
                      double **vals, double **vecs, int *nLargeShifts,
                      cJSON *jout, _MPI_Comm mpicom) {
-    mat_int j;
+    mat_int j, blocks;
     int i, wrank;
+    int testMax, test2, countMax = 0, count2 = 0;
     int na;
     int firstValue = -1;
     int lastValue = -1;
     double norm2, vecnorm2,  maxnorm2, vecdotgrad;
-    double cutoff, zzz;
+    double cutoffMax, cutoff2, zzz;
     cJSON *tmp;
 #ifdef USE_MPI
     MPI_Comm_rank(mpicom, &wrank);
@@ -36,8 +37,10 @@ void cutoffNullspace(mat_int n, int nvals, cJSON *options,
     tmp  = cJSON_GetObjectItemCaseSensitive(options, "blockSize");
     assert(cJSON_IsNumber(tmp));
     na = tmp->valueint;
-    tmp  = cJSON_GetObjectItemCaseSensitive(options, "largeShiftCutoff");
-    cutoff = cJSON_IsNumber(tmp)?tmp->valuedouble:1.0;
+    tmp  = cJSON_GetObjectItemCaseSensitive(options, "eigenCutoffMax");
+    cutoffMax = cJSON_IsNumber(tmp)?tmp->valuedouble:1.0;
+    tmp  = cJSON_GetObjectItemCaseSensitive(options, "eigenCutoff2");
+    cutoff2 = cJSON_IsNumber(tmp)?tmp->valuedouble:1.0;
     tmp  = cJSON_GetObjectItemCaseSensitive(options, "removeCutoff");
     zzz = cJSON_IsNumber(tmp)?tmp->valuedouble:1.0;
 
@@ -67,6 +70,7 @@ void cutoffNullspace(mat_int n, int nvals, cJSON *options,
                 norm2 = 0;
             }
         }
+        blocks = n/na;
 #ifdef USE_MPI
         MPI_Allreduce(MPI_IN_PLACE, &vecnorm2, 1, MPI_DOUBLE,
                       MPI_SUM, mpicom);
@@ -74,11 +78,20 @@ void cutoffNullspace(mat_int n, int nvals, cJSON *options,
                       MPI_SUM, mpicom);
         MPI_Allreduce(MPI_IN_PLACE, &maxnorm2, 1, MPI_DOUBLE,
                       MPI_MAX, mpicom);
+        MPI_Allreduce(MPI_IN_PLACE, &blocks, 1, _MPI_MAT_INT,
+                      MPI_SUM, mpicom);
 #endif
         /* If eigenvectors are normalized, then vecnorm2
            is not needed. */
-        if(cutoff * zzz * fabs((*vals)[i]) * vecnorm2 <=
-           fabs(vecdotgrad) * sqrt(maxnorm2)) {
+        testMax = cutoffMax * zzz * fabs((*vals)[i]) * vecnorm2 <=
+            fabs(vecdotgrad) * sqrt(maxnorm2);
+        if(testMax)
+            countMax++;
+        test2 = cutoff2 * zzz * fabs((*vals)[i]) * sqrt(vecnorm2) * blocks <=
+            fabs(vecdotgrad);
+        if(test2)
+            count2++;
+        if(testMax || test2) {
             if(firstValue < 0)
                 firstValue = i;
             lastValue = i;
@@ -92,11 +105,13 @@ void cutoffNullspace(mat_int n, int nvals, cJSON *options,
     *vals = realloc(*vals, (*nLargeShifts)*sizeof(double));
     *vecs = realloc(*vecs, n*(*nLargeShifts)*sizeof(double));
 
-    cJSON_AddNumberToObject(jout, "firstValue", firstValue); 
-    cJSON_AddNumberToObject(jout, "lastValue", lastValue); 
-    cJSON_AddNumberToObject(jout, "nvals", nvals); 
+    cJSON_AddNumberToObject(jout, "firstValue", firstValue);
+    cJSON_AddNumberToObject(jout, "lastValue", lastValue);
+    cJSON_AddNumberToObject(jout, "nvals", nvals);
+    cJSON_AddNumberToObject(jout, "nvalsMax", countMax);
+    cJSON_AddNumberToObject(jout, "nvals2", count2);
     if(wrank == 0) {
-        printf("cutoffNullSpace:  %u of %u zeros between [%i, %i]\n",
-               *nLargeShifts, nvals, firstValue, lastValue);
+        printf("cutoffNullSpace:  %u (max %i, norm %i) of %u eigenpairs between [%i, %i]\n",
+               *nLargeShifts, countMax, count2, nvals, firstValue, lastValue);
     }
 }

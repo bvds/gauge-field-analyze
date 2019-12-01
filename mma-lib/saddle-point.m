@@ -45,16 +45,19 @@ applyCutoff1[hess_?VectorQ, grad_, cutoff_: 1, zzz_: 1] :=
    Which[Pi zzz <= Norm[shift], Map[0&, shift],
     Norm[shift] < cutoff  zzz, shift,
     True, (cutoff/Norm[shift]) shift ]]];
-shiftNorm[shifts_] := Max[Map[Norm, Partition[shifts, nc^2 - 1]]];
-compareVectors[a_, b_] := {{(shiftNorm[a]+shiftNorm[b])/2,
-                            1-shiftNorm[a]/shiftNorm[b]},
+shiftNormMax[shifts_] :=
+    Max[Map[Norm, Partition[shifts, nc^2 - 1]]];
+shiftNorm2[shifts_] :=
+    Norm[shifts] (nc^2-1)/Length[shifts];
+compareVectors[a_, b_] := {{(shiftNormMax[a]+shiftNormMax[b])/2,
+                            1-shiftNormMax[a]/shiftNormMax[b]},
                            {(Norm[a]+Norm[b])/2, 1-Norm[a]/Norm[b]},
                            Block[{cos = a.b/(Norm[a] Norm[b])},
                                  {cos, Sqrt[(1+cos) (1-cos)]}]};
 applyCutoff2::usage = "Rescale shifts on an entire lattice so that \
 the largest norm of a shift on a link is less than the cutoff.";
 applyCutoff2[shifts_?ArrayQ, cutoff_: 1, zzz_: 1] :=
- Block[{maxNorm = shiftNorm[shifts]},
+ Block[{maxNorm = shiftNormMax[shifts]},
   If[maxNorm < cutoff zzz, shifts,
    Print["applyCutoff2: rescale maxNorm ", maxNorm, " to ",
     cutoff]; (cutoff/maxNorm) shifts]];
@@ -64,38 +67,58 @@ meaning. We infer the effect on the lattice links by using the \
 rotation back onto the lattice.  We demand that the norm of the \
 largest shift on any single link be less than the cutoff (default \
 value Pi).";
-applyCutoff3[hess_, grad_, proj_, cutoff_: Pi, zzz_: 1] :=
- Block[{maxLinkShift = Map[shiftNorm, proj], result,
-	count = 0, firstValue = Null, lastValue = Null, doPairs = False},
-  If[doPairs, goodPairs0 = {}; badPairs0 = {}];
+Options[applyCutoff3] = {"cutoffMax" -> Pi, "cutoff2" -> Pi, "zzz" -> 1};
+applyCutoff3[hess_, grad_, proj_, OptionsPattern[]] :=
+ Block[{result, count = 0, countMax = 0, count2 = 0,
+        firstValue = Null, lastValue = Null},
   result = MapThread[
-      If[cutoff zzz Abs[#1] <= Abs[#2] #3,
-	 count += 1;
-	 If[firstValue === Null, firstValue = #4];
-	 lastValue = #4;
-	 If[doPairs, AppendTo[badPairs0, {#1, #2}]]; 0,
-	 If[doPairs, AppendTo[goodPairs0, {#1, #2}]]; #2/#1]&,
-	{hess, grad, maxLinkShift, Range[Length[grad]]}];
+      Block[{
+          testMax = OptionValue["cutoffMax"] OptionValue["zzz"] Abs[#1] <=
+                               Abs[#2] shiftNormMax[#3],
+          test2 = OptionValue["cutoff2"] OptionValue["zzz"] Abs[#1] <=
+                             Abs[#2] shiftNorm2[#3]},
+            If[testMax, countMax++];
+            If[test2, count2++];
+            If[testMax || test2,
+	       count += 1;
+	       If[firstValue === Null, firstValue = #4];
+	       lastValue = #4;
+               0,
+	       #2/#1]]&,
+      {hess, grad, proj, Range[Length[grad]]}];
   If[count > 0,
-     Print["applyCutoff3:  ", count, " of ", Length[hess],
-	   " zeros, between ", {firstValue, lastValue}]];
+     Print["applyCutoff3:  {total, max, norm} = ",
+           {count, countMax, count2}, " of ", Length[hess],
+	   " eigenpairs between ", {firstValue, lastValue}]];
   result];
 cutoffNullspace::usage =
   "Select vectors in proj that are associated with shifts that \
 violate the cutoff.";
-cutoffNullspace[hess_, grad_, proj_, cutoff_:Pi, zzz_:1] :=
-  Block[{result, count = 0, firstValue = Null, lastValue = Null},
+Options[cutoffNullspace] = Options[applyCutoff3];
+cutoffNullspace[hess_, grad_, proj_, OptionsPattern[]] :=
+ Block[{result,  count = 0, countMax = 0, count2 = 0,
+        firstValue = Null, lastValue = Null},
    result = MapThread[
-       If[zzz < Infinity && cutoff zzz Abs[#1] <= Abs[#2] shiftNorm[#3],
-          count += 1;
-	  If[firstValue === Null, firstValue = #4];
-	  lastValue = #4;
-	  #3,
-	  Nothing]&,
-	 {hess, grad, proj, Range[Length[grad]]}];
+      Block[{
+          testMax = OptionValue["zzz"] &&
+                    OptionValue["cutoffMax"] OptionValue["zzz"] Abs[#1] <=
+                               Abs[#2] shiftNormMax[#3],
+          test2 = OptionValue["zzz"] &&
+                  OptionValue["cutoff2"] OptionValue["zzz"] Abs[#1] <=
+                             Abs[#2] shiftNorm2[#3]},
+            If[testMax, countMax++];
+            If[test2, count2++];
+            If[testMax || test2,
+               count += 1;
+	       If[firstValue === Null, firstValue = #4];
+	       lastValue = #4;
+	       #3,
+	       Nothing]]&,
+	   {hess, grad, proj, Range[Length[grad]]}];
    If[count > 0 || True,
-      Print["cutoffNullSpace:  ", count, " of ", Length[hess],
-	    " zeros, between ", {firstValue, lastValue}]];
+      Print["applyCutoff3:  {total, max, norm} = ",
+            {count, countMax, count2}, " of ", Length[hess],
+	    " eigenpairs between ", {firstValue, lastValue}]];
    result];
 
 
@@ -367,7 +390,7 @@ Options[findDelta] = {dynamicPartMethod -> Automatic, printDetails -> True,
   chunkSize -> 1,
   (* Roughly speaking, the relative error in the matrix norm of
      one link goes as Norm[shift]^3/48. *)
-  largeShiftCutoff -> 2, rescaleCutoff -> 2};
+  eigenCutoffMax -> 2, eigenCutoff2 -> 2, rescaleCutoff -> 2};
 SetAttributes[findDelta, HoldFirst];
 
 (* Dense matrix version (default) *)
@@ -379,7 +402,7 @@ findDelta[{hess_, grad_, gauge_}, OptionsPattern[]] :=
        Return[$Failed]];
     If[MatrixQ[gauge],
        (* Find projection onto subspace orthogonal to all gauge transforms.
-       proj is dense. *)
+         proj is dense. *)
        proj = NullSpace[gauge];
        hessp = proj.hess.Transpose[proj];
        gradp = proj.grad,
@@ -391,9 +414,11 @@ findDelta[{hess_, grad_, gauge_}, OptionsPattern[]] :=
     If[False, Print["Dynamic hess.grad: ", hess.grad]];
     {values, oo} = Eigensystem[Normal[hessp]];
     stepShifts = applyCutoff3[values, oo.gradp, oo.proj,
-	OptionValue[largeShiftCutoff], zzz].oo.proj;
+                              "cutoffMax" -> OptionValue[eigenCutoffMax],
+                              "cutoff2" -> OptionValue[eigenCutoff2],
+                              "zzz" -> zzz].oo.proj;
     Print["shifts norms and rescale:  ",
-	  {shiftNorm[stepShifts], Norm[stepShifts],
+	  {shiftNormMax[stepShifts], shiftNorm2[stepShifts],
 	   stepShifts.hess.stepShifts/stepShifts.grad}];
     If[OptionValue[storeHess],
        hess0 = hess; grad0 = grad; proj0 = proj; oo0 = oo;
@@ -447,7 +472,8 @@ findDelta[{hess_, grad_, gauge_}, opts:OptionsPattern[]] :=
          orthoSubspace -> dp,
 	 initialVector -> grad, printDetails -> 1];
      Module[{largeShiftSpace = cutoffNullspace[Sqrt[vals], vecs.grad, vecs,
-         OptionValue[largeShiftCutoff], zzz]},
+               "cutoffMax" -> OptionValue[eigenCutoffMax],
+               "cutoff2" -> OptionValue[eigenCutoff2], "zzz" -> zzz]},
 	    If[Length[largeShiftSpace] > 0,
 	       (# - (largeShiftSpace.#).largeShiftSpace)&, Identity]]];
    smallProj = (addTime[tsp, countsp++; smallProj0[#]]&);
@@ -520,7 +546,7 @@ findDelta[data:{hess_, grad_, gauge_}, opts:OptionsPattern[]] :=
             Apply[Sequence,
                   {"mpirun",
                    "-np", ToString[OptionValue[processes]],
-                   If[debug > 1, "--report-bindings", Nothing],
+                   If[debug > 2, "--report-bindings", Nothing],
                    Which[OptionValue[mpiFlags] === None,
                          Nothing,
                          StringQ[OptionValue[mpiFlags]],
@@ -558,8 +584,10 @@ findDelta[data:{hess_, grad_, gauge_}, opts:OptionsPattern[]] :=
           "n" -> Length[grad],
           "gaugeDimension" -> Length[gauge],
           "removeCutoff" -> zzz,
-          "largeShiftCutoff" ->
-              OptionValue[largeShiftCutoff]/.Infinity -> 10.0^20,
+          "eigenCutoffMax" ->
+              OptionValue[eigenCutoffMax]/.Infinity -> 10.0^20,
+          "eigenCutoff2" ->
+              OptionValue[eigenCutoff2]/.Infinity -> 10.0^20,
           "dynamicPartOptions" ->
               {methodOptions[OptionValue[dynamicPartMethod]]}/.symbolString,
           "largeShiftOptions" -> OptionValue[largeShiftOptions]/.symbolString,
