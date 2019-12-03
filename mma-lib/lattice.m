@@ -240,7 +240,8 @@ setAxialGauge[dir_] :=
 
 sumStaples::usage = "Returns a general matrix in color space.";
 sumStaples[dir1_, coords_] := Block[{total = zeroMatrix[]},
-  Do[If[dir2 != dir1,(* forward staple *)
+ Do[If[dir2 != dir1,
+    (* forward staple *)
     total += getLink[dir2, shift[dir1, coords]].ConjugateTranspose[
        getLink[dir1, shift[dir2, coords]]].ConjugateTranspose[
 	   getLink[dir2, coords]];
@@ -265,7 +266,7 @@ stapleTest[] :=
 wrapIt[coords_List] :=
     MapThread[(1 + Mod[#1 - 1, #2])&, {coords, latticeDimensions}];
 plotActionLimits[] := {0, Min[2 n^2/3, 15]};
-plotActionPlane[dir1_, dir2_, anchor_List, range_] :=
+plotActionPlane[dir1_, dir2_, anchor, range_] :=
  Block[{coords = anchor},
   ListPlot3D[
    Flatten[Table[coords[[dir1]] = x1;
@@ -276,7 +277,7 @@ plotActionPlane[dir1_, dir2_, anchor_List, range_] :=
 	   1], PlotRange -> {{1/2, latticeDimensions[[dir1]] + 1/2},
 			     {1/2, latticeDimensions[[dir2]] + 1/2},
 			     range}]];
-plotActionSides[dir0_, dir1_, dir2_, anchor_List, range_] :=
+plotActionSides[dir0_, dir1_, dir2_, anchor, range_] :=
  Block[{coords = anchor},
   ListPlot3D[
    Flatten[Table[coords[[dir1]] = x1;
@@ -288,13 +289,17 @@ plotActionSides[dir0_, dir1_, dir2_, anchor_List, range_] :=
 		 {x2, 0, latticeDimensions[[dir2]]}, {i, 2}], 2],
    PlotRange -> {{1/2, latticeDimensions[[dir1]] + 1/2}, {1/2,
       latticeDimensions[[dir2]] + 1/2}, range}]];
-plotAction[dir0_, dir1_, dir2_, anchor_List, range_: {0, 2 nc^2/3 }] :=
-  Block[{coords = anchor},
-  ListAnimate[
-   Flatten[Table[coords[[dir0]] = x0;
-     If[i == 1, plotActionPlane[dir1, dir2, coords, range],
-	plotActionSides[dir0, dir1, dir2, coords, range]],
-		 {x0, latticeDimensions[[dir0]]}, {i, 2}], 1]]]
+plotAction::usage = "Animate the action density of a two dimensional slices of the lattice in directions {dir1, dir2} as a function of dir0.  One can also specify an anchor point for the remaining nd-3 dimensions.";
+Options[plotAction] = {anchor :> Table[1, {nd}], PlotRange :> {0, 2 nc^2/3 }};
+plotAction[dir0_, dir1_, dir2_, OptionsPattern[]] :=
+ Block[{coords = OptionValue[anchor]},
+       ListAnimate[
+           Flatten[Table[coords[[dir0]] = x0;
+               {plotActionPlane[dir1, dir2, coords, OptionValue[PlotRange]],
+	        plotActionSides[dir0, dir1, dir2, coords,
+                                OptionValue[PlotRange]]},
+		         {x0, latticeDimensions[[dir0]]}], 1]]]
+
 lineLinks[dir_, anchor_List] :=
   Block[{coords = anchor},
    ColumnForm[

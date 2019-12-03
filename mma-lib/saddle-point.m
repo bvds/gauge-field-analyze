@@ -24,6 +24,20 @@ printLevel[opt_, default_] :=
           opt === True, default, opt === False, 0,
           True, default];
 
+
+(* Define norms for shifts *)
+
+shiftNormMax[shifts_] :=
+    Max[Map[Norm, Partition[shifts, nc^2 - 1]]];
+shiftNorm2[shifts_] :=
+    Norm[shifts] (nc^2-1)/Length[shifts];
+compareVectors[a_, b_] := {{(shiftNormMax[a]+shiftNormMax[b])/2,
+                            1-shiftNormMax[a]/shiftNormMax[b]},
+                           {(Norm[a]+Norm[b])/2, 1-Norm[a]/Norm[b]},
+                           Block[{cos = a.b/(Norm[a] Norm[b])},
+                                 {cos, Sqrt[(1+cos) (1-cos)]}]};
+
+
 (* Shift cutoff *)
 
 applyCutoff1::usage = "Rescale shifts for a single link.  \
@@ -44,16 +58,7 @@ applyCutoff1[hess_?VectorQ, grad_, cutoff_: 1, zzz_: 1] :=
    shift = grad/hess;
    Which[Pi zzz <= Norm[shift], Map[0&, shift],
     Norm[shift] < cutoff  zzz, shift,
-    True, (cutoff/Norm[shift]) shift ]]];
-shiftNormMax[shifts_] :=
-    Max[Map[Norm, Partition[shifts, nc^2 - 1]]];
-shiftNorm2[shifts_] :=
-    Norm[shifts] (nc^2-1)/Length[shifts];
-compareVectors[a_, b_] := {{(shiftNormMax[a]+shiftNormMax[b])/2,
-                            1-shiftNormMax[a]/shiftNormMax[b]},
-                           {(Norm[a]+Norm[b])/2, 1-Norm[a]/Norm[b]},
-                           Block[{cos = a.b/(Norm[a] Norm[b])},
-                                 {cos, Sqrt[(1+cos) (1-cos)]}]};
+    True, (cutoff/Norm[shift]) shift]]];
 applyCutoff2::usage = "Rescale shifts on an entire lattice so that \
 the largest norm of a shift on a link is less than the cutoff.";
 applyCutoff2[shifts_?ArrayQ, cutoff_: 1, zzz_: 1] :=
@@ -73,9 +78,11 @@ applyCutoff3[hess_, grad_, proj_, OptionsPattern[]] :=
         firstValue = Null, lastValue = Null},
   result = MapThread[
       Block[{
-          testMax = OptionValue["cutoffMax"] OptionValue["zzz"] Abs[#1] <=
+          testMax = OptionValue["zzz"] < Infinity &&
+                    OptionValue["cutoffMax"] OptionValue["zzz"] Abs[#1] <=
                                Abs[#2] shiftNormMax[#3],
-          test2 = OptionValue["cutoff2"] OptionValue["zzz"] Abs[#1] <=
+          test2 = OptionValue["zzz"] < Infinity &&
+                  OptionValue["cutoff2"] OptionValue["zzz"] Abs[#1] <=
                              Abs[#2] shiftNorm2[#3]},
             If[testMax, countMax++];
             If[test2, count2++];
@@ -100,10 +107,10 @@ cutoffNullspace[hess_, grad_, proj_, OptionsPattern[]] :=
         firstValue = Null, lastValue = Null},
    result = MapThread[
       Block[{
-          testMax = OptionValue["zzz"] &&
+          testMax = OptionValue["zzz"] < Infinity &&
                     OptionValue["cutoffMax"] OptionValue["zzz"] Abs[#1] <=
                                Abs[#2] shiftNormMax[#3],
-          test2 = OptionValue["zzz"] &&
+          test2 = OptionValue["zzz"] < Infinity &&
                   OptionValue["cutoff2"] OptionValue["zzz"] Abs[#1] <=
                              Abs[#2] shiftNorm2[#3]},
             If[testMax, countMax++];
@@ -116,7 +123,7 @@ cutoffNullspace[hess_, grad_, proj_, OptionsPattern[]] :=
 	       Nothing]]&,
 	   {hess, grad, proj, Range[Length[grad]]}];
    If[count > 0 || True,
-      Print["applyCutoff3:  {total, max, norm} = ",
+      Print["cutoffNullspace:  {total, max, norm} = ",
             {count, countMax, count2}, " of ", Length[hess],
 	    " eigenpairs between ", {firstValue, lastValue}]];
    result];
@@ -374,7 +381,7 @@ findDelta::dynamicPartMethod = "Only dynamicPartMethod = Automatic is supported.
 findDelta::asymmetric = "Hessian must be symmetric unless Method->\"External\".";
 findDelta::symmetric = "Since Method->\"External\", you can set fullMatrix -> False.";
 Options[findDelta] = {dynamicPartMethod -> Automatic, printDetails -> True,
-  Method -> Automatic, removeCutoff -> 1, dampingFactor -> 1,
+  Method -> "Dense", ignoreCutoff -> False, dampingFactor -> 1,
   storeHess -> False, largeShiftOptions -> {},
   storeBB -> False, debugProj -> False, externalAction -> Automatic,
   remoteHost -> "samson",
@@ -382,7 +389,7 @@ Options[findDelta] = {dynamicPartMethod -> Automatic, printDetails -> True,
      Extensive benchmarking shows 2 threads * maximum MPI processes
      is optimal. *)
   threads -> 2,
-  (* A numerical value will execute the MPI version *)
+  (* A numerical value will invoke the MPI version. *)
   processes -> Automatic,
   (* Currently, hard-coded for a single AMD Epyc processor. *)
   mpiFlags -> None,
@@ -395,9 +402,11 @@ SetAttributes[findDelta, HoldFirst];
 
 (* Dense matrix version (default) *)
 findDelta[{hess_, grad_, gauge_}, OptionsPattern[]] :=
-  Block[{hessp, gradp, zzz = OptionValue[removeCutoff],
-         damping = OptionValue[dampingFactor], values, oo, proj},
-    If[Not[SymmetricMatrixQ[hess, Tolerance->256*$MachineEpsilon]],
+ Block[{hessp, gradp, zzz = If[OptionValue[ignoreCutoff], Infinity, 1],
+        damping = OptionValue[dampingFactor], values, oo, proj},
+       (* The Mathematica function doesn't work so well
+         for small perturbations. *)
+    If[Norm[hess-Transpose[hess]] > $MachineEpsilon,
        Message[findDelta::asymmetric];
        Return[$Failed]];
     If[MatrixQ[gauge],
@@ -424,12 +433,12 @@ findDelta[{hess_, grad_, gauge_}, OptionsPattern[]] :=
        hess0 = hess; grad0 = grad; proj0 = proj; oo0 = oo;
        pairs0 = Transpose[{values, oo.gradp}]];
     -damping applyCutoff2[stepShifts, OptionValue[rescaleCutoff], zzz]] /;
-  OptionValue[Method] === Automatic || OptionValue[Method] === "Dense";
+  OptionValue[Method] === "Dense";
 
 (* Version using mathematica versions of MINRES/MINRES-QLP
    and Lanczos eigensystem solvers. *)
 findDelta[{hess_, grad_, gauge_}, opts:OptionsPattern[]] :=
- Block[{zzz = OptionValue[removeCutoff],
+    Block[{zzz = If[OptionValue[ignoreCutoff], Infinity, 1],
     minresFun = minresLabels[methodName[OptionValue[Method]]],
     damping = OptionValue[dampingFactor], result, dp, dp0,
     smallProj, smallProj0, tinit = SessionTime[],
@@ -524,7 +533,7 @@ runRemote[command_, output_:None, error_:None] :=
  *)
 findDelta::poorMpiFlags = "These flag values are probably not very good.";
 findDelta[data:{hess_, grad_, gauge_}, opts:OptionsPattern[]] :=
-    Block[{zzz = OptionValue[removeCutoff],
+    Block[{
     damping = OptionValue[dampingFactor],
     action = OptionValue[externalAction],
     tinit = SessionTime[],
@@ -583,7 +592,8 @@ findDelta[data:{hess_, grad_, gauge_}, opts:OptionsPattern[]] :=
           "partitions" -> latticeDimensions[[-1]],
           "n" -> Length[grad],
           "gaugeDimension" -> Length[gauge],
-          "removeCutoff" -> zzz,
+          "eigenCutoffRescale" ->
+              If[OptionValue[ignoreCutoff], 10.0^20, 1.0],
           "eigenCutoffMax" ->
               OptionValue[eigenCutoffMax]/.Infinity -> 10.0^20,
           "eigenCutoff2" ->
@@ -605,7 +615,7 @@ findDelta[data:{hess_, grad_, gauge_}, opts:OptionsPattern[]] :=
       Export[localPath <> gradFile, grad];
       Export[localPath <> gaugeFile, gauge];
       Apply[Clear, Unevaluated[data]]];
-   (* Run external program interactively *)
+   (* Run external program locally *)
    If[action === Automatic,
       Run["rm", "-f", localPath <> shiftFile, localPath <> outFile];
       out = RunProcess[{mpi, "saddle-lib/"<>executable,
@@ -677,7 +687,8 @@ findDelta[data:{hess_, grad_, gauge_}, opts:OptionsPattern[]] :=
          Return[$Failed]]];
    stepOut = Import[localPath <> outFile];
    stepShifts = ReadList[localPath <> shiftFile, Number];
-   -damping applyCutoff2[stepShifts, OptionValue[rescaleCutoff], zzz]] /;
+   -damping applyCutoff2[stepShifts, OptionValue[rescaleCutoff],
+                         If[OptionValue[ignoreCutoff], Infinity, 1]]] /;
  methodName[OptionValue[Method]] === "External";
 
 SetAttributes[applyDelta, HoldFirst];

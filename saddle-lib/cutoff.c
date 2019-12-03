@@ -41,7 +41,7 @@ void cutoffNullspace(mat_int n, int nvals, cJSON *options,
     cutoffMax = cJSON_IsNumber(tmp)?tmp->valuedouble:1.0;
     tmp  = cJSON_GetObjectItemCaseSensitive(options, "eigenCutoff2");
     cutoff2 = cJSON_IsNumber(tmp)?tmp->valuedouble:1.0;
-    tmp  = cJSON_GetObjectItemCaseSensitive(options, "removeCutoff");
+    tmp  = cJSON_GetObjectItemCaseSensitive(options, "eigenCutoffRescale");
     zzz = cJSON_IsNumber(tmp)?tmp->valuedouble:1.0;
 
     // Color blocks should be evenly divided among processes
