@@ -5,14 +5,14 @@
   one-plaquette spikes.
  *)
 
-linkSaddlePointStep::usage = "One iteration of the saddle point search applied to a single link.  Set rescaleCutoff to a large number to test this against the explicit calculation.";
+linkSaddlePointStep::usage = "One iteration of the saddle point search applied to a single link.  Set ignoreCutoff -> True to test this against the explicit calculation.";
 Options[linkSaddlePointStep] = {ignoreCutoff -> False,
-    rescaleCutoff -> 1, dampingFactor -> 1,
+    linkCutoff :> Sqrt[nc^2/(3 beta)], rescaleCutoff -> 1, dampingFactor -> 1,
     printHessian -> False, printShift -> False};
 linkSaddlePointStep[u2Staples_, u1_, OptionsPattern[]] := 
  Block[{
      cutoff = If[OptionValue[ignoreCutoff], 1,
-                 Sqrt[nc^2/(3 beta)] OptionValue[rescaleCutoff]],
+                 OptionValue[linkCutoff]*OptionValue[rescaleCutoff]],
      zzz = If[OptionValue[ignoreCutoff], Infinity, 1],
    damping = OptionValue[dampingFactor], debug = False, 
    ff = u2Staples.u1, grad, mm, oo, values, deltas},
@@ -52,26 +52,29 @@ linkSaddlePoint[dir_, coords_, opts : OptionsPattern[]] :=
   uu = u1.u2;
   If[debug > 0, SUMatrixQ[uu, Tolerance -> 10^-7]];
   {uu, maxShift}];
-allLinkSaddlePoint::usage = "Apply one-link saddle point step to all links, returning updated lattice.";
+allLinkSaddlePoint::usage = "Apply one-link saddle point step to all links, returning associated statistics.  This starts with some given gaugeField and updates it.";
 Options[allLinkSaddlePoint] = Options[linkSaddlePoint];
-allLinkSaddlePoint[opts:OptionsPattern[]] :=
- Block[{count = 0, maxShift = 4 Pi, linkShift, stats = {}, stat, uu,
-	newGaugeField},
-  While[count < OptionValue[maxCount] && 
-	maxShift > OptionValue[Tolerance],
-	maxShift = 0;
-	newGaugeField = 
-	Table[
-            {uu, linkShift} = linkSaddlePoint[
-                dir, latticeCoordinates[k], maxCount -> 1, opts];
-	    maxShift = Max[linkShift, maxShift];
-	    uu,
-	    {dir, nd}, {k, latticeVolume[]}];
-	Print[stat = {count, maxShift, averagePlaquette[]}];
-	If[False,
-	   AppendTo[stat, exponentialModel[
-	       talliesToAverageErrors[polyakovLoopTallies["simple"]],
-	       printResult -> True]]];
-	AppendTo[stats, stat];
-	count++];
-  {newGaugeField, stats}];
+allLinkSaddlePoint[n_, opts:OptionsPattern[]] :=
+ Block[{distance, tallyData, ff, result, t0, t1,
+        coordList = Sort[Table[latticeCoordinates[k], {k, latticeVolume[]}],
+                         Order[linearSiteIndex[#1], linearSiteIndex[#2]]&],
+        debug = printLevel[OptionValue[printDetails], 1]},
+  distance = latticeDistanceFrom[gaugeField];
+  Table[
+      t0 = SessionTime[];
+      If[i>0,
+         gaugeField = Table[
+             ParallelMap[First[linkSaddlePoint[dir, #, opts]]&,
+                              coordList],
+	     {dir, nd}];
+         ];
+      t1 = SessionTime[];
+      If[debug > 1, Print["Step ", i, " in ", t1 - t0, " seconds"]];
+      tallyData = talliesToAverageErrors[polyakovLoopTallies["smeared"]];
+      ff = exponentialModel[tallyData];
+      result = Join[{i, distance[gaugeField], averagePlaquette[]},
+           Inner[{#1[[1]], #1[[2]], #2} &, ff["BestFitParameters"], 
+                 ff["ParameterErrors"], List]];
+      If[debug > 0, Print[result]];
+      result,
+      {i, 0, n}]];
