@@ -52,19 +52,27 @@ linkSaddlePoint[dir_, coords_, opts : OptionsPattern[]] :=
   uu = u1.u2;
   If[debug > 0, SUMatrixQ[uu, Tolerance -> 10^-7]];
   {uu, maxShift}];
+makeCoordList[] := Block[
+    {result = Array[Null&, latticeVolume[]]},
+    Do[Block[{coord = latticeCoordinates[k]},
+             result[[linearSiteIndex[coord]]] = coord],
+       {k, latticeVolume[]}]; result];
 allLinkSaddlePoint::usage = "Apply one-link saddle point step to all links, returning associated statistics.  This starts with some given gaugeField and updates it.";
-Options[allLinkSaddlePoint] = Options[linkSaddlePoint];
+Options[allLinkSaddlePoint] = Join[{maxAvgPlaquette -> 1},
+                                   Options[linkSaddlePoint]];
 allLinkSaddlePoint[n_, opts:OptionsPattern[]] :=
- Block[{distance, tallyData, ff, result, t0, t1,
-        coordList = Sort[Table[latticeCoordinates[k], {k, latticeVolume[]}],
-                         Order[linearSiteIndex[#1], linearSiteIndex[#2]]&],
+ Block[{distance, tallyData, avgP = 0, ff, result, t0, t1,
+        coordList = makeCoordList[],
+        lspo = Apply[Sequence, FilterRules[{opts}, Options[linkSaddlePoint]]],
         debug = printLevel[OptionValue[printDetails], 1]},
   distance = latticeDistanceFrom[gaugeField];
-  Table[
+  (* Sow[] and Reap[] allow an early exit from the loop. *)
+  Reap[Do[
+      If[avgP >= OptionValue[maxAvgPlaquette], Break[]];
       t0 = SessionTime[];
       If[i>0,
          gaugeField = Table[
-             ParallelMap[First[linkSaddlePoint[dir, #, opts]]&,
+             ParallelMap[First[linkSaddlePoint[dir, #, lspo]]&,
                               coordList],
 	     {dir, nd}];
          ];
@@ -72,9 +80,10 @@ allLinkSaddlePoint[n_, opts:OptionsPattern[]] :=
       If[debug > 1, Print["Step ", i, " in ", t1 - t0, " seconds"]];
       tallyData = talliesToAverageErrors[polyakovLoopTallies["smeared"]];
       ff = exponentialModel[tallyData];
-      result = Join[{i, distance[gaugeField], averagePlaquette[]},
+      avgP = averagePlaquette[];
+      result = Join[{i, distance[gaugeField], avgP},
            Inner[{#1[[1]], #1[[2]], #2} &, ff["BestFitParameters"], 
                  ff["ParameterErrors"], List]];
       If[debug > 0, Print[result]];
-      result,
-      {i, 0, n}]];
+      Sow[result],
+      {i, 0, n}]][[2,1]]];

@@ -45,9 +45,9 @@ plaquette[dir1_, dir2_, coords_List] := Re[Tr[
     ConjugateTranspose[getLink[dir1, shift[dir2, coords]]].
     ConjugateTranspose[getLink[dir2, coords]]]];
 averagePlaquette[] :=
-    Chop[Sum[Re[plaquette[dir1, dir2, latticeCoordinates[k]]],
+    Sum[Re[plaquette[dir1, dir2, latticeCoordinates[k]]],
 	     {k, latticeVolume[]}, {dir1, 2, nd},
-	     {dir2, dir1 - 1}]*2/(latticeVolume[]*nc*nd*(nd - 1))];
+	     {dir2, dir1 - 1}]*2/(latticeVolume[]*nc*nd*(nd - 1));
 makeRootLattice[] := makeRootLattice[gaugeField];
 makeRootLattice[gf_] := ParallelMap[SUPower[#, 0.5]&, gf, {2}];
 latticeDistance::usage = "Distance between two lattice configurations
@@ -147,7 +147,7 @@ polyakovLoopAdd[tallies_, dir_] :=
       fits to a cosh().  That is, he includes the direct distance
       plus wrapping any number of times around the lattice.
       However, this makes things complicated if we want to
-      include off-axis separation or contributions from
+      include off-axis separation or contributions from wrappings in
       the other direction transverse to the Polyakov loop.
 
       ntL is the area enclosed by the Polyakov loops. *)
@@ -266,7 +266,7 @@ stapleTest[] :=
 wrapIt[coords_List] :=
     MapThread[(1 + Mod[#1 - 1, #2])&, {coords, latticeDimensions}];
 plotActionLimits[] := {0, Min[2 n^2/3, 15]};
-plotActionPlane[dir1_, dir2_, anchor, range_] :=
+plotActionPlane[dir1_, dir2_, anchor_, range_] :=
  Block[{coords = anchor},
   ListPlot3D[
    Flatten[Table[coords[[dir1]] = x1;
@@ -277,7 +277,7 @@ plotActionPlane[dir1_, dir2_, anchor, range_] :=
 	   1], PlotRange -> {{1/2, latticeDimensions[[dir1]] + 1/2},
 			     {1/2, latticeDimensions[[dir2]] + 1/2},
 			     range}]];
-plotActionSides[dir0_, dir1_, dir2_, anchor, range_] :=
+plotActionSides[dir0_, dir1_, dir2_, anchor_, range_] :=
  Block[{coords = anchor},
   ListPlot3D[
    Flatten[Table[coords[[dir1]] = x1;
@@ -305,3 +305,48 @@ lineLinks[dir_, anchor_List] :=
    ColumnForm[
     Table[coords[[dir]] = i;
 	  getLink[dir, coords], {i, latticeDimensions[[dir]]}]]];
+
+(*
+  Two-point correlations of the plaquette operator.
+
+  For ThinkPad, 6 cores:
+      8^3, nc=3 lattice:  2.0 seconds
+      16^3, nc=3 lattice: 150 seconds
+ *)
+plaquetteCorrelationTallies::usage = "Returns tallies as a function of (2*distance)^2.";
+plaquetteCorrelationTallies[] :=
+ Block[{center2 = Table[If[i==#1 || i==#2, 1, 0],{i, nd}]&, pp,
+   distance2 = With[{ld = latticeDimensions},
+                   Compile[{{xa, _Integer, 1}, {xb, _Integer, 1}},
+                           Dot[#, #]&[Mod[xa - xb + ld, 2*ld] - ld]]],
+   pabList = Compile[{{lt, _Real, 1}, {pa, _Real}, {pb, _Real}},
+                     lt + {1, pa, pb, pa^2, pb^2, pa*pb}]},
+  pp = Flatten[Table[
+      Block[{coords = latticeCoordinates[k]},
+            {2*coords + center2[dir1, dir2],
+             plaquette[dir1, dir2, coords]/nc}],
+      {dir1, nd-1}, {dir2, dir1+1, nd}, {k, latticeVolume[]}], 2];
+ Merge[ParallelTable[
+  Block[{tallies = Association[{}], xa, xb, pa, pb, lt, dx2},
+   Do[
+       {xa, pa} = pp[[i]];
+       {xb, pb} = pp[[j]];
+       (* Nearest distance, including wrap-around.
+         Use twice the distance squared, so everything is an integer. *)
+       dx2 = distance2[xa, xb];
+       lt = Lookup[tallies, dx2, Table[0.0, {6}]];
+       tallies[dx2] = pabList[lt, pa, pb],
+       {i, kernel, Length[pp]-1, $KernelCount},
+       {j, i+1, Length[pp]}];
+   tallies],
+  {kernel, $KernelCount}], Total]];
+(* From https://en.wikipedia.org/wiki/Correlation_and_dependence
+  There are more correct formulas for the standard error. *)
+sampleCorrelation[d_ -> x_] :=
+    Block[{r = (x[[1]]*x[[6]] - x[[2]]*x[[3]])/
+               Sqrt[(x[[1]]*x[[4]] - x[[2]]^2) (x[[1]]*x[[5]] - x[[3]]^2)]},
+          {Sqrt[d]/2, r, Sqrt[(1-r^2)/(x[[1]]-2)]}];
+plaquetteCorrelations[] :=
+    Map[sampleCorrelation,
+        Sort[Normal[plaquetteCorrelationTallies[]],
+             Order[N[First[#1]], N[First[#2]]] &]];
