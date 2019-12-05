@@ -350,3 +350,10 @@ plaquetteCorrelations[] :=
     Map[sampleCorrelation,
         Sort[Normal[plaquetteCorrelationTallies[]],
              Order[N[First[#1]], N[First[#2]]] &]];
+plotPlaquetteCorrelations[corr_, opts:OptionsPattern[]] := 
+   (* Bug in ErrorListPlot:  x-values must be numerical *)
+ ErrorListPlot[Map[{{N[#[[1]]], #[[2]]}, ErrorBar[ #[[3]]]} &, corr], 
+  PlotRange -> {{0, All}, All}, Axes -> False, Frame -> True, 
+  FrameLabel -> {"distance", "correlation"}, 
+  Epilog -> {Dashing[0.01], 
+             Line[{{0, 0}, {1/2 + Max[Map[First, corr]], 0}}]}, opts];

@@ -10,10 +10,10 @@
 NotebookFileLineBreakTest
 NotebookFileLineBreakTest
 NotebookDataPosition[       158,          7]
-NotebookDataLength[    722133,      14651]
-NotebookOptionsPosition[    636294,      13585]
-NotebookOutlinePosition[    636656,      13601]
-CellTagsIndexPosition[    636613,      13598]
+NotebookDataLength[    764499,      15490]
+NotebookOptionsPosition[    672350,      14353]
+NotebookOutlinePosition[    672711,      14369]
+CellTagsIndexPosition[    672668,      14366]
 WindowFrame->Normal*)
 
 (* Beginning of Notebook Content *)
@@ -11572,12 +11572,780 @@ Cell[BoxData[
    3.784397806317995*^9}},ExpressionUUID->"0d132a29-0128-4d5c-ab77-\
 3a2ba0cdad8f"],
 
+Cell[CellGroupData[{
+
 Cell[BoxData["\<\"Starting external program.\"\>"], "Print",
  CellChangeTimes->{
   3.784421098079474*^9},ExpressionUUID->"60967a15-0b88-414f-a5f9-\
-5a9c08448e57"]
+5a9c08448e57"],
+
+Cell[BoxData[
+ InterpretationBox[
+  RowBox[{"\<\"External program finished, \"\>", "\[InvisibleSpace]", "8340", 
+   "\[InvisibleSpace]", "\<\" s.\"\>"}],
+  SequenceForm["External program finished, ", 8340, " s."],
+  Editable->False]], "Print",
+ CellChangeTimes->{
+  3.7844295186988897`*^9},ExpressionUUID->"4377cacd-bae5-4704-bdc4-\
+30f031b3480f"],
+
+Cell[BoxData[
+ StyleBox["\<\"MAXLAN:     10000, Restart:         4,   NED: -       1,      \
+NEC:         1\\nMATVEC:       512,  Reorth:       512, Nloop:         1,  \
+Nlocked:         0\\nTtotal:  2.350930,    T_op:  0.400234, Torth:  1.360215, \
+  Tstart:  0.192861\\nGauge matrix extreme eigenvalues found:\\n  \
+3.298052e-01\\nMAXLAN:     25000, Restart:         7,   NED: -    2000,      \
+NEC:      2000\\nMATVEC:     48577,  Reorth:     48776, Nloop:        22,  \
+Nlocked:      1413\\nTtotal: 1.436e+04,    T_op: 3.918e+03, Torth: 7.249e+03, \
+  Tstart: 3.124e+03\\nlargeShifts: ops=48577, sumNcol=48577, \
+maxNcol=1\\nlargeShifts: 48577 matrix-vector ops, 48776 reorthogonalizations \
+in 8322.48 s\\ncutoffNullSpace:  543 (max 9, norm 543) of 2000 eigenpairs \
+between [0, 1967]\\nlinearSolve:  1051 iterations, 1051 reorthogonalizations \
+in 63.83 s\\ndynamicProject:  148036 calls (148035 usertol), 5222784 \
+matrix-vector ops, max itn 54\\n                 in 2057.12 s\\nshifts.c:  \
+init and i/o 8.24 s, calculation 8388.34 s\\n\"\>",
+  StripOnInput->False,
+  FontColor->RGBColor[0, 0, 1]]], "Print",
+ CellChangeTimes->{
+  3.7844295192461157`*^9},ExpressionUUID->"29ee1165-2cef-41ed-b995-\
+a8cab9932616"]
+}, Open  ]],
+
+Cell[BoxData[
+ TemplateBox[{
+  "DeleteFile","fdnfnd",
+   "\"Directory or file \
+\\!\\(\\*RowBox[{\\\"\\\\\\\"../data/3-3/step-16-28-5-2c-1.m\\\\\\\"\\\"}]\\) \
+not found.\"",2,7,6,31699601489826673572,"Kernel 2"},
+  "MessageTemplate"]], "Message", "MSG",
+ CellChangeTimes->{
+  3.784429521707037*^9},ExpressionUUID->"2909030e-25d3-4895-98cf-\
+2507fea0998a"],
+
+Cell[CellGroupData[{
+
+Cell[BoxData["\<\"Starting external program.\"\>"], "Print",
+ CellChangeTimes->{
+  3.784429826741026*^9},ExpressionUUID->"0ade85ad-fa07-448b-99c2-\
+9ce11703f1c2"],
+
+Cell[BoxData[
+ InterpretationBox[
+  RowBox[{"\<\"External program finished, \"\>", "\[InvisibleSpace]", "12420",
+    "\[InvisibleSpace]", "\<\" s.\"\>"}],
+  SequenceForm["External program finished, ", 12420, " s."],
+  Editable->False]], "Print",
+ CellChangeTimes->{
+  3.784442364426084*^9},ExpressionUUID->"4493e2bf-02df-46c6-8eb3-\
+99ff4c974c81"],
+
+Cell[BoxData[
+ StyleBox["\<\"MAXLAN:     10000, Restart:         4,   NED: -       1,      \
+NEC:         1\\nMATVEC:       512,  Reorth:       512, Nloop:         1,  \
+Nlocked:         0\\nTtotal:  2.601407,    T_op:  0.437815, Torth:  1.557209, \
+  Tstart:  0.194815\\nGauge matrix extreme eigenvalues found:\\n  \
+2.715540e-01\\nMAXLAN:     25000, Restart:         7,   NED: -    3000,      \
+NEC:      3000\\nMATVEC:     44017,  Reorth:     44374, Nloop:        13,  \
+Nlocked:      2674\\nTtotal: 1.987e+04,    T_op: 4.068e+03, Torth: 9.373e+03, \
+  Tstart: 6.286e+03\\nlargeShifts: ops=44017, sumNcol=44017, \
+maxNcol=1\\nlargeShifts: 44017 matrix-vector ops, 44374 reorthogonalizations \
+in 12413.54 s\\ncutoffNullSpace:  382 (max 12, norm 382) of 3000 eigenpairs \
+between [0, 1526]\\nlinearSolve:  1180 iterations, 1180 reorthogonalizations \
+in 66.98 s\\ndynamicProject:  134772 calls (134771 usertol), 5214649 \
+matrix-vector ops, max itn 59\\n                 in 2267.45 s\\nshifts.c:  \
+init and i/o 8.20 s, calculation 12483.11 s\\n\"\>",
+  StripOnInput->False,
+  FontColor->RGBColor[0, 0, 1]]], "Print",
+ CellChangeTimes->{
+  3.784442364981608*^9},ExpressionUUID->"04c9e3fc-484b-4973-801e-\
+a327f6c0625c"]
+}, Open  ]],
+
+Cell[BoxData[
+ TemplateBox[{
+  "DeleteFile","fdnfnd",
+   "\"Directory or file \
+\\!\\(\\*RowBox[{\\\"\\\\\\\"../data/3-3/step-16-28-5-2c-2.m\\\\\\\"\\\"}]\\) \
+not found.\"",2,7,7,31699601489826673572,"Kernel 2"},
+  "MessageTemplate"]], "Message", "MSG",
+ CellChangeTimes->{
+  3.784442366913101*^9},ExpressionUUID->"1b88b88a-3295-4097-bec8-\
+51f496f1cc3f"],
+
+Cell[CellGroupData[{
+
+Cell[BoxData["\<\"Starting external program.\"\>"], "Print",
+ CellChangeTimes->{
+  3.784442584890073*^9},ExpressionUUID->"9a8cfc4b-3fd2-4535-9e2f-\
+217a8bb7b69d"],
+
+Cell[BoxData[
+ InterpretationBox[
+  RowBox[{"\<\"External program finished, \"\>", "\[InvisibleSpace]", "18060",
+    "\[InvisibleSpace]", "\<\" s.\"\>"}],
+  SequenceForm["External program finished, ", 18060, " s."],
+  Editable->False]], "Print",
+ CellChangeTimes->{
+  3.784469627983532*^9},ExpressionUUID->"cc837cd2-72a3-4d04-87fd-\
+0ffacafd4c77"],
+
+Cell[BoxData[
+ StyleBox["\<\"MAXLAN:     10000, Restart:         4,   NED: -       1,      \
+NEC:         1\\nMATVEC:       512,  Reorth:       512, Nloop:         1,  \
+Nlocked:         0\\nTtotal:  2.253519,    T_op:  0.409776, Torth:  1.265729, \
+  Tstart:  0.194006\\nGauge matrix extreme eigenvalues found:\\n  \
+2.290254e-01\\nMAXLAN:     25000, Restart:         7,   NED: -    3000,      \
+NEC:      3000\\nMATVEC:     41929,  Reorth:     42851, Nloop:        12,  \
+Nlocked:      2482\\nTtotal: 1.987e+04,    T_op: 3.906e+03, Torth: 9.463e+03, \
+  Tstart: 6.371e+03\\nlargeShifts: ops=41929, sumNcol=41929, \
+maxNcol=1\\nlargeShifts: 41929 matrix-vector ops, 42851 reorthogonalizations \
+in 12327.95 s\\ncutoffNullSpace:  285 (max 3, norm 285) of 3000 eigenpairs \
+between [0, 909]\\nlinearSolve:  854 iterations, 854 reorthogonalizations in \
+42.60 s\\ndynamicProject:  128421 calls (128420 usertol), 5372628 \
+matrix-vector ops, max itn 63\\n                 in 2062.22 s\\nshifts.c:  \
+init and i/o 8.45 s, calculation 12373.39 s\\n\"\>",
+  StripOnInput->False,
+  FontColor->RGBColor[0, 0, 1]]], "Print",
+ CellChangeTimes->{
+  3.784469628748517*^9},ExpressionUUID->"b5f32adc-1136-4436-9735-\
+68721d75498f"]
+}, Open  ]],
+
+Cell[BoxData[
+ TemplateBox[{
+  "DeleteFile","fdnfnd",
+   "\"Directory or file \
+\\!\\(\\*RowBox[{\\\"\\\\\\\"../data/3-3/step-16-28-5-2c-3.m\\\\\\\"\\\"}]\\) \
+not found.\"",2,7,8,31699601489826673572,"Kernel 2"},
+  "MessageTemplate"]], "Message", "MSG",
+ CellChangeTimes->{
+  3.7844696308774977`*^9},ExpressionUUID->"adf583f9-7c82-42d4-9157-\
+156c93a9ff4b"],
+
+Cell[BoxData[
+ TemplateBox[{
+  "General","stop",
+   "\"Further output of \\!\\(\\*StyleBox[RowBox[{\\\"DeleteFile\\\", \
+\\\"::\\\", \\\"fdnfnd\\\"}], \\\"MessageName\\\"]\\) will be suppressed \
+during this calculation.\"",2,7,9,31699601489826673572,"Kernel 2"},
+  "MessageTemplate"]], "Message", "MSG",
+ CellChangeTimes->{
+  3.784469630886689*^9},ExpressionUUID->"d27d05a0-8a14-43e4-ab35-\
+e159d039df1a"],
+
+Cell[CellGroupData[{
+
+Cell[BoxData["\<\"Starting external program.\"\>"], "Print",
+ CellChangeTimes->{
+  3.784469912991536*^9},ExpressionUUID->"a16feea6-df4a-41cb-a629-\
+d79973b74af7"],
+
+Cell[BoxData[
+ InterpretationBox[
+  RowBox[{"\<\"External program finished, \"\>", "\[InvisibleSpace]", "5820", 
+   "\[InvisibleSpace]", "\<\" s.\"\>"}],
+  SequenceForm["External program finished, ", 5820, " s."],
+  Editable->False]], "Print",
+ CellChangeTimes->{
+  3.784475788059539*^9},ExpressionUUID->"254b5e6c-72f7-4829-9565-\
+2ab64765089f"],
+
+Cell[BoxData[
+ StyleBox["\<\"MAXLAN:     10000, Restart:         4,   NED: -       1,      \
+NEC:         1\\nMATVEC:       512,  Reorth:       512, Nloop:         1,  \
+Nlocked:         0\\nTtotal:  2.264648,    T_op:  0.410221, Torth:  1.265485, \
+  Tstart:  0.190124\\nGauge matrix extreme eigenvalues found:\\n  \
+1.957609e-01\\nMAXLAN:     25000, Restart:         7,   NED: -    1818,      \
+NEC:      1818\\nMATVEC:     34666,  Reorth:     35740, Nloop:        18,  \
+Nlocked:      2028\\nTtotal: 1.019e+04,    T_op: 3.454e+03, Torth: 4.813e+03, \
+  Tstart: 1.881e+03\\nlargeShifts: ops=34666, sumNcol=34666, \
+maxNcol=1\\nlargeShifts: 34666 matrix-vector ops, 35740 reorthogonalizations \
+in 5798.05 s\\ncutoffNullSpace:  225 (max 5, norm 225) of 1818 eigenpairs \
+between [0, 694]\\nlinearSolve:  797 iterations, 797 reorthogonalizations in \
+38.90 s\\ndynamicProject:  106670 calls (106669 usertol), 4790875 \
+matrix-vector ops, max itn 68\\n                 in 1824.79 s\\nshifts.c:  \
+init and i/o 8.41 s, calculation 5838.79 s\\n\"\>",
+  StripOnInput->False,
+  FontColor->RGBColor[0, 0, 1]]], "Print",
+ CellChangeTimes->{
+  3.7844757886236753`*^9},ExpressionUUID->"c3dbed40-8121-41fd-aa6c-\
+315a2c768faa"],
+
+Cell[BoxData["\<\"Starting external program.\"\>"], "Print",
+ CellChangeTimes->{
+  3.784476008487894*^9},ExpressionUUID->"76250fec-02a2-4941-b93a-\
+faff5711cf3f"],
+
+Cell[BoxData[
+ InterpretationBox[
+  RowBox[{"\<\"External program finished, \"\>", "\[InvisibleSpace]", "4380", 
+   "\[InvisibleSpace]", "\<\" s.\"\>"}],
+  SequenceForm["External program finished, ", 4380, " s."],
+  Editable->False]], "Print",
+ CellChangeTimes->{
+  3.784480428275721*^9},ExpressionUUID->"2980c648-c47c-4ed7-902a-\
+756fc8cd632d"],
+
+Cell[BoxData[
+ StyleBox["\<\"MAXLAN:     10000, Restart:         4,   NED: -       1,      \
+NEC:         1\\nMATVEC:       512,  Reorth:       512, Nloop:         1,  \
+Nlocked:         0\\nTtotal:  2.463190,    T_op:  0.342375, Torth:  1.517748, \
+  Tstart:  0.194665\\nGauge matrix extreme eigenvalues found:\\n  \
+1.694227e-01\\nMAXLAN:     25000, Restart:         7,   NED: -    1388,      \
+NEC:      1388\\nMATVEC:     31789,  Reorth:     33472, Nloop:        21,  \
+Nlocked:      1220\\nTtotal: 7.880e+03,    T_op: 3.379e+03, Torth: 3.498e+03, \
+  Tstart: 9.863e+02\\nlargeShifts: ops=31789, sumNcol=31789, \
+maxNcol=1\\nlargeShifts: 31789 matrix-vector ops, 33472 reorthogonalizations \
+in 4321.83 s\\ncutoffNullSpace:  186 (max 4, norm 186) of 1388 eigenpairs \
+between [0, 545]\\nlinearSolve:  762 iterations, 762 reorthogonalizations in \
+36.92 s\\ndynamicProject:  98578 calls (98577 usertol), 4705828 matrix-vector \
+ops, max itn 72\\n                 in 1787.59 s\\nshifts.c:  init and i/o \
+8.29 s, calculation 4360.50 s\\n\"\>",
+  StripOnInput->False,
+  FontColor->RGBColor[0, 0, 1]]], "Print",
+ CellChangeTimes->{
+  3.7844804288157263`*^9},ExpressionUUID->"0ca7cb53-97a2-490a-93c3-\
+c1a4a8f19f2b"],
+
+Cell[BoxData["\<\"Starting external program.\"\>"], "Print",
+ CellChangeTimes->{
+  3.784480601473629*^9},ExpressionUUID->"ad5ad651-e00a-4baf-bb1a-\
+19eb8a5d3ac3"],
+
+Cell[BoxData[
+ InterpretationBox[
+  RowBox[{"\<\"External program finished, \"\>", "\[InvisibleSpace]", "3480", 
+   "\[InvisibleSpace]", "\<\" s.\"\>"}],
+  SequenceForm["External program finished, ", 3480, " s."],
+  Editable->False]], "Print",
+ CellChangeTimes->{
+  3.7844841153949423`*^9},ExpressionUUID->"e486a75e-1158-4776-83f9-\
+d1b0ffc2a65a"],
+
+Cell[BoxData[
+ StyleBox["\<\"MAXLAN:     10000, Restart:         4,   NED: -       1,      \
+NEC:         1\\nMATVEC:       512,  Reorth:       512, Nloop:         1,  \
+Nlocked:         0\\nTtotal:  2.276693,    T_op:  0.421550, Torth:  1.263665, \
+  Tstart:  0.195431\\nGauge matrix extreme eigenvalues found:\\n  \
+1.488751e-01\\nMAXLAN:     25000, Restart:         7,   NED: -    1090,      \
+NEC:      1090\\nMATVEC:     29033,  Reorth:     30018, Nloop:        25,  \
+Nlocked:      1059\\nTtotal: 6.395e+03,    T_op: 3.230e+03, Torth: 2.537e+03, \
+  Tstart: 6.156e+02\\nlargeShifts: ops=29033, sumNcol=29033, \
+maxNcol=1\\nlargeShifts: 29033 matrix-vector ops, 30018 reorthogonalizations \
+in 3444.04 s\\ncutoffNullSpace:  161 (max 4, norm 161) of 1090 eigenpairs \
+between [0, 431]\\nlinearSolve:  823 iterations, 823 reorthogonalizations in \
+40.17 s\\ndynamicProject:  89734 calls (89733 usertol), 4574747 matrix-vector \
+ops, max itn 77\\n                 in 1712.90 s\\nshifts.c:  init and i/o \
+8.29 s, calculation 3485.83 s\\n\"\>",
+  StripOnInput->False,
+  FontColor->RGBColor[0, 0, 1]]], "Print",
+ CellChangeTimes->{
+  3.784484115981168*^9},ExpressionUUID->"e9d63c92-0e9f-4198-b587-\
+2d3152474c97"],
+
+Cell[BoxData["\<\"Starting external program.\"\>"], "Print",
+ CellChangeTimes->{
+  3.784484306729968*^9},ExpressionUUID->"0465f26d-d5eb-495b-8174-\
+5cc2ee05b4fb"],
+
+Cell[BoxData[
+ InterpretationBox[
+  RowBox[{"\<\"External program finished, \"\>", "\[InvisibleSpace]", "2880", 
+   "\[InvisibleSpace]", "\<\" s.\"\>"}],
+  SequenceForm["External program finished, ", 2880, " s."],
+  Editable->False]], "Print",
+ CellChangeTimes->{
+  3.7844872105544987`*^9},ExpressionUUID->"a484a5a4-d42f-4255-9038-\
+2fed6b0f8a56"],
+
+Cell[BoxData[
+ StyleBox["\<\"MAXLAN:     10000, Restart:         4,   NED: -       1,      \
+NEC:         1\\nMATVEC:       512,  Reorth:       512, Nloop:         1,  \
+Nlocked:         0\\nTtotal:  2.277660,    T_op:  0.398212, Torth:  1.287718, \
+  Tstart:  0.195266\\nGauge matrix extreme eigenvalues found:\\n  \
+1.323972e-01\\nMAXLAN:     25000, Restart:         7,   NED: -     862,      \
+NEC:       862\\nMATVEC:     26399,  Reorth:     27670, Nloop:        28,  \
+Nlocked:       757\\nTtotal: 5.392e+03,    T_op: 3.092e+03, Torth: 1.932e+03, \
+  Tstart: 3.598e+02\\nlargeShifts: ops=26399, sumNcol=26399, \
+maxNcol=1\\nlargeShifts: 26399 matrix-vector ops, 27670 reorthogonalizations \
+in 2850.20 s\\ncutoffNullSpace:  132 (max 5, norm 132) of 862 eigenpairs \
+between [0, 328]\\nlinearSolve:  790 iterations, 790 reorthogonalizations in \
+38.26 s\\ndynamicProject:  82052 calls (82051 usertol), 4392581 matrix-vector \
+ops, max itn 81\\n                 in 1639.22 s\\nshifts.c:  init and i/o \
+8.24 s, calculation 2890.00 s\\n\"\>",
+  StripOnInput->False,
+  FontColor->RGBColor[0, 0, 1]]], "Print",
+ CellChangeTimes->{
+  3.784487211226231*^9},ExpressionUUID->"ddf87f7b-ff7b-460f-9269-\
+6ee2cdce1e60"],
+
+Cell[BoxData["\<\"Starting external program.\"\>"], "Print",
+ CellChangeTimes->{
+  3.784487380252697*^9},ExpressionUUID->"72fcb74d-ad4d-4246-b527-\
+c25587a375e9"],
+
+Cell[BoxData[
+ InterpretationBox[
+  RowBox[{"\<\"External program finished, \"\>", "\[InvisibleSpace]", "2640", 
+   "\[InvisibleSpace]", "\<\" s.\"\>"}],
+  SequenceForm["External program finished, ", 2640, " s."],
+  Editable->False]], "Print",
+ CellChangeTimes->{
+  3.784490044302631*^9},ExpressionUUID->"3d674214-662d-4048-9003-\
+d12fc0d6a1dd"],
+
+Cell[BoxData[
+ StyleBox["\<\"MAXLAN:     10000, Restart:         4,   NED: -       1,      \
+NEC:         1\\nMATVEC:       512,  Reorth:       512, Nloop:         1,  \
+Nlocked:         0\\nTtotal:  2.479459,    T_op:  0.417753, Torth:  1.453661, \
+  Tstart:  0.199974\\nGauge matrix extreme eigenvalues found:\\n  \
+1.189354e-01\\nMAXLAN:     25000, Restart:         7,   NED: -     656,      \
+NEC:       656\\nMATVEC:     23851,  Reorth:     24812, Nloop:        34,  \
+Nlocked:       565\\nTtotal: 5.018e+03,    T_op: 3.427e+03, Torth: 1.385e+03, \
+  Tstart: 1.987e+02\\nlargeShifts: ops=23851, sumNcol=23851, \
+maxNcol=1\\nlargeShifts: 23851 matrix-vector ops, 24812 reorthogonalizations \
+in 2608.87 s\\ncutoffNullSpace:  115 (max 3, norm 115) of 656 eigenpairs \
+between [0, 266]\\nlinearSolve:  734 iterations, 734 reorthogonalizations in \
+35.74 s\\ndynamicProject:  73986 calls (73985 usertol), 4166429 matrix-vector \
+ops, max itn 85\\n                 in 1819.71 s\\nshifts.c:  init and i/o \
+8.27 s, calculation 2646.22 s\\n\"\>",
+  StripOnInput->False,
+  FontColor->RGBColor[0, 0, 1]]], "Print",
+ CellChangeTimes->{
+  3.784490044830657*^9},ExpressionUUID->"ff721daa-db93-4582-8a6c-\
+8cb1e070644c"],
+
+Cell[BoxData["\<\"Starting external program.\"\>"], "Print",
+ CellChangeTimes->{
+  3.784490211057341*^9},ExpressionUUID->"a6dbf82f-a0a1-45c0-8b46-\
+3f66649f1961"],
+
+Cell[BoxData[
+ InterpretationBox[
+  RowBox[{"\<\"External program finished, \"\>", "\[InvisibleSpace]", "2220", 
+   "\[InvisibleSpace]", "\<\" s.\"\>"}],
+  SequenceForm["External program finished, ", 2220, " s."],
+  Editable->False]], "Print",
+ CellChangeTimes->{
+  3.7844924506150913`*^9},ExpressionUUID->"d08c9ef9-2bfd-46f7-af28-\
+d75e0552ec41"],
+
+Cell[BoxData[
+ StyleBox["\<\"MAXLAN:     10000, Restart:         4,   NED: -       1,      \
+NEC:         1\\nMATVEC:       512,  Reorth:       512, Nloop:         1,  \
+Nlocked:         0\\nTtotal:  2.760730,    T_op:  0.461481, Torth:  1.698826, \
+  Tstart:  0.199306\\nGauge matrix extreme eigenvalues found:\\n  \
+1.078135e-01\\nMAXLAN:     25000, Restart:         7,   NED: -     532,      \
+NEC:       532\\nMATVEC:     22386,  Reorth:     23680, Nloop:        38,  \
+Nlocked:       469\\nTtotal: 4.160e+03,    T_op: 2.867e+03, Torth: 1.137e+03, \
+  Tstart: 1.506e+02\\nlargeShifts: ops=22386, sumNcol=22386, \
+maxNcol=1\\nlargeShifts: 22386 matrix-vector ops, 23680 reorthogonalizations \
+in 2158.94 s\\ncutoffNullSpace:  116 (max 3, norm 116) of 532 eigenpairs \
+between [0, 266]\\nlinearSolve:  522 iterations, 522 reorthogonalizations in \
+25.32 s\\ndynamicProject:  69500 calls (69499 usertol), 4068932 matrix-vector \
+ops, max itn 90\\n                 in 1516.65 s\\nshifts.c:  init and i/o \
+8.21 s, calculation 2185.99 s\\n\"\>",
+  StripOnInput->False,
+  FontColor->RGBColor[0, 0, 1]]], "Print",
+ CellChangeTimes->{
+  3.784492451194951*^9},ExpressionUUID->"d41a027d-baa7-41b1-aa2a-\
+114a4129e9df"],
+
+Cell[BoxData["\<\"Starting external program.\"\>"], "Print",
+ CellChangeTimes->{
+  3.784492613602147*^9},ExpressionUUID->"5334e2aa-c4f7-496e-95bc-\
+0cd40cd24046"],
+
+Cell[BoxData[
+ InterpretationBox[
+  RowBox[{"\<\"External program finished, \"\>", "\[InvisibleSpace]", "2220", 
+   "\[InvisibleSpace]", "\<\" s.\"\>"}],
+  SequenceForm["External program finished, ", 2220, " s."],
+  Editable->False]], "Print",
+ CellChangeTimes->{
+  3.78449485174548*^9},ExpressionUUID->"c909f4e9-13b0-4dc7-bc23-6f8c9397a4e4"],
+
+Cell[BoxData[
+ StyleBox["\<\"MAXLAN:     10000, Restart:         4,   NED: -       1,      \
+NEC:         1\\nMATVEC:       512,  Reorth:       512, Nloop:         1,  \
+Nlocked:         0\\nTtotal:  2.269261,    T_op:  0.393238, Torth:  1.279892, \
+  Tstart:  0.198749\\nGauge matrix extreme eigenvalues found:\\n  \
+9.858464e-02\\nMAXLAN:     25000, Restart:         7,   NED: -     532,      \
+NEC:       532\\nMATVEC:     21966,  Reorth:     23502, Nloop:        38,  \
+Nlocked:       476\\nTtotal: 4.185e+03,    T_op: 2.924e+03, Torth: 1.120e+03, \
+  Tstart: 1.357e+02\\nlargeShifts: ops=21966, sumNcol=21966, \
+maxNcol=1\\nlargeShifts: 21966 matrix-vector ops, 23502 reorthogonalizations \
+in 2165.65 s\\ncutoffNullSpace:  110 (max 2, norm 110) of 532 eigenpairs \
+between [0, 265]\\nlinearSolve:  456 iterations, 456 reorthogonalizations in \
+22.28 s\\ndynamicProject:  68350 calls (68349 usertol), 4147186 matrix-vector \
+ops, max itn 94\\n                 in 1545.90 s\\nshifts.c:  init and i/o \
+8.29 s, calculation 2189.42 s\\n\"\>",
+  StripOnInput->False,
+  FontColor->RGBColor[0, 0, 1]]], "Print",
+ CellChangeTimes->{
+  3.784494852276553*^9},ExpressionUUID->"bce434f2-e990-4204-8072-\
+bbf775170024"],
+
+Cell[BoxData["\<\"Starting external program.\"\>"], "Print",
+ CellChangeTimes->{
+  3.7844950126905813`*^9},ExpressionUUID->"7b40be68-11c9-468b-8a55-\
+9fea26bdb237"],
+
+Cell[BoxData[
+ InterpretationBox[
+  RowBox[{"\<\"External program finished, \"\>", "\[InvisibleSpace]", "2280", 
+   "\[InvisibleSpace]", "\<\" s.\"\>"}],
+  SequenceForm["External program finished, ", 2280, " s."],
+  Editable->False]], "Print",
+ CellChangeTimes->{
+  3.784497311431426*^9},ExpressionUUID->"9a63057c-e953-4a42-a72a-\
+45e7628997ed"],
+
+Cell[BoxData[
+ StyleBox["\<\"MAXLAN:     10000, Restart:         4,   NED: -       1,      \
+NEC:         1\\nMATVEC:       512,  Reorth:       512, Nloop:         1,  \
+Nlocked:         0\\nTtotal:  2.279458,    T_op:  0.403761, Torth:  1.262448, \
+  Tstart:  0.196745\\nGauge matrix extreme eigenvalues found:\\n  \
+9.147819e-02\\nMAXLAN:     25000, Restart:         7,   NED: -     530,      \
+NEC:       530\\nMATVEC:     21644,  Reorth:     23067, Nloop:        37,  \
+Nlocked:       487\\nTtotal: 4.285e+03,    T_op: 3.009e+03, Torth: 1.127e+03, \
+  Tstart: 1.431e+02\\nlargeShifts: ops=21644, sumNcol=21644, \
+maxNcol=1\\nlargeShifts: 21644 matrix-vector ops, 23067 reorthogonalizations \
+in 2218.61 s\\ncutoffNullSpace:  96 (max 2, norm 96) of 530 eigenpairs \
+between [0, 222]\\nlinearSolve:  495 iterations, 495 reorthogonalizations in \
+24.21 s\\ndynamicProject:  67349 calls (67348 usertol), 4223613 matrix-vector \
+ops, max itn 96\\n                 in 1594.81 s\\nshifts.c:  init and i/o \
+8.24 s, calculation 2244.31 s\\n\"\>",
+  StripOnInput->False,
+  FontColor->RGBColor[0, 0, 1]]], "Print",
+ CellChangeTimes->{
+  3.784497311998399*^9},ExpressionUUID->"d90ec73f-ab26-4cde-93de-\
+ee377d0e6364"],
+
+Cell[BoxData["\<\"Starting external program.\"\>"], "Print",
+ CellChangeTimes->{
+  3.784497474631197*^9},ExpressionUUID->"9ec5810c-d0fc-4b33-97e7-\
+7359579c5537"],
+
+Cell[BoxData[
+ InterpretationBox[
+  RowBox[{"\<\"External program finished, \"\>", "\[InvisibleSpace]", "2040", 
+   "\[InvisibleSpace]", "\<\" s.\"\>"}],
+  SequenceForm["External program finished, ", 2040, " s."],
+  Editable->False]], "Print",
+ CellChangeTimes->{
+  3.784499530802723*^9},ExpressionUUID->"0903c6db-270e-4d74-8048-\
+3d9539b67a8e"],
+
+Cell[BoxData[
+ StyleBox["\<\"MAXLAN:     10000, Restart:         4,   NED: -       1,      \
+NEC:         1\\nMATVEC:       512,  Reorth:       512, Nloop:         1,  \
+Nlocked:         0\\nTtotal:  2.275042,    T_op:  0.405233, Torth:  1.284438, \
+  Tstart:  0.196841\\nGauge matrix extreme eigenvalues found:\\n  \
+8.597171e-02\\nMAXLAN:     25000, Restart:         7,   NED: -     444,      \
+NEC:       444\\nMATVEC:     19916,  Reorth:     21405, Nloop:        39,  \
+Nlocked:       376\\nTtotal: 3.850e+03,    T_op: 2.780e+03, Torth: 9.408e+02, \
+  Tstart: 1.242e+02\\nlargeShifts: ops=19916, sumNcol=19916, \
+maxNcol=1\\nlargeShifts: 19916 matrix-vector ops, 21405 reorthogonalizations \
+in 1994.08 s\\ncutoffNullSpace:  89 (max 3, norm 89) of 444 eigenpairs \
+between [0, 185]\\nlinearSolve:  404 iterations, 404 reorthogonalizations in \
+19.57 s\\ndynamicProject:  62049 calls (62048 usertol), 3984057 matrix-vector \
+ops, max itn 100\\n                 in 1470.45 s\\nshifts.c:  init and i/o \
+8.27 s, calculation 2015.13 s\\n\"\>",
+  StripOnInput->False,
+  FontColor->RGBColor[0, 0, 1]]], "Print",
+ CellChangeTimes->{
+  3.784499531388823*^9},ExpressionUUID->"40c58f5e-aa00-47fa-acf1-\
+2e6dc2e2445b"],
+
+Cell[BoxData["\<\"Starting external program.\"\>"], "Print",
+ CellChangeTimes->{
+  3.784499708326211*^9},ExpressionUUID->"bad07808-121f-42e5-b19a-\
+520bacdeb7fc"],
+
+Cell[BoxData[
+ InterpretationBox[
+  RowBox[{"\<\"External program finished, \"\>", "\[InvisibleSpace]", "1920", 
+   "\[InvisibleSpace]", "\<\" s.\"\>"}],
+  SequenceForm["External program finished, ", 1920, " s."],
+  Editable->False]], "Print",
+ CellChangeTimes->{
+  3.784501646780361*^9},ExpressionUUID->"dd9bcede-25c5-4871-9966-\
+e2d1f914cee6"],
+
+Cell[BoxData[
+ StyleBox["\<\"MAXLAN:     10000, Restart:         4,   NED: -       1,      \
+NEC:         1\\nMATVEC:       512,  Reorth:       512, Nloop:         1,  \
+Nlocked:         0\\nTtotal:  2.252163,    T_op:  0.402428, Torth:  1.263862, \
+  Tstart:  0.194977\\nGauge matrix extreme eigenvalues found:\\n  \
+8.085467e-02\\nMAXLAN:     25000, Restart:         7,   NED: -     370,      \
+NEC:       370\\nMATVEC:     18975,  Reorth:     20608, Nloop:        46,  \
+Nlocked:       327\\nTtotal: 3.582e+03,    T_op: 2.710e+03, Torth: 7.675e+02, \
+  Tstart: 1.005e+02\\nlargeShifts: ops=18975, sumNcol=18975, \
+maxNcol=1\\nlargeShifts: 18975 matrix-vector ops, 20608 reorthogonalizations \
+in 1852.07 s\\ncutoffNullSpace:  82 (max 4, norm 82) of 370 eigenpairs \
+between [0, 185]\\nlinearSolve:  434 iterations, 434 reorthogonalizations in \
+21.65 s\\ndynamicProject:  59430 calls (59429 usertol), 3897720 matrix-vector \
+ops, max itn 101\\n                 in 1436.09 s\\nshifts.c:  init and i/o \
+8.87 s, calculation 1875.18 s\\n\"\>",
+  StripOnInput->False,
+  FontColor->RGBColor[0, 0, 1]]], "Print",
+ CellChangeTimes->{
+  3.7845016474497013`*^9},ExpressionUUID->"275a378c-c7df-4eba-ac80-\
+cbbabbaaf310"],
+
+Cell[BoxData["\<\"Starting external program.\"\>"], "Print",
+ CellChangeTimes->{
+  3.784502049440393*^9},ExpressionUUID->"77d4219c-c8f1-42ea-84e1-\
+9b7212899ed0"],
+
+Cell[BoxData[
+ InterpretationBox[
+  RowBox[{"\<\"External program finished, \"\>", "\[InvisibleSpace]", "1860", 
+   "\[InvisibleSpace]", "\<\" s.\"\>"}],
+  SequenceForm["External program finished, ", 1860, " s."],
+  Editable->False]], "Print",
+ CellChangeTimes->{
+  3.7845039251089373`*^9},ExpressionUUID->"55112003-e730-4068-8c14-\
+b27f39dff0dd"],
+
+Cell[BoxData[
+ StyleBox["\<\"MAXLAN:     10000, Restart:         4,   NED: -       1,      \
+NEC:         1\\nMATVEC:       512,  Reorth:       512, Nloop:         1,  \
+Nlocked:         0\\nTtotal:  2.305067,    T_op:  0.408824, Torth:  1.290296, \
+  Tstart:  0.194270\\nGauge matrix extreme eigenvalues found:\\n  \
+7.671228e-02\\nMAXLAN:     25000, Restart:         7,   NED: -     370,      \
+NEC:       370\\nMATVEC:     18413,  Reorth:     19924, Nloop:        45,  \
+Nlocked:       333\\nTtotal: 3.519e+03,    T_op: 2.661e+03, Torth: 7.514e+02, \
+  Tstart: 1.014e+02\\nlargeShifts: ops=18413, sumNcol=18413, \
+maxNcol=1\\nlargeShifts: 18413 matrix-vector ops, 19924 reorthogonalizations \
+in 1819.55 s\\ncutoffNullSpace:  78 (max 1, norm 78) of 370 eigenpairs \
+between [0, 140]\\nlinearSolve:  367 iterations, 367 reorthogonalizations in \
+17.63 s\\ndynamicProject:  57488 calls (57487 usertol), 3854135 matrix-vector \
+ops, max itn 103\\n                 in 1407.81 s\\nshifts.c:  init and i/o \
+8.35 s, calculation 1838.69 s\\n\"\>",
+  StripOnInput->False,
+  FontColor->RGBColor[0, 0, 1]]], "Print",
+ CellChangeTimes->{
+  3.784503925647338*^9},ExpressionUUID->"f51d038e-cbc5-4759-9392-\
+c4fe25f8bfec"],
+
+Cell[BoxData["\<\"Starting external program.\"\>"], "Print",
+ CellChangeTimes->{
+  3.784504109657967*^9},ExpressionUUID->"623b964f-2d96-4a0c-9159-\
+b24f78fd76bf"],
+
+Cell[BoxData[
+ InterpretationBox[
+  RowBox[{"\<\"External program finished, \"\>", "\[InvisibleSpace]", "1740", 
+   "\[InvisibleSpace]", "\<\" s.\"\>"}],
+  SequenceForm["External program finished, ", 1740, " s."],
+  Editable->False]], "Print",
+ CellChangeTimes->{
+  3.784505872274569*^9},ExpressionUUID->"07802912-356d-4e98-833f-\
+ad771e8a6a97"],
+
+Cell[BoxData[
+ StyleBox["\<\"MAXLAN:     10000, Restart:         4,   NED: -       1,      \
+NEC:         1\\nMATVEC:       512,  Reorth:       512, Nloop:         1,  \
+Nlocked:         0\\nTtotal:  2.306882,    T_op:  0.431008, Torth:  1.281829, \
+  Tstart:  0.195701\\nGauge matrix extreme eigenvalues found:\\n  \
+7.294498e-02\\nMAXLAN:     25000, Restart:         7,   NED: -     280,      \
+NEC:       280\\nMATVEC:     17215,  Reorth:     18822, Nloop:        54,  \
+Nlocked:       249\\nTtotal: 3.241e+03,    T_op: 2.548e+03, Torth: 5.901e+02, \
+  Tstart: 9.923e+01\\nlargeShifts: ops=17215, sumNcol=17215, \
+maxNcol=1\\nlargeShifts: 17215 matrix-vector ops, 18822 reorthogonalizations \
+in 1682.17 s\\ncutoffNullSpace:  78 (max 1, norm 78) of 280 eigenpairs \
+between [0, 143]\\nlinearSolve:  319 iterations, 319 reorthogonalizations in \
+15.80 s\\ndynamicProject:  53894 calls (53893 usertol), 3668262 matrix-vector \
+ops, max itn 108\\n                 in 1348.12 s\\nshifts.c:  init and i/o \
+8.20 s, calculation 1699.47 s\\n\"\>",
+  StripOnInput->False,
+  FontColor->RGBColor[0, 0, 1]]], "Print",
+ CellChangeTimes->{
+  3.784505872942965*^9},ExpressionUUID->"05914cd6-e0f3-4e9e-b0c6-\
+964d851548ca"],
+
+Cell[BoxData["\<\"Starting external program.\"\>"], "Print",
+ CellChangeTimes->{
+  3.7845062673762197`*^9},ExpressionUUID->"b35f5f14-0f82-46c3-86a1-\
+147c3a5fa0e1"],
+
+Cell[BoxData[
+ InterpretationBox[
+  RowBox[{"\<\"External program finished, \"\>", "\[InvisibleSpace]", "1740", 
+   "\[InvisibleSpace]", "\<\" s.\"\>"}],
+  SequenceForm["External program finished, ", 1740, " s."],
+  Editable->False]], "Print",
+ CellChangeTimes->{
+  3.784508022331524*^9},ExpressionUUID->"df2fa229-16f1-4894-8c7d-\
+51fc899eb3af"],
+
+Cell[BoxData[
+ StyleBox["\<\"MAXLAN:     10000, Restart:         4,   NED: -       1,      \
+NEC:         1\\nMATVEC:       512,  Reorth:       512, Nloop:         1,  \
+Nlocked:         0\\nTtotal:  2.502452,    T_op:  0.338066, Torth:  1.563100, \
+  Tstart:  0.193392\\nGauge matrix extreme eigenvalues found:\\n  \
+6.969589e-02\\nMAXLAN:     25000, Restart:         7,   NED: -     286,      \
+NEC:       286\\nMATVEC:     16973,  Reorth:     18859, Nloop:        52,  \
+Nlocked:       247\\nTtotal: 3.276e+03,    T_op: 2.576e+03, Torth: 5.999e+02, \
+  Tstart: 9.545e+01\\nlargeShifts: ops=16973, sumNcol=16973, \
+maxNcol=1\\nlargeShifts: 16973 matrix-vector ops, 18859 reorthogonalizations \
+in 1697.92 s\\ncutoffNullSpace:  63 (max 2, norm 63) of 286 eigenpairs \
+between [0, 142]\\nlinearSolve:  403 iterations, 403 reorthogonalizations in \
+20.21 s\\ndynamicProject:  53615 calls (53614 usertol), 3687484 matrix-vector \
+ops, max itn 111\\n                 in 1367.64 s\\nshifts.c:  init and i/o \
+8.29 s, calculation 1719.73 s\\n\"\>",
+  StripOnInput->False,
+  FontColor->RGBColor[0, 0, 1]]], "Print",
+ CellChangeTimes->{
+  3.784508022933132*^9},ExpressionUUID->"b7c48055-08f6-4334-861d-\
+bcc50e83bf3f"],
+
+Cell[BoxData["\<\"Starting external program.\"\>"], "Print",
+ CellChangeTimes->{
+  3.7845082202775593`*^9},ExpressionUUID->"d0f4637f-b542-4061-8f58-\
+64abd18dc380"],
+
+Cell[BoxData[
+ InterpretationBox[
+  RowBox[{"\<\"External program finished, \"\>", "\[InvisibleSpace]", "1740", 
+   "\[InvisibleSpace]", "\<\" s.\"\>"}],
+  SequenceForm["External program finished, ", 1740, " s."],
+  Editable->False]], "Print",
+ CellChangeTimes->{
+  3.784509977203342*^9},ExpressionUUID->"ad266b07-e45d-4a66-be94-\
+8f525941c079"],
+
+Cell[BoxData[
+ StyleBox["\<\"MAXLAN:     10000, Restart:         4,   NED: -       1,      \
+NEC:         1\\nMATVEC:       512,  Reorth:       512, Nloop:         1,  \
+Nlocked:         0\\nTtotal:  2.516539,    T_op:  0.433827, Torth:  1.494643, \
+  Tstart:  0.200867\\nGauge matrix extreme eigenvalues found:\\n  \
+6.677975e-02\\nMAXLAN:     25000, Restart:         7,   NED: -     284,      \
+NEC:       284\\nMATVEC:     16893,  Reorth:     19280, Nloop:        52,  \
+Nlocked:       232\\nTtotal: 3.274e+03,    T_op: 2.565e+03, Torth: 6.103e+02, \
+  Tstart: 9.415e+01\\nlargeShifts: ops=16893, sumNcol=16893, \
+maxNcol=1\\nlargeShifts: 16893 matrix-vector ops, 19280 reorthogonalizations \
+in 1698.08 s\\ncutoffNullSpace:  60 (max 1, norm 60) of 284 eigenpairs \
+between [0, 100]\\nlinearSolve:  373 iterations, 373 reorthogonalizations in \
+19.01 s\\ndynamicProject:  53816 calls (53815 usertol), 3723169 matrix-vector \
+ops, max itn 110\\n                 in 1364.54 s\\nshifts.c:  init and i/o \
+8.24 s, calculation 1718.67 s\\n\"\>",
+  StripOnInput->False,
+  FontColor->RGBColor[0, 0, 1]]], "Print",
+ CellChangeTimes->{
+  3.784509977784409*^9},ExpressionUUID->"957c081a-8cd1-4d63-934e-\
+c90316d75cc0"],
+
+Cell[BoxData["\<\"Starting external program.\"\>"], "Print",
+ CellChangeTimes->{
+  3.7845101603219976`*^9},ExpressionUUID->"67beb224-77be-49d8-89ab-\
+286e7541c7ba"],
+
+Cell[BoxData[
+ InterpretationBox[
+  RowBox[{"\<\"External program finished, \"\>", "\[InvisibleSpace]", "1680", 
+   "\[InvisibleSpace]", "\<\" s.\"\>"}],
+  SequenceForm["External program finished, ", 1680, " s."],
+  Editable->False]], "Print",
+ CellChangeTimes->{
+  3.7845118550143557`*^9},ExpressionUUID->"68c3500b-35d4-43dc-b8ff-\
+2b926b509434"],
+
+Cell[BoxData[
+ StyleBox["\<\"MAXLAN:     10000, Restart:         4,   NED: -       1,      \
+NEC:         1\\nMATVEC:       512,  Reorth:       512, Nloop:         1,  \
+Nlocked:         0\\nTtotal:  2.793360,    T_op:  0.457358, Torth:  1.708122, \
+  Tstart:  0.201287\\nGauge matrix extreme eigenvalues found:\\n  \
+6.478255e-02\\nMAXLAN:     25000, Restart:         7,   NED: -     250,      \
+NEC:       250\\nMATVEC:     16015,  Reorth:     18186, Nloop:        56,  \
+Nlocked:       212\\nTtotal: 3.087e+03,    T_op: 2.460e+03, Torth: 5.291e+02, \
+  Tstart: 9.358e+01\\nlargeShifts: ops=16015, sumNcol=16015, \
+maxNcol=1\\nlargeShifts: 16015 matrix-vector ops, 18186 reorthogonalizations \
+in 1602.99 s\\ncutoffNullSpace:  58 (max 2, norm 58) of 250 eigenpairs \
+between [0, 141]\\nlinearSolve:  411 iterations, 411 reorthogonalizations in \
+21.11 s\\ndynamicProject:  51042 calls (51041 usertol), 3569710 matrix-vector \
+ops, max itn 112\\n                 in 1309.91 s\\nshifts.c:  init and i/o \
+8.30 s, calculation 1625.83 s\\n\"\>",
+  StripOnInput->False,
+  FontColor->RGBColor[0, 0, 1]]], "Print",
+ CellChangeTimes->{
+  3.784511855647517*^9},ExpressionUUID->"a88abc9b-ceb8-454e-9698-\
+ac9622b7ca19"],
+
+Cell[BoxData["\<\"Starting external program.\"\>"], "Print",
+ CellChangeTimes->{
+  3.78451215181504*^9},ExpressionUUID->"f7602b52-2b20-4976-ac83-b6b8a749c722"],
+
+Cell[BoxData[
+ InterpretationBox[
+  RowBox[{"\<\"External program finished, \"\>", "\[InvisibleSpace]", "1800", 
+   "\[InvisibleSpace]", "\<\" s.\"\>"}],
+  SequenceForm["External program finished, ", 1800, " s."],
+  Editable->False]], "Print",
+ CellChangeTimes->{
+  3.784513966506339*^9},ExpressionUUID->"d2bd03e9-0bba-46b0-8d67-\
+ecc296d37ef6"],
+
+Cell[BoxData[
+ StyleBox["\<\"MAXLAN:     10000, Restart:         4,   NED: -       1,      \
+NEC:         1\\nMATVEC:       512,  Reorth:       512, Nloop:         1,  \
+Nlocked:         0\\nTtotal:  2.390088,    T_op:  0.375103, Torth:  1.411064, \
+  Tstart:  0.194663\\nGauge matrix extreme eigenvalues found:\\n  \
+6.325622e-02\\nMAXLAN:     25000, Restart:         7,   NED: -     282,      \
+NEC:       282\\nMATVEC:     16698,  Reorth:     19000, Nloop:        53,  \
+Nlocked:       248\\nTtotal: 3.384e+03,    T_op: 2.682e+03, Torth: 6.063e+02, \
+  Tstart: 9.185e+01\\nlargeShifts: ops=16698, sumNcol=16698, \
+maxNcol=1\\nlargeShifts: 16698 matrix-vector ops, 19000 reorthogonalizations \
+in 1750.90 s\\ncutoffNullSpace:  57 (max 1, norm 57) of 282 eigenpairs \
+between [0, 141]\\nlinearSolve:  368 iterations, 368 reorthogonalizations in \
+19.39 s\\ndynamicProject:  53136 calls (53135 usertol), 3736127 matrix-vector \
+ops, max itn 115\\n                 in 1429.96 s\\nshifts.c:  init and i/o \
+8.26 s, calculation 1771.82 s\\n\"\>",
+  StripOnInput->False,
+  FontColor->RGBColor[0, 0, 1]]], "Print",
+ CellChangeTimes->{
+  3.784513967094192*^9},ExpressionUUID->"3391f723-736e-43c2-a261-\
+ae3605070a4c"],
+
+Cell[BoxData["\<\"Starting external program.\"\>"], "Print",
+ CellChangeTimes->{
+  3.78451412674984*^9},ExpressionUUID->"54f5a468-7e97-48e7-97c5-3c4ef026ad47"],
+
+Cell[BoxData[
+ InterpretationBox[
+  RowBox[{"\<\"External program finished, \"\>", "\[InvisibleSpace]", "1740", 
+   "\[InvisibleSpace]", "\<\" s.\"\>"}],
+  SequenceForm["External program finished, ", 1740, " s."],
+  Editable->False]], "Print",
+ CellChangeTimes->{
+  3.784515880730035*^9},ExpressionUUID->"dcb2311d-c55f-49a0-94e7-\
+564dcf35c37f"],
+
+Cell[BoxData[
+ StyleBox["\<\"MAXLAN:     10000, Restart:         4,   NED: -       1,      \
+NEC:         1\\nMATVEC:       512,  Reorth:       512, Nloop:         1,  \
+Nlocked:         0\\nTtotal:  2.274207,    T_op:  0.407779, Torth:  1.274312, \
+  Tstart:  0.199914\\nGauge matrix extreme eigenvalues found:\\n  \
+6.166465e-02\\nMAXLAN:     25000, Restart:         7,   NED: -     282,      \
+NEC:       282\\nMATVEC:     16403,  Reorth:     18766, Nloop:        51,  \
+Nlocked:       243\\nTtotal: 3.248e+03,    T_op: 2.559e+03, Torth: 5.948e+02, \
+  Tstart: 9.088e+01\\nlargeShifts: ops=16403, sumNcol=16403, \
+maxNcol=1\\nlargeShifts: 16403 matrix-vector ops, 18766 reorthogonalizations \
+in 1681.37 s\\ncutoffNullSpace:  56 (max 2, norm 56) of 282 eigenpairs \
+between [0, 141]\\nlinearSolve:  368 iterations, 368 reorthogonalizations in \
+19.67 s\\ndynamicProject:  52312 calls (52311 usertol), 3697677 matrix-vector \
+ops, max itn 117\\n                 in 1360.84 s\\nshifts.c:  init and i/o \
+8.32 s, calculation 1702.51 s\\n\"\>",
+  StripOnInput->False,
+  FontColor->RGBColor[0, 0, 1]]], "Print",
+ CellChangeTimes->{
+  3.784515881354228*^9},ExpressionUUID->"6f8c7790-855f-4a21-8d03-\
+606b5b36522c"]
 }, Open  ]]
 }, Open  ]]
+}, Closed]]
 }, Open  ]],
 
 Cell[CellGroupData[{
@@ -13585,7 +14353,7 @@ cce11580648d"]
 },
 Evaluator->"Kernel 2",
 WindowSize->{852, 699},
-WindowMargins->{{Automatic, 47}, {10, Automatic}},
+WindowMargins->{{Automatic, 32}, {0, Automatic}},
 FrontEndVersion->"11.2 for Linux x86 (64-bit) (September 10, 2017)",
 StyleDefinitions->"Default.nb"
 ]
@@ -14514,142 +15282,213 @@ Cell[528604, 11465, 1210, 19, 356, "Print",ExpressionUUID->"b951a103-75ea-40d4-9
 }, Open  ]],
 Cell[CellGroupData[{
 Cell[529863, 11490, 3975, 82, 331, "Input",ExpressionUUID->"0d132a29-0128-4d5c-ab77-3a2ba0cdad8f"],
-Cell[533841, 11574, 162, 3, 25, "Print",ExpressionUUID->"60967a15-0b88-414f-a5f9-5a9c08448e57"]
+Cell[CellGroupData[{
+Cell[533863, 11576, 162, 3, 25, "Print",ExpressionUUID->"60967a15-0b88-414f-a5f9-5a9c08448e57"],
+Cell[534028, 11581, 347, 8, 25, "Print",ExpressionUUID->"4377cacd-bae5-4704-bdc4-30f031b3480f"],
+Cell[534378, 11591, 1220, 19, 356, "Print",ExpressionUUID->"29ee1165-2cef-41ed-b995-a8cab9932616"]
+}, Open  ]],
+Cell[535613, 11613, 356, 9, 22, "Message",ExpressionUUID->"2909030e-25d3-4895-98cf-2507fea0998a"],
+Cell[CellGroupData[{
+Cell[535994, 11626, 162, 3, 25, "Print",ExpressionUUID->"0ade85ad-fa07-448b-99c2-9ce11703f1c2"],
+Cell[536159, 11631, 347, 8, 25, "Print",ExpressionUUID->"4493e2bf-02df-46c6-8eb3-99ff4c974c81"],
+Cell[536509, 11641, 1221, 19, 356, "Print",ExpressionUUID->"04c9e3fc-484b-4973-801e-a327f6c0625c"]
+}, Open  ]],
+Cell[537745, 11663, 356, 9, 22, "Message",ExpressionUUID->"1b88b88a-3295-4097-bec8-51f496f1cc3f"],
+Cell[CellGroupData[{
+Cell[538126, 11676, 162, 3, 25, "Print",ExpressionUUID->"9a8cfc4b-3fd2-4535-9e2f-217a8bb7b69d"],
+Cell[538291, 11681, 347, 8, 25, "Print",ExpressionUUID->"cc837cd2-72a3-4d04-87fd-0ffacafd4c77"],
+Cell[538641, 11691, 1217, 19, 356, "Print",ExpressionUUID->"b5f32adc-1136-4436-9735-68721d75498f"]
+}, Open  ]],
+Cell[539873, 11713, 358, 9, 22, "Message",ExpressionUUID->"adf583f9-7c82-42d4-9157-156c93a9ff4b"],
+Cell[540234, 11724, 406, 9, 22, "Message",ExpressionUUID->"d27d05a0-8a14-43e4-ab35-e159d039df1a"],
+Cell[CellGroupData[{
+Cell[540665, 11737, 162, 3, 25, "Print",ExpressionUUID->"a16feea6-df4a-41cb-a629-d79973b74af7"],
+Cell[540830, 11742, 345, 8, 25, "Print",ExpressionUUID->"254b5e6c-72f7-4829-9565-2ab64765089f"],
+Cell[541178, 11752, 1217, 19, 356, "Print",ExpressionUUID->"c3dbed40-8121-41fd-aa6c-315a2c768faa"],
+Cell[542398, 11773, 162, 3, 25, "Print",ExpressionUUID->"76250fec-02a2-4941-b93a-faff5711cf3f"],
+Cell[542563, 11778, 345, 8, 25, "Print",ExpressionUUID->"2980c648-c47c-4ed7-902a-756fc8cd632d"],
+Cell[542911, 11788, 1215, 19, 356, "Print",ExpressionUUID->"0ca7cb53-97a2-490a-93c3-c1a4a8f19f2b"],
+Cell[544129, 11809, 162, 3, 25, "Print",ExpressionUUID->"ad5ad651-e00a-4baf-bb1a-19eb8a5d3ac3"],
+Cell[544294, 11814, 347, 8, 25, "Print",ExpressionUUID->"e486a75e-1158-4776-83f9-d1b0ffc2a65a"],
+Cell[544644, 11824, 1213, 19, 356, "Print",ExpressionUUID->"e9d63c92-0e9f-4198-b587-2d3152474c97"],
+Cell[545860, 11845, 162, 3, 25, "Print",ExpressionUUID->"0465f26d-d5eb-495b-8174-5cc2ee05b4fb"],
+Cell[546025, 11850, 347, 8, 25, "Print",ExpressionUUID->"a484a5a4-d42f-4255-9038-2fed6b0f8a56"],
+Cell[546375, 11860, 1212, 19, 356, "Print",ExpressionUUID->"ddf87f7b-ff7b-460f-9269-6ee2cdce1e60"],
+Cell[547590, 11881, 162, 3, 25, "Print",ExpressionUUID->"72fcb74d-ad4d-4246-b527-c25587a375e9"],
+Cell[547755, 11886, 345, 8, 25, "Print",ExpressionUUID->"3d674214-662d-4048-9003-d12fc0d6a1dd"],
+Cell[548103, 11896, 1212, 19, 356, "Print",ExpressionUUID->"ff721daa-db93-4582-8a6c-8cb1e070644c"],
+Cell[549318, 11917, 162, 3, 25, "Print",ExpressionUUID->"a6dbf82f-a0a1-45c0-8b46-3f66649f1961"],
+Cell[549483, 11922, 347, 8, 25, "Print",ExpressionUUID->"d08c9ef9-2bfd-46f7-af28-d75e0552ec41"],
+Cell[549833, 11932, 1212, 19, 356, "Print",ExpressionUUID->"d41a027d-baa7-41b1-aa2a-114a4129e9df"],
+Cell[551048, 11953, 162, 3, 25, "Print",ExpressionUUID->"5334e2aa-c4f7-496e-95bc-0cd40cd24046"],
+Cell[551213, 11958, 342, 7, 25, "Print",ExpressionUUID->"c909f4e9-13b0-4dc7-bc23-6f8c9397a4e4"],
+Cell[551558, 11967, 1212, 19, 356, "Print",ExpressionUUID->"bce434f2-e990-4204-8072-bbf775170024"],
+Cell[552773, 11988, 164, 3, 25, "Print",ExpressionUUID->"7b40be68-11c9-468b-8a55-9fea26bdb237"],
+Cell[552940, 11993, 345, 8, 25, "Print",ExpressionUUID->"9a63057c-e953-4a42-a72a-45e7628997ed"],
+Cell[553288, 12003, 1210, 19, 356, "Print",ExpressionUUID->"d90ec73f-ab26-4cde-93de-ee377d0e6364"],
+Cell[554501, 12024, 162, 3, 25, "Print",ExpressionUUID->"9ec5810c-d0fc-4b33-97e7-7359579c5537"],
+Cell[554666, 12029, 345, 8, 25, "Print",ExpressionUUID->"0903c6db-270e-4d74-8048-3d9539b67a8e"],
+Cell[555014, 12039, 1211, 19, 356, "Print",ExpressionUUID->"40c58f5e-aa00-47fa-acf1-2e6dc2e2445b"],
+Cell[556228, 12060, 162, 3, 25, "Print",ExpressionUUID->"bad07808-121f-42e5-b19a-520bacdeb7fc"],
+Cell[556393, 12065, 345, 8, 25, "Print",ExpressionUUID->"dd9bcede-25c5-4871-9966-e2d1f914cee6"],
+Cell[556741, 12075, 1213, 19, 356, "Print",ExpressionUUID->"275a378c-c7df-4eba-ac80-cbbabbaaf310"],
+Cell[557957, 12096, 162, 3, 25, "Print",ExpressionUUID->"77d4219c-c8f1-42ea-84e1-9b7212899ed0"],
+Cell[558122, 12101, 347, 8, 25, "Print",ExpressionUUID->"55112003-e730-4068-8c14-b27f39dff0dd"],
+Cell[558472, 12111, 1211, 19, 356, "Print",ExpressionUUID->"f51d038e-cbc5-4759-9392-c4fe25f8bfec"],
+Cell[559686, 12132, 162, 3, 25, "Print",ExpressionUUID->"623b964f-2d96-4a0c-9159-b24f78fd76bf"],
+Cell[559851, 12137, 345, 8, 25, "Print",ExpressionUUID->"07802912-356d-4e98-833f-ad771e8a6a97"],
+Cell[560199, 12147, 1211, 19, 356, "Print",ExpressionUUID->"05914cd6-e0f3-4e9e-b0c6-964d851548ca"],
+Cell[561413, 12168, 164, 3, 25, "Print",ExpressionUUID->"b35f5f14-0f82-46c3-86a1-147c3a5fa0e1"],
+Cell[561580, 12173, 345, 8, 25, "Print",ExpressionUUID->"df2fa229-16f1-4894-8c7d-51fc899eb3af"],
+Cell[561928, 12183, 1211, 19, 356, "Print",ExpressionUUID->"b7c48055-08f6-4334-861d-bcc50e83bf3f"],
+Cell[563142, 12204, 164, 3, 25, "Print",ExpressionUUID->"d0f4637f-b542-4061-8f58-64abd18dc380"],
+Cell[563309, 12209, 345, 8, 25, "Print",ExpressionUUID->"ad266b07-e45d-4a66-be94-8f525941c079"],
+Cell[563657, 12219, 1211, 19, 356, "Print",ExpressionUUID->"957c081a-8cd1-4d63-934e-c90316d75cc0"],
+Cell[564871, 12240, 164, 3, 25, "Print",ExpressionUUID->"67beb224-77be-49d8-89ab-286e7541c7ba"],
+Cell[565038, 12245, 347, 8, 25, "Print",ExpressionUUID->"68c3500b-35d4-43dc-b8ff-2b926b509434"],
+Cell[565388, 12255, 1211, 19, 356, "Print",ExpressionUUID->"a88abc9b-ceb8-454e-9698-ac9622b7ca19"],
+Cell[566602, 12276, 159, 2, 25, "Print",ExpressionUUID->"f7602b52-2b20-4976-ac83-b6b8a749c722"],
+Cell[566764, 12280, 345, 8, 25, "Print",ExpressionUUID->"d2bd03e9-0bba-46b0-8d67-ecc296d37ef6"],
+Cell[567112, 12290, 1211, 19, 356, "Print",ExpressionUUID->"3391f723-736e-43c2-a261-ae3605070a4c"],
+Cell[568326, 12311, 159, 2, 25, "Print",ExpressionUUID->"54f5a468-7e97-48e7-97c5-3c4ef026ad47"],
+Cell[568488, 12315, 345, 8, 25, "Print",ExpressionUUID->"dcb2311d-c55f-49a0-94e7-564dcf35c37f"],
+Cell[568836, 12325, 1211, 19, 356, "Print",ExpressionUUID->"6f8c7790-855f-4a21-8d03-606b5b36522c"]
 }, Open  ]]
 }, Open  ]]
+}, Closed]]
 }, Open  ]],
 Cell[CellGroupData[{
-Cell[534064, 11584, 861, 12, 68, "Section",ExpressionUUID->"46f126fc-8644-4db1-acc3-f0e4461602b2"],
+Cell[570120, 12352, 861, 12, 68, "Section",ExpressionUUID->"46f126fc-8644-4db1-acc3-f0e4461602b2"],
 Cell[CellGroupData[{
-Cell[534950, 11600, 306, 5, 55, "Subsection",ExpressionUUID->"a6ad1cd9-7dcb-4735-9172-582b736915a6"],
-Cell[535259, 11607, 652, 14, 173, "Text",ExpressionUUID->"45ae7feb-c2d8-4f6b-8a59-eb1c8c455d7a"],
-Cell[535914, 11623, 139, 2, 31, "Input",ExpressionUUID->"e282bce5-6dd7-4408-9478-6da5c030a354"],
-Cell[536056, 11627, 454, 11, 55, "Input",ExpressionUUID->"01d726a0-16e4-4c9d-b7bd-35d1dce4b908"],
+Cell[571006, 12368, 306, 5, 55, "Subsection",ExpressionUUID->"a6ad1cd9-7dcb-4735-9172-582b736915a6"],
+Cell[571315, 12375, 652, 14, 173, "Text",ExpressionUUID->"45ae7feb-c2d8-4f6b-8a59-eb1c8c455d7a"],
+Cell[571970, 12391, 139, 2, 31, "Input",ExpressionUUID->"e282bce5-6dd7-4408-9478-6da5c030a354"],
+Cell[572112, 12395, 454, 11, 55, "Input",ExpressionUUID->"01d726a0-16e4-4c9d-b7bd-35d1dce4b908"],
 Cell[CellGroupData[{
-Cell[536535, 11642, 2772, 55, 216, "Input",ExpressionUUID->"61b6b35d-fa1a-483d-87be-b652b5406f53"],
+Cell[572591, 12410, 2772, 55, 216, "Input",ExpressionUUID->"61b6b35d-fa1a-483d-87be-b652b5406f53"],
 Cell[CellGroupData[{
-Cell[539332, 11701, 160, 3, 25, "Print",ExpressionUUID->"cbd00862-95ab-4dce-b0f7-d09fe7c2d949"],
-Cell[539495, 11706, 153, 3, 25, "Print",ExpressionUUID->"dcbe6ad3-4283-4c17-a9ff-acf5bbf23157"],
-Cell[539651, 11711, 465, 12, 25, "Print",ExpressionUUID->"2fd54f61-ab4c-412d-aae9-a0ff0aacfa90"],
-Cell[540119, 11725, 3608, 54, 1192, "Print",ExpressionUUID->"2d2d4fdc-8ba6-4365-80ee-6497b683efef"],
-Cell[543730, 11781, 388, 10, 25, "Print",ExpressionUUID->"4874eda5-82af-4760-b411-d07ba3036f11"],
-Cell[544121, 11793, 501, 11, 25, "Print",ExpressionUUID->"adfd78b4-c879-4cae-8d43-54bd55b37e94"],
-Cell[544625, 11806, 554, 14, 25, "Print",ExpressionUUID->"f46b70bc-a82e-499e-8051-4f3a70c69c07"]
+Cell[575388, 12469, 160, 3, 25, "Print",ExpressionUUID->"cbd00862-95ab-4dce-b0f7-d09fe7c2d949"],
+Cell[575551, 12474, 153, 3, 25, "Print",ExpressionUUID->"dcbe6ad3-4283-4c17-a9ff-acf5bbf23157"],
+Cell[575707, 12479, 465, 12, 25, "Print",ExpressionUUID->"2fd54f61-ab4c-412d-aae9-a0ff0aacfa90"],
+Cell[576175, 12493, 3608, 54, 1192, "Print",ExpressionUUID->"2d2d4fdc-8ba6-4365-80ee-6497b683efef"],
+Cell[579786, 12549, 388, 10, 25, "Print",ExpressionUUID->"4874eda5-82af-4760-b411-d07ba3036f11"],
+Cell[580177, 12561, 501, 11, 25, "Print",ExpressionUUID->"adfd78b4-c879-4cae-8d43-54bd55b37e94"],
+Cell[580681, 12574, 554, 14, 25, "Print",ExpressionUUID->"f46b70bc-a82e-499e-8051-4f3a70c69c07"]
 }, Open  ]]
 }, Open  ]],
-Cell[545206, 11824, 404, 10, 55, "Input",ExpressionUUID->"aaaeb56a-08cf-4b3c-a207-8c483301bd84"],
+Cell[581262, 12592, 404, 10, 55, "Input",ExpressionUUID->"aaaeb56a-08cf-4b3c-a207-8c483301bd84"],
 Cell[CellGroupData[{
-Cell[545635, 11838, 2945, 57, 262, "Input",ExpressionUUID->"dca5f06d-61e2-47d2-8ac1-2b7101357e70"],
+Cell[581691, 12606, 2945, 57, 262, "Input",ExpressionUUID->"dca5f06d-61e2-47d2-8ac1-2b7101357e70"],
 Cell[CellGroupData[{
-Cell[548605, 11899, 158, 3, 25, "Print",ExpressionUUID->"e694bd7c-109e-48b8-8436-1cec80fe6f0b"],
-Cell[548766, 11904, 153, 3, 25, "Print",ExpressionUUID->"1f41bff3-6fe2-4044-bbe4-1e3471773ac0"],
-Cell[548922, 11909, 465, 12, 25, "Print",ExpressionUUID->"da1280b7-0c34-4d8c-8aab-72508599829d"],
-Cell[549390, 11923, 3535, 52, 1214, "Print",ExpressionUUID->"7ab643fd-beaf-4d1a-9a73-a05cde7c135f"],
-Cell[552928, 11977, 385, 9, 25, "Print",ExpressionUUID->"d8ba4487-f493-499e-9d36-ecdafa14c8cb"],
-Cell[553316, 11988, 503, 11, 25, "Print",ExpressionUUID->"2a12bce0-d223-45cc-8da7-8ef6eb4649a8"],
-Cell[553822, 12001, 556, 14, 25, "Print",ExpressionUUID->"590d7c21-7fd5-4128-b476-50fa4e5040ea"]
+Cell[584661, 12667, 158, 3, 25, "Print",ExpressionUUID->"e694bd7c-109e-48b8-8436-1cec80fe6f0b"],
+Cell[584822, 12672, 153, 3, 25, "Print",ExpressionUUID->"1f41bff3-6fe2-4044-bbe4-1e3471773ac0"],
+Cell[584978, 12677, 465, 12, 25, "Print",ExpressionUUID->"da1280b7-0c34-4d8c-8aab-72508599829d"],
+Cell[585446, 12691, 3535, 52, 1214, "Print",ExpressionUUID->"7ab643fd-beaf-4d1a-9a73-a05cde7c135f"],
+Cell[588984, 12745, 385, 9, 25, "Print",ExpressionUUID->"d8ba4487-f493-499e-9d36-ecdafa14c8cb"],
+Cell[589372, 12756, 503, 11, 25, "Print",ExpressionUUID->"2a12bce0-d223-45cc-8da7-8ef6eb4649a8"],
+Cell[589878, 12769, 556, 14, 25, "Print",ExpressionUUID->"590d7c21-7fd5-4128-b476-50fa4e5040ea"]
 }, Open  ]]
 }, Open  ]],
-Cell[554405, 12019, 430, 11, 55, "Input",ExpressionUUID->"c7c35ee9-56fe-4c7d-8da1-e783d9cedb5f"]
+Cell[590461, 12787, 430, 11, 55, "Input",ExpressionUUID->"c7c35ee9-56fe-4c7d-8da1-e783d9cedb5f"]
 }, Open  ]],
 Cell[CellGroupData[{
-Cell[554872, 12035, 409, 7, 55, "Subsection",ExpressionUUID->"f93cb797-d79d-44bc-a11e-1a121c80cc43"],
-Cell[555284, 12044, 578, 11, 104, "Text",ExpressionUUID->"cb1b4e9f-d797-4066-aa26-99caf097d326"],
+Cell[590928, 12803, 409, 7, 55, "Subsection",ExpressionUUID->"f93cb797-d79d-44bc-a11e-1a121c80cc43"],
+Cell[591340, 12812, 578, 11, 104, "Text",ExpressionUUID->"cb1b4e9f-d797-4066-aa26-99caf097d326"],
 Cell[CellGroupData[{
-Cell[555887, 12059, 3707, 71, 285, "Input",ExpressionUUID->"feb275ff-df91-4550-8d78-695cbdbfb632"],
+Cell[591943, 12827, 3707, 71, 285, "Input",ExpressionUUID->"feb275ff-df91-4550-8d78-695cbdbfb632"],
 Cell[CellGroupData[{
-Cell[559619, 12134, 1202, 19, 356, "Print",ExpressionUUID->"8ca82a71-a8d7-4c25-8f6a-761d9d593ea9"],
-Cell[560824, 12155, 503, 11, 25, "Print",ExpressionUUID->"6b3196f7-c8c8-4cac-8a3f-3718da88a3d3"]
+Cell[595675, 12902, 1202, 19, 356, "Print",ExpressionUUID->"8ca82a71-a8d7-4c25-8f6a-761d9d593ea9"],
+Cell[596880, 12923, 503, 11, 25, "Print",ExpressionUUID->"6b3196f7-c8c8-4cac-8a3f-3718da88a3d3"]
 }, Open  ]],
-Cell[561342, 12169, 355, 9, 22, "Message",ExpressionUUID->"38c9a5b7-2241-405a-8820-e1216ecafa5c"],
+Cell[597398, 12937, 355, 9, 22, "Message",ExpressionUUID->"38c9a5b7-2241-405a-8820-e1216ecafa5c"],
 Cell[CellGroupData[{
-Cell[561722, 12182, 1204, 19, 356, "Print",ExpressionUUID->"193abc9d-7ddd-49d2-9442-89783f22fc79"],
-Cell[562929, 12203, 503, 11, 25, "Print",ExpressionUUID->"672a6c2a-27f2-4b3d-87c7-ae0c25373218"]
+Cell[597778, 12950, 1204, 19, 356, "Print",ExpressionUUID->"193abc9d-7ddd-49d2-9442-89783f22fc79"],
+Cell[598985, 12971, 503, 11, 25, "Print",ExpressionUUID->"672a6c2a-27f2-4b3d-87c7-ae0c25373218"]
 }, Open  ]],
-Cell[563447, 12217, 355, 9, 22, "Message",ExpressionUUID->"6b12992a-4ce5-4c3a-b96e-1e7577f7f07b"],
-Cell[563805, 12228, 133, 2, 35, "Output",ExpressionUUID->"3c09e2b4-d393-40b5-a263-67f12ab425a7"]
+Cell[599503, 12985, 355, 9, 22, "Message",ExpressionUUID->"6b12992a-4ce5-4c3a-b96e-1e7577f7f07b"],
+Cell[599861, 12996, 133, 2, 35, "Output",ExpressionUUID->"3c09e2b4-d393-40b5-a263-67f12ab425a7"]
 }, Open  ]]
 }, Open  ]],
 Cell[CellGroupData[{
-Cell[563987, 12236, 454, 7, 55, "Subsection",ExpressionUUID->"e7a44947-b9ad-473f-a555-ac94f8cf9bca"],
-Cell[564444, 12245, 532, 11, 81, "Text",ExpressionUUID->"99c68342-25e4-4a67-bc19-9fe0a292ae67"],
+Cell[600043, 13004, 454, 7, 55, "Subsection",ExpressionUUID->"e7a44947-b9ad-473f-a555-ac94f8cf9bca"],
+Cell[600500, 13013, 532, 11, 81, "Text",ExpressionUUID->"99c68342-25e4-4a67-bc19-9fe0a292ae67"],
 Cell[CellGroupData[{
-Cell[565001, 12260, 3861, 73, 285, "Input",ExpressionUUID->"ec2b397a-3604-4095-b49a-d1736cd6d917"],
+Cell[601057, 13028, 3861, 73, 285, "Input",ExpressionUUID->"ec2b397a-3604-4095-b49a-d1736cd6d917"],
 Cell[CellGroupData[{
-Cell[568887, 12337, 1274, 20, 356, "Print",ExpressionUUID->"8f85e692-f300-4296-84f9-a35547894e88"],
-Cell[570164, 12359, 574, 12, 25, "Print",ExpressionUUID->"18b57f63-6db5-443c-afb4-30b28402c1d0"],
-Cell[570741, 12373, 1272, 20, 356, "Print",ExpressionUUID->"9418e650-4a06-4fe4-830d-c74f982cc66e"],
-Cell[572016, 12395, 572, 12, 25, "Print",ExpressionUUID->"edc52aa8-11e4-460c-a1a3-32b14e2fde1f"]
+Cell[604943, 13105, 1274, 20, 356, "Print",ExpressionUUID->"8f85e692-f300-4296-84f9-a35547894e88"],
+Cell[606220, 13127, 574, 12, 25, "Print",ExpressionUUID->"18b57f63-6db5-443c-afb4-30b28402c1d0"],
+Cell[606797, 13141, 1272, 20, 356, "Print",ExpressionUUID->"9418e650-4a06-4fe4-830d-c74f982cc66e"],
+Cell[608072, 13163, 572, 12, 25, "Print",ExpressionUUID->"edc52aa8-11e4-460c-a1a3-32b14e2fde1f"]
 }, Open  ]],
-Cell[572603, 12410, 137, 3, 35, "Output",ExpressionUUID->"ada39eac-d26c-467a-ab36-7dbb53256f01"]
+Cell[608659, 13178, 137, 3, 35, "Output",ExpressionUUID->"ada39eac-d26c-467a-ab36-7dbb53256f01"]
 }, Open  ]]
 }, Closed]]
 }, Closed]],
 Cell[CellGroupData[{
-Cell[572801, 12420, 919, 13, 54, "Section",ExpressionUUID->"1871320c-88a4-4724-b559-ae1bfe602d75"],
-Cell[573723, 12435, 451, 8, 58, "Text",ExpressionUUID->"19f7ae12-5ba2-4951-8d74-2734a415350e"],
+Cell[608857, 13188, 919, 13, 54, "Section",ExpressionUUID->"1871320c-88a4-4724-b559-ae1bfe602d75"],
+Cell[609779, 13203, 451, 8, 58, "Text",ExpressionUUID->"19f7ae12-5ba2-4951-8d74-2734a415350e"],
 Cell[CellGroupData[{
-Cell[574199, 12447, 3968, 75, 285, "Input",ExpressionUUID->"e07b7bf2-fc71-4dfe-bed9-fb77270a666a"],
+Cell[610255, 13215, 3968, 75, 285, "Input",ExpressionUUID->"e07b7bf2-fc71-4dfe-bed9-fb77270a666a"],
 Cell[CellGroupData[{
-Cell[578192, 12526, 204, 3, 25, "Print",ExpressionUUID->"c6f9ef12-fc38-4974-9c5b-46c6918c033d"],
-Cell[578399, 12531, 197, 3, 25, "Print",ExpressionUUID->"f78b118f-9d4e-4f2b-98be-cf204dc2676d"],
-Cell[578599, 12536, 509, 12, 25, "Print",ExpressionUUID->"7d2d7464-adbe-4c6f-bef0-74f9cc345a0a"],
-Cell[579111, 12550, 9395, 126, 4118, "Print",ExpressionUUID->"4af6ca44-2580-4db6-8dc6-aa3366010dee"],
-Cell[588509, 12678, 547, 11, 25, "Print",ExpressionUUID->"894bf4c3-782e-4e90-b7af-d6c72e5337c6"],
-Cell[589059, 12691, 384, 8, 25, "Print",ExpressionUUID->"9d69cde3-4d6d-4f25-a112-1816d2e3e898"],
-Cell[589446, 12701, 799, 16, 48, "Print",ExpressionUUID->"1fae99a0-3f05-48e5-bff6-d73a816281d4"],
-Cell[590248, 12719, 204, 3, 25, "Print",ExpressionUUID->"4e469385-780d-4e89-acc5-9111c3011fcf"],
-Cell[590455, 12724, 199, 3, 25, "Print",ExpressionUUID->"0be4fcac-4ef8-4597-a49f-fab511558932"],
-Cell[590657, 12729, 511, 12, 25, "Print",ExpressionUUID->"21eb0826-6be6-483a-a280-94db48d07f91"],
-Cell[591171, 12743, 9388, 127, 4118, "Print",ExpressionUUID->"87defc14-a411-4627-b4e4-7bc8829dbcb2"],
-Cell[600562, 12872, 547, 11, 25, "Print",ExpressionUUID->"04e705db-a106-4e13-9f5c-a020bde46673"],
-Cell[601112, 12885, 384, 8, 25, "Print",ExpressionUUID->"3e82a014-e681-4ad3-b6f8-b67506ec9cfa"]
+Cell[614248, 13294, 204, 3, 25, "Print",ExpressionUUID->"c6f9ef12-fc38-4974-9c5b-46c6918c033d"],
+Cell[614455, 13299, 197, 3, 25, "Print",ExpressionUUID->"f78b118f-9d4e-4f2b-98be-cf204dc2676d"],
+Cell[614655, 13304, 509, 12, 25, "Print",ExpressionUUID->"7d2d7464-adbe-4c6f-bef0-74f9cc345a0a"],
+Cell[615167, 13318, 9395, 126, 4118, "Print",ExpressionUUID->"4af6ca44-2580-4db6-8dc6-aa3366010dee"],
+Cell[624565, 13446, 547, 11, 25, "Print",ExpressionUUID->"894bf4c3-782e-4e90-b7af-d6c72e5337c6"],
+Cell[625115, 13459, 384, 8, 25, "Print",ExpressionUUID->"9d69cde3-4d6d-4f25-a112-1816d2e3e898"],
+Cell[625502, 13469, 799, 16, 48, "Print",ExpressionUUID->"1fae99a0-3f05-48e5-bff6-d73a816281d4"],
+Cell[626304, 13487, 204, 3, 25, "Print",ExpressionUUID->"4e469385-780d-4e89-acc5-9111c3011fcf"],
+Cell[626511, 13492, 199, 3, 25, "Print",ExpressionUUID->"0be4fcac-4ef8-4597-a49f-fab511558932"],
+Cell[626713, 13497, 511, 12, 25, "Print",ExpressionUUID->"21eb0826-6be6-483a-a280-94db48d07f91"],
+Cell[627227, 13511, 9388, 127, 4118, "Print",ExpressionUUID->"87defc14-a411-4627-b4e4-7bc8829dbcb2"],
+Cell[636618, 13640, 547, 11, 25, "Print",ExpressionUUID->"04e705db-a106-4e13-9f5c-a020bde46673"],
+Cell[637168, 13653, 384, 8, 25, "Print",ExpressionUUID->"3e82a014-e681-4ad3-b6f8-b67506ec9cfa"]
 }, Open  ]],
-Cell[601511, 12896, 395, 8, 22, "Message",ExpressionUUID->"04cd9493-1ed0-4851-a5bb-a93d941300e7"],
-Cell[601909, 12906, 800, 15, 48, "Print",ExpressionUUID->"b280eab6-7185-4144-a5ee-bcc8d2fd6ee5"]
+Cell[637567, 13664, 395, 8, 22, "Message",ExpressionUUID->"04cd9493-1ed0-4851-a5bb-a93d941300e7"],
+Cell[637965, 13674, 800, 15, 48, "Print",ExpressionUUID->"b280eab6-7185-4144-a5ee-bcc8d2fd6ee5"]
 }, Open  ]],
-Cell[602724, 12924, 175, 3, 35, "Text",ExpressionUUID->"7de31a2a-04da-44c0-b60c-acd092546339"],
+Cell[638780, 13692, 175, 3, 35, "Text",ExpressionUUID->"7de31a2a-04da-44c0-b60c-acd092546339"],
 Cell[CellGroupData[{
-Cell[602924, 12931, 4264, 79, 285, "Input",ExpressionUUID->"10c7ea09-2b40-424c-b97f-6689e147d33c"],
+Cell[638980, 13699, 4264, 79, 285, "Input",ExpressionUUID->"10c7ea09-2b40-424c-b97f-6689e147d33c"],
 Cell[CellGroupData[{
-Cell[607213, 13014, 2768, 39, 884, "Print",ExpressionUUID->"6ad5c921-8164-418d-9ad9-6a22a07fb060"],
-Cell[609984, 13055, 588, 11, 25, "Print",ExpressionUUID->"5eb3e1ff-4898-443d-9118-4eead7835847"],
-Cell[610575, 13068, 429, 8, 25, "Print",ExpressionUUID->"e812aa4a-9f5a-4c52-aed4-2d87c4cf0bf8"],
-Cell[611007, 13078, 824, 15, 48, "Print",ExpressionUUID->"79ca71c1-883c-4332-b339-ccee5b886773"]
+Cell[643269, 13782, 2768, 39, 884, "Print",ExpressionUUID->"6ad5c921-8164-418d-9ad9-6a22a07fb060"],
+Cell[646040, 13823, 588, 11, 25, "Print",ExpressionUUID->"5eb3e1ff-4898-443d-9118-4eead7835847"],
+Cell[646631, 13836, 429, 8, 25, "Print",ExpressionUUID->"e812aa4a-9f5a-4c52-aed4-2d87c4cf0bf8"],
+Cell[647063, 13846, 824, 15, 48, "Print",ExpressionUUID->"79ca71c1-883c-4332-b339-ccee5b886773"]
 }, Open  ]]
 }, Open  ]],
 Cell[CellGroupData[{
-Cell[611880, 13099, 4316, 79, 285, "Input",ExpressionUUID->"e3b341bb-59fb-4250-9f11-695112fc0c7f"],
+Cell[647936, 13867, 4316, 79, 285, "Input",ExpressionUUID->"e3b341bb-59fb-4250-9f11-695112fc0c7f"],
 Cell[CellGroupData[{
-Cell[616221, 13182, 164, 3, 25, "Print",ExpressionUUID->"582cb055-1eff-4e00-a6a1-67746dee1eb8"],
-Cell[616388, 13187, 347, 8, 25, "Print",ExpressionUUID->"5715084f-2fa8-4f8f-8df6-c5966536c0ed"],
-Cell[616738, 13197, 2681, 38, 884, "Print",ExpressionUUID->"4e9e6585-69e4-41ae-a51e-11705bac549b"],
-Cell[619422, 13237, 501, 11, 25, "Print",ExpressionUUID->"0c69bec2-8299-4f0a-8bb0-7955cb1d94c2"]
+Cell[652277, 13950, 164, 3, 25, "Print",ExpressionUUID->"582cb055-1eff-4e00-a6a1-67746dee1eb8"],
+Cell[652444, 13955, 347, 8, 25, "Print",ExpressionUUID->"5715084f-2fa8-4f8f-8df6-c5966536c0ed"],
+Cell[652794, 13965, 2681, 38, 884, "Print",ExpressionUUID->"4e9e6585-69e4-41ae-a51e-11705bac549b"],
+Cell[655478, 14005, 501, 11, 25, "Print",ExpressionUUID->"0c69bec2-8299-4f0a-8bb0-7955cb1d94c2"]
 }, Open  ]],
-Cell[619938, 13251, 358, 9, 22, "Message",ExpressionUUID->"9c7e5944-51b4-4739-b79a-a37765a705bf"],
-Cell[620299, 13262, 757, 16, 48, "Print",ExpressionUUID->"0de05a6a-3f93-4a64-b57e-535828387aba"]
+Cell[655994, 14019, 358, 9, 22, "Message",ExpressionUUID->"9c7e5944-51b4-4739-b79a-a37765a705bf"],
+Cell[656355, 14030, 757, 16, 48, "Print",ExpressionUUID->"0de05a6a-3f93-4a64-b57e-535828387aba"]
 }, Open  ]]
 }, Closed]],
 Cell[CellGroupData[{
-Cell[621105, 13284, 968, 14, 54, "Section",ExpressionUUID->"7e54e706-4cad-45cf-95c7-be29450928bd"],
-Cell[622076, 13300, 497, 9, 35, "Text",ExpressionUUID->"b50045dc-b526-47d9-b14e-3a9bdbbe15eb"],
+Cell[657161, 14052, 968, 14, 54, "Section",ExpressionUUID->"7e54e706-4cad-45cf-95c7-be29450928bd"],
+Cell[658132, 14068, 497, 9, 35, "Text",ExpressionUUID->"b50045dc-b526-47d9-b14e-3a9bdbbe15eb"],
 Cell[CellGroupData[{
-Cell[622598, 13313, 4463, 81, 285, "Input",ExpressionUUID->"85ef6015-6cc4-4ae4-ad44-95fcbcc1d8db"],
+Cell[658654, 14081, 4463, 81, 285, "Input",ExpressionUUID->"85ef6015-6cc4-4ae4-ad44-95fcbcc1d8db"],
 Cell[CellGroupData[{
-Cell[627086, 13398, 162, 3, 25, "Print",ExpressionUUID->"3b419be7-540f-427a-b499-904969a166b8"],
-Cell[627251, 13403, 347, 8, 25, "Print",ExpressionUUID->"c3967517-5c8d-40ea-9b03-5b9386aec8b1"],
-Cell[627601, 13413, 2675, 38, 884, "Print",ExpressionUUID->"42f422c3-6f3b-4f40-8d8e-389e42b052e8"],
-Cell[630279, 13453, 503, 11, 25, "Print",ExpressionUUID->"5324ff92-33ab-477f-aec3-6dfc2263642b"]
+Cell[663142, 14166, 162, 3, 25, "Print",ExpressionUUID->"3b419be7-540f-427a-b499-904969a166b8"],
+Cell[663307, 14171, 347, 8, 25, "Print",ExpressionUUID->"c3967517-5c8d-40ea-9b03-5b9386aec8b1"],
+Cell[663657, 14181, 2675, 38, 884, "Print",ExpressionUUID->"42f422c3-6f3b-4f40-8d8e-389e42b052e8"],
+Cell[666335, 14221, 503, 11, 25, "Print",ExpressionUUID->"5324ff92-33ab-477f-aec3-6dfc2263642b"]
 }, Open  ]],
-Cell[630797, 13467, 356, 9, 22, "Message",ExpressionUUID->"b8a1d8a0-aa03-430e-9059-9f5e7ba46bb2"],
+Cell[666853, 14235, 356, 9, 22, "Message",ExpressionUUID->"b8a1d8a0-aa03-430e-9059-9f5e7ba46bb2"],
 Cell[CellGroupData[{
-Cell[631178, 13480, 751, 15, 48, "Print",ExpressionUUID->"8c5638b9-55d3-4f1e-a38e-3f380ec80562"],
-Cell[631932, 13497, 162, 3, 25, "Print",ExpressionUUID->"98592520-2f78-41d4-991e-7c260c8d9194"],
-Cell[632097, 13502, 347, 8, 25, "Print",ExpressionUUID->"9cffb3a9-1e83-433a-afcb-ba39e81ab717"],
-Cell[632447, 13512, 2671, 38, 884, "Print",ExpressionUUID->"4e0b78b4-4819-4979-a774-2506790a9a83"]
+Cell[667234, 14248, 751, 15, 48, "Print",ExpressionUUID->"8c5638b9-55d3-4f1e-a38e-3f380ec80562"],
+Cell[667988, 14265, 162, 3, 25, "Print",ExpressionUUID->"98592520-2f78-41d4-991e-7c260c8d9194"],
+Cell[668153, 14270, 347, 8, 25, "Print",ExpressionUUID->"9cffb3a9-1e83-433a-afcb-ba39e81ab717"],
+Cell[668503, 14280, 2671, 38, 884, "Print",ExpressionUUID->"4e0b78b4-4819-4979-a774-2506790a9a83"]
 }, Open  ]],
-Cell[635133, 13553, 357, 9, 22, "Message",ExpressionUUID->"5b88610d-d35a-4594-ab9a-d34626617054"],
-Cell[635493, 13564, 761, 16, 48, "Print",ExpressionUUID->"6c01ce9f-204a-4ddd-b68f-cce11580648d"]
+Cell[671189, 14321, 357, 9, 22, "Message",ExpressionUUID->"5b88610d-d35a-4594-ab9a-d34626617054"],
+Cell[671549, 14332, 761, 16, 48, "Print",ExpressionUUID->"6c01ce9f-204a-4ddd-b68f-cce11580648d"]
 }, Open  ]]
 }, Closed]]
 }, Open  ]]
