@@ -320,7 +320,16 @@ plaquetteCorrelationTallies[] :=
                    Compile[{{xa, _Integer, 1}, {xb, _Integer, 1}},
                            Dot[#, #]&[Mod[xa - xb + ld, 2*ld] - ld]]],
    pabList = Compile[{{lt, _Real, 1}, {pa, _Real}, {pb, _Real}},
-                     lt + {1, pa, pb, pa^2, pb^2, pa*pb}]},
+                     lt + {1, pa, pb, pa^2, pb^2, pa*pb}],
+   orient = Compile[{{dir1a, _Integer}, {dir2a, _Integer}, {xa, _Integer, 1},
+                     {dir1b, _Integer}, {dir2b, _Integer}, {xb, _Integer, 1}},
+                    If[
+                        dir1a == dir1b && dir2a === dir2b,
+                        Which[
+                            #[[dir1a]]^2 + #[[dir2a]]^2 == #.#, 1,
+                            #[[dir1a]]==0 && #[[dir2a]]==0, 2,
+                            True, 3]&[xa-xb],
+                        4]]},
   pp = Flatten[Table[
       Block[{coords = latticeCoordinates[k]},
             {dir1, dir2, 2*coords + center2[dir1, dir2],
@@ -333,7 +342,8 @@ plaquetteCorrelationTallies[] :=
    Do[
        {dir1a, dir2a, xa, pa} = pp[[i]];
        {dir1b, dir2b, xb, pb} = pp[[j]];
-       sameDirQ = (dir1a == dir1b && dir2a == dir2b);
+       sameDirQ = orient[dir1a, dir2a, xa,
+                         dir1b, dir2b, xb];
        (* Nearest distance, including wrap-around.
          Use twice the distance squared, so everything is an integer. *)
        dx2 = distance2[xa, xb];
@@ -352,12 +362,21 @@ sampleCorrelation[{q_, d_} -> x_] :=
 plaquetteCorrelations[] :=
     Map[sampleCorrelation,
         Sort[Normal[plaquetteCorrelationTallies[]],
-             Order[N[#1[[1,1]]], N[#2[[1,1]]]]&]];
+             Order[N[#1[[1, 2]]], N[#2[[1, 2]]]]&]];
 plotPlaquetteCorrelations[corr_, opts:OptionsPattern[]] := 
    (* Bug in ErrorListPlot:  x-values must be numerical *)
-    ErrorListPlot[Map[{{N[#[[1]]], #[[2]]}, ErrorBar[ #[[3]]]}&,
-                   GatherBy[corr, Last], {2}],
+    ErrorListPlot[Map[
+        {{N[#[[1]]], #[[2]]}, ErrorBar[ #[[3]]]}&,
+        (* Order data sets by the value of the last index.
+         One could also use GroupBy[] to do this. *)
+        Table[Select[corr, Last[#]==i&],
+              {i, Union[Map[Last, corr]]}], {2}],
   PlotRange -> {{0, All}, All}, Axes -> False, Frame -> True, 
-  FrameLabel -> {"distance", "correlation"}, 
+  FrameLabel -> {"distance", "correlation"},
+  PlotLegends -> Placed[SwatchLegend[
+      (* Data set order is given by the numbering in
+        the compiled function "orient" above. *)
+      {"same plane", "same orientation, stacked",
+       "same orientation, offset", "different orientation"}], {0.7, 0.75}],
   Epilog -> {Dashing[0.01], 
              Line[{{0, 0}, {1/2 + Max[Map[First, corr]], 0}}]}, opts];
