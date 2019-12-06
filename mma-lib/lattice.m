@@ -323,36 +323,40 @@ plaquetteCorrelationTallies[] :=
                      lt + {1, pa, pb, pa^2, pb^2, pa*pb}]},
   pp = Flatten[Table[
       Block[{coords = latticeCoordinates[k]},
-            {2*coords + center2[dir1, dir2],
-             plaquette[dir1, dir2, coords]/nc}],
+            {dir1, dir2, 2*coords + center2[dir1, dir2],
+             (* Since we are interested in the large beta case. *)
+             1 - plaquette[dir1, dir2, coords]/nc}],
       {dir1, nd-1}, {dir2, dir1+1, nd}, {k, latticeVolume[]}], 2];
  Merge[ParallelTable[
-  Block[{tallies = Association[{}], xa, xb, pa, pb, lt, dx2},
+  Block[{tallies = Association[{}], sameDirQ,
+         dir1a, dir1b, dir2a, dir2b, xa, xb, pa, pb, lt, dx2},
    Do[
-       {xa, pa} = pp[[i]];
-       {xb, pb} = pp[[j]];
+       {dir1a, dir2a, xa, pa} = pp[[i]];
+       {dir1b, dir2b, xb, pb} = pp[[j]];
+       sameDirQ = (dir1a == dir1b && dir2a == dir2b);
        (* Nearest distance, including wrap-around.
          Use twice the distance squared, so everything is an integer. *)
        dx2 = distance2[xa, xb];
-       lt = Lookup[tallies, dx2, Table[0.0, {6}]];
-       tallies[dx2] = pabList[lt, pa, pb],
+       lt = Lookup[tallies, Key[{sameDirQ, dx2}], Table[0.0, {6}]];
+       tallies[{sameDirQ, dx2}] = pabList[lt, pa, pb],
        {i, kernel, Length[pp]-1, $KernelCount},
        {j, i+1, Length[pp]}];
    tallies],
   {kernel, $KernelCount}], Total]];
 (* From https://en.wikipedia.org/wiki/Correlation_and_dependence
   There are more correct formulas for the standard error. *)
-sampleCorrelation[d_ -> x_] :=
+sampleCorrelation[{q_, d_} -> x_] :=
     Block[{r = (x[[1]]*x[[6]] - x[[2]]*x[[3]])/
                Sqrt[(x[[1]]*x[[4]] - x[[2]]^2) (x[[1]]*x[[5]] - x[[3]]^2)]},
-          {Sqrt[d]/2, r, Sqrt[(1-r^2)/(x[[1]]-2)]}];
+          {Sqrt[d]/2, r, Sqrt[(1-r^2)/(x[[1]]-2)], q}];
 plaquetteCorrelations[] :=
     Map[sampleCorrelation,
         Sort[Normal[plaquetteCorrelationTallies[]],
-             Order[N[First[#1]], N[First[#2]]] &]];
+             Order[N[#1[[1,1]]], N[#2[[1,1]]]]&]];
 plotPlaquetteCorrelations[corr_, opts:OptionsPattern[]] := 
    (* Bug in ErrorListPlot:  x-values must be numerical *)
- ErrorListPlot[Map[{{N[#[[1]]], #[[2]]}, ErrorBar[ #[[3]]]} &, corr], 
+    ErrorListPlot[Map[{{N[#[[1]]], #[[2]]}, ErrorBar[ #[[3]]]}&,
+                   GatherBy[corr, Last], {2}],
   PlotRange -> {{0, All}, All}, Axes -> False, Frame -> True, 
   FrameLabel -> {"distance", "correlation"}, 
   Epilog -> {Dashing[0.01], 
