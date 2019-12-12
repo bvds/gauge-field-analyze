@@ -1,0 +1,203 @@
+%\documentclass[twocolumn,eqsecnum,aps]{revtex4}
+\documentclass[preprint,aps]{revtex4}
+%\documentclass[eqsecnum,aps]{revtex}
+%
+\usepackage{amsmath}
+\usepackage{amsfonts}
+\usepackage{graphicx}
+%
+\newcommand{\da}{\dagger}  % symbol for Hermitian conjugate dagger
+\newcommand{\be}{\begin{equation}}
+\newcommand{\eq}{\end{equation}}
+\newcommand{\integer}{\mathbb{Z}}       % set of integers
+\newcommand{\plaquette}{p}
+\DeclareMathOperator{\SU}{SU}
+\DeclareMathOperator{\Tr}{Tr}
+
+
+\begin{document}
+%\draft
+\title{Saddle points of the Yang Mills action in 2+1 dimensions}
+
+
+\author{Brett van de Sande}
+%\affiliation{}
+
+
+\begin{abstract}
+  We find saddle points of $\SU(N)$ action in three space-time dimensions
+  and see characteristics consistant with Witten's Master Field.
+\end{abstract}
+
+\pacs{Valid PACS appear here.
+{\tt$\backslash$\string pacs\{\}} should always be input,
+even if empty.}
+\maketitle
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\baselineskip .2in
+
+\section{Introduction}
+\label{intro}
+
+Since Wilson introduced his lattice action in 1976,
+lattice gauge theory has become the tool of choice for
+non-perturbative studies of QCD.  Although numerical
+calculations using Wilson's lattice have generated numerous
+physical results, the nature of the QCD vacuum itself
+has remained somewhat of a mystery.
+
+In 1982 [?] 't Hooft suggested that center vortices could
+explain confinement and subsequent numerical experiments
+using maximal abelian gauge have lent some evidence for this
+picture.  However, there has been little progress in taking
+this picture and creating a full description of the
+QCD vacuum state.  [Hugo Reinhardt's ugly paper is a
+  heroic attempt in this direction.]
+
+In 1979, Witten pointed out that QCD has some rather remarkable
+properties in the $N \to \infty$ limit.  In particular,
+expectation values of observables become dominated by a single
+configuration of the gauge field, the ``master field.''
+Although this idea was compelling, there seemed to be no
+way to figure out exactly what this Master Field is.
+
+In studying the QCD vacuum, one should note the following:
+
+\begin{enumerate}
+
+\item Quarks are not important.  In the langauge of Lattice QCD,
+  one says that the quenched approximation (no dynamical
+ quarks) is a good approximation to the full theory.
+
+\item The $N\to\infty$ limit of QCD is a good approximation to the
+  physical case $N=3$.  This has been demonstrated in numerous
+  perturbative and non-perturbative calculations [cite review paper].
+  In particular, Mike Teper has shown this to be the case for
+  the glueball spectrum [cite teper].
+
+\item The behavior of $\SU(N)$ gauge theory in 3 space-time dimensions
+  is remarkabley similar to the 4 dimensional theory [cite Teper].
+  Although the scale is generated quite differently in each case ---
+  in 4 dimensions, it is generated dynamically through quantum
+  flucutations while in 3 dimensions the coupling is dimensionful ---
+  once a scale is generated, the theories behave in a very similar manner.
+
+\item In Witten's Master Field picture, the master field is
+  a semi-classical field.  That is, it is a saddle point
+  of the QCD action.
+
+\end{enumerate}
+
+These facts suggest a research program for studying the QCD vacuum state:
+one should look at saddle-points of the gauge field action
+in 3 spacetime dimensions, looking for a description that emerges in
+the $N\to \infty$ limit.  Hopefully, this description
+can then be applied to the 4 dimensional theory.
+
+I pursue the first step of this program in the following.
+We will start with conventional $D=3$ lattice gauge
+theory field configurations for various values of $N$ and
+calculate the nearest associated saddle-point configurations.
+
+We believe that these saddle-point field configurations
+are a good starting-point for understanding the 2+1 theory
+vacuum in the $N\to\infty$ limit.
+
+\section{Saddle points of the Wilson action}
+\label{two}
+
+%  Need to finish defining notation
+%
+We introduce a $D-dimensional$ spacetime lattice with
+sites $x$ representing the quark fields (which we will ignore)
+and links representing the gauge fields:
+\be
+U(x,x+\hat{\mu})  = \mathrm{e}^{i A_a T_a}
+\eq
+where $T_a$ are the generators of $\SU(N)$ and the index
+$a\in\{1, \ldots, N^2-1\}$.  The link fields $A_a$ represent
+the gauge fields of the theory.
+
+The associated action [cite Wilson] is
+%
+\be
+S = \mathrm{e}^{-\beta \left(1-\sum_\plaquette U_\plaquette\right)}
+\eq
+Next define gauge symmetry.
+
+Thus, a lattice with $L^3$ sites has $L^3 D \left(N^2-1\right)$
+degrees of freedom.
+
+
+\section{Conclusions}
+
+
+\vspace{10mm}
+\noindent {Acknowledgements}:
+
+\vspace{10mm}
+\noindent {\bf APPENDIX: Roots of $\SU(N)$ matrices}
+
+\vspace{10mm}
+
+In general, for some Lie group matrix $U$, the matrix power
+$U^t$, $t\in[0,1]$ should be a smooth map from $[0,1]$
+onto the group manifold where $U^0=\mathbb{I}$ and $U^1=U$. 
+In general, a unitary matrix $U$ can be factored as
+%
+\be
+U = V^\da \begin{pmatrix}
+    \mathrm{e}^{i \lambda_1} & & &\\
+    & \mathrm{e}^{i \lambda_2} & &\\
+    & & \ddots & \\
+    & & & \mathrm{e}^{i \lambda_N}\end{pmatrix} V
+\eq
+%
+where $V$ is a unitary matrix and $-\pi < \lambda_i < \pi$.
+In the case $U \in \SU(N)$ the $\det(U)=1$ condition implies that
+\be
+\sum_i \lambda_i = 2 \pi m\;, \quad m\in\integer \;.
+\eq
+For taking matrix roots, cases where $m\neq 0$ present a
+difficulty.  However, one can always shift $\lambda_i$ by
+multiples of $2\pi$:
+\be
+\lambda_i \to \lambda_i^\prime = \lambda_i + 2 \pi n_i\;,\quad
+n_i\in\integer
+\eq
+such that $\sum_i \lambda_i^\prime = 0$ and
+$\lambda_i^\prime - \lambda_j^\prime < 2 \pi$.
+%
+\begin{figure}
+
+\includegraphics[width=2in]{hex3}
+  \caption{In the case of $\SU(3)$, $(\lambda_1^\prime,\lambda_2^\prime)$ lie in the shaded hexagonal region.
+    Elements of the center of the group $z$, $z^2$, lie on the vertices of the hexagon.}
+\end{figure}
+%
+Using $\lambda_i^\prime$, we define $U^t$ as:
+\be
+U^t = V^\da \begin{pmatrix}
+    \mathrm{e}^{i\lambda_1^\prime t} & & &\\
+    & \mathrm{e}^{i\lambda_2^\prime t} & &\\
+    & & \ddots & \\
+    & & & \mathrm{e}^{i\lambda_N^\prime t}\end{pmatrix} V
+\eq
+Similarly, we define the logarithm of $U$ as:
+\be
+\log U = i V^\da \begin{pmatrix}
+    \lambda_1^\prime & & &\\
+    & \lambda_2^\prime & &\\
+    & & \ddots & \\
+    & & & \lambda_N^\prime\end{pmatrix} V
+\eq
+
+\begin{thebibliography}{99}
+
+
+\end{thebibliography}
+
+\end{document}

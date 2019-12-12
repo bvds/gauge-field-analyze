@@ -359,7 +359,7 @@ sampleCorrelation[{q_, d_} -> x_] :=
     Block[{r = (x[[1]]*x[[6]] - x[[2]]*x[[3]])/
                Sqrt[(x[[1]]*x[[4]] - x[[2]]^2) (x[[1]]*x[[5]] - x[[3]]^2)]},
           {Sqrt[d]/2, r, Sqrt[(1-r^2)/(x[[1]]-2)], q}];
-plaquetteCorrelations[] :=
+makePlaquetteCorrelations[] :=
     Map[sampleCorrelation,
         Sort[Normal[plaquetteCorrelationTallies[]],
              Order[N[#1[[1, 2]]], N[#2[[1, 2]]]]&]];

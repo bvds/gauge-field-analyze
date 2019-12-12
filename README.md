@@ -30,11 +30,10 @@ To get configuration options:
 
     ./configure --help
 
-To build:
+In particular, note the `--with-qdp` option.  To build:
 
     ./congfigure [options]
     make
-
 
 ### Run
 
