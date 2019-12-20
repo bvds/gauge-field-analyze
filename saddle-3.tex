@@ -1,6 +1,24 @@
-%\documentclass[twocolumn,eqsecnum,aps]{revtex4}
-\documentclass[preprint,aps]{revtex4}
+%\documentclass[twocolumn,eqsecnum,aps,]{revtex4-2}
+\documentclass[preprint,aps,prd]{revtex4-2}
 %\documentclass[eqsecnum,aps]{revtex}
+%
+%
+%  Using Zotero to generate physics.bib file.
+%
+%  A number of sites set language=en which Zotero
+%  passes on to BibTex, but LaTeX package babel doesn't know ``en.''
+%  In Zotero, either remove the language field or set it to ``english''
+%  before exporting to BibTex.
+%\usepackage[english]{babel}
+%
+%
+%  Ubuntu doesn't have the latest RevTex.
+%  Download and install using:
+%    sudo unzip revtex4-2-tds.zip -d /usr/share/texlive/texmf-dist/
+%    sudo mktexlsr /usr/share/texlive/texmf-dist/
+%
+\bibliographystyle{apsrev4-2}
+%
 %
 \usepackage{amsmath}
 \usepackage{amsfonts}
@@ -10,7 +28,9 @@
 \newcommand{\be}{\begin{equation}}
 \newcommand{\eq}{\end{equation}}
 \newcommand{\integer}{\mathbb{Z}}       % set of integers
-\newcommand{\plaquette}{p}
+\newcommand{\plaquette}{\Box}
+\newcommand{\metric}[2]{\left\langle #1,#2\right\rangle}
+\newcommand{\config}{\mathcal{U}}
 \DeclareMathOperator{\SU}{SU}
 \DeclareMathOperator{\Tr}{Tr}
 
@@ -22,7 +42,7 @@
 
 \author{Brett van de Sande}
 %\affiliation{}
-
+\noaffiliation
 
 \begin{abstract}
   We find saddle points of $\SU(N)$ action in three space-time dimensions
@@ -42,14 +62,14 @@ even if empty.}
 \section{Introduction}
 \label{intro}
 
-Since Wilson introduced his lattice action in 1976,
+Since Wilson introduced his lattice action in 1974~\cite{wilson_confinement_1974},
 lattice gauge theory has become the tool of choice for
 non-perturbative studies of QCD.  Although numerical
 calculations using Wilson's lattice have generated numerous
 physical results, the nature of the QCD vacuum itself
 has remained somewhat of a mystery.
 
-In 1982 [?] 't Hooft suggested that center vortices could
+In 1982 't Hooft suggested that center vortices could
 explain confinement and subsequent numerical experiments
 using maximal abelian gauge have lent some evidence for this
 picture.  However, there has been little progress in taking
@@ -60,11 +80,12 @@ QCD vacuum state.  [Hugo Reinhardt's ugly paper is a
 In 1979, Witten pointed out that QCD has some rather remarkable
 properties in the $N \to \infty$ limit.  In particular,
 expectation values of observables become dominated by a single
-configuration of the gauge field, the ``master field.''
+configuration of the gauge field, the
+``master field''~\cite{witten_1/n_1980}.
 Although this idea was compelling, there seemed to be no
-way to figure out exactly what this Master Field is.
+way to figure out exactly what this Master Field could be.
 
-In studying the QCD vacuum, one should note the following:
+To motivate our approach to studying the QCD vacuum, note the following:
 
 \begin{enumerate}
 
@@ -74,9 +95,9 @@ In studying the QCD vacuum, one should note the following:
 
 \item The $N\to\infty$ limit of QCD is a good approximation to the
   physical case $N=3$.  This has been demonstrated in numerous
-  perturbative and non-perturbative calculations [cite review paper].
-  In particular, Mike Teper has shown this to be the case for
-  the glueball spectrum [cite teper].
+  perturbative and non-perturbative calculations~\cite{lucini_sun_2013}.
+  In particular, Teper has shown this to be the case for
+  the glueball spectrum in both 2+1 and 3+1 dimensions [cite teper].
 
 \item The behavior of $\SU(N)$ gauge theory in 3 space-time dimensions
   is remarkabley similar to the 4 dimensional theory [cite Teper].
@@ -95,42 +116,338 @@ These facts suggest a research program for studying the QCD vacuum state:
 one should look at saddle-points of the gauge field action
 in 3 spacetime dimensions, looking for a description that emerges in
 the $N\to \infty$ limit.  Hopefully, this description
-can then be applied to the 4 dimensional theory.
+can then be generalized to the 4 dimensional theory.
 
 I pursue the first step of this program in the following.
-We will start with conventional $D=3$ lattice gauge
+We will start with conventional 2+1 dimension lattice gauge
 theory field configurations for various values of $N$ and
 calculate the nearest associated saddle-point configurations.
-
-We believe that these saddle-point field configurations
-are a good starting-point for understanding the 2+1 theory
+These saddle-point field configurations should be
+a good starting-point for understanding the 2+1 dimension
 vacuum in the $N\to\infty$ limit.
 
-\section{Saddle points of the Wilson action}
-\label{two}
+\section{The Wilson action}
+\label{action}
 
-%  Need to finish defining notation
-%
-We introduce a $D-dimensional$ spacetime lattice with
-sites $x$ representing the quark fields (which we will ignore)
-and links representing the gauge fields:
+The purpose of the section is to set some notation.
+We introduce a $D$-dimensional spacetime lattice with lattice
+spacing $a$ and sites labeled by $x$.  Define
 \be
-U(x,x+\hat{\mu})  = \mathrm{e}^{i A_a T_a}
+  U_\mu(x) \in \SU(N)
 \eq
-where $T_a$ are the generators of $\SU(N)$ and the index
-$a\in\{1, \ldots, N^2-1\}$.  The link fields $A_a$ represent
-the gauge fields of the theory.
+to be the link going from site $x$ to site $x+a \hat{\mu}$.
+If the lattice has $L$ sites in each dimension, the lattice has
+$n_L=L^D D \left(N^2-1\right)$ degrees of freedom.
+Define lattice configuration
+$\config=\left\{U_1(x_1),\ldots\right\}$
+to be a particular set of link fields that cover the entire lattice.
 
-The associated action [cite Wilson] is
+We can define a metric for elements of $\SU(N)$:
+%
+\begin{eqnarray}
+  \metric{U}{V} &=& \sqrt{2 \Tr\,z z^\da} \; , \nonumber\\
+  z &=& \log\left(U^{-1} V\right)
+    \; , \quad U, V\in\SU(N) \label{metric}
+\end{eqnarray}
+where the logarithm is defined in Appendix~\ref{roots}.
+We can use this metric to define the average
+distance between two lattice configurations $\config_k$ and $\config_l$:
+\be
+   \metric{\config_k}{\config_l} = \frac{1}{L^D D} \sum_{x,\mu}
+          \metric{U^{(k)}_\mu(x)}{U^{(l)}_\mu(x)}
+\eq
+where $U^{(k)}_\mu(x)$ is a link in $\config_k$
+and $U^{(l)}_\mu(x)$ is a link in $\config_l$.
+
+The associated Wilson action is
 %
 \be
-S = \mathrm{e}^{-\beta \left(1-\sum_\plaquette U_\plaquette\right)}
+S = \beta \sum_{x,\, \mu<\nu} \left(1-\frac{1}{N} \Re\, \plaquette_{\mu,\nu}(x)\right)
 \eq
-Next define gauge symmetry.
+where $\plaquette_{\mu,\nu}(x)$ is a plaquette lying in the $\mu\nu$-plane:
+\be
+\plaquette_{\mu,\nu}(x) = \Tr U_\mu(x) U_\nu(x+a \hat{\mu})
+U_\mu^\da(x+a\hat{\nu}) U_\nu^\da(x) \; .
+\eq
+It is sometimes convenient to use the average plaquette,
+\be
+      \plaquette_\mathrm{avg} = \frac{1}{L^D D N}
+             \sum_{x,\,\mu<\nu} \Re\,\plaquette_{\mu,\nu}(x) 
+\eq
+with normalization such that $\plaquette_\mathrm{avg}=1$
+for the bare vacuum configuration $U_\mu(x) = \mathbb{I}$.
 
-Thus, a lattice with $L^3$ sites has $L^3 D \left(N^2-1\right)$
-degrees of freedom.
+The Wilson action is invarient under $\SU(N)$ gauge transforms:
+%
+\be
+    U_\mu(x) \to U_G(x) U_\mu(x) U_G^\da(x+a \hat{\mu})
+         \; , \quad U_G(x) \in \SU(N) \; .
+\eq
+%
+The lattice has a total of $n_G = L^D\left(N^2-1\right)$ gauge symmetries.
 
+\section{Shifts of the gauge fields}
+
+\begin{figure}
+  \[
+  \begin{array}{l}
+    \mbox{} \hspace{0.2in} x \hspace{0.3in} \sqrt{U_\mu(x)}
+    \hspace{0.25in} e^{i w_{a}(\mu, x) T_a}
+    \hspace{0.25in} \sqrt{U_\mu(x)} \hspace{0.3in} x+a\hat{\mu} \\[-0.3in]
+    %
+    %  Graphic generated in Matheatica file ``gauge.nb''
+    %
+  \includegraphics{link}
+  \end{array}
+  \]
+  \caption{One can think of a shift as applying a color rotation
+    to the middle of a lattice link. \label{shift}}
+\end{figure}
+
+In order to find a saddle point, it is convenient to modify
+the link fields $U_\mu(x)$ in a manner that maintains lattice symmetries.
+We define a ``shift'' for each links as,
+\be
+  U_\mu(x) \to \sqrt{U_\mu(x)}\, e^{i w_{a}(\mu, x) T_a}\, \sqrt{U_\mu(x)} \; .
+    \label{shifts}
+\eq
+where $T_a$ are generators of $\SU(N)$, with normalization
+$\delta_{a,b} = 2 \Tr(T_a T_b)$ and the square root is defined
+in Appendix~\ref{roots}.
+We can then take partial derivatives of the action with
+respect to the $n_L$ shifts $\mathbf{w} = \left(w_a(\mu, x), \ldots\right)$
+to obtain the gradient vector $\mathbf{q}$ and Hessian matrix
+$H$.  The gradient and Hessian can be used to estimate the
+position of the nearest saddle point.
+
+Let us consider the gradient for the link $U_\mu(x)$.
+The gradient will involve the $2 (D-1)$ plaquettes that include that link.
+Let $F_\mu(x)$ be the associated sum of staples; then
+\be
+   \frac{\partial S}{\partial w_a(\mu, x)} = \frac{\beta}{N}
+   \Im\Tr\left(F_\mu(x) \sqrt{U_\mu(x)} T_a \sqrt{U_\mu(x)}\right) \; .
+   \label{grad}
+\eq
+We can use Eqn.~(\ref{grad}) to construct the gradient vector $\mathbf{q}$.
+Likewise, one can calculate the $n_L\times n_L$ Hessian matrix
+$H$ from
+\be
+   \frac{\partial^2 S}{\partial w_a(\mu, x)\, \partial w_b(\nu, y)}
+\eq
+which is nonzero if there is a plaquette which contains both
+$U_\mu(x)$ and $U_\nu(y)$.
+The full calculation of $H$ is rather lengthy and we will not bore the reader
+with the details.
+
+Some shifts $\mathbf{w}$ correspond to gauge transforms.
+As we shall see, such shifts are problematic for any saddle
+point search, since the action is constant in those directions.
+To address this issue, we determine the set of shifts that are
+equivalent to infinitesimal gauge transforms.  Consider a gauge transform
+at site $x$; its action on link $U_\mu(x)$ is:
+\be
+U_\mu(x) \to e^{i C_a(x) T_a} U_\mu(x) = U_\mu(x)+ + i C_a(x) T_a U_\mu(x) +
+       \mathrm{O}\!\left(C_a^2(x)\right)
+\eq
+But this is equal to some infinitesimal shift $w_a(\mu, x)$ on
+the same link $U_\mu(x)$:
+\be
+U_\mu(x) \to U_\mu(x) + i w_a \sqrt{U_\mu(x)}T_a \sqrt{U_\mu(x)} +
+       \mathrm{O}\!\left(w_a^2\right)
+\eq
+%
+Equating the two and taking the trace:
+\be
+w_a = 2 C_b(x) \Tr\left(\sqrt{U_\mu(x)} T_a
+                     \sqrt{U_\mu^\da(x)} T_b\right) \; . \label{gs}
+\eq
+Using Eqn.~(\ref{gs}), one can construct an $n_G \times n_L$ matrix
+$G$ that relates shifts to infinitesimal gauge transforms
+at each lattice site.
+Since the action is invarient under gauge transforms, $G \mathbf{q} = 0$.
+However, since the Hessian is quadratic in the fields, $G H G^T \neq 0$.
+
+Since we are using the Hessian, we are approximating
+the action $S$ as being quadratic in $\mathbf{w}$.  If $\mathbf{w}$
+is too large, the quadratic approximation is no longer valid.
+Thus, we need some measure of the size of $\mathbf{w}$.
+We define two norms:
+A lattice-wide $\infty$-norm, taking the ordinary norm at each link:
+\be
+\left\lVert \mathbf{w}\right\rVert_{\mathrm{max}} =
+     \max_{x,\mu} \sqrt{\sum_a w_a^2(\mu, x)}
+\eq
+as well as an ordinary Euclidean norm, averaged over links
+\be
+\left\lVert \mathbf{w}\right\rVert_2 =
+     \frac{1}{L^D D}\sqrt{\sum_{x, \mu, a} w_a(\mu, x)}
+        \; .
+\eq
+
+
+
+\section{Calculating the saddle point}
+\label{saddle}
+
+\begin{figure}
+\includegraphics{eigenAll}
+\caption{Histogram of the eigenvalues of $H/\beta$ for a $6^3$ lattice,
+  $\beta = 8.175$, $N=3$.  We see a peak around zero due to the
+  $\SU(3)$ gauge symmetry.
+  {\bf need to fix sign/scale of eigenvalues} \label{eigenAll}}
+\end{figure}
+
+In principle, to find the nearest saddle point, one would
+find $H$ and $\mathbf{q}$, solve the linear system
+\be
+    H \mathbf{y} = \mathbf{q} \label{linear1}
+\eq
+and shift the gauge fields using $\mathbf{w} = -\mathbf{y}$.
+Since the action $S$ is not quadratic in $\mathbf{w}$, one
+would then iterate this process to find the actual saddle point.
+
+However, in practice, this procedure does not work.  To see why, let us
+look at the eigenvalues of $H$.  As seen in Figure~\ref{eigenAll},
+we see that the eigenvalues are strongly peaked around zero,
+due to the gauge symmetry of the theory.  Thus, the linear
+system (\ref{linear1}) will be nearly singular and
+the solution will be numerically unstable.  We must be more careful.
+
+To address this issue, we remove directions in shift-space corresponding
+to gauge infinitesimal gauge transforms.  To do this, we start
+by calculating the null-space $P_G$ of the gauge transform matrix $G$,
+\be
+G P_G^T = 0
+\eq
+where $P_G P_G^T = \mathbb{I}$.  Then we project $H$ and $\mathbf{q}$ onto
+the space of non-gauge-transform shifts:
+\be
+         H^\prime = P_G H P_G^T \quad \mbox{and} \quad
+         \mathbf{q}^\prime = P_G \mathbf{q} \; .
+\eq
+Then we can solve the linear system
+\be
+   H^\prime \mathbf{y} = \mathbf{q}^\prime \label{linear2}
+\eq
+and set $\mathbf{w} = - P_G^T \mathbf{y}$.  However, this is
+still insufficient to yield a well-behaved linear system.
+
+\begin{figure}
+\includegraphics{shiftPairs}
+\caption{Scatter plot of eigenvalue-gradient pairs of $H^\prime/\beta$
+  for a $6^3$ lattice, $\beta = 8.175$, $N=3$.  The pairs above the
+  v-shaped wedge correspond to large shifts and will dominate
+  the solution to the linear system, Eqn.~(\ref{linear2}).
+  {\bf need to fix size/sign of values}
+  \label{shiftPairs}}
+\end{figure}
+
+To better understand this issue, let us find the eigenvalues and
+eigenvectors of $H^\prime$:
+\be
+          H^\prime = O \begin{pmatrix}
+    \lambda_1 & & \\
+    & \lambda_2 & \\
+    & & \ddots  \end{pmatrix} O^T
+\eq
+and express Eqn.~(\ref{linear2}) in the eigenspace of $H^\prime$:
+\be
+\begin{pmatrix}
+    \lambda_1 & & \\
+    & \lambda_2 & \\
+    & & \ddots  \end{pmatrix} \overline{\mathbf{y}} =
+  \overline{\mathbf{q}} \label{linear3}
+\eq
+where $\overline{\mathbf{y}} = O \mathbf{y}$ and
+$\overline{\mathbf{q}}  = O \mathbf{q}^\prime$.
+If any eigenvalue $\left|\lambda_i\right|\ll \left|\overline{q}_i\right|$,
+then there will be a large shift that will dominate the solution
+to the linear system.  See Figure~\ref{shiftPairs}.
+Thus, we impose a cutoff $\Lambda$:
+\be
+     \Lambda \left|\lambda_i\right| > \left|\overline{q}_i\right|
+\eq
+%
+and remove from Eqn.~{\ref{linear3}) any rows associated with eigenpairs
+that violate the cutoff (inside the v-shaped
+region in Fig.~\ref{shiftPairs}).
+
+Finally, since the gauge symmetry of the action is non-linear,
+we do not want to shift the fields by too much before recalculating
+the matrix $G$.
+Thus, it is useful to add a damping factor $\gamma$ before
+shifting the lattice fields:
+\be
+         \mathbf{w} = - \gamma \mathbf{y} = - \gamma O^T \overline{\mathbf{y}}
+\eq
+Armed with these three tools:  removing infinitesimal-gauge-transform shifts,
+imposing the $\Lambda$ cutoff, and using the damping factor $\gamma$,
+we can apply the shift iteratively find saddle-point configurations
+that are of physical interest.
+
+\section{Trajectories}
+
+\begin{figure}
+\includegraphics{trajectory1}
+\includegraphics{trajectory2}
+\includegraphics{trajectory3}
+\caption{Several trajectories are shown for a $16^3$ lattice configuration,
+  $N=3$, $\beta=28$.
+  The starting configuration $\config_0$ was generated using standard Euclidean
+  Lattice Monte Carlo; ``distance'' is $\metric{\config_0}{\config_k}$;
+  {\bf 2b} was generated with $\gamma=0.1$, $\Lambda_\mathrm{max} = 2$,
+  and $\Lambda_2=0.0004$;
+  {\bf 2c} was generated with $\gamma=0.2$, $\Lambda_\mathrm{max} = 2$,
+  and $\Lambda_2=0.0002$;
+  {\bf 2d} was generated with $\gamma=0.1$, $\Lambda_\mathrm{max} = 2$,
+  and $\Lambda_2=0.0002$.
+  For {\bf lc}, $\gamma=0.1$, off-diagonal blocks of $H$ were dropped,
+  and a shift
+  was applied to a link when $\left\lVert\mathbf{w}\right\rVert<0.327$.
+  \label{trajectory123}}
+\end{figure}
+  
+We will apply our procedure to $\SU(3)$, $16^3$ and $20^3$ lattice
+configurations, as well as $\SU(4)$, $16^3$ lattice
+configurations.  Details of the numerical calculation
+are discussed in Appendices~\ref{krylov} and \ref{configurations}.
+
+By applying the procedure dissussed in Section~\ref{saddle} iteratively,
+we produce a trajectory of lattice configurations $\config_0, \config_1, \ldots$
+in configuration space.  In Fig.~\ref{trajectory123}, we show some trajectories
+in terms of the string tension $\sigma a^2$, $\plaquette_\mathrm{avg}$,
+and the distance
+to the original gauge configuration $\metric{\config_0}{\config_k}$.
+
+Lucini and Teper report a string tension $\sigma a^2=0.016282(76)$
+for $N=3$, and $\beta=28$ (Ref.~\cite{lucini_$mathrmsun$_2002}, Table~5).
+For the initial configuration $\config_0$ used in Fig.\ref{trajectory123},
+we measure $\sigma a^2=0.0155(56)$;
+with errors that remain about that size for $\config_k$, $k>0$.
+For $\config_0$, $\plaquette_\mathrm{avg}=0.902$ and the
+action is dominated by perbative fluctuations of the gauge fields.
+We can use the string tension to
+estimate $\plaquette_\mathrm{avg}$ where we expect the action to become
+dominated by the string-like behavior of the theory:
+\be
+\plaquette_\mathrm{avg} \gtrsim  1 - \sigma a^2 = 0.984 \; .
+\eq
+
+
+Ideally, $\plaquette_\mathrm{avg}$ will increase steadily and the string tension will remain relatively constant as we apply our iterative procedure.
+Also, the distance to the starting configuration should not become very large.
+This is illustrated by the trajectory {\bf 2c}.
+In cases where $\gamma$ or $\Lambda_2$ is too large, we find that the
+string tension does not remain stable, as illustrated by
+trajectory {\bf 2b}.
+
+We also have investigated an ad-hoc procedure where
+the off-diagonal color blocks of $H$ are dropped (that is, the
+saddle point search is applied to each link individually).
+This procedure is much easier to apply numerically.
+As shown in trajectory {\bf lc},
+we see that that the string tension can remain relatively stable,
+but $\config_k$ eventually degrades to the trivial vacuum.
 
 \section{Conclusions}
 
@@ -138,14 +455,16 @@ degrees of freedom.
 \vspace{10mm}
 \noindent {Acknowledgements}:
 
-\vspace{10mm}
-\noindent {\bf APPENDIX: Roots of $\SU(N)$ matrices}
+\appendix
 
-\vspace{10mm}
+\section{Roots of $\SU(N)$ matrices}
+\label{roots}
 
-In general, for some Lie group matrix $U$, the matrix power
-$U^t$, $t\in[0,1]$ should be a smooth map from $[0,1]$
-onto the group manifold where $U^0=\mathbb{I}$ and $U^1=U$. 
+In general, for matrix $U_c$ belonging to a connected Lie group,
+the matrix power $U_c^t$, $t\in[0,1]$ should be a
+smooth map from $[0,1]$ onto the group manifold where
+$U_c^0=\mathbb{I}$, $U_c^1=U_c$, and $U_c^s U_c^t = U_c^{s+t}$.
+% The image of the map should have minimal length. 
 In general, a unitary matrix $U$ can be factored as
 %
 \be
@@ -157,23 +476,23 @@ U = V^\da \begin{pmatrix}
 \eq
 %
 where $V$ is a unitary matrix and $-\pi < \lambda_i < \pi$.
-In the case $U \in \SU(N)$ the $\det(U)=1$ condition implies that
+In the special case $U \in \SU(N)$, the $\det(U)=1$ condition implies that
 \be
 \sum_i \lambda_i = 2 \pi m\;, \quad m\in\integer \;.
 \eq
-For taking matrix roots, cases where $m\neq 0$ present a
+When taking matrix roots, cases where $m\neq 0$ present a
 difficulty.  However, one can always shift $\lambda_i$ by
 multiples of $2\pi$:
 \be
 \lambda_i \to \lambda_i^\prime = \lambda_i + 2 \pi n_i\;,\quad
-n_i\in\integer
+n_i\in\integer \; ,
 \eq
 such that $\sum_i \lambda_i^\prime = 0$ and
 $\lambda_i^\prime - \lambda_j^\prime < 2 \pi$.
 %
 \begin{figure}
 
-\includegraphics[width=2in]{hex3}
+\includegraphics{hex3}
   \caption{In the case of $\SU(3)$, $(\lambda_1^\prime,\lambda_2^\prime)$ lie in the shaded hexagonal region.
     Elements of the center of the group $z$, $z^2$, lie on the vertices of the hexagon.}
 \end{figure}
@@ -184,8 +503,9 @@ U^t = V^\da \begin{pmatrix}
     \mathrm{e}^{i\lambda_1^\prime t} & & &\\
     & \mathrm{e}^{i\lambda_2^\prime t} & &\\
     & & \ddots & \\
-    & & & \mathrm{e}^{i\lambda_N^\prime t}\end{pmatrix} V
+    & & & \mathrm{e}^{i\lambda_N^\prime t}\end{pmatrix} V \; .
 \eq
+This definition of $U^t$ fufills the conditions listed above.
 Similarly, we define the logarithm of $U$ as:
 \be
 \log U = i V^\da \begin{pmatrix}
@@ -195,9 +515,63 @@ Similarly, we define the logarithm of $U$ as:
     & & & \lambda_N^\prime\end{pmatrix} V
 \eq
 
-\begin{thebibliography}{99}
+\section{Solving a constrained linear system}
+\label{krylov}
 
+For lattices of interest, the basis size $n_L$ is large enough
+that direct solution is not possible and one must resort to Krylov
+space methods (sparse matrix methods).
 
-\end{thebibliography}
+The Hessian matrix $H$ is sparse, with an $(N^2-1)\times(N^2-1)$
+color block structure and $(6D-5)$ nonzero blocks per row.
+The gauge transform matrix $G$ has the same color block structure
+with $2 D$ nonzero blocks per row and $2$ nonzero blocks per column.
+
+In order to preserve the sparsity of the matrices, we never
+explicitly construct the space of non-transform shifts used in
+Eqn.~(\ref{linear2}).  Instead, we apply the projection
+operator $P_G$ onto any Krylov space vector $\mathbf{v}$ by solving a
+linear system:
+\begin{eqnarray}
+  P_G \mathbf{v} &=& \mathbf{v} - O^T \mathbf{u} \\
+  O O^T \mathbf{u} &=& O \mathbf{v} \label{gcg}
+\end{eqnarray}
+where Eqn.~(\ref{gcg}) is solved using the conjugate gradient
+alogrithm, subroutine MINRES-QLP~\cite{choi_algorithm_2014}.
+
+We start by using Lanczos library nu-TRLan~\cite{yamazaki_adaptive_2010},
+modified so that we can apply $P_G$ to any Krylov space vector, to
+find the smallest eigenpairs of $H P_g H$.  We then find
+eigenvectors $\left\{\mathbf{r}_1, \mathbf{r}_2, \ldots\right\}$
+associated with eigenpairs $\left(\lambda_i^2, \mathbf{r}_i\right)$
+that violate the $\Lambda$ cutoff,
+\be
+   \lambda_i^2 \Lambda > \mathbf{r\cdot q}
+        \left\lVert \mathbf{q}\right\rVert_2
+\eq
+(We also use the norm $\left\lVert \mathbf{w}\right\rVert_\mathrm{max}$
+to ensure the shift is small for individual links.)
+Then we solve the linear system $H \mathbf{y} = \mathbf{q}$
+using the conjugate gradient alogrithm,
+subroutine MINRES-QLP~\cite{choi_algorithm_2014}, modified so that
+$P_G$ and the projection operator
+$\mathbb{I}- \sum_k \mathbf{r}_k \otimes \mathbf{r}_r$
+are applied to any Krylov space vector.
+
+\section{Lattice configurations}
+\label{configurations}
+
+Lattice configurations were generated using the Chroma
+code~\cite{edwards_chroma_2005}.
+For $N>3$ it was necessary to add partial pivoting~\cite{golub_matrix_1996}
+to the Chroma routine that calculates matrix determinants.  We then
+verified that Chroma-generated values of $\plaquette_\mathrm{avg}$ agree with
+Teper's results~\cite{lucini_$mathrmsun$_2002} for $N=3,4$.
+
+We used ... {\bf details of Monte Carlo: thermalizing steps,
+  overerelaxation, et cetera.
+  Details of Polyakov loop calculations.}
+
+\bibliography{physics}  % Use physics.bib
 
 \end{document}
