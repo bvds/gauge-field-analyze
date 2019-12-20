@@ -39,11 +39,11 @@ shift[dir_, coordIn_List, size_:1] :=
 	cc[[dir]] = 1 + Mod[cc[[dir]] + size - 1, latticeDimensions[[dir]]];
 	cc];
 
-plaquette[dir1_, dir2_, coords_List] := Re[Tr[
+plaquette[dir1_, dir2_, coords_List] := Tr[
     getLink[dir1, coords].
     getLink[dir2, shift[dir1, coords]].
     ConjugateTranspose[getLink[dir1, shift[dir2, coords]]].
-    ConjugateTranspose[getLink[dir2, coords]]]];
+    ConjugateTranspose[getLink[dir2, coords]]];
 averagePlaquette[] :=
     Sum[Re[plaquette[dir1, dir2, latticeCoordinates[k]]],
 	     {k, latticeVolume[]}, {dir1, 2, nd},
@@ -53,21 +53,19 @@ makeRootLattice[gf_] := ParallelMap[SUPower[#, 0.5]&, gf, {2}];
 latticeDistance::usage = "Distance between two lattice configurations
  using the Euclidean metric in the tangent space of
  the first lattice, divided by the number of links.";
-latticeDistance[root1_, lattice2_]:=
+latticeDistance[lattice1_, lattice2_]:=
     Block[{y = Flatten[MapThread[
-        Norm[Map[Tr, 2 Im[SUGenerators[].SULog[
-            Block[{x=ConjugateTranspose[#1]}, x.#2.x]]]]]&,
-            {root1, lattice2}, 2]]},
+        (* These are all equivalent *)
+        Which[
+            False,
+            Sqrt[2] Norm[Flatten[SULog[LinearSolve[##]]]],
+            False,
+            Sqrt[2 Tr[#.ConjugateTranspose[#]]]&[SULog[LinearSolve[##]]],
+            True,
+            (* The Im[] is to remove any floating point errors *)
+            2 Norm[Map[Tr, Im[SUGenerators[].SULog[LinearSolve[##]]]]]]&,
+            {lattice1, lattice2}, 2]]},
           Norm[y]/Length[y]];
-(* Return a function that evaluates distance from
-  lattice1.  So
-       latticeDistanceFrom[lattice1][lattice2] ==
-           latticeDistance[makeRootLattice[lattice1], lattice2]
-  This might be a memory hog, since the module variable
-  persists.  *)
-latticeDistanceFrom[lattice1_]:=
-    Module[{root1 = makeRootLattice[lattice1]},
-           latticeDistance[root1, #]&];
 
 makeTrivialLattice::usage =
   "All links identity for a given nd,nc,latticeDimensions.
@@ -271,7 +269,7 @@ plotActionPlane[dir1_, dir2_, anchor_, range_] :=
   ListPlot3D[
    Flatten[Table[coords[[dir1]] = x1;
      coords[[dir2]] = x2; {x1 + 1/2, x2 + 1/2,
-	beta (1 - plaquette[dir1, dir2, wrapIt[coords]]/nc)},
+	   beta (1 - Re[plaquette[dir1, dir2, wrapIt[coords]]]/nc)},
 		 {x1, 0, latticeDimensions[[dir1]]},
 		 {x2, 0, latticeDimensions[[dir2]]}],
 	   1], PlotRange -> {{1/2, latticeDimensions[[dir1]] + 1/2},
@@ -284,7 +282,7 @@ plotActionSides[dir0_, dir1_, dir2_, anchor_, range_] :=
      coords[[dir2]] = x2; {x1 + If[i == 1, 1/2, 0],
       x2 + If[i == 1, 0, 1/2],
       beta (1 -
-         plaquette[dir0, If[i == 1, dir1, dir2], wrapIt[coords]]/nc)},
+            Re[plaquette[dir0, If[i == 1, dir1, dir2], wrapIt[coords]]]/nc)},
 		 {x1, 0, latticeDimensions[[dir1]]},
 		 {x2, 0, latticeDimensions[[dir2]]}, {i, 2}], 2],
    PlotRange -> {{1/2, latticeDimensions[[dir1]] + 1/2}, {1/2,
@@ -313,14 +311,16 @@ lineLinks[dir_, anchor_List] :=
       8^3, nc=3 lattice:  2.0 seconds
       16^3, nc=3 lattice: 150 seconds
  *)
+Options[plaquetteCorrelationTallies] = {
+    (* Charge conjugation/parity -1, 1 *)
+    "chargeConjugation" -> 1};
 plaquetteCorrelationTallies::usage = "Returns tallies as a function of (2*distance)^2.";
-plaquetteCorrelationTallies[] :=
+plaquetteCorrelationTallies[OptionsPattern[]] :=
  Block[{center2 = Table[If[i==#1 || i==#2, 1, 0],{i, nd}]&, pp,
    distance2 = With[{ld = latticeDimensions},
                    Compile[{{xa, _Integer, 1}, {xb, _Integer, 1}},
                            Dot[#, #]&[Mod[xa - xb + ld, 2*ld] - ld]]],
-   pabList = Compile[{{lt, _Real, 1}, {pa, _Real}, {pb, _Real}},
-                     lt + {1, pa, pb, pa^2, pb^2, pa*pb}],
+   pabList,
    orient = Compile[{{dir1a, _Integer}, {dir2a, _Integer}, {xa, _Integer, 1},
                      {dir1b, _Integer}, {dir2b, _Integer}, {xb, _Integer, 1}},
                     If[
@@ -333,9 +333,14 @@ plaquetteCorrelationTallies[] :=
   pp = Flatten[Table[
       Block[{coords = latticeCoordinates[k]},
             {dir1, dir2, 2*coords + center2[dir1, dir2],
-             (* Since we are interested in the large beta case. *)
-             1 - plaquette[dir1, dir2, coords]/nc}],
+             If[OptionValue["chargeConjugation"] > 0, Re[#], Im[#]]&[
+                 plaquette[dir1, dir2, coords]]/nc}],
       {dir1, nd-1}, {dir2, dir1+1, nd}, {k, latticeVolume[]}], 2];
+  pabList = With[
+      {pavg = Mean[Map[Last, pp]]},
+      Compile[{{lt, _Real, 1}, {pa, _Real}, {pb, _Real}},
+              Block[{corr = (pa - pavg)*(pb - pavg)},
+                    lt + {1, corr, corr^2}]]];
  Merge[ParallelTable[
   Block[{tallies = Association[{}], sameDirQ,
          dir1a, dir1b, dir2a, dir2b, xa, xb, pa, pb, lt, dx2},
@@ -347,7 +352,7 @@ plaquetteCorrelationTallies[] :=
        (* Nearest distance, including wrap-around.
          Use twice the distance squared, so everything is an integer. *)
        dx2 = distance2[xa, xb];
-       lt = Lookup[tallies, Key[{sameDirQ, dx2}], Table[0.0, {6}]];
+       lt = Lookup[tallies, Key[{sameDirQ, dx2}], Table[0.0, {3}]];
        tallies[{sameDirQ, dx2}] = pabList[lt, pa, pb],
        {i, kernel, Length[pp]-1, $KernelCount},
        {j, i+1, Length[pp]}];
@@ -356,27 +361,27 @@ plaquetteCorrelationTallies[] :=
 (* From https://en.wikipedia.org/wiki/Correlation_and_dependence
   There are more correct formulas for the standard error. *)
 sampleCorrelation[{q_, d_} -> x_] :=
-    Block[{r = (x[[1]]*x[[6]] - x[[2]]*x[[3]])/
-               Sqrt[(x[[1]]*x[[4]] - x[[2]]^2) (x[[1]]*x[[5]] - x[[3]]^2)]},
-          {Sqrt[d]/2, r, Sqrt[(1-r^2)/(x[[1]]-2)], q}];
-makePlaquetteCorrelations[] :=
+    Block[{r = x[[2]]/x[[1]]},
+          {Sqrt[d]/2, r, Sqrt[x[[3]] - x[[1]] r^2]/x[[1]], q}];
+makePlaquetteCorrelations[opts:OptionsPattern[]] :=
     Map[sampleCorrelation,
-        Sort[Normal[plaquetteCorrelationTallies[]],
+        Sort[Normal[plaquetteCorrelationTallies[opts]],
              Order[N[#1[[1, 2]]], N[#2[[1, 2]]]]&]];
 plotPlaquetteCorrelations[corr_, opts:OptionsPattern[]] := 
-   (* Bug in ErrorListPlot:  x-values must be numerical *)
-    ErrorListPlot[Map[
-        {{N[#[[1]]], #[[2]]}, ErrorBar[ #[[3]]]}&,
-        (* Order data sets by the value of the last index.
+ (* Bug in ErrorListPlot:  x-values must be machine numbers *)
+ ErrorListPlot[Map[
+     {{N[#[[1]]], #[[2]]}, ErrorBar[ #[[3]]]}&,
+       (* Order data sets by the value of the last index.
          One could also use GroupBy[] to do this. *)
-        Table[Select[corr, Last[#]==i&],
-              {i, Union[Map[Last, corr]]}], {2}],
+       Table[Select[corr, Last[#]==i&],
+             {i, Union[Map[Last, corr]]}], {2}],
+  opts,
   PlotRange -> {{0, All}, All}, Axes -> False, Frame -> True, 
-  FrameLabel -> {"distance", "correlation"},
+  FrameLabel -> {"separation", "correlation"},
   PlotLegends -> Placed[SwatchLegend[
       (* Data set order is given by the numbering in
         the compiled function "orient" above. *)
       {"same plane", "same orientation, stacked",
        "same orientation, offset", "different orientation"}], {0.7, 0.75}],
   Epilog -> {Dashing[0.01], 
-             Line[{{0, 0}, {1/2 + Max[Map[First, corr]], 0}}]}, opts];
+             Line[{{0, 0}, {1/2 + Max[Map[First, corr]], 0}}]}];

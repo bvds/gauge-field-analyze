@@ -1,8 +1,8 @@
 (*
   Do one link at a time.
 
-  In this case, the resulting action density is dominated by
-  one-plaquette spikes.
+  That is, ignore off-diagonal color blocks of the Hessian.
+  Numerically, this is much easier.
  *)
 
 linkSaddlePointStep::usage = "One iteration of the saddle point search applied to a single link.  Set ignoreCutoff -> True to test this against the explicit calculation.";
@@ -61,11 +61,11 @@ allLinkSaddlePoint::usage = "Apply one-link saddle point step to all links, retu
 Options[allLinkSaddlePoint] = Join[{maxAvgPlaquette -> 1},
                                    Options[linkSaddlePoint]];
 allLinkSaddlePoint[n_, opts:OptionsPattern[]] :=
- Block[{distance, tallyData, avgP = 0, ff, result, t0, t1,
+ Block[{gfi, tallyData, avgP = 0, ff, result, t0, t1,
         coordList = makeCoordList[],
         lspo = Apply[Sequence, FilterRules[{opts}, Options[linkSaddlePoint]]],
         debug = printLevel[OptionValue[printDetails], 1]},
-  distance = latticeDistanceFrom[gaugeField];
+  gfi = gaugeField;
   (* Sow[] and Reap[] allow an early exit from the loop. *)
   Reap[Do[
       If[avgP >= OptionValue[maxAvgPlaquette], Break[]];
@@ -81,7 +81,7 @@ allLinkSaddlePoint[n_, opts:OptionsPattern[]] :=
       tallyData = talliesToAverageErrors[polyakovLoopTallies["smeared"]];
       ff = exponentialModel[tallyData];
       avgP = averagePlaquette[];
-      result = Join[{i, distance[gaugeField], avgP},
+      result = Join[{i, latticeDistance[gfi, gaugeField], avgP},
            Inner[{#1[[1]], #1[[2]], #2} &, ff["BestFitParameters"], 
                  ff["ParameterErrors"], List]];
       If[debug > 0, Print[result]];

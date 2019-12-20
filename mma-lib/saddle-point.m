@@ -430,6 +430,7 @@ findDelta[{hess_, grad_, gauge_}, OptionsPattern[]] :=
 	  {shiftNormMax[stepShifts], shiftNorm2[stepShifts],
 	   stepShifts.hess.stepShifts/stepShifts.grad}];
     If[OptionValue[storeHess],
+       Print["Define hess0, grad0, proj0, oo0, pairs0"];
        hess0 = hess; grad0 = grad; proj0 = proj; oo0 = oo;
        pairs0 = Transpose[{values, oo.gradp}]];
     -damping applyCutoff2[stepShifts, OptionValue[rescaleCutoff], zzz]] /;
