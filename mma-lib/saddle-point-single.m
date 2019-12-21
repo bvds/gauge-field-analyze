@@ -81,7 +81,7 @@ allLinkSaddlePoint[n_, opts:OptionsPattern[]] :=
       tallyData = talliesToAverageErrors[polyakovLoopTallies["smeared"]];
       ff = exponentialModel[tallyData];
       avgP = averagePlaquette[];
-      result = Join[{i, latticeDistance[gfi, gaugeField], avgP},
+      result = Join[{i, avgP},
            Inner[{#1[[1]], #1[[2]], #2} &, ff["BestFitParameters"], 
                  ff["ParameterErrors"], List]];
       If[debug > 0, Print[result]];

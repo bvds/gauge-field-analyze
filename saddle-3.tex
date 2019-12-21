@@ -29,7 +29,6 @@
 \newcommand{\eq}{\end{equation}}
 \newcommand{\integer}{\mathbb{Z}}       % set of integers
 \newcommand{\plaquette}{\Box}
-\newcommand{\metric}[2]{\left\langle #1,#2\right\rangle}
 \newcommand{\config}{\mathcal{U}}
 \DeclareMathOperator{\SU}{SU}
 \DeclareMathOperator{\Tr}{Tr}
@@ -46,7 +45,7 @@
 
 \begin{abstract}
   We find saddle points of $\SU(N)$ action in three space-time dimensions
-  and see characteristics consistant with Witten's Master Field.
+  and see characteristics consistent with Witten's Master Field.
 \end{abstract}
 
 \pacs{Valid PACS appear here.
@@ -89,7 +88,7 @@ To motivate our approach to studying the QCD vacuum, note the following:
 
 \begin{enumerate}
 
-\item Quarks are not important.  In the langauge of Lattice QCD,
+\item Quarks are not important.  In the language of Lattice QCD,
   one says that the quenched approximation (no dynamical
  quarks) is a good approximation to the full theory.
 
@@ -97,13 +96,14 @@ To motivate our approach to studying the QCD vacuum, note the following:
   physical case $N=3$.  This has been demonstrated in numerous
   perturbative and non-perturbative calculations~\cite{lucini_sun_2013}.
   In particular, Teper has shown this to be the case for
-  the glueball spectrum in both 2+1 and 3+1 dimensions [cite teper].
+  the glueball spectrum in both 2+1~\cite{teper_$mathrmsun$_1998,lucini_$mathrmsun$_2002}
+  and 3+1 dimensions~\cite{teper_large-n_2005}.
 
 \item The behavior of $\SU(N)$ gauge theory in 3 space-time dimensions
-  is remarkabley similar to the 4 dimensional theory [cite Teper].
+  is remarkabley similar to the 4 dimensional theory~\cite{teper_$mathrmsun$_1998,lucini_$mathrmsun$_2002,teper_large-n_2005}.
   Although the scale is generated quite differently in each case ---
   in 4 dimensions, it is generated dynamically through quantum
-  flucutations while in 3 dimensions the coupling is dimensionful ---
+  fluctuations while in 3 dimensions the coupling is dimensionful ---
   once a scale is generated, the theories behave in a very similar manner.
 
 \item In Witten's Master Field picture, the master field is
@@ -142,23 +142,6 @@ Define lattice configuration
 $\config=\left\{U_1(x_1),\ldots\right\}$
 to be a particular set of link fields that cover the entire lattice.
 
-We can define a metric for elements of $\SU(N)$:
-%
-\begin{eqnarray}
-  \metric{U}{V} &=& \sqrt{2 \Tr\,z z^\da} \; , \nonumber\\
-  z &=& \log\left(U^{-1} V\right)
-    \; , \quad U, V\in\SU(N) \label{metric}
-\end{eqnarray}
-where the logarithm is defined in Appendix~\ref{roots}.
-We can use this metric to define the average
-distance between two lattice configurations $\config_k$ and $\config_l$:
-\be
-   \metric{\config_k}{\config_l} = \frac{1}{L^D D} \sum_{x,\mu}
-          \metric{U^{(k)}_\mu(x)}{U^{(l)}_\mu(x)}
-\eq
-where $U^{(k)}_\mu(x)$ is a link in $\config_k$
-and $U^{(l)}_\mu(x)$ is a link in $\config_l$.
-
 The associated Wilson action is
 %
 \be
@@ -171,13 +154,13 @@ U_\mu^\da(x+a\hat{\nu}) U_\nu^\da(x) \; .
 \eq
 It is sometimes convenient to use the average plaquette,
 \be
-      \plaquette_\mathrm{avg} = \frac{1}{L^D D N}
+      \plaquette_\mathrm{avg} = \frac{2}{L^D D (D-1) N}
              \sum_{x,\,\mu<\nu} \Re\,\plaquette_{\mu,\nu}(x) 
 \eq
 with normalization such that $\plaquette_\mathrm{avg}=1$
 for the bare vacuum configuration $U_\mu(x) = \mathbb{I}$.
 
-The Wilson action is invarient under $\SU(N)$ gauge transforms:
+The Wilson action is invariant under $\SU(N)$ gauge transforms:
 %
 \be
     U_\mu(x) \to U_G(x) U_\mu(x) U_G^\da(x+a \hat{\mu})
@@ -264,7 +247,7 @@ w_a = 2 C_b(x) \Tr\left(\sqrt{U_\mu(x)} T_a
 Using Eqn.~(\ref{gs}), one can construct an $n_G \times n_L$ matrix
 $G$ that relates shifts to infinitesimal gauge transforms
 at each lattice site.
-Since the action is invarient under gauge transforms, $G \mathbf{q} = 0$.
+Since the action is invariant under gauge transforms, $G \mathbf{q} = 0$.
 However, since the Hessian is quadratic in the fields, $G H G^T \neq 0$.
 
 Since we are using the Hessian, we are approximating
@@ -360,17 +343,27 @@ and express Eqn.~(\ref{linear2}) in the eigenspace of $H^\prime$:
 \eq
 where $\overline{\mathbf{y}} = O \mathbf{y}$ and
 $\overline{\mathbf{q}}  = O \mathbf{q}^\prime$.
-If any eigenvalue $\left|\lambda_i\right|\ll \left|\overline{q}_i\right|$,
+If any eigenvalue $\left|\lambda_i\right|\ll
+\left|\overline{q}_i\right|$,
 then there will be a large shift that will dominate the solution
 to the linear system.  See Figure~\ref{shiftPairs}.
-Thus, we impose a cutoff $\Lambda$:
+Thus, we impose a cutoff $\Lambda_2$:
 \be
-     \Lambda \left|\lambda_i\right| > \left|\overline{q}_i\right|
+    \frac{\left|\overline{q}_i\right|\left\lVert \left(O P_G\right)_i\right\rVert_2}{\left|\lambda_i\right|}
+     < \Lambda_2
+    \mbox{\quad \bf Verify formula}
 \eq
 %
 and remove from Eqn.~{\ref{linear3}) any rows associated with eigenpairs
 that violate the cutoff (inside the v-shaped
-region in Fig.~\ref{shiftPairs}).
+region in Fig.~\ref{shiftPairs}).  For additional safety, we
+we also impose a maximum cutoff
+\be
+    \frac{\left|\overline{q}_i\right|
+      \left\lVert \left(O P_G\right)_i\right\rVert_\mathrm{max}}
+    {\left|\lambda_i\right|}
+    < \Lambda_\mathrm{max} \; .
+\eq
 
 Finally, since the gauge symmetry of the action is non-linear,
 we do not want to shift the fields by too much before recalculating
@@ -381,30 +374,28 @@ shifting the lattice fields:
          \mathbf{w} = - \gamma \mathbf{y} = - \gamma O^T \overline{\mathbf{y}}
 \eq
 Armed with these three tools:  removing infinitesimal-gauge-transform shifts,
-imposing the $\Lambda$ cutoff, and using the damping factor $\gamma$,
+imposing the $\Lambda$ cutoffs, and using the damping factor $\gamma$,
 we can apply the shift iteratively find saddle-point configurations
 that are of physical interest.
 
 \section{Trajectories}
 
 \begin{figure}
-\includegraphics{trajectory1}
-\includegraphics{trajectory2}
 \includegraphics{trajectory3}
 \caption{Several trajectories are shown for a $16^3$ lattice configuration,
   $N=3$, $\beta=28$.
   The starting configuration $\config_0$ was generated using standard Euclidean
-  Lattice Monte Carlo; ``distance'' is $\metric{\config_0}{\config_k}$;
+  Lattice Monte Carlo;
   {\bf 2b} was generated with $\gamma=0.1$, $\Lambda_\mathrm{max} = 2$,
   and $\Lambda_2=0.0004$;
-  {\bf 2c} was generated with $\gamma=0.2$, $\Lambda_\mathrm{max} = 2$,
+  {\bf 2c} was generated with $\gamma=0.5$, $\Lambda_\mathrm{max} = 2$,
   and $\Lambda_2=0.0002$;
   {\bf 2d} was generated with $\gamma=0.1$, $\Lambda_\mathrm{max} = 2$,
   and $\Lambda_2=0.0002$.
   For {\bf lc}, $\gamma=0.1$, off-diagonal blocks of $H$ were dropped,
   and a shift
   was applied to a link when $\left\lVert\mathbf{w}\right\rVert<0.327$.
-  \label{trajectory123}}
+  \label{trajectory3}}
 \end{figure}
   
 We will apply our procedure to $\SU(3)$, $16^3$ and $20^3$ lattice
@@ -412,20 +403,18 @@ configurations, as well as $\SU(4)$, $16^3$ lattice
 configurations.  Details of the numerical calculation
 are discussed in Appendices~\ref{krylov} and \ref{configurations}.
 
-By applying the procedure dissussed in Section~\ref{saddle} iteratively,
+By applying the procedure discussed in Section~\ref{saddle} iteratively,
 we produce a trajectory of lattice configurations $\config_0, \config_1, \ldots$
-in configuration space.  In Fig.~\ref{trajectory123}, we show some trajectories
-in terms of the string tension $\sigma a^2$, $\plaquette_\mathrm{avg}$,
-and the distance
-to the original gauge configuration $\metric{\config_0}{\config_k}$.
+in configuration space.  In Fig.~\ref{trajectory3}, we show some trajectories
+in terms of the string tension $\sigma a^2$ and $\plaquette_\mathrm{avg}$.
 
 Lucini and Teper report a string tension $\sigma a^2=0.016282(76)$
 for $N=3$, and $\beta=28$ (Ref.~\cite{lucini_$mathrmsun$_2002}, Table~5).
-For the initial configuration $\config_0$ used in Fig.\ref{trajectory123},
+For the initial configuration $\config_0$ used in Fig.\ref{trajectory3},
 we measure $\sigma a^2=0.0155(56)$;
 with errors that remain about that size for $\config_k$, $k>0$.
 For $\config_0$, $\plaquette_\mathrm{avg}=0.902$ and the
-action is dominated by perbative fluctuations of the gauge fields.
+action is dominated by perturbative fluctuations of the gauge fields.
 We can use the string tension to
 estimate $\plaquette_\mathrm{avg}$ where we expect the action to become
 dominated by the string-like behavior of the theory:
@@ -435,11 +424,10 @@ dominated by the string-like behavior of the theory:
 
 
 Ideally, $\plaquette_\mathrm{avg}$ will increase steadily and the string tension will remain relatively constant as we apply our iterative procedure.
-Also, the distance to the starting configuration should not become very large.
-This is illustrated by the trajectory {\bf 2c}.
+This is illustrated by the trajectory {\bf 2d}.
 In cases where $\gamma$ or $\Lambda_2$ is too large, we find that the
 string tension does not remain stable, as illustrated by
-trajectory {\bf 2b}.
+trajectories {\bf 2b} and {\bf 2c}.
 
 We also have investigated an ad-hoc procedure where
 the off-diagonal color blocks of $H$ are dropped (that is, the
@@ -449,11 +437,121 @@ As shown in trajectory {\bf lc},
 we see that that the string tension can remain relatively stable,
 but $\config_k$ eventually degrades to the trivial vacuum.
 
+{\bf  To do: Redo trajectory 2c and 2d (in progress).
+  $\SU(3)$, $L^3=20^3$ and
+  $\SU(4)$ are not quite working, yet}
+
+
+\section{Spectrum}
+
+\begin{figure}
+   configuration $\config_0$\\
+   \includegraphics{corrOriginal}\\
+   configuration $\config_{10}$\\
+   \includegraphics{corr2d10}\\
+   configuration $\config_{20}$\\
+   \includegraphics{corr2d20Even}
+\caption{Correlations of the even plaquette operator for several points
+  along trajectory {\bf 2d} shown in Fig.~\ref{trajectory3}.
+  Also shown is an exponential corresponding to Teper's value
+  for the lowest $0^{++}$ glueball.
+  \label{corr2dEven}}
+\end{figure}
+
+\begin{figure}
+   \includegraphics{corr2d20Odd}
+   \caption{Correlations of the odd plaquette operator for
+     lattice configuration
+     $\config_{20}$ on trajectory {\bf 2d} shown in Fig.~\ref{trajectory3}.
+  Also shown is an exponential corresponding to Teper's value
+  for the lowest $0^{--}$ glueball.
+  \label{corr2dOdd}}
+\end{figure}
+
+\begin{figure}
+   \includegraphics{corrLink995}
+   \caption{Correlations of the even plaquette operator for
+     the $\plaquette_\mathrm{avg} \approx 0.995$ lattice configuration
+     on trajectory {\bf lc} shown in Fig.~\ref{trajectory3}.
+    Also shown is an exponential corresponding to Teper's value
+     for the lowest $0^{++}$ glueball.
+     We do not see the desired exponential behavior.
+  \label{corrLink995}}
+\end{figure}
+
+We can look at other properties of the gauge configuration
+as we move along the trajectory.  In particular, let us look
+at the correlators of the charge conjugation even plaquette operator
+\be
+  \left\langle
+  \left(\Re \plaquette_{\mu,\nu}(x) - \plaquette_\mathrm{avg}\right)
+  \left(\Re \plaquette_{\alpha,\beta}(y) - \plaquette_\mathrm{avg}\right)
+  \right\rangle
+\eq
+as a function of the separation of the two plaquettes
+\be
+\mathrm{separation} =
+        \left\lVert \left(x+a \hat{\mu}/2+ a\hat{\nu}/2\right) -
+             \left(y+a \hat{\alpha}/2+ a\hat{\beta}/2\right)
+             \right\rVert \; .
+\eq
+This correlator corresponds to the $0^{++}$ glueball spectrum.
+
+In Fig.~\ref{corr2dEven}, we plot the correlation for various relative
+orientations of the two plaquettes for some point along the
+best trajectory in~\ref{trajectory3}.  We also plot an exponential
+corresponding to Teper's value for the $0^{++}$ glueball,
+mass $0.5517(38)/a$ for $\beta=28$, $L^3=23^3$~\cite{teper_$mathrmsun$_1998}.
+The exponential only demonstrates that there is qualitative agreement;
+the correlator also has contributions from the excited $0^{++}$ states.
+
+Likewise, we can look at the charge conjugation odd correlator
+\be
+  \left\langle
+  \left(\Im \plaquette_{\mu,\nu}(x) - \plaquette_\mathrm{avg}\right)
+  \left(\Im \plaquette_{\alpha,\beta}(y) - \plaquette_\mathrm{avg}\right)
+  \right\rangle   \; ,
+\eq
+corresponding to the $0^{--}$ glueballs; see Fig.~\ref{corr2dOdd}.
+Also shown is an exponential corresponding to the lowest $0^{--}$ state,
+mass $0.8133(57)/a$ \cite{teper_$mathrmsun$_1998}.
+
+In the case where the off-diagonal color blocks of $H$ are dropped,
+we do not see the desired exponential behavior in the correlator,
+Fig.~\ref{corrLink995}.
+
+\section{Gauge Fields}
+
+{\bf To do:  look at the fields themselves.
+
+  Ideas:
+  \begin{itemize}
+  \item  Look at $A_{\mu,a}$ directly in the $A_0=0$ (axial) gauge.
+
+  \item Find some nice way to express the Faraday tensor $F_{\mu,\nu}$ and
+    plot it.
+
+  \item Impose fixed boundary conditions on a cylinder where we fix the
+    link fields to correspond to one center charge inside the
+    cylinder.
+    
+  \end{itemize}
+}
+
+
 \section{Conclusions}
 
+The master field idea is a statement about the $N\to \infty$ limit
+of $\SU(N)$ gauge theory.  However, if finite $N$ is similar
+to the $N\to\infty$ limit, we should expect to properties of
+the master field emerge, approximately, at finite $N$.
+As an example of this, we
+see that a saddle point of a single lattice configuration
+contains the necessary physics, at least approximately, to produce the
+low-energy spectrum of the theory.
 
 \vspace{10mm}
-\noindent {Acknowledgements}:
+\noindent {Acknowledgments}:
 
 \appendix
 
@@ -505,7 +603,7 @@ U^t = V^\da \begin{pmatrix}
     & & \ddots & \\
     & & & \mathrm{e}^{i\lambda_N^\prime t}\end{pmatrix} V \; .
 \eq
-This definition of $U^t$ fufills the conditions listed above.
+This definition of $U^t$ fulfills the conditions listed above.
 Similarly, we define the logarithm of $U$ as:
 \be
 \log U = i V^\da \begin{pmatrix}
@@ -537,7 +635,7 @@ linear system:
   O O^T \mathbf{u} &=& O \mathbf{v} \label{gcg}
 \end{eqnarray}
 where Eqn.~(\ref{gcg}) is solved using the conjugate gradient
-alogrithm, subroutine MINRES-QLP~\cite{choi_algorithm_2014}.
+algorithm, subroutine MINRES-QLP~\cite{choi_algorithm_2014}.
 
 We start by using Lanczos library nu-TRLan~\cite{yamazaki_adaptive_2010},
 modified so that we can apply $P_G$ to any Krylov space vector, to
@@ -552,7 +650,7 @@ that violate the $\Lambda$ cutoff,
 (We also use the norm $\left\lVert \mathbf{w}\right\rVert_\mathrm{max}$
 to ensure the shift is small for individual links.)
 Then we solve the linear system $H \mathbf{y} = \mathbf{q}$
-using the conjugate gradient alogrithm,
+using the conjugate gradient algorithm,
 subroutine MINRES-QLP~\cite{choi_algorithm_2014}, modified so that
 $P_G$ and the projection operator
 $\mathbb{I}- \sum_k \mathbf{r}_k \otimes \mathbf{r}_r$
@@ -569,7 +667,7 @@ verified that Chroma-generated values of $\plaquette_\mathrm{avg}$ agree with
 Teper's results~\cite{lucini_$mathrmsun$_2002} for $N=3,4$.
 
 We used ... {\bf details of Monte Carlo: thermalizing steps,
-  overerelaxation, et cetera.
+  over-relaxation, et cetera.
   Details of Polyakov loop calculations.}
 
 \bibliography{physics}  % Use physics.bib
