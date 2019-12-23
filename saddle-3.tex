@@ -189,15 +189,15 @@ The lattice has a total of $n_G = L^D\left(N^2-1\right)$ gauge symmetries.
 
 In order to find a saddle point, it is convenient to modify
 the link fields $U_\mu(x)$ in a manner that maintains lattice symmetries.
-We define a ``shift'' for each links as,
+We define a ``shift'' for each links as
 \be
-  U_\mu(x) \to \sqrt{U_\mu(x)}\, e^{i w_{a}(\mu, x) T_a}\, \sqrt{U_\mu(x)} \; .
+  U_\mu(x) \to \sqrt{U_\mu(x)}\, e^{i w_{a}(\mu, x) T_a}\, \sqrt{U_\mu(x)} \; ,
     \label{shifts}
 \eq
 where $T_a$ are generators of $\SU(N)$, with normalization
 $\delta_{a,b} = 2 \Tr(T_a T_b)$ and the square root is defined
 in Appendix~\ref{roots}.
-We can then take partial derivatives of the action with
+We can then take partial derivatives of $N S/\beta$ with
 respect to the $n_L$ shifts $\mathbf{w} = \left(w_a(\mu, x), \ldots\right)$
 to obtain the gradient vector $\mathbf{q}$ and Hessian matrix
 $H$.  The gradient and Hessian can be used to estimate the
@@ -207,7 +207,7 @@ Let us consider the gradient for the link $U_\mu(x)$.
 The gradient will involve the $2 (D-1)$ plaquettes that include that link.
 Let $F_\mu(x)$ be the associated sum of staples; then
 \be
-   \frac{\partial S}{\partial w_a(\mu, x)} = \frac{\beta}{N}
+   \frac{N}{\beta} \frac{\partial S}{\partial w_a(\mu, x)} =
    \Im\Tr\left(F_\mu(x) \sqrt{U_\mu(x)} T_a \sqrt{U_\mu(x)}\right) \; .
    \label{grad}
 \eq
@@ -215,7 +215,7 @@ We can use Eqn.~(\ref{grad}) to construct the gradient vector $\mathbf{q}$.
 Likewise, one can calculate the $n_L\times n_L$ Hessian matrix
 $H$ from
 \be
-   \frac{\partial^2 S}{\partial w_a(\mu, x)\, \partial w_b(\nu, y)}
+      \frac{N}{\beta} \frac{\partial^2 S}{\partial w_a(\mu, x)\, \partial w_b(\nu, y)}
 \eq
 which is nonzero if there is a plaquette which contains both
 $U_\mu(x)$ and $U_\nu(y)$.
@@ -248,7 +248,7 @@ Using Eqn.~(\ref{gs}), one can construct an $n_G \times n_L$ matrix
 $G$ that relates shifts to infinitesimal gauge transforms
 at each lattice site.
 Since the action is invariant under gauge transforms, $G \mathbf{q} = 0$.
-However, since the Hessian is quadratic in the fields, $G H G^T \neq 0$.
+However, since the Hessian represents the quadratic term, $G H G^T \neq 0$.
 
 Since we are using the Hessian, we are approximating
 the action $S$ as being quadratic in $\mathbf{w}$.  If $\mathbf{w}$
@@ -263,7 +263,7 @@ A lattice-wide $\infty$-norm, taking the ordinary norm at each link:
 as well as an ordinary Euclidean norm, averaged over links
 \be
 \left\lVert \mathbf{w}\right\rVert_2 =
-     \frac{1}{L^D D}\sqrt{\sum_{x, \mu, a} w_a(\mu, x)}
+     \frac{1}{L^D D}\sqrt{\sum_{x, \mu, a} w_a^2(\mu, x)}
         \; .
 \eq
 
@@ -274,10 +274,10 @@ as well as an ordinary Euclidean norm, averaged over links
 
 \begin{figure}
 \includegraphics{eigenAll}
-\caption{Histogram of the eigenvalues of $H/\beta$ for a $6^3$ lattice,
+\caption{Histogram of the eigenvalues of $H$ for a $6^3$ lattice,
   $\beta = 8.175$, $N=3$.  We see a peak around zero due to the
   $\SU(3)$ gauge symmetry.
-  {\bf need to fix sign/scale of eigenvalues} \label{eigenAll}}
+  \label{eigenAll}}
 \end{figure}
 
 In principle, to find the nearest saddle point, one would
@@ -310,30 +310,24 @@ the space of non-gauge-transform shifts:
 \eq
 Then we can solve the linear system
 \be
-   H^\prime \mathbf{y} = \mathbf{q}^\prime \label{linear2}
+   H^\prime \mathbf{y}^\prime = \mathbf{q}^\prime \label{linear2}
 \eq
-and set $\mathbf{w} = - P_G^T \mathbf{y}$.  However, this is
+and set $\mathbf{w} = - P_G^T \mathbf{y}^\prime$.  However, this is
 still insufficient to yield a well-behaved linear system.
 
 \begin{figure}
 \includegraphics{shiftPairs}
-\caption{Scatter plot of eigenvalue-gradient pairs of $H^\prime/\beta$
+\caption{Scatter plot of eigenvalue-gradient pairs of $H^\prime$
   for a $6^3$ lattice, $\beta = 8.175$, $N=3$.  The pairs above the
   v-shaped wedge correspond to large shifts and will dominate
   the solution to the linear system, Eqn.~(\ref{linear2}).
-  {\bf need to fix size/sign of values}
   \label{shiftPairs}}
 \end{figure}
 
-To better understand this issue, let us find the eigenvalues and
-eigenvectors of $H^\prime$:
-\be
-          H^\prime = O \begin{pmatrix}
-    \lambda_1 & & \\
-    & \lambda_2 & \\
-    & & \ddots  \end{pmatrix} O^T
-\eq
-and express Eqn.~(\ref{linear2}) in the eigenspace of $H^\prime$:
+To better understand this issue, let us find the eigenvalues
+$\left(\lambda_1, \lambda_2, \ldots\right)$ and
+eigenvectors $\mathcal{O}=\left(\mathbf{v}_1, \mathbf{v_2}, \ldots\right)$
+of $H^\prime$ and express Eqn.~(\ref{linear2}) in the eigenspace of $H^\prime$:
 \be
 \begin{pmatrix}
     \lambda_1 & & \\
@@ -341,38 +335,49 @@ and express Eqn.~(\ref{linear2}) in the eigenspace of $H^\prime$:
     & & \ddots  \end{pmatrix} \overline{\mathbf{y}} =
   \overline{\mathbf{q}} \label{linear3}
 \eq
-where $\overline{\mathbf{y}} = O \mathbf{y}$ and
-$\overline{\mathbf{q}}  = O \mathbf{q}^\prime$.
-If any eigenvalue $\left|\lambda_i\right|\ll
+where $\overline{\mathbf{y}} = \mathcal{O} \mathbf{y}^\prime$ and
+$\overline{\mathbf{q}}  = \mathcal{O} \mathbf{q}^\prime$.
+The solution is simply
+\be
+    \overline{y}_i = \frac{\overline{q}_i}{\lambda_i} \; .
+\eq
+In any case where $\left|\lambda_i\right|\ll
 \left|\overline{q}_i\right|$,
-then there will be a large shift that will dominate the solution
-to the linear system.  See Figure~\ref{shiftPairs}.
+there will be a large shift that will dominate the solution
+to the linear system; see Figure~\ref{shiftPairs}.
 Thus, we impose a cutoff $\Lambda_2$:
 \be
-    \frac{\left|\overline{q}_i\right|\left\lVert \left(O P_G\right)_i\right\rVert_2}{\left|\lambda_i\right|}
-     < \Lambda_2
-    \mbox{\quad \bf Verify formula}
+    \frac{\left|\overline{q}_i\right|\left\lVert P_G^T \mathbf{v}_i\right\rVert_2}{\left|\lambda_i\right|}
+     < \Lambda_2 \label{lambda2}
 \eq
 %
-and remove from Eqn.~{\ref{linear3}) any rows associated with eigenpairs
-that violate the cutoff (inside the v-shaped
-region in Fig.~\ref{shiftPairs}).  For additional safety, we
-we also impose a maximum cutoff
+and set $\overline{y}_i=0$ whenever the cutoff is violated.
+That is, we remove any eigenpairs inside the v-shaped
+region in Fig.~\ref{shiftPairs}.  For additional safety, we
+we also impose maximum value cutoff
 \be
     \frac{\left|\overline{q}_i\right|
-      \left\lVert \left(O P_G\right)_i\right\rVert_\mathrm{max}}
+      \left\lVert P_G^T \mathbf{v}_i\right\rVert_\mathrm{max}}
     {\left|\lambda_i\right|}
     < \Lambda_\mathrm{max} \; .
+\eq
+Thus,
+\be
+      \mathbf{y} = P_g^T \left. \mathcal{O}^T
+                    \overline{\mathbf{y}}\right|_{\Lambda_2,\Lambda_\mathrm{max}} \; .
 \eq
 
 Finally, since the gauge symmetry of the action is non-linear,
 we do not want to shift the fields by too much before recalculating
-the matrix $G$.
-Thus, it is useful to add a damping factor $\gamma$ before
-shifting the lattice fields:
+the matrix $G$.  We want to ensure the shift is small
+enough on each link, consistant with the quadratic expansion.
+Thus, it is useful to add a damping factor $\gamma$ and
+further rescale by $\Lambda_s$, when needed:
 \be
-         \mathbf{w} = - \gamma \mathbf{y} = - \gamma O^T \overline{\mathbf{y}}
+    \mathbf{w} = - \gamma \mathbf{y} \min\left(1, \frac{\Lambda_s}{\left\lVert \mathbf{y}\right\rVert_\mathrm{max}}\right) \; .
 \eq
+Typically, $\Lambda_s = 1$ or $2$ is used.
+
 Armed with these three tools:  removing infinitesimal-gauge-transform shifts,
 imposing the $\Lambda$ cutoffs, and using the damping factor $\gamma$,
 we can apply the shift iteratively find saddle-point configurations
@@ -437,7 +442,7 @@ As shown in trajectory {\bf lc},
 we see that that the string tension can remain relatively stable,
 but $\config_k$ eventually degrades to the trivial vacuum.
 
-{\bf  To do: Redo trajectory 2c and 2d (in progress).
+{\bf  To do:
   $\SU(3)$, $L^3=20^3$ and
   $\SU(4)$ are not quite working, yet}
 
@@ -498,7 +503,7 @@ as a function of the separation of the two plaquettes
 This correlator corresponds to the $0^{++}$ glueball spectrum.
 
 In Fig.~\ref{corr2dEven}, we plot the correlation for various relative
-orientations of the two plaquettes for some point along the
+orientations of the two plaquettes for several points along the
 best trajectory in~\ref{trajectory3}.  We also plot an exponential
 corresponding to Teper's value for the $0^{++}$ glueball,
 mass $0.5517(38)/a$ for $\beta=28$, $L^3=23^3$~\cite{teper_$mathrmsun$_1998}.
@@ -587,12 +592,12 @@ n_i\in\integer \; ,
 \eq
 such that $\sum_i \lambda_i^\prime = 0$ and
 $\lambda_i^\prime - \lambda_j^\prime < 2 \pi$.
+The $\SU(3)$ case is shown in Fig.~\ref{hexagon}.
 %
 \begin{figure}
-
 \includegraphics{hex3}
   \caption{In the case of $\SU(3)$, $(\lambda_1^\prime,\lambda_2^\prime)$ lie in the shaded hexagonal region.
-    Elements of the center of the group $z$, $z^2$, lie on the vertices of the hexagon.}
+    Elements of the center of the group $z$, $z^2$, lie on the vertices of the hexagon. \label{hexagon}}
 \end{figure}
 %
 Using $\lambda_i^\prime$, we define $U^t$ as:
@@ -628,32 +633,43 @@ with $2 D$ nonzero blocks per row and $2$ nonzero blocks per column.
 In order to preserve the sparsity of the matrices, we never
 explicitly construct the space of non-transform shifts used in
 Eqn.~(\ref{linear2}).  Instead, we apply the projection
-operator $P_G$ onto any Krylov space vector $\mathbf{v}$ by solving a
-linear system:
-\begin{eqnarray}
-  P_G \mathbf{v} &=& \mathbf{v} - O^T \mathbf{u} \\
-  O O^T \mathbf{u} &=& O \mathbf{v} \label{gcg}
-\end{eqnarray}
-where Eqn.~(\ref{gcg}) is solved using the conjugate gradient
+operator $P_G$ onto any Krylov space vector $\mathbf{v}$ using:
+\be
+    P_G \mathbf{v} = \mathbf{v} - G^T \mathbf{u} \; ,
+\eq
+where $\mathbf{u}$ is a solution of the linear system
+\be
+  G G^T \mathbf{u} = G \mathbf{v} \; .\label{gcg}
+\eq
+Eqn.~(\ref{gcg}) is solved using the conjugate gradient
 algorithm, subroutine MINRES-QLP~\cite{choi_algorithm_2014}.
+The matrix $G G^T$ is well-conditioned, so this typically converges
+in less than 40 steps.
 
-We start by using Lanczos library nu-TRLan~\cite{yamazaki_adaptive_2010},
-modified so that we can apply $P_G$ to any Krylov space vector, to
-find the smallest eigenpairs of $H P_g H$.  We then find
+Use the Lanczos library nu-TRLan~\cite{yamazaki_adaptive_2010},
+modified so that $P_G$ is applied to any Krylov space vector, to
+find the smallest eigenpairs of $\left(P_g H\right)^2$.  We then find $M$
 eigenvectors $\left\{\mathbf{r}_1, \mathbf{r}_2, \ldots\right\}$
 associated with eigenpairs $\left(\lambda_i^2, \mathbf{r}_i\right)$
-that violate the $\Lambda$ cutoff,
-\be
-   \lambda_i^2 \Lambda > \mathbf{r\cdot q}
-        \left\lVert \mathbf{q}\right\rVert_2
-\eq
-(We also use the norm $\left\lVert \mathbf{w}\right\rVert_\mathrm{max}$
-to ensure the shift is small for individual links.)
+that violate the $\Lambda$ cutoffs,
+\begin{eqnarray}
+   \frac{ \mathbf{r}_i \mathbf{\cdot} \mathbf{q}
+   \left\lVert \mathbf{r}_i\right\rVert_2}{\left|\lambda_i\right| }
+     &>& \Lambda_2  \quad\mbox{or} \\
+   \frac{ \mathbf{r}_i\mathbf{\cdot} \mathbf{q}
+   \left\lVert \mathbf{r}_i\right\rVert_\mathrm{max}}{\left|\lambda_i\right| }
+     &>& \Lambda_\mathrm{max} \; .
+\end{eqnarray}
+To ensure that we have found the eigenpairs that violate the cutoff,
+we may need to calculate as many as 2000 to 4000 lowest eigenpairs
+in the Lanzos routine.  As one moves along a trajectory towards the saddle point, the gradient vector decreases in magnitude and fewer eigenpairs
+exceed the $\Lambda$ cutoffs.
+
 Then we solve the linear system $H \mathbf{y} = \mathbf{q}$
 using the conjugate gradient algorithm,
 subroutine MINRES-QLP~\cite{choi_algorithm_2014}, modified so that
-$P_G$ and the projection operator
-$\mathbb{I}- \sum_k \mathbf{r}_k \otimes \mathbf{r}_r$
+the projection operators $P_G$ and 
+$\mathbb{I}- \sum_{k=1}^M \mathbf{r}_k \otimes \mathbf{r}_k$
 are applied to any Krylov space vector.
 
 \section{Lattice configurations}
