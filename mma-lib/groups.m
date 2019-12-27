@@ -60,32 +60,54 @@ centerPhases[mat_] :=(* Used for some testing *)
     Length[phases]}, {j, Length[phases]}];
   Sort[phases, Order[Abs[#1], Abs[#2]]&]];
 
-Options[getPhases] = {Tolerance -> 10^-5, "debug"->False};
 getPhases::phaseSum = "Invalid determinant, total phase = `1`";
-getPhases[mat_, OptionsPattern[]]:= Block[{values, vectors, phases, phaseSum,
-                         fix=True, delta},
-  {values, vectors} = Eigensystem[mat];
-  phases = Arg[values]; phaseSum = Total[phases];
-  (* Gram-Schmidt orthogonalization, for algebraic cases. *)
-  vectors = Orthogonalize[vectors];
-  (* Sanity check.  QDP++ default is single precision,
-  so we set the default tolerance high. *)
-  If[Abs[Mod[phaseSum + Pi, 2 Pi] - Pi] > OptionValue[Tolerance],
-   Message[getPhases::phaseSum, phaseSum]; Return[$Failed]];
-  (* If the total is nonzero, need to shift *)
-  If[phaseSum != 0, phases[[1]] -= phaseSum;
-   While[fix, fix = False;
-    Do[If[phases[[i]] - phases[[j]] > 2*Pi,
-      delta = Floor[(phases[[i]] - phases[[j]] + 2*Pi)/(4*Pi)];
-      phases[[i]] -= 2*Pi*delta; phases[[j]] += 2*Pi*delta;
-      If[OptionValue["debug"], Print["Fixing phases ", {i,j}]];
-      fix = True], {i, Length[mat]}, {j, Length[mat]}]]];
-  {phases, vectors}];
+Options[getPhases] = {Tolerance -> 10^-5, "center" -> False, "debug" -> False};
+(* Create a class-like structure with private variables.
+  This is a work-around for the fact that compiled functions
+  cannot return multiple variable types. *)
+Module[
+  {fixPhases, bestPhases, bestCenter},
+ fixPhases = Compile[
+  {{values, _Complex, 1}, {tolerance, _Real}, {centerFlag, True|False}},
+   Block[{nc = Length[values], phases, phaseSum, fix, delta},
+    (* If the total is nonzero, need to shift *)
+    phases = Arg[values];
+    phaseSum = Total[phases];
+    (* Sanity check.  QDP++ default is single precision,
+      so we set the default tolerance high. *)
+    If[Abs[Mod[phaseSum + Pi, 2 Pi] - Pi] > tolerance,
+       Message[getPhases::phaseSum, phaseSum]];
+    Do[
+        If[center > 0, phases -= 2*Pi/nc; phaseSum = -2 Pi];
+        phases[[1]] -= phaseSum;
+        fix = True;
+        While[
+            fix,
+            fix = False;
+            Do[If[
+                phases[[i]] - phases[[j]] > 2*Pi,
+                delta = Floor[(phases[[i]] - phases[[j]] + 2*Pi)/(4*Pi)];
+                phases[[i]] -= 2*Pi*delta; phases[[j]] += 2*Pi*delta;
+                fix = True],
+               {i, nc}, {j, nc}]];
+        If[center == 0 || Norm[bestPhases] > Norm[phases],
+           bestPhases = phases; bestCenter = center],
+        {center, 0, If[centerFlag, nc-1, 0]}]]];
+ getPhases[mat_, matrixFlag_, OptionsPattern[]] :=
+    Block[{values, vectors},
+          If[matrixFlag,    
+             {values, vectors} = Eigensystem[mat];
+             (* Gram-Schmidt orthogonalization, for algebraic cases. *)
+             vectors = Orthogonalize[vectors],
+             values = Eigenvalues[mat];
+             vectors = Nothing];
+          fixPhases[values, OptionValue[Tolerance], OptionValue["center"]];
+          {bestPhases, vectors, bestCenter}]];
 SUPower::usage = "Take some power of an SU(N) matrix with the property that U^z, as a function of z is a smooth map onto the group manifold.  The analogous Mathematica function MatrixPower[] uses a different convention for the branch taken in the complex plane.";
 Options[SUPower] = Options[getPhases];
 SUPower[mat_, power_, opts:OptionsPattern[]] :=
- Block[{vectors, phases, result},
-  {phases, vectors} = getPhases[mat, opts];
+ Block[{vectors, phases, result, center},
+       {phases, vectors, center} = getPhases[mat, True, opts];
   result = Transpose[vectors].DiagonalMatrix[
      Exp[I*phases*power]].Conjugate[vectors];
   If[OptionValue["debug"] && Not[SUMatrixQ[result, OptionValue[Tolerance]]],
@@ -94,6 +116,12 @@ SUPower[mat_, power_, opts:OptionsPattern[]] :=
 SULog::usage = "Take the logaritm of an SU(N) matrix, choosing the root such that the resulting matrix is traceless and has eigenvalues that obey Abs[lamda_i-lambda_j] <= 2 Pi.  The analogous Mathematica function MatrixLog[] uses a different convention for the branch taken in the complex plane.";
 Options[SULog] = Options[getPhases];
 SULog[mat_, opts:OptionsPattern[]] :=
- Block[{vectors, phases},
-  {phases, vectors} = getPhases[mat, opts];
-  Transpose[vectors].DiagonalMatrix[I phases].Conjugate[vectors]];
+ Block[{phases, vectors, center},
+   {phases, vectors, center} = getPhases[mat, True, opts];
+   Transpose[vectors].DiagonalMatrix[I phases].Conjugate[vectors]];
+SUNorm::usage = "Distance of group element from the identity (or the nearest element of the center) using the tangent space. Returns the norm and the associated element of the center (Z_N under addition).  The normalization convention is compatible with our normalization of the SU(N) generators.";
+Options[SUNorm] = Options[getPhases];
+SUNorm[mat_, opts:OptionsPattern[]] :=
+ Block[{phases, center},
+   {phases, center} = getPhases[mat, False, opts];
+   {Sqrt[2] Norm[phases], center}];

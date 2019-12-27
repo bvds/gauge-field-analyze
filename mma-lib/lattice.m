@@ -57,11 +57,13 @@ latticeDistance[lattice1_, lattice2_]:=
     Block[{y = Flatten[MapThread[
         (* These are all equivalent *)
         Which[
+            True,
+            First[SUNorm[LinearSolve[##]]],
             False,
             Sqrt[2] Norm[Flatten[SULog[LinearSolve[##]]]],
             False,
             Sqrt[2 Tr[#.ConjugateTranspose[#]]]&[SULog[LinearSolve[##]]],
-            True,
+            False,
             (* The Im[] is to remove any floating point errors *)
             2 Norm[Map[Tr, Im[SUGenerators[].SULog[LinearSolve[##]]]]]]&,
             {lattice1, lattice2}, 2]]},
@@ -234,7 +236,55 @@ setAxialGauge[dir_] :=
 	   {j, latticeDimensions[[dir]]}];
       Print["Final link diff:",
 	    Chop[v - getLink[dir, shift[dir, coords, -1]]]]]]]],
-            {i, latticeVolume[]}];
+    {i, latticeVolume[]}];
+
+(*
+  Using "center"->False then "center"->True works substantially better.
+  For 16^3, nc=3, beta=28, "center"->False:  "damping"->1.1 works best
+         For saddle point, "center"->False has same behavior.
+         For saddle point, "center"->False then "center"->True:
+                                             "damping"->1.0 works best
+ *)
+Options[setMinimumGauge] = {"center" -> False, "iterations" -> 1,
+                            "damping" -> 1, "debug" -> False,
+                            "histogram" -> False};
+setMimimumGauge::usage = "Set gauge to mimium average link magnitude for the current lattice configuration.  This should be exact, so the average plaquette should be unchanged.";
+setMinimumGauge[OptionsPattern[]] :=
+ Table[Block[{logLattice, gauge, latticeNorms, tmp,
+              damping = OptionValue["damping"]},
+   logLattice = ParallelMap[
+       SULog[#, "center" -> OptionValue["center"]]&,
+            gaugeField, {2}];
+   latticeNorms = Flatten[Map[Sqrt[2] Norm[Flatten[#]]&,
+                               logLattice, {2}]];
+   (* Construct gauge transform *)
+   gauge = ParallelTable[
+     Block[{coords = latticeCoordinates[i], sum},
+       sum = Sum[getLink[logLattice][dir, coords]
+           - getLink[logLattice][dir, shift[dir, coords, -1]],
+                 {dir, nd}];
+       MatrixExp[-damping*sum/(2*nd)]],
+     {i, latticeVolume[]}];
+   (* Apply gauge transform *)
+   Do[
+       (* Shared memory is super-slow, so we set the link
+         as a separate, non-parallel step. *)
+       tmp = ParallelTable[
+           Block[{coords = latticeCoordinates[i], shiftGauge},
+                 shiftGauge = ConjugateTranspose[
+                     gauge[[latticeIndex[shift[dir, coords]]]]];
+                 gauge[[i]].getLink[dir, coords].shiftGauge],
+           {i, latticeVolume[]}];
+       Do[
+           Block[{coords = latticeCoordinates[i]},
+                 setLink[dir, coords, tmp[[i]]]],
+           {i, latticeVolume[]}],
+       {dir, nd}];
+   If[OptionValue["histogram"],
+      Histogram[latticeNorms],
+      {Mean[latticeNorms],
+       StandardDeviation[latticeNorms]/Sqrt[Length[latticeNorms]]}]],
+  {OptionValue["iterations"]}];
 
 sumStaples::usage = "Returns a general matrix in color space.";
 sumStaples[dir1_, coords_] := Block[{total = zeroMatrix[]},

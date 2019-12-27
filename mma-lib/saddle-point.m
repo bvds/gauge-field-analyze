@@ -193,7 +193,7 @@ infinitesimal gauge transformations.  The result is returned as a \
 SparseArray.";
 gaugeTransformShifts::axial = "Not Axial gauge.";
 SetAttributes[gaugeTransformShifts, HoldFirst];
-gaugeTransformShifts[rootGaugeField_, fixed_: - 1] :=
+gaugeTransformShifts[rootGaugeField_Symbol, fixed_: - 1] :=
  ParallelSum[
   Block[{gaugeShifts = Association[], gen = SUGenerators[],
     c2grad = coords2grad[fixed]},
