@@ -68,11 +68,19 @@ latticeDistance[lattice1_, lattice2_]:=
             2 Norm[Map[Tr, Im[SUGenerators[].SULog[LinearSolve[##]]]]]]&,
             {lattice1, lattice2}, 2]]},
           Norm[y]/Length[y]];
+latticeNorm::usage = "SUNorm[] averaged over the lattice links.";
+latticeNorm[opts:OptionsPattern[]] := latticeNorm[gaugeField, opts];
+latticeNorm[lattice_, opts:OptionsPattern[]]:=
+    Block[{y = Flatten[Map[
+        First[SUNorm[#, opts]]&,
+             lattice, {2}]]},
+          Norm[y]/Length[y]];
 
 makeTrivialLattice::usage =
   "All links identity for a given nd,nc,latticeDimensions.
-Can add small random pertubation.";
+Can add small random pertubation or choose and element of the center.";
 Options[makeTrivialLattice] = {randomGauge -> False,
+  randomCenter -> False,
   randomPerturbation -> 0};
 makeTrivialLattice[
   OptionsPattern[]] := (gaugeField =
@@ -81,7 +89,10 @@ makeTrivialLattice[
       I Table[RandomReal[
           OptionValue[randomPerturbation]],
 	      {nc^2 - 1}] .SUGenerators[]],
-     IdentityMatrix[nc]], {nd}, {latticeVolume[]}];
+            IdentityMatrix[nc]]*
+         If[OptionValue[randomCenter],
+            Exp[I 2 Pi RandomInteger[nc-1]/nc], 1],
+         {nd}, {latticeVolume[]}];
   Clear[linearSiteIndex];
   Do[linearSiteIndex[latticeCoordinates[i]] = i,
      {i, latticeVolume[]}];
@@ -205,10 +216,14 @@ exponentialModel[tallyData_, OptionsPattern[]] :=
   If[OptionValue[printResult], Print[ff["ParameterTable"]]]; ff];
 
 
-setAxialGauge::usage = "Set gauge for the current lattice configuration.
-This should be exact, so the average plaquette should be unchanged.";
-setAxialGauge[dir_] :=
- Do[Block[{coords = latticeCoordinates[i], debug = False},
+setAxialGauge::usage = "Set axial gauge for the current lattice configuration.
+That is, links along any Polyakov loop in direction dir are constant.
+In the case \"center\" -> True,  set the gauge modulo the center of the group.
+For each Polyakov loop, one link will be assigned the total center
+rotation for that loop.";
+Options[setAxialGauge] = Options[SUPower];
+setAxialGauge[dir_, opts:OptionsPattern[]] :=
+ Do[Block[{coords = latticeCoordinates[i], debug = OptionValue["debug"]},
    If[coords[[dir]] == 1,
     Block[{v = IdentityMatrix[nc], vt, ct},
      (* Initial values *)
@@ -218,7 +233,7 @@ setAxialGauge[dir_] :=
      Do[v = v.getLink[dir, shift[dir, coords, j - 1]],
 	{j, latticeDimensions[[dir]]}];
      If[debug, Print["Full product:", v]];
-     v = SUPower[v, 1/latticeDimensions[[dir]]];
+     v = SUPower[v, 1/latticeDimensions[[dir]], opts];
      If[debug, Print["Root:", v]];
      Do[
       (* Apply gauge choice to each site *)
@@ -240,51 +255,106 @@ setAxialGauge[dir_] :=
 
 (*
   Using "center"->False then "center"->True works substantially better.
-  For 16^3, nc=3, beta=28, "center"->False:  "damping"->1.1 works best
+  For 16^3, nc=3, beta=28, "center"->False:  "damping"->1.7 works best
          For saddle point, "center"->False has same behavior.
          For saddle point, "center"->False then "center"->True:
-                                             "damping"->1.0 works best
+                                             "damping"->1.8 works best
  *)
 Options[setMinimumGauge] = {"center" -> False, "iterations" -> 1,
-                            "damping" -> 1, "debug" -> False,
-                            "histogram" -> False};
+                            "damping" -> 1.7, "debug" -> False};
 setMimimumGauge::usage = "Set gauge to mimium average link magnitude for the current lattice configuration.  This should be exact, so the average plaquette should be unchanged.";
 setMinimumGauge[OptionsPattern[]] :=
- Table[Block[{logLattice, gauge, latticeNorms, tmp,
-              damping = OptionValue["damping"]},
-   logLattice = ParallelMap[
-       SULog[#, "center" -> OptionValue["center"]]&,
-            gaugeField, {2}];
-   latticeNorms = Flatten[Map[Sqrt[2] Norm[Flatten[#]]&,
-                               logLattice, {2}]];
-   (* Construct gauge transform *)
-   gauge = ParallelTable[
-     Block[{coords = latticeCoordinates[i], sum},
-       sum = Sum[getLink[logLattice][dir, coords]
-           - getLink[logLattice][dir, shift[dir, coords, -1]],
-                 {dir, nd}];
-       MatrixExp[-damping*sum/(2*nd)]],
-     {i, latticeVolume[]}];
-   (* Apply gauge transform *)
-   Do[
-       (* Shared memory is super-slow, so we set the link
-         as a separate, non-parallel step. *)
-       tmp = ParallelTable[
-           Block[{coords = latticeCoordinates[i], shiftGauge},
-                 shiftGauge = ConjugateTranspose[
-                     gauge[[latticeIndex[shift[dir, coords]]]]];
-                 gauge[[i]].getLink[dir, coords].shiftGauge],
-           {i, latticeVolume[]}];
-       Do[
-           Block[{coords = latticeCoordinates[i]},
-                 setLink[dir, coords, tmp[[i]]]],
-           {i, latticeVolume[]}],
-       {dir, nd}];
-   If[OptionValue["histogram"],
-      Histogram[latticeNorms],
-      {Mean[latticeNorms],
-       StandardDeviation[latticeNorms]/Sqrt[Length[latticeNorms]]}]],
-  {OptionValue["iterations"]}];
+ Table[Block[{norms = {0, 0.0, 0.0}, update,
+              damping = OptionValue["damping"], logLog},
+   (* Take the log of a link, accumulating statistics
+      on the first run through the checkerboard. *)
+   logLog = Block[{x = SULog[#1, "center"->OptionValue["center"]], y},
+                  If[#2==0, y = Sqrt[2.0] Norm[Flatten[x]];
+                            norms += {1, y, y*y}]; x]&;
+   (* Take result from parallel computation and update gaugeField,
+      accumulating statistics. *)
+   update = (Apply[setLink, Take[#, 3]];
+             If[#[[4]] =!= Null, norms += #[[4]]])&;
+   (* Shared variables are super-slow.  Instead, create a table
+     of updated links, then update gaugeField and statistics after
+     the parallel computation is completed.
+     Use checkerboard to avoid conflicts in link updates. *)
+   Do[Scan[update, ParallelTable[
+       Block[{coords = latticeCoordinates[i], sum, gauge,
+              norms = {0, 0.0, 0.0}},
+             If[Mod[Total[coords], 2] == cb,
+                (* Construct gauge transform *)
+                sum = Sum[
+                    logLog[getLink[dir, coords], cb]
+                    - logLog[getLink[dir, shift[dir, coords, -1]], cb],
+                    {dir, nd}];
+                gauge = MatrixExp[-damping*sum/(2*nd)];
+                (* Create gauge transformed links.
+                 Include statistics once. *)
+                Table[
+                    {{dir, coords, gauge.getLink[dir, coords],
+                      If[dir==1, norms, Null]},
+                     {dir, shift[dir, coords, -1],
+                      getLink[dir, shift[dir, coords, -1]].
+                             ConjugateTranspose[gauge], Null}},
+                    {dir, nd}],
+                Nothing]],
+       {i, latticeVolume[]}, Method->"CoarsestGrained"], {3}], {cb, 0, 1}];
+   (* Mean and standard error of the norm of the initial links. *)
+   {norms[[2]]/norms[[1]],
+    Sqrt[norms[[3]]-norms[[2]]^2/norms[[1]]]/norms[[1]]}],
+       {OptionValue["iterations"]}];
+
+Options[setMinimumAxialGauge] = {"center" -> False,
+                            "damping" -> 1.0, "debug" -> False};
+setMinimumAxialGauge[dir1_, OptionsPattern[]] :=
+ Block[{damping = OptionValue["damping"],
+     (* Take the log of a link. *)
+     logLog = SULog[#1, "center"->OptionValue["center"]]&,
+     (* Take result from parallel computation and update gaugeField. *)
+     update = Apply[setLink, #]&},
+   (* Shared variables are super-slow.  Instead, create a table
+     of updated links, then update gaugeField and statistics after
+     the parallel computation is completed.
+     Use checkerboard to avoid conflicts in link updates. *)
+   Do[Scan[update, ParallelTable[
+     Block[{coords = latticeCoordinates[i], sum, gauge, lastU, firstU},
+      If[coords[[dir1]] == 1 && Mod[Total[coords], 2] == cb,
+         lastU = getLink[dir1, shift[dir1, coords, -1]];
+         Table[
+             (* Iterate through a Polyakov loop in direction dir1 *)
+             coords[[dir1]] = j;
+             (* Construct gauge transform *)
+             sum = Sum[
+                 If[dir1 == dir2,
+                    -logLog[lastU],
+                    logLog[getLink[dir2, coords]]
+                    - logLog[getLink[dir2, shift[dir2, coords, -1]]]],
+                 {dir2, nd}];
+             gauge = MatrixExp[-damping*sum/(2*nd-1)];
+             (* Create gauge transformed links.
+               Include statistics once. *)
+             Table[
+                 If[dir1 == dir2,
+                    (* Order is important here:  need to use
+                      lastU before updating it. *)
+                    {If[j==1,
+                        firstU = lastU.ConjugateTranspose[gauge];
+                        Nothing,
+                        {dir2, shift[dir2, coords, -1],
+                         lastU.ConjugateTranspose[gauge]}],
+                     If[j==latticeDimensions[[dir1]],
+                        {dir2, coords, gauge.firstU},
+                        lastU = gauge.getLink[dir2, coords];
+                        Nothing]},
+                    {{dir2, shift[dir2, coords, -1],
+                      getLink[dir2, shift[dir2, coords, -1]].
+                             ConjugateTranspose[gauge]},
+                     {dir2, coords, gauge.getLink[dir2, coords]}}],
+                 {dir2, nd}],
+             {j, latticeDimensions[[dir1]]}],
+         Nothing]],
+     {i, latticeVolume[]}, Method->"CoarsestGrained"], {4}], {cb, 0, 1}]];
 
 sumStaples::usage = "Returns a general matrix in color space.";
 sumStaples[dir1_, coords_] := Block[{total = zeroMatrix[]},
