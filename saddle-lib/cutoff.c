@@ -83,11 +83,11 @@ void cutoffNullspace(mat_int n, int nvals, cJSON *options,
 #endif
         /* If eigenvectors are normalized, then vecnorm2
            is not needed. */
-        testMax = cutoffMax * zzz * fabs((*vals)[i]) * vecnorm2 <=
-            fabs(vecdotgrad) * sqrt(maxnorm2);
+        testMax = cutoffMax*zzz*fabs((*vals)[i])*vecnorm2 <=
+            fabs(vecdotgrad)*sqrt(maxnorm2);
         if(testMax)
             countMax++;
-        test2 = cutoff2 * zzz * fabs((*vals)[i]) * sqrt(vecnorm2) * blocks <=
+        test2 = cutoff2*zzz*fabs((*vals)[i])*sqrt(vecnorm2*blocks) <=
             fabs(vecdotgrad);
         if(test2)
             count2++;

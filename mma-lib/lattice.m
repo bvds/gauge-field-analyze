@@ -67,14 +67,14 @@ latticeDistance[lattice1_, lattice2_]:=
             (* The Im[] is to remove any floating point errors *)
             2 Norm[Map[Tr, Im[SUGenerators[].SULog[LinearSolve[##]]]]]]&,
             {lattice1, lattice2}, 2]]},
-          Norm[y]/Length[y]];
+          Norm[y]/Sqrt[Length[y]]];
 latticeNorm::usage = "SUNorm[] averaged over the lattice links.";
 latticeNorm[opts:OptionsPattern[]] := latticeNorm[gaugeField, opts];
 latticeNorm[lattice_, opts:OptionsPattern[]]:=
     Block[{y = Flatten[Map[
         First[SUNorm[#, opts]]&,
              lattice, {2}]]},
-          Norm[y]/Length[y]];
+          Norm[y]/Sqrt[Length[y]]];
 
 makeTrivialLattice::usage =
   "All links identity for a given nd,nc,latticeDimensions.

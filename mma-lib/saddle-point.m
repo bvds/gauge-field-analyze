@@ -30,7 +30,7 @@ printLevel[opt_, default_] :=
 shiftNormMax[shifts_] :=
     Max[Map[Norm, Partition[shifts, nc^2 - 1]]];
 shiftNorm2[shifts_] :=
-    Norm[shifts] (nc^2-1)/Length[shifts];
+    Norm[shifts] Sqrt[(nc^2-1)/Length[shifts]];
 compareVectors[a_, b_] := {{(shiftNormMax[a]+shiftNormMax[b])/2,
                             1-shiftNormMax[a]/shiftNormMax[b]},
                            {(Norm[a]+Norm[b])/2, 1-Norm[a]/Norm[b]},
