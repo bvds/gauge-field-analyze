@@ -264,24 +264,24 @@ Options[setMinimumGauge] = {"center" -> False, "iterations" -> 1,
                             "damping" -> 1.7, "debug" -> False};
 setMimimumGauge::usage = "Set gauge to mimium average link magnitude for the current lattice configuration.  This should be exact, so the average plaquette should be unchanged.";
 setMinimumGauge[OptionsPattern[]] :=
- Table[Block[{norms = {0, 0.0, 0.0}, update,
+    Table[Block[{normSum = 0.0, update,
               damping = OptionValue["damping"], logLog},
    (* Take the log of a link, accumulating statistics
       on the first run through the checkerboard. *)
    logLog = Block[{x = SULog[#1, "center"->OptionValue["center"]], y},
-                  If[#2==0, y = Sqrt[2.0] Norm[Flatten[x]];
-                            norms += {1, y, y*y}]; x]&;
+                  If[#2==0, y = Flatten[x];
+                            normSum += 2.0*Total[Re[y]^2+Im[y]^2]]; x]&;
    (* Take result from parallel computation and update gaugeField,
       accumulating statistics. *)
    update = (Apply[setLink, Take[#, 3]];
-             If[#[[4]] =!= Null, norms += #[[4]]])&;
+             If[#[[4]] =!= Null, normSum += #[[4]]])&;
    (* Shared variables are super-slow.  Instead, create a table
      of updated links, then update gaugeField and statistics after
      the parallel computation is completed.
      Use checkerboard to avoid conflicts in link updates. *)
    Do[Scan[update, ParallelTable[
        Block[{coords = latticeCoordinates[i], sum, gauge,
-              norms = {0, 0.0, 0.0}},
+              normSum = 0.0},
              If[Mod[Total[coords], 2] == cb,
                 (* Construct gauge transform *)
                 sum = Sum[
@@ -293,17 +293,17 @@ setMinimumGauge[OptionsPattern[]] :=
                  Include statistics once. *)
                 Table[
                     {{dir, coords, gauge.getLink[dir, coords],
-                      If[dir==1, norms, Null]},
+                      If[dir==1, normSum, Null]},
                      {dir, shift[dir, coords, -1],
                       getLink[dir, shift[dir, coords, -1]].
                              ConjugateTranspose[gauge], Null}},
                     {dir, nd}],
                 Nothing]],
        {i, latticeVolume[]}, Method->"CoarsestGrained"], {3}], {cb, 0, 1}];
-   (* Mean and standard error of the norm of the initial links. *)
-   {norms[[2]]/norms[[1]],
-    Sqrt[norms[[3]]-norms[[2]]^2/norms[[1]]]/norms[[1]]}],
-       {OptionValue["iterations"]}];
+   (* The 2-norm of the initial links,
+     averaging over the number of links. *)
+   Sqrt[normSum/(latticeVolume[]*nd)]],
+                {OptionValue["iterations"]}];
 
 Options[setMinimumAxialGauge] = {"center" -> False,
                             "damping" -> 1.0, "debug" -> False};
@@ -355,6 +355,27 @@ setMinimumAxialGauge[dir1_, OptionsPattern[]] :=
              {j, latticeDimensions[[dir1]]}],
          Nothing]],
      {i, latticeVolume[]}, Method->"CoarsestGrained"], {4}], {cb, 0, 1}]];
+
+nStrategies = 10;
+applyGaugeTransforms[s_] :=
+    (* New direction each time setAxialGauge[] is called. *)
+  Block[{lastDir = nd, dir}, dir = (lastDir = Mod[lastDir, nd] + 1) &;
+    Scan[Which[
+      # == 1, setAxialGauge[dir[], "center" -> False],
+      # == 2, setAxialGauge[dir[], "center" -> True],
+      # == 3, setMinimumGauge["center" -> False, "damping" -> 1],
+      # == 4, setMinimumGauge["center" -> True, "damping" -> 1],
+      # == 5, setMinimumGauge["center" -> False, "damping" -> 1.5],
+      # == 6, setMinimumGauge["center" -> True, "damping" -> 1.5],
+      # == 7,
+      setMinimumAxialGauge[dir[], "center" -> False, "damping" -> 1],
+      # == 8,
+      setMinimumAxialGauge[dir[], "center" -> True, "damping" -> 1],
+      # == 9,
+      setMinimumAxialGauge[dir[], "center" -> False, "damping" -> 1.5],
+      # == 10,
+      setMinimumAxialGauge[dir[], "center" -> True, "damping" -> 1.5]
+         ] &, s]; latticeNorm["center" -> True]];
 
 sumStaples::usage = "Returns a general matrix in color space.";
 sumStaples[dir1_, coords_] := Block[{total = zeroMatrix[]},
