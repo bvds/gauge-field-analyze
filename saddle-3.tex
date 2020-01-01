@@ -649,8 +649,7 @@ in less than 40 steps.
 We use the Lanczos library nu-TRLan~\cite{yamazaki_adaptive_2010},
 modified so that $P_G$ is applied to any Krylov space vector, to
 find the smallest eigenpairs of $\left(P_g H\right)^2$.  We then find
-the lowest $M$
-eigenvectors $\left\{\mathbf{r}_1, \mathbf{r}_2, \ldots\right\}$
+$M$ eigenvectors $\left\{\mathbf{r}_1, \mathbf{r}_2, \ldots\right\}$
 associated with eigenpairs $\left(\lambda_i^2, \mathbf{r}_i\right)$
 that violate the $\Lambda$ cutoffs,
 \begin{eqnarray}
@@ -661,8 +660,8 @@ that violate the $\Lambda$ cutoffs,
    \left\lVert \mathbf{r}_i\right\rVert_\mathrm{max}}{\left|\lambda_i\right| }
      &>& \Lambda_\mathrm{max} \; .
 \end{eqnarray}
-To ensure that we have found the eigenpairs that violate the cutoff,
-we may need to calculate as many as 2000 to 4000 eigenpairs
+To ensure that we have found all the eigenpairs that violate the cutoff,
+we may need to calculate as many as 2000 to 4000 of the lowest eigenpairs
 in the Lanzos routine.  As one moves along a trajectory towards the
 saddle point, the gradient vector decreases in magnitude and fewer eigenpairs
 exceed the $\Lambda$ cutoffs.
