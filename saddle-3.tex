@@ -626,14 +626,14 @@ that direct solution is not possible and one must resort to Krylov
 space methods (sparse matrix methods).
 
 The Hessian matrix $H$ is sparse, with an $(N^2-1)\times(N^2-1)$
-color block structure and $(6D-5)$ nonzero blocks per row.
+color block structure and $6D+1$ nonzero blocks per row/column.
 The gauge transform matrix $G$ has the same color block structure
 with $2 D$ nonzero blocks per row and $2$ nonzero blocks per column.
 
 In order to preserve the sparsity of the matrices, we never
 explicitly construct the space of non-transform shifts used in
 Eqn.~(\ref{linear2}).  Instead, we apply the projection
-operator $P_G$ onto any Krylov space vector $\mathbf{v}$ using:
+operator $P_G$ to any Krylov space vector $\mathbf{v}$ using:
 \be
     P_G \mathbf{v} = \mathbf{v} - G^T \mathbf{u} \; ,
 \eq
@@ -646,9 +646,10 @@ algorithm, subroutine MINRES-QLP~\cite{choi_algorithm_2014}.
 The matrix $G G^T$ is well-conditioned, so this typically converges
 in less than 40 steps.
 
-Use the Lanczos library nu-TRLan~\cite{yamazaki_adaptive_2010},
+We use the Lanczos library nu-TRLan~\cite{yamazaki_adaptive_2010},
 modified so that $P_G$ is applied to any Krylov space vector, to
-find the smallest eigenpairs of $\left(P_g H\right)^2$.  We then find $M$
+find the smallest eigenpairs of $\left(P_g H\right)^2$.  We then find
+the lowest $M$
 eigenvectors $\left\{\mathbf{r}_1, \mathbf{r}_2, \ldots\right\}$
 associated with eigenpairs $\left(\lambda_i^2, \mathbf{r}_i\right)$
 that violate the $\Lambda$ cutoffs,
@@ -661,8 +662,9 @@ that violate the $\Lambda$ cutoffs,
      &>& \Lambda_\mathrm{max} \; .
 \end{eqnarray}
 To ensure that we have found the eigenpairs that violate the cutoff,
-we may need to calculate as many as 2000 to 4000 lowest eigenpairs
-in the Lanzos routine.  As one moves along a trajectory towards the saddle point, the gradient vector decreases in magnitude and fewer eigenpairs
+we may need to calculate as many as 2000 to 4000 eigenpairs
+in the Lanzos routine.  As one moves along a trajectory towards the
+saddle point, the gradient vector decreases in magnitude and fewer eigenpairs
 exceed the $\Lambda$ cutoffs.
 
 Then we solve the linear system $H \mathbf{y} = \mathbf{q}$
