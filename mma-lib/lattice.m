@@ -104,14 +104,13 @@ makeTrivialLattice[
 		     ConjugateTranspose[u]], {dir, nd}]],
       {i, latticeVolume[]}]]);
 
-
-polyakovLoop[dir_, anchor_] :=
+polyakovLoop[dir_, anchor_, op_] :=
   (* Simple loop. *)
   Block[{u = IdentityMatrix[nc]},
    Do[If[False, Print[{i, Tr[u]}]];
       u = u.getLink[dir, shift[dir, anchor, i - 1]],
-      {i, latticeDimensions[[dir]]}]; Tr[u]];
-polyakovLoop[dir0_, anchor_, {dir1_}, {width1_}] :=
+      {i, latticeDimensions[[dir]]}]; stringOperator[u, op]];
+polyakovLoop[dir0_, anchor_, {dir1_}, {width1_}, op_] :=
   (* Smeared over a 1-dimensional strip of a given width. 
   Normalization is so that the result is the same as the simple loop
   for lattice links = 1. *)
@@ -139,70 +138,86 @@ polyakovLoop[dir0_, anchor_, {dir1_}, {width1_}] :=
    uu = slice[[width1]];
    Do[uu = uu.ConjugateTranspose[
        getLink[dir1, shift[dir1, aa, i - 1]]];
-    uu += slice[[i]], {i, width1 - 1, 1, -1}]; Tr[uu]];
+    uu += slice[[i]], {i, width1 - 1, 1, -1}]; stringOperator[uu, op]];
 
 loopThickness[] := beta Sqrt[2 Pi]/nc^2;
 
 (* The Polyakov loop correlators are tallied as
-  a function of the area enclosed by the two loops (ntl).
+  a function of the area enclosed by the two loops (ntL).
   This allows easy generalization to non-cubic lattices. *)
 SetAttributes[polyakovLoopAdd, HoldFirst];
-polyakovLoopAdd[tallies_, dir_] :=
+polyakovLoopAdd[tallies_, dir_, op_] :=
  Block[{face = latticeDimensions, pp, nf}, face[[dir]] = 1;
   nf = Apply[Times, face];
-  pp = Table[polyakovLoop[dir, latticeCoordinates[k, face]], {k, nf}];
-   Do[Block[{x1 = latticeCoordinates[k1, face],
-             x2 = latticeCoordinates[k2, face], ntL, z, lt},
-    (* Here, we use the shortest distance, including wrapping
-      around the lattice.  In arXiv:hep-lat/0107007v2, Teper
-      fits to a cosh().  That is, he includes the direct distance
-      plus wrapping any number of times around the lattice.
-      However, this makes things complicated if we want to
-      include off-axis separation or contributions from wrappings in
-      the other direction transverse to the Polyakov loop.
+  pp = Table[polyakovLoop[dir, latticeCoordinates[k, face], op], {k, nf}];
+  Do[Block[
+      {x1 = latticeCoordinates[k1, face],
+       x2 = latticeCoordinates[k2, face], ntL, z, lt},
+      (* Here, we use the shortest distance, including wrapping
+        around the lattice.  In arXiv:hep-lat/0107007v2, Teper
+        fits to a cosh().  That is, he includes the direct distance
+        plus wrapping any number of times around the lattice.
+        However, this makes things complicated if we want to
+        include off-axis separation or contributions from wrappings in
+        the other direction transverse to the Polyakov loop.
 
-      ntL is the area enclosed by the Polyakov loops. *)
-    ntL = latticeDimensions[[dir]]*
-          Norm[Mod[x1 - x2 + face/2, face] - face/2];
-    lt = Lookup[tallies, ntL, {0, 0, 0}]; lt[[1]] += 1;
-    (* Imaginary part cancels out when averaging over face *)
-    z = Re[pp[[k1]] Conjugate[pp[[k2]]]]; lt[[2]] += z;
-    lt[[3]] += z^2; tallies[ntL] = lt], {k1, nf - 1},
-      {k2, k1 + 1, nf}]];
-polyakovLoopAdd[tallies_, dir0_, dir1_] :=
- Block[{face = latticeDimensions, pp,
-   width1 = Floor[loopThickness[] + 0.5] + 1, skip, nf},
-  face[[dir0]] = 1; skip = Max[1, width1 - 1];
-  nf = Apply[Times, face];
+        ntL is the area enclosed by the Polyakov loop. *)
+      ntL = latticeDimensions[[dir]]*
+            Norm[Mod[x1 - x2 + face/2, face] - face/2];
+      lt = Lookup[tallies, ntL, {0, 0, 0}];
+      If[Head[op] === String,
+         (* Imaginary part cancels out when averaging over face *)
+         z = Re[Conjugate[pp[[k1]]] pp[[k2]]];
+         lt += {1, z, z^2},
+         z = Conjugate[pp[[k1, 1]]] pp[[k2, 2]];
+         lt += {1, z, Re[z]^2 + I*Im[z]^2};
+         z = Conjugate[pp[[k2, 1]]] pp[[k1, 2]];
+         lt += {1, z, Re[z]^2 + I*Im[z]^2}];
+      tallies[ntL] = lt],
+     {k1, nf - 1}, {k2, k1 + 1, nf}]];
+polyakovLoopAdd[tallies_, dir0_, dir1_, op_] :=
+ Block[{
+  face = latticeDimensions, pp,
+  width1 = Floor[loopThickness[] + 0.5] + 1, skip, nf},
+       face[[dir0]] = 1; skip = Max[1, width1 - 1];
+       nf = Apply[Times, face];
   pp = Table[
-    Block[{coords = latticeCoordinates[k, face]},
-     If[Mod[coords[[dir1]] - 1, skip] == 0,
-      polyakovLoop[dir0, coords, {dir1}, {width1}], Null]], {k, nf}];
-  Do[If[NumberQ[pp[[k1]]] && NumberQ[pp[[k2]]],
+      Block[{coords = latticeCoordinates[k, face]},
+            If[Mod[coords[[dir1]] - 1, skip] == 0,
+               polyakovLoop[dir0, coords, {dir1}, {width1}, op], Null]],
+      {k, nf}];
+  Do[If[pp[[k1]]=!=Null && pp[[k2]]=!=Null,
     Block[{x1 = latticeCoordinates[k1, face],
            x2 = latticeCoordinates[k2, face], dx, ntL, z, lt},
      (* See comment above. *)
      dx = Mod[x1 - x2 + face/2, face] - face/2;
      If[2*dx[[dir1]]^2 < dx.dx,
-        (* ntL is the area enclosed by the Polyakov loops. *)
+        (* ntL is the area enclosed by the Polyakov loop. *)
         ntL = latticeDimensions[[dir0]]*Norm[dx];
-        lt = Lookup[tallies, ntL, {0, 0, 0}]; lt[[1]] += 1;
-      (* The imaginary part cancels out when averaging over the face. *)
-      z = Re[pp[[k1]] Conjugate[pp[[k2]]]]; lt[[2]] += z;
-      lt[[3]] += z^2; tallies[ntL] = lt]]],
-     {k1, nf - 1}, {k2, k1 + 1, nf}]];
+        lt = Lookup[tallies, ntL, {0, 0, 0}];
+        If[Head[op]===String,
+           (* The imaginary part cancels out when averaging over the face. *)
+           z = Re[Conjugate[pp[[k1]]] pp[[k2]]];
+           lt += {1, z, z^2},
+           z = Conjugate[pp[[k1, 1]]] pp[[k2, 2]];
+           lt += {1, z, Re[z]^2 + I*Im[z]^2};
+           z = Conjugate[pp[[k2, 1]]] pp[[k1, 2]];
+           lt += {1, z, Re[z]^2 + I*Im[z]^2}];
+        tallies[ntL] = lt]]],
+     {k1, nf-1}, {k2, k1 + 1, nf}]];
 
-polyakovLoopTallies["simple"] :=
+polyakovLoopTallies["simple", op_:"1"] :=
   Block[{tallies = Association[{}]},
-   Do[polyakovLoopAdd[tallies, dir], {dir, nd}]; tallies];
-polyakovLoopTallies["smeared"] :=
+   Do[polyakovLoopAdd[tallies, dir, op], {dir, nd}]; tallies];
+polyakovLoopTallies["smeared", op_:"1"] :=
   Block[{tallies = Association[{}]},
-	Do[If[dir0 != dir1, polyakovLoopAdd[tallies, dir0, dir1]],
+	Do[If[dir0 != dir1, polyakovLoopAdd[tallies, dir0, dir1, op]],
 	   {dir0, nd}, {dir1, nd}]; tallies];
 
 talliesToAverageErrors[tallies_] :=
- Map[{#[[2]]/#[[1]],
-    Sqrt[(#[[1]] #[[3]] - #[[2]]^2)/#[[1]]]/#[[1]]}&, tallies];
+    Map[{#[[2]]/#[[1]],
+         Sqrt[Re[#[[3]]] - Re[#[[2]]]^2/#[[1]]]/#[[1]]
+         + I Sqrt[Im[#[[3]]] - Im[#[[2]]]^2/#[[1]]]/#[[1]]}&, tallies];
 
 Options[exponentialModel] = {printResult -> False};
 exponentialModel[tallyData_, OptionsPattern[]] :=
@@ -214,6 +229,40 @@ exponentialModel[tallyData_, OptionsPattern[]] :=
     VarianceEstimatorFunction -> (1&),
     Weights -> Map[(1/#[[2, 2]]^2)&, Normal[tallyData]]];
   If[OptionValue[printResult], Print[ff["ParameterTable"]]]; ff];
+
+
+wilsonLoop::usage = "Planar Wilson loop.";
+wilsonLoop[dir1_, dir2_, coords_List, l1_, l2_, op_String] :=
+    Block[{u = IdentityMatrix[nc], x = coords},
+          Do[u = u.getLink[dir1, x]; x = shift[dir1, x], {l1}];
+          Do[u = u.getLink[dir2, x]; x = shift[dir2, x], {l2}];
+          Do[x = shift[dir1, x, -1];
+             u = u.ConjugateTranspose[getLink[dir1, x]], {l1}];
+          Do[x = shift[dir2, x, -1];
+             u = u.ConjugateTranspose[getLink[dir2, x]], {l2}];
+          If[x != coords, Print["Wilson loop error"]; Abort[]];
+          stringOperator[u, op]]
+wilsonLoopDistribution::usage = "Return distribution of loop values (complex) for a given size Wilson loop.  Just show values where the imaginary part is > 0.";
+wilsonLoopDistribution[l1_, l2_, op_String:"1"] :=
+    (* Opposite loop orientations would give the complex conjugate *)
+    Block[{absIm = If[Im[#] > 0, #, Conjugate[#]]&},
+    Flatten[ParallelTable[
+        {absIm[wilsonLoop[dir1, dir2, latticeCoordinates[k], l1, l2, op]],
+         If[l1 != l2,
+            absIm[wilsonLoop[dir1, dir2, latticeCoordinates[k], l2, l1, op]],
+            Nothing]},
+	{k, latticeVolume[]}, {dir1, 2, nd},
+	{dir2, dir1 - 1}]]];
+averageWilsonLoop::usage = "Return average value for a given size Wilson loop.";
+averageWilsonLoop[l1_, l2_, op_String:"1"] :=
+    (* Opposite loop orientations would cancel the imaginary part. *)
+    (ParallelSum[
+        Re[wilsonLoop[dir1, dir2, latticeCoordinates[k], l1, l2, op]],
+        + If[l1 != l2,
+             Re[wilsonLoop[dir1, dir2, latticeCoordinates[k], l2, l1, op]],
+             0],
+	{k, latticeVolume[]}, {dir1, 2, nd},
+	{dir2, dir1 - 1}]*2/(If[l1 == l2, 1, 2]*latticeVolume[]*nd*(nd - 1)));
 
 
 setAxialGauge::usage = "Set axial gauge for the current lattice configuration.
@@ -404,40 +453,6 @@ stapleTest[] :=
 
 wrapIt[coords_List] :=
     MapThread[(1 + Mod[#1 - 1, #2])&, {coords, latticeDimensions}];
-plotActionLimits[] := {0, Min[2 n^2/3, 15]};
-plotActionPlane[dir1_, dir2_, anchor_, range_] :=
- Block[{coords = anchor},
-  ListPlot3D[
-   Flatten[Table[coords[[dir1]] = x1;
-     coords[[dir2]] = x2; {x1 + 1/2, x2 + 1/2,
-	   beta (1 - Re[plaquette[dir1, dir2, wrapIt[coords]]]/nc)},
-		 {x1, 0, latticeDimensions[[dir1]]},
-		 {x2, 0, latticeDimensions[[dir2]]}],
-	   1], PlotRange -> {{1/2, latticeDimensions[[dir1]] + 1/2},
-			     {1/2, latticeDimensions[[dir2]] + 1/2},
-			     range}]];
-plotActionSides[dir0_, dir1_, dir2_, anchor_, range_] :=
- Block[{coords = anchor},
-  ListPlot3D[
-   Flatten[Table[coords[[dir1]] = x1;
-     coords[[dir2]] = x2; {x1 + If[i == 1, 1/2, 0],
-      x2 + If[i == 1, 0, 1/2],
-      beta (1 -
-            Re[plaquette[dir0, If[i == 1, dir1, dir2], wrapIt[coords]]]/nc)},
-		 {x1, 0, latticeDimensions[[dir1]]},
-		 {x2, 0, latticeDimensions[[dir2]]}, {i, 2}], 2],
-   PlotRange -> {{1/2, latticeDimensions[[dir1]] + 1/2}, {1/2,
-      latticeDimensions[[dir2]] + 1/2}, range}]];
-plotAction::usage = "Animate the action density of a two dimensional slices of the lattice in directions {dir1, dir2} as a function of dir0.  One can also specify an anchor point for the remaining nd-3 dimensions.";
-Options[plotAction] = {anchor :> Table[1, {nd}], PlotRange :> {0, 2 nc^2/3 }};
-plotAction[dir0_, dir1_, dir2_, OptionsPattern[]] :=
- Block[{coords = OptionValue[anchor]},
-       ListAnimate[
-           Flatten[Table[coords[[dir0]] = x0;
-               {plotActionPlane[dir1, dir2, coords, OptionValue[PlotRange]],
-	        plotActionSides[dir0, dir1, dir2, coords,
-                                OptionValue[PlotRange]]},
-		         {x0, latticeDimensions[[dir0]]}], 1]]]
 
 lineLinks[dir_, anchor_List] :=
   Block[{coords = anchor},
@@ -508,21 +523,26 @@ makePlaquetteCorrelations[opts:OptionsPattern[]] :=
     Map[sampleCorrelation,
         Sort[Normal[plaquetteCorrelationTallies[opts]],
              Order[N[#1[[1, 2]]], N[#2[[1, 2]]]]&]];
-plotPlaquetteCorrelations[corr_, opts:OptionsPattern[]] := 
- (* Bug in ErrorListPlot:  x-values must be machine numbers *)
- ErrorListPlot[Map[
-     {{N[#[[1]]], #[[2]]}, ErrorBar[ #[[3]]]}&,
-       (* Order data sets by the value of the last index.
-         One could also use GroupBy[] to do this. *)
-       Table[Select[corr, Last[#]==i&],
-             {i, Union[Map[Last, corr]]}], {2}],
-  opts,
-  PlotRange -> {{0, All}, All}, Axes -> False, Frame -> True, 
-  FrameLabel -> {"separation", "correlation"},
-  PlotLegends -> Placed[SwatchLegend[
-      (* Data set order is given by the numbering in
-        the compiled function "orient" above. *)
-      {"same plane", "same orientation, stacked",
-       "same orientation, offset", "different orientation"}], {0.7, 0.75}],
-  Epilog -> {Dashing[0.01], 
-             Line[{{0, 0}, {1/2 + Max[Map[First, corr]], 0}}]}];
+
+makeFaradayLattice::usage = 
+  "Construct a dual lattice containing the Faraday tensor.  This \
+construction only makes sense in the context of the minimum norm \
+gauge."; 
+makeFaradayLattice[] := 
+  Block[{lgf = (-I)*ParallelMap[SULog, gaugeField, {2}], agA1, agA2, agA1s2, 
+    agA2s1, agA11, agA22, faces = {{2, 3}, {3, 1}, {1, 2}}, 
+    dx = {{0, 1, 1}, {1, 0, 1}, {1, 1, 0}}, 
+    dualLattice = Array[Null &, {nd, latticeVolume[]}], dir1, dir2, 
+    coords}, 
+  Do[{dir1, dir2} = faces[[dir0]]; 
+      coords = latticeCoordinates[i];
+    agA1 = getLink[lgf][dir1, coords]; 
+    agA2s1 = getLink[lgf][dir2, shift[dir1, coords]]; 
+    agA1s2 = getLink[lgf][dir1, shift[dir2, coords]]; 
+    agA2 = getLink[lgf][dir2, coords];
+    agA11 = (agA1 + agA1s2)/2; agA22 = (agA2 + agA2s1)/2; 
+    coords = wrapIt[coords - dx[[dir0]]];
+    dualLattice[[dir0, linearSiteIndex[coords]]] =
+    (agA2s1 - agA2) - (agA1s2 - agA1) + 
+      I*(agA11.agA22 - agA22.agA11), {dir0, nd}, 
+         {i, latticeVolume[]}]; dualLattice];

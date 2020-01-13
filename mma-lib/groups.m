@@ -125,3 +125,45 @@ SUNorm[mat_, opts:OptionsPattern[]] :=
  Block[{phases, center},
    {phases, center} = getPhases[mat, False, opts];
    {Sqrt[2] Norm[phases], center}];
+
+
+stringOperator::usage = "See arXiv:hep-lat/0107007v2 1 Aug 2001, Appendix A.  There is a notational error in Teper's Eqns. (49) and (50).";
+stringOperator::unknown = "Unknown `1`";
+stringOperator[uu_, {op1_, op2_}] :=
+    {stringOperator[uu, op1], stringOperator[uu, op2]};
+stringOperator[uu_, op_String]:=
+ Block[{nc = Length[uu]},
+   Which[
+      (* Normalization used in Italian paper *)
+      op == "1" || op == "t1", Tr[uu]/nc,
+      op == "2S", (Tr[uu]^2 + Tr[uu.uu])/(nc (nc+1)),
+      op == "2A", (Tr[uu]^2 - Tr[uu.uu])/(nc (nc-1)),
+      op == "3S",
+      (Tr[uu]^3 + 3 Tr[uu] Tr[uu.uu] + 2 Tr[uu.uu.uu])/(nc (nc+2) (nc+1)),
+      op == "3A",
+      (Tr[uu]^3 - 3 Tr[uu] Tr[uu.uu] + 2 Tr[uu.uu.uu])/(nc (nc-2) (nc-1)),
+      op == "3M",
+      (Tr[uu]^3 - Tr[uu.uu.uu])/(nc (nc+1) (nc-1)),
+      (* Monomials *)
+      op == "t2", Tr[uu.uu]/nc,
+      op == "t1t1", Tr[uu]^2/nc^2,
+      op == "t3", Tr[uu.uu.uu]/nc,
+      op == "t2t1", Tr[uu.uu]*Tr[uu]/nc^2,
+      op == "t1t1t1", Tr[uu]^3/nc^3,
+      op == "t4", Tr[uu.uu.uu.uu]/nc,
+      op == "t5", Tr[uu.uu.uu.uu.uu]/nc,
+      op == "t6", Tr[uu.uu.uu.uu.uu.uu]/nc,
+      op == "t7", Tr[uu.uu.uu.uu.uu.uu.uu]/nc,
+      op == "t8", Tr[uu.uu.uu.uu.uu.uu.uu.uu]/nc,
+      (* Normalize the trace. *)
+      op == "bvds2S", (Tr[uu]^2/nc + Tr[uu.uu])/(2 nc),
+      op == "bvds2A", (Tr[uu]^2/nc - Tr[uu.uu])/(2 nc),
+      op == "bvds3S",
+      (Tr[uu]^3/nc^2 + 3 Tr[uu] Tr[uu.uu]/nc + 2 Tr[uu.uu.uu])/(6 nc),
+      op == "bvds3A",
+      (Tr[uu]^3/nc^2 - 3 Tr[uu] Tr[uu.uu]/nc + 2 Tr[uu.uu.uu])/(6 nc),
+      op == "bvds3M",
+      (Tr[uu]^3/nc^2 - Tr[uu.uu.uu])/(3 nc),
+      True,
+      Message[stringOperator::unknown, op]; $Failed
+  ]];

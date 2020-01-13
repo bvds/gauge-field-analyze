@@ -127,27 +127,30 @@ a good starting-point for understanding the 2+1 dimension
 vacuum in the $N\to\infty$ limit.
 
 \section{The Wilson action}
-\label{action}
 
 The purpose of the section is to set some notation.
 We introduce a $D$-dimensional spacetime lattice with lattice
-spacing $a$ and sites labeled by $x$.  Define
-\be
-  U_\mu(x) \in \SU(N)
-\eq
+spacing $a$ and sites labeled by $x$.  Define $U_\mu(x) \in \SU(N)$
 to be the link going from site $x$ to site $x+a \hat{\mu}$.
 If the lattice has $L$ sites in each dimension, the lattice has
 $n_L=L^D D \left(N^2-1\right)$ degrees of freedom.
-Define lattice configuration
+Let lattice configuration
 $\config=\left\{U_1(x_1),\ldots\right\}$
-to be a particular set of link fields that cover the entire lattice.
+be a particular set of link fields that cover the entire lattice.
 
 The associated Wilson action is
 %
 \be
-S = \beta \sum_{x,\, \mu<\nu} \left(1-\frac{1}{N} \Re\, \plaquette_{\mu,\nu}(x)\right)
+S = \beta \sum_{x,\, \mu<\nu} \left(1-\frac{1}{N} \Re\, \plaquette_{\mu,\nu}(x)\right) \label{action}
 \eq
-where $\plaquette_{\mu,\nu}(x)$ is a plaquette lying in the $\mu\nu$-plane:
+where
+\be
+\beta=\frac{2 N}{a g^2}
+\eq
+so that $S$ becomes the usual Yang-Mills action in the $a\to 0$ limit.
+In $D=3$ dimensions, the coupling $g$ has dimensions of
+$\left(\mbox{mass}\right)^{1/2}$, consistent with $\beta$ being dimensionless.
+Also, $\plaquette_{\mu,\nu}(x)$ is a plaquette lying in the $\mu\nu$-plane:
 \be
 \plaquette_{\mu,\nu}(x) = \Tr U_\mu(x) U_\nu(x+a \hat{\mu})
 U_\mu^\da(x+a\hat{\nu}) U_\nu^\da(x) \; .
@@ -189,7 +192,7 @@ The lattice has a total of $n_G = L^D\left(N^2-1\right)$ gauge symmetries.
 
 In order to find a saddle point, it is convenient to modify
 the link fields $U_\mu(x)$ in a manner that maintains lattice symmetries.
-We define a ``shift'' for each links as
+We define a ``shift'' for each link as
 \be
   U_\mu(x) \to \sqrt{U_\mu(x)}\, e^{i w_{a}(\mu, x) T_a}\, \sqrt{U_\mu(x)} \; ,
     \label{shifts}
@@ -217,7 +220,7 @@ $H$ from
 \be
       \frac{N}{\beta} \frac{\partial^2 S}{\partial w_a(\mu, x)\, \partial w_b(\nu, y)}
 \eq
-which is nonzero if there is a plaquette which contains both
+which is nonzero when there is a plaquette which contains both
 $U_\mu(x)$ and $U_\nu(y)$.
 The full calculation of $H$ is rather lengthy and we will not bore the reader
 with the details.
@@ -229,7 +232,7 @@ To address this issue, we determine the set of shifts that are
 equivalent to infinitesimal gauge transforms.  Consider a gauge transform
 at site $x$; its action on link $U_\mu(x)$ is:
 \be
-U_\mu(x) \to e^{i C_a(x) T_a} U_\mu(x) = U_\mu(x)+ + i C_a(x) T_a U_\mu(x) +
+U_\mu(x) \to e^{i C_a(x) T_a} U_\mu(x) = U_\mu(x) + i C_a(x) T_a U_\mu(x) +
        \mathrm{O}\!\left(C_a^2(x)\right)
 \eq
 But this is equal to some infinitesimal shift $w_a(\mu, x)$ on
@@ -297,7 +300,7 @@ system (\ref{linear1}) will be nearly singular and
 the solution will be numerically unstable.  We must be more careful.
 
 To address this issue, we remove directions in shift-space corresponding
-to gauge infinitesimal gauge transforms.  To do this, we start
+to infinitesimal gauge transforms.  To do this, we start
 by calculating the null-space $P_G$ of the gauge transform matrix $G$,
 \be
 G P_G^T = 0
@@ -344,7 +347,7 @@ The solution is simply
 In any case where $\left|\lambda_i\right|\ll
 \left|\overline{q}_i\right|$,
 there will be a large shift that will dominate the solution
-to the linear system; see Figure~\ref{shiftPairs}.
+to the linear system.
 Thus, we impose a cutoff $\Lambda_2$:
 \be
     \frac{\left|\overline{q}_i\right|\left\lVert P_G^T \mathbf{v}_i\right\rVert_2}{\left|\lambda_i\right|}
@@ -353,7 +356,7 @@ Thus, we impose a cutoff $\Lambda_2$:
 %
 and set $\overline{y}_i=0$ whenever the cutoff is violated.
 That is, we remove any eigenpairs inside the v-shaped
-region in Fig.~\ref{shiftPairs}.  For additional safety, we
+region shown in Fig.~\ref{shiftPairs}.  For additional safety, we
 we also impose maximum value cutoff
 \be
     \frac{\left|\overline{q}_i\right|
@@ -370,7 +373,7 @@ Thus,
 Finally, since the gauge symmetry of the action is non-linear,
 we do not want to shift the fields by too much before recalculating
 the matrix $G$.  We want to ensure the shift is small
-enough on each link, consistant with the quadratic expansion.
+enough on each link to be consistant with the quadratic expansion.
 Thus, it is useful to add a damping factor $\gamma$ and
 further rescale by $\Lambda_s$, when needed:
 \be
@@ -420,7 +423,7 @@ we measure $\sigma a^2=0.0155(56)$;
 with errors that remain about that size for $\config_k$, $k>0$.
 For $\config_0$, $\plaquette_\mathrm{avg}=0.902$ and the
 action is dominated by perturbative fluctuations of the gauge fields.
-We can use the string tension to
+One can use the string tension to
 estimate $\plaquette_\mathrm{avg}$ where we expect the action to become
 dominated by the string-like behavior of the theory:
 \be
@@ -443,8 +446,8 @@ we see that that the string tension can remain relatively stable,
 but $\config_k$ eventually degrades to the trivial vacuum.
 
 {\bf  To do:
-  $\SU(3)$, $L^3=20^3$ and
-  $\SU(4)$ are not quite working, yet}
+  finish $\SU(3)$, $L^3=20^3$ calculation and
+  add results for $\SU(4)$}
 
 
 \section{Spectrum}
@@ -500,15 +503,19 @@ as a function of the separation of the two plaquettes
              \left(y+a \hat{\alpha}/2+ a\hat{\beta}/2\right)
              \right\rVert \; .
 \eq
-This correlator corresponds to the $0^{++}$ glueball spectrum.
+This correlator couples to the $0^{++}$ glueball states.
 
 In Fig.~\ref{corr2dEven}, we plot the correlation for various relative
 orientations of the two plaquettes for several points along the
 best trajectory in~\ref{trajectory3}.  We also plot an exponential
 corresponding to Teper's value for the $0^{++}$ glueball,
 mass $0.5517(38)/a$ for $\beta=28$, $L^3=23^3$~\cite{teper_$mathrmsun$_1998}.
-The exponential only demonstrates that there is qualitative agreement;
-the correlator also has contributions from the excited $0^{++}$ states.
+The exponential only demonstrates that there is qualitative agreement.
+Since the correlator also has contributions from the excited $0^{++}$
+states, a quantitative fit would require a more extensive analysis,
+with additional operators in the correlation function.  However, one
+would expect the single plaquette operator to couple very strongly
+to the lowest state and not so strongly to the excited states.
 
 Likewise, we can look at the charge conjugation odd correlator
 \be
@@ -517,7 +524,7 @@ Likewise, we can look at the charge conjugation odd correlator
   \left(\Im \plaquette_{\alpha,\beta}(y) - \plaquette_\mathrm{avg}\right)
   \right\rangle   \; ,
 \eq
-corresponding to the $0^{--}$ glueballs; see Fig.~\ref{corr2dOdd}.
+corresponding to the $0^{--}$ glueball states; see Fig.~\ref{corr2dOdd}.
 Also shown is an exponential corresponding to the lowest $0^{--}$ state,
 mass $0.8133(57)/a$ \cite{teper_$mathrmsun$_1998}.
 
@@ -566,8 +573,8 @@ low-energy spectrum of the theory.
 In general, for matrix $U_c$ belonging to a connected Lie group,
 the matrix power $U_c^t$, $t\in[0,1]$ should be a
 smooth map from $[0,1]$ onto the group manifold where
-$U_c^0=\mathbb{I}$, $U_c^1=U_c$, and $U_c^s U_c^t = U_c^{s+t}$.
-% The image of the map should have minimal length. 
+$U_c^0=\mathbb{I}$, $U_c^1=U_c$, and $U_c^s U_c^t = U_c^{s+t}$;
+the image of the map should have minimal length.
 In general, a unitary matrix $U$ can be factored as
 %
 \be
@@ -592,7 +599,6 @@ n_i\in\integer \; ,
 \eq
 such that $\sum_i \lambda_i^\prime = 0$ and
 $\lambda_i^\prime - \lambda_j^\prime < 2 \pi$.
-The $\SU(3)$ case is shown in Fig.~\ref{hexagon}.
 %
 \begin{figure}
 \includegraphics{hex3}
@@ -600,6 +606,7 @@ The $\SU(3)$ case is shown in Fig.~\ref{hexagon}.
     Elements of the center of the group $z$, $z^2$, lie on the vertices of the hexagon. \label{hexagon}}
 \end{figure}
 %
+The $\SU(3)$ case is shown in Fig.~\ref{hexagon}.
 Using $\lambda_i^\prime$, we define $U^t$ as:
 \be
 U^t = V^\da \begin{pmatrix}
