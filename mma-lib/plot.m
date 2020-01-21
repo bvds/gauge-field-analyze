@@ -54,17 +54,100 @@ plotPlaquetteCorrelations[corr_, opts:OptionsPattern[]] :=
              Line[{{0, 0}, {1/2 + Max[Map[First, corr]], 0}}]}];
 
 plotDist::usage = "Distribution of complex numbers in a unit circle in the complex plane, showing Im[z]<0 part, and the center of the gauge group.";
-plotDist[data_] := 
+plotDist[data_, op_:"1"] := (
+    Print["{mean, Re stdev, Im stdev}: ",
+          {Mean[Re[data]], StandardDeviation[Re[data]],
+           Chop[Sqrt[Mean[Map[Im[#]^2&, data]]]]}];
   Show[{Histogram3D[Map[{Re[#], -Im[#]} &, data], 
      PlotRange -> {{-1, 1}, {-1, 0.01}, {0, All}}, 
      BoxRatios -> {1, 0.5, 0.25}, 
      AxesLabel -> {"Re(\[CapitalPhi])", "Im(\[CapitalPhi])", None}, 
      FaceGrids -> {{0, 1, 0}}, BaseStyle -> journalStyle], 
-    Graphics3D[{{Red, Thickness[0.01], 
+     Graphics3D[{(*{Red, Thickness[0.01], 
        Table[Line[{{0, 0, 0.1}, 
-          2 {Cos[2 Pi k/nc], Sin[2 Pi k/nc], 0.1}}], {k, 0, 
-         nc - 1}]}, {Hue[0.5, .3], 
-       Cylinder[{{0, 0, 0.05}, {0, 0, -0.1}}, 1]}}]}];
+                   {Cos[2 Pi k/nc], -Sin[2 Pi k/nc], 1.5}}], {k, 0, nc/2}]},*)
+         {Blue, Thickness[0.005],
+          Table[Line[Map[{Re[#], Im[#], 1.5}&,
+            Table[stringOperator[
+                centerSUMatrix[k1].SUPower[centerSUMatrix[k2], x], op],
+                  {x, 0, 1, 1/(10 nc)}]]], {k2, 1, nc-1}, {k1, 0, k2}]},
+         {Hue[0.5, .3], 
+          Cylinder[{{0, 0, 0.05}, {0, 0, -0.1}}, 1]}}]}])/;op != "phases";
+
+plotPhases[data_, op_:"phases"] :=
+    Block[{dy = 1.5, z, \[Lambda], basis,
+           reflect = If[#1, -Abs[#2], #2]&,
+           conj = Function[k, If[k==0, 0, nc-k], {Listable}],
+        centerPhases = Function[k, Reverse[Sort[
+            cleanPhases[Table[2 Pi k/nc, {nc}]]]], {Listable}]},
+    Print["{{mean, stdev}, ...}: ",
+          Transpose[{Mean[data], StandardDeviation[data]}]];
+    Which[
+        nc == 2,
+        Histogram[Map[First, data],
+                  PlotRange-> {{-Pi, Pi}, {0, All}},
+                  Axes -> False, Frame -> True,
+                  FrameLabel -> {Subscript[\[Lambda], 1], "count"},
+                  BaseStyle -> journalStyle],
+        nc == -3,
+        Show[Histogram3D[
+            Map[{#[[1]], #[[2]]} &, data], 
+            PlotRange -> {{0, 4 Pi/3}, {-2 Pi/3, 2 Pi/3}, {0, All}}, 
+            BoxRatios -> {1, 1, 0.25}, 
+            AxesLabel -> {Subscript[\[Lambda], 1],
+                          Subscript[\[Lambda], 2], None}, 
+            FaceGrids -> {{0, 1, 0}}, BaseStyle -> journalStyle], 
+              Graphics3D[{
+                  {Text[z^1, {4 Pi/3, -2 Pi/3, 0}, {-1, -1}],
+                   Text[z^2, {2 Pi/3, 2 Pi/3, 0}, {-1, -1}],
+                   Text[z^0, {0, 0, 0}, {1, -1}]},
+                  {Blue, Thickness[0.005],
+                   Line[{{0, 0, dy}, {4 Pi/3, -2 Pi/3, dy},
+                         {2 Pi/3, 2 Pi/3, dy}, {0, 0, dy}}]}}]],
+        nc > 2,
+        basis = Table[Subscript[\[Lambda], i], {i, nc}];
+        GraphicsColumn[Flatten[Table[
+            Block[{v0, v1, v2, b1, b2, dd, oo, perm},
+                  oo = Order[{k0, k1, k2}, Sort[conj[{k0, k1, k2}]]];
+                  If[oo < 0,
+                     Print["Skipping ", {k0, k1, k2}]; Nothing,
+                     perm = Which[
+                         oo==0 && k2 == conj[k2], {k2, k0, k1},
+                         oo==0 && k1 == conj[k1], {k1, k0, k2},
+                         True, {k0, k1, k2}];
+                  {v0, v1, v2} = centerPhases[perm];
+                  v1 -= v0; v2 -= v0;
+                  b1 = v1 + v2; b1 = Simplify[b1/Norm[b1]];
+                  b2 = v1 - b1 (b1.v1); b2 = Simplify[b2/Norm[b2]];
+                  dd = Map[{(#-v0).b1, reflect[oo==0, (#-v0).b2]}&, data];
+                  If[False,
+                     Print[Chop[{{k0, k1, k2}, v0, {v1, v2}, {b1, b2}}]]];
+                  Show[Histogram3D[
+                      dd, 
+                      PlotRange -> {{0, Max[v1.b1, v2.b1]+0.2},
+                                    {Min[v1.b2, v2.b2]-0.2,
+                                     If[oo == 0, 0, Max[v1.b2, v2.b2]+0.2]},
+                                    {0, All}},
+                      BoxRatios -> {1, If[oo==0, 1/2, 1], 0.25},
+                      FaceGrids -> Append[If[oo==0, {{0, 1, 0}}, {}],
+                                          {0, 0, -1}],
+                      AxesLabel -> If[False,
+                                      {Simplify[b1.basis],
+                                       Simplify[b2.basis], None},
+                                      None],
+                      AspectRatio -> 1/GoldenRatio,
+                      BaseStyle -> journalStyle], 
+                   Graphics3D[{
+                       {If[oo == 0, Nothing,
+                           Text[z^perm[[2]], {v1.b1, v1.b2, 0}, {0, -2}]],
+                           Text[z^perm[[3]], {v2.b1, v2.b2, 0}, {0, -2}],
+                        Text[z^perm[[1]], {0, 0, 0}, {0, -2}]},
+                       {Blue, Thickness[0.005],
+                        Line[{{0, 0, dy}, {v1.b1, v1.b2, dy},
+                              {v2.b1, v2.b2, dy}, {0, 0, dy}}]}}]]]],
+            {k0, 0, nc-3}, {k1, k0+1, nc-2}, {k2, k1+1, nc-1}]],
+                       ImageSize->450]
+    ]]/;op == "phases";
 
 
 (*

@@ -60,6 +60,20 @@ centerPhases[mat_] :=(* Used for some testing *)
     Length[phases]}, {j, Length[phases]}];
   Sort[phases, Order[Abs[#1], Abs[#2]]&]];
 
+cleanPhases[phases0_] :=
+ Block[{phases = phases0, fix = True},
+       phases[[1]] -= Total[phases];
+       While[
+           fix,
+           fix = False;
+           Do[If[
+               phases[[i]] - phases[[j]] > 2*Pi,
+               delta = Floor[(phases[[i]] - phases[[j]] + 2*Pi)/(4*Pi)];
+               phases[[i]] -= 2*Pi*delta; phases[[j]] += 2*Pi*delta;
+               fix = True],
+              {i, nc}, {j, nc}]];
+       phases];
+
 getPhases::phaseSum = "Invalid determinant, total phase = `1`";
 Options[getPhases] = {Tolerance -> 10^-5, "center" -> False, "debug" -> False};
 (* Create a class-like structure with private variables.
@@ -134,17 +148,33 @@ stringOperator[uu_, {op1_, op2_}] :=
 stringOperator[uu_, op_String]:=
  Block[{nc = Length[uu]},
    Which[
-      (* Normalization used in Italian paper *)
+      (* Use the normalization from the Italian paper:
+         action on the identity element is 1.
+         In this case, the action on any group element lies inside
+         the unit circle in the complex plane.
+         For the antisymmetric representation dimension > nc,
+         the action of the operator on any group element is zero. *)
       op == "1" || op == "t1", Tr[uu]/nc,
       op == "2S", (Tr[uu]^2 + Tr[uu.uu])/(nc (nc+1)),
       op == "2A", (Tr[uu]^2 - Tr[uu.uu])/(nc (nc-1)),
       op == "3S",
       (Tr[uu]^3 + 3 Tr[uu] Tr[uu.uu] + 2 Tr[uu.uu.uu])/(nc (nc+2) (nc+1)),
       op == "3A",
-      (Tr[uu]^3 - 3 Tr[uu] Tr[uu.uu] + 2 Tr[uu.uu.uu])/(nc (nc-2) (nc-1)),
+      If[nc > 2,
+         (Tr[uu]^3 - 3 Tr[uu] Tr[uu.uu] + 2 Tr[uu.uu.uu])/(nc (nc-2) (nc-1)),
+         0],
       op == "3M",
       (Tr[uu]^3 - Tr[uu.uu.uu])/(nc (nc+1) (nc-1)),
-      (* Monomials *)
+      op == "4S",
+      (Tr[uu]^4 + 6 Tr[uu]^2 Tr[uu.uu] + 3 Tr[uu.uu]^2 +
+       8 Tr[uu] Tr[uu.uu.uu] + 6 Tr[uu.uu.uu.uu])/(nc (nc+1) (nc+2) (nc+3)),
+      op == "4A",
+      If[nc > 3,
+         (Tr[uu]^4 - 6 Tr[uu]^2 Tr[uu.uu] + 3 Tr[uu.uu]^2 +
+          8 Tr[uu] Tr[uu.uu.uu] - 6 Tr[uu.uu.uu.uu])/
+         (nc (nc-1) (nc-2) (nc-3)),
+         0],
+      (* various monomials *)
       op == "t2", Tr[uu.uu]/nc,
       op == "t1t1", Tr[uu]^2/nc^2,
       op == "t3", Tr[uu.uu.uu]/nc,
@@ -155,15 +185,12 @@ stringOperator[uu_, op_String]:=
       op == "t6", Tr[uu.uu.uu.uu.uu.uu]/nc,
       op == "t7", Tr[uu.uu.uu.uu.uu.uu.uu]/nc,
       op == "t8", Tr[uu.uu.uu.uu.uu.uu.uu.uu]/nc,
-      (* Normalize the trace. *)
-      op == "bvds2S", (Tr[uu]^2/nc + Tr[uu.uu])/(2 nc),
-      op == "bvds2A", (Tr[uu]^2/nc - Tr[uu.uu])/(2 nc),
-      op == "bvds3S",
-      (Tr[uu]^3/nc^2 + 3 Tr[uu] Tr[uu.uu]/nc + 2 Tr[uu.uu.uu])/(6 nc),
-      op == "bvds3A",
-      (Tr[uu]^3/nc^2 - 3 Tr[uu] Tr[uu.uu]/nc + 2 Tr[uu.uu.uu])/(6 nc),
-      op == "bvds3M",
-      (Tr[uu]^3/nc^2 - Tr[uu.uu.uu])/(3 nc),
+      (* Complete set of physical observables.
+        Returns a vector of nc reals.  All other quantities
+        can be inferred from these quantities. *)
+      op == "phases",
+      Block[{phases = First[getPhases[uu, False]]},
+            Reverse[Sort[phases]]],
       True,
       Message[stringOperator::unknown, op]; $Failed
   ]];

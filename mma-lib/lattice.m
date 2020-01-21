@@ -245,14 +245,14 @@ wilsonLoop[dir1_, dir2_, coords_List, l1_, l2_, op_String] :=
 wilsonLoopDistribution::usage = "Return distribution of loop values (complex) for a given size Wilson loop.  Just show values where the imaginary part is > 0.";
 wilsonLoopDistribution[l1_, l2_, op_String:"1"] :=
     (* Opposite loop orientations would give the complex conjugate *)
-    Block[{absIm = If[Im[#] > 0, #, Conjugate[#]]&},
+    Block[{absIm = If[op == "phases", #, If[Im[#] > 0, #, Conjugate[#]]]&},
     Flatten[ParallelTable[
         {absIm[wilsonLoop[dir1, dir2, latticeCoordinates[k], l1, l2, op]],
          If[l1 != l2,
             absIm[wilsonLoop[dir1, dir2, latticeCoordinates[k], l2, l1, op]],
             Nothing]},
 	{k, latticeVolume[]}, {dir1, 2, nd},
-	{dir2, dir1 - 1}]]];
+	{dir2, dir1 - 1}], 3]];
 averageWilsonLoop::usage = "Return average value for a given size Wilson loop.";
 averageWilsonLoop[l1_, l2_, op_String:"1"] :=
     (* Opposite loop orientations would cancel the imaginary part. *)
@@ -266,7 +266,7 @@ averageWilsonLoop[l1_, l2_, op_String:"1"] :=
 
 
 setAxialGauge::usage = "Set axial gauge for the current lattice configuration.
-That is, links along any Polyakov loop in direction dir are constant.
+That is, links along any Polyakov loop in direction dir are constant and diagonal.
 In the case \"center\" -> True,  set the gauge modulo the center of the group.
 For each Polyakov loop, one link will be assigned the total center
 rotation for that loop.";
@@ -274,7 +274,7 @@ Options[setAxialGauge] = Options[SUPower];
 setAxialGauge[dir_, opts:OptionsPattern[]] :=
  Do[Block[{coords = latticeCoordinates[i], debug = OptionValue["debug"]},
    If[coords[[dir]] == 1,
-    Block[{v = IdentityMatrix[nc], vt, ct},
+    Block[{v = IdentityMatrix[nc], vt, ct, phases},
      (* Initial values *)
      If[False,
 	Do[Print[{j, getLink[dir, shift[dir, coords, j - 1]]}],
@@ -282,7 +282,10 @@ setAxialGauge[dir_, opts:OptionsPattern[]] :=
      Do[v = v.getLink[dir, shift[dir, coords, j - 1]],
 	{j, latticeDimensions[[dir]]}];
      If[debug, Print["Full product:", v]];
-     v = SUPower[v, 1/latticeDimensions[[dir]], opts];
+     (* Since we want the diagonal part,
+       use getPhases instead of SUPower. *)
+     phases = First[getPhases[v, False, opts]];
+     v = DiagonalMatrix[Exp[I*phases/latticeDimensions[[dir]]]];
      If[debug, Print["Root:", v]];
      Do[
       (* Apply gauge choice to each site *)
@@ -524,25 +527,43 @@ makePlaquetteCorrelations[opts:OptionsPattern[]] :=
         Sort[Normal[plaquetteCorrelationTallies[opts]],
              Order[N[#1[[1, 2]]], N[#2[[1, 2]]]]&]];
 
+
+dualShift3 = {{0, 1, 1}, {1, 0, 1}, {1, 1, 0}};
 makeFaradayLattice::usage = 
-  "Construct a dual lattice containing the Faraday tensor.  This \
-construction only makes sense in the context of the minimum norm \
-gauge."; 
+  "Construct a dual lattice containing a^2*g times the Faraday tensor.\
+This construction only makes sense in the context of the minimum norm gauge."; 
 makeFaradayLattice[] := 
-  Block[{lgf = (-I)*ParallelMap[SULog, gaugeField, {2}], agA1, agA2, agA1s2, 
-    agA2s1, agA11, agA22, faces = {{2, 3}, {3, 1}, {1, 2}}, 
-    dx = {{0, 1, 1}, {1, 0, 1}, {1, 1, 0}}, 
+ Block[{u1, u2, u1s2, u2s1, faces = {{2, 3}, {3, 1}, {1, 2}}, 
     dualLattice = Array[Null &, {nd, latticeVolume[]}], dir1, dir2, 
-    coords}, 
+    coords, z}, 
   Do[{dir1, dir2} = faces[[dir0]]; 
       coords = latticeCoordinates[i];
-    agA1 = getLink[lgf][dir1, coords]; 
-    agA2s1 = getLink[lgf][dir2, shift[dir1, coords]]; 
-    agA1s2 = getLink[lgf][dir1, shift[dir2, coords]]; 
-    agA2 = getLink[lgf][dir2, coords];
-    agA11 = (agA1 + agA1s2)/2; agA22 = (agA2 + agA2s1)/2; 
-    coords = wrapIt[coords - dx[[dir0]]];
+    u1 = getLink[dir1, coords];
+    u2s1 = getLink[dir2, shift[dir1, coords]];
+    u1s2 = getLink[dir1, shift[dir2, coords]];
+    u2 = getLink[dir2, coords];
+    coords = wrapIt[coords + dualShift3[[dir0]]];
+    z = u1.u2s1 + ConjugateTranspose[u2.u1s2] +
+         u2s1.ConjugateTranspose[u1s2] + ConjugateTranspose[u2].u1;
     dualLattice[[dir0, linearSiteIndex[coords]]] =
-    (agA2s1 - agA2) - (agA1s2 - agA1) + 
-      I*(agA11.agA22 - agA22.agA11), {dir0, nd}, 
-         {i, latticeVolume[]}]; dualLattice];
+    -I (z - ConjugateTranspose[z])/4,
+     {dir0, nd}, {i, latticeVolume[]}]; dualLattice]/;nd==3;
+
+makeFaradayLatticeA::usage = "Alternative form for makeFaradayLattice[]."; 
+makeFaradayLatticeA[testTerm_:1.0] := 
+ Block[{lgf = (-I)*ParallelMap[SULog, gaugeField, {2}], agA1, agA2, agA1s2, 
+         agA2s1, agA11, agA22, faces = {{2, 3}, {3, 1}, {1, 2}}, 
+    dualLattice = Array[Null &, {nd, latticeVolume[]}], dir1, dir2, 
+    coords},
+  Do[{dir1, dir2} = faces[[dir0]];
+      coords = latticeCoordinates[i];
+    agA1 = getLink[lgf][dir1, coords];
+    agA2s1 = getLink[lgf][dir2, shift[dir1, coords]];
+    agA1s2 = getLink[lgf][dir1, shift[dir2, coords]];
+    agA2 = getLink[lgf][dir2, coords];
+    agA11 = (agA1 + agA1s2)/2; agA22 = (agA2 + agA2s1)/2;
+    coords = wrapIt[coords + dualShift3[[dir0]]];
+    dualLattice[[dir0, linearSiteIndex[coords]]] =
+    (agA2s1 - agA2) - (agA1s2 - agA1) +
+    testTerm*I*(agA11.agA22 - agA22.agA11),
+     {dir0, nd}, {i, latticeVolume[]}]; dualLattice]/;nd==3;
