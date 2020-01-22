@@ -1,3 +1,15 @@
+printNumberError[a_, b_] :=
+ Block[{exponent = Floor[Log[10, Abs[a]]]}, 
+   If[exponent < 6 && exponent > -4,
+      (* From https://mathematica.stackexchange.com/questions/132454 *)
+      NumberForm[
+       SetAccuracy[Row[{a, "\[PlusMinus]", b}, " "], 
+        Accuracy[SetPrecision[b, 2]]], ExponentFunction -> (Null & )], 
+      Block[{aa = a/10^exponent, bb = b/10^exponent}, 
+       Row[{"(", SetAccuracy[aa, Accuracy[SetPrecision[bb, 2]]], 
+         "\[PlusMinus]", SetAccuracy[bb, Accuracy[SetPrecision[bb, 2]]], 
+            ")","\[Times]", Superscript[10, exponent]}, " "]]]];
+
 plotActionLimits[] := {0, Min[2 n^2/3, 15]};
 plotActionPlane[dir1_, dir2_, anchor_, range_] :=
  Block[{coords = anchor},
@@ -55,9 +67,9 @@ plotPlaquetteCorrelations[corr_, opts:OptionsPattern[]] :=
 
 plotDist::usage = "Distribution of complex numbers in a unit circle in the complex plane, showing Im[z]<0 part, and the center of the gauge group.";
 plotDist[data_, op_:"1"] := (
-    Print["{mean, Re stdev, Im stdev}: ",
+    Print["{mean, Re stdev, Im stdev, count}: ",
           {Mean[Re[data]], StandardDeviation[Re[data]],
-           Chop[Sqrt[Mean[Map[Im[#]^2&, data]]]]}];
+           Chop[Sqrt[Mean[Map[Im[#]^2&, data]]]], Length[data]}];
   Show[{Histogram3D[Map[{Re[#], -Im[#]} &, data], 
      PlotRange -> {{-1, 1}, {-1, 0.01}, {0, All}}, 
      BoxRatios -> {1, 0.5, 0.25}, 

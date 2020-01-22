@@ -161,10 +161,12 @@ polyakovLoopAdd[tallies_, dir_, op_] :=
         include off-axis separation or contributions from wrappings in
         the other direction transverse to the Polyakov loop.
 
-        ntL is the area enclosed by the Polyakov loop. *)
-      ntL = latticeDimensions[[dir]]*
-            Norm[Mod[x1 - x2 + face/2, face] - face/2];
-      lt = Lookup[tallies, ntL, {0, 0, 0}];
+        ntL is the area enclosed by the Polyakov loop.
+        and the length of the loop (for the leading correction). *)
+      ntL = {latticeDimensions[[dir]]*
+             Norm[Mod[x1 - x2 + face/2, face] - face/2],
+             latticeDimensions[[dir]]};
+      lt = Lookup[tallies, Key[ntL], {0, 0, 0}];
       If[Head[op] === String,
          (* Imaginary part cancels out when averaging over face *)
          z = Re[Conjugate[pp[[k1]]] pp[[k2]]];
@@ -192,9 +194,11 @@ polyakovLoopAdd[tallies_, dir0_, dir1_, op_] :=
      (* See comment above. *)
      dx = Mod[x1 - x2 + face/2, face] - face/2;
      If[2*dx[[dir1]]^2 < dx.dx,
-        (* ntL is the area enclosed by the Polyakov loop. *)
-        ntL = latticeDimensions[[dir0]]*Norm[dx];
-        lt = Lookup[tallies, ntL, {0, 0, 0}];
+        (* ntL is the area enclosed by the Polyakov loop
+          and the length of the loop (for the leading correction). *)
+        ntL = {latticeDimensions[[dir0]]*Norm[dx],
+               latticeDimensions[[dir0]]};
+        lt = Lookup[tallies, Key[ntL], {0, 0, 0}];
         If[Head[op]===String,
            (* The imaginary part cancels out when averaging over the face. *)
            z = Re[Conjugate[pp[[k1]]] pp[[k2]]];
@@ -208,7 +212,7 @@ polyakovLoopAdd[tallies_, dir0_, dir1_, op_] :=
 
 polyakovLoopTallies["simple", op_:"1"] :=
   Block[{tallies = Association[{}]},
-   Do[polyakovLoopAdd[tallies, dir, op], {dir, nd}]; tallies];
+        Do[polyakovLoopAdd[tallies, dir, op], {dir, nd}]; tallies];
 polyakovLoopTallies["smeared", op_:"1"] :=
   Block[{tallies = Association[{}]},
 	Do[If[dir0 != dir1, polyakovLoopAdd[tallies, dir0, dir1, op]],
@@ -222,10 +226,11 @@ talliesToAverageErrors[tallies_] :=
 Options[exponentialModel] = {printResult -> False};
 exponentialModel[tallyData_, OptionsPattern[]] :=
     Block[(* Protect against any global definitions of model paramters. *)
-	{ff, a2sigma, norm, c, x},
+	{ff, a2sigma, norm, c, x, casimir = Pi (nd-2)/6},
   ff = NonlinearModelFit[
-    Map[{#[[1]], #[[2, 1]]}&, Normal[tallyData]],
-    norm Exp[-a2sigma x] + c, {{norm, 1}, {a2sigma, 0.01}, {c, 0}}, x,
+    Map[{#[[1, 1]], #[[1,2]], #[[2, 1]]}&, Normal[tallyData]],
+    norm Exp[-x*(a2sigma - casimir/ll^2)] + c,
+    {{norm, 1}, {a2sigma, 0.01}, {c, 0}}, {x, ll},
     VarianceEstimatorFunction -> (1&),
     Weights -> Map[(1/#[[2, 2]]^2)&, Normal[tallyData]]];
   If[OptionValue[printResult], Print[ff["ParameterTable"]]]; ff];
@@ -269,10 +274,11 @@ setAxialGauge::usage = "Set axial gauge for the current lattice configuration.
 That is, links along any Polyakov loop in direction dir are constant and diagonal.
 In the case \"center\" -> True,  set the gauge modulo the center of the group.
 For each Polyakov loop, one link will be assigned the total center
-rotation for that loop.";
-Options[setAxialGauge] = Options[SUPower];
+rotation for that loop.  Option \"abelian\" -> True rotates the field so that it is diagonal.";
+Options[setAxialGauge] = Append[Options[getPhases], "abelian" -> True];
 setAxialGauge[dir_, opts:OptionsPattern[]] :=
- Do[Block[{coords = latticeCoordinates[i], debug = OptionValue["debug"]},
+ Do[Block[{coords = latticeCoordinates[i], debug = OptionValue["debug"],
+       popts = Apply[Sequence, FilterRules[{opts}, Options[getPhases]]]},
    If[coords[[dir]] == 1,
     Block[{v = IdentityMatrix[nc], vt, ct, phases},
      (* Initial values *)
@@ -284,8 +290,11 @@ setAxialGauge[dir_, opts:OptionsPattern[]] :=
      If[debug, Print["Full product:", v]];
      (* Since we want the diagonal part,
        use getPhases instead of SUPower. *)
-     phases = First[getPhases[v, False, opts]];
-     v = DiagonalMatrix[Exp[I*phases/latticeDimensions[[dir]]]];
+     If[OptionValue["abelian"],
+        phases = Reverse[Sort[First[getPhases[v, False, popts]]]];
+        v = DiagonalMatrix[Exp[I*phases/latticeDimensions[[dir]]]],
+        v = SUPower[v, 1/latticeDimensions[[dir]], popts]
+     ];
      If[debug, Print["Root:", v]];
      Do[
       (* Apply gauge choice to each site *)
@@ -313,8 +322,9 @@ setAxialGauge[dir_, opts:OptionsPattern[]] :=
                                              "damping"->1.8 works best
  *)
 Options[setMinimumGauge] = {"center" -> False, "iterations" -> 1,
+                            "abelianWeight" -> 1,
                             "damping" -> 1.7, "debug" -> False};
-setMimimumGauge::usage = "Set gauge to mimium average link magnitude for the current lattice configuration.  This should be exact, so the average plaquette should be unchanged.";
+setMimimumGauge::usage = "Set gauge to minimum average link magnitude for the current lattice configuration.  This should be exact, so the average plaquette should be unchanged.  Option \"abelian\" -> 0.0 should correspond to maximum abelian gauge.";
 setMinimumGauge[OptionsPattern[]] :=
     Table[Block[{normSum = 0.0, update,
               damping = OptionValue["damping"], logLog},
@@ -340,6 +350,8 @@ setMinimumGauge[OptionsPattern[]] :=
                     logLog[getLink[dir, coords], cb]
                     - logLog[getLink[dir, shift[dir, coords, -1]], cb],
                     {dir, nd}];
+                If[OptionValue["abelianWeight"] != 1,
+                   Do[sum[[i,i]] *= OptionValue["abelianWeight"], {i, nc}]];
                 gauge = MatrixExp[-damping*sum/(2*nd)];
                 (* Create gauge transformed links.
                  Include statistics once. *)
@@ -357,6 +369,7 @@ setMinimumGauge[OptionsPattern[]] :=
    Sqrt[normSum/(latticeVolume[]*nd)]],
                 {OptionValue["iterations"]}];
 
+setMinimumAxialGauge::usage = "Set Axial gauge to minimize norm of all adjoining links.  In practice, this doesn't work very well.";
 Options[setMinimumAxialGauge] = {"center" -> False,
                             "damping" -> 1.0, "debug" -> False};
 setMinimumAxialGauge[dir1_, OptionsPattern[]] :=
@@ -408,26 +421,41 @@ setMinimumAxialGauge[dir1_, OptionsPattern[]] :=
          Nothing]],
      {i, latticeVolume[]}, Method->"CoarsestGrained"], {4}], {cb, 0, 1}]];
 
-nStrategies = 10;
-applyGaugeTransforms[s_] :=
-    (* New direction each time setAxialGauge[] is called. *)
-  Block[{lastDir = nd, dir}, dir = (lastDir = Mod[lastDir, nd] + 1) &;
-    Scan[Which[
-      # == 1, setAxialGauge[dir[], "center" -> False],
-      # == 2, setAxialGauge[dir[], "center" -> True],
-      # == 3, setMinimumGauge["center" -> False, "damping" -> 1],
-      # == 4, setMinimumGauge["center" -> True, "damping" -> 1],
-      # == 5, setMinimumGauge["center" -> False, "damping" -> 1.5],
-      # == 6, setMinimumGauge["center" -> True, "damping" -> 1.5],
-      # == 7,
-      setMinimumAxialGauge[dir[], "center" -> False, "damping" -> 1],
-      # == 8,
-      setMinimumAxialGauge[dir[], "center" -> True, "damping" -> 1],
-      # == 9,
-      setMinimumAxialGauge[dir[], "center" -> False, "damping" -> 1.5],
-      # == 10,
-      setMinimumAxialGauge[dir[], "center" -> True, "damping" -> 1.5]
-         ] &, s]; latticeNorm["center" -> True]];
+nStrategies = 6;
+Options[applyGaugeTransforms] = {"abelian" -> False, "abelianWeight"->1};
+applyGaugeTransforms[s_, OptionsPattern[]] :=
+ (* New direction each time setAxialGauge[] is called. *)
+ Block[{lastDir = nd, dir},
+   dir = Function[lastDir = Mod[lastDir, nd] + 1];
+   Scan[Which[
+       # == 1, setAxialGauge[dir[], "center" -> False,
+                             "abelian"->OptionValue["abelian"]],
+       # == 2, setAxialGauge[dir[], "center" -> True,
+                             "abelian"->OptionValue["abelian"]],
+       # == 3,
+       setMinimumGauge["center" -> False, "damping" -> 1,
+                       "abelianWeight" -> OptionValue["abelianWeight"]],
+       # == 4,
+       setMinimumGauge["center" -> True, "damping" -> 1,
+                       "abelianWeight" -> OptionValue["abelianWeight"]],
+       # == 5,
+       setMinimumGauge["center" -> False, "damping" -> 1.5,
+                       "abelianWeight" -> OptionValue["abelianWeight"]],
+       # == 6,
+       setMinimumGauge["center" -> True, "damping" -> 1.5,
+                       "abelianWeight" -> OptionValue["abelianWeight"]],
+       (* In practice, these don't work well *)
+      (* # == 7,
+        setMinimumAxialGauge[dir[], "center" -> False, "damping" -> 1],
+        # == 8,
+        setMinimumAxialGauge[dir[], "center" -> True, "damping" -> 1],
+        # == 9,
+        setMinimumAxialGauge[dir[], "center" -> False, "damping" -> 1.5],
+        # == 10,
+        setMinimumAxialGauge[dir[], "center" -> True, "damping" -> 1.5]*)
+       True,
+       Abort[]
+        ] &, s]; latticeNorm["center" -> True]];
 
 sumStaples::usage = "Returns a general matrix in color space.";
 sumStaples[dir1_, coords_] := Block[{total = zeroMatrix[]},
