@@ -321,12 +321,12 @@ setAxialGauge[dir_, opts:OptionsPattern[]] :=
          For saddle point, "center"->False then "center"->True:
                                              "damping"->1.8 works best
  *)
-Options[setMinimumGauge] = {"center" -> False, "iterations" -> 1,
+Options[setMinimumGauge] = {"center" -> False,
                             "abelianWeight" -> 1,
                             "damping" -> 1.7, "debug" -> False};
 setMimimumGauge::usage = "Set gauge to minimum average link magnitude for the current lattice configuration.  This should be exact, so the average plaquette should be unchanged.  Option \"abelian\" -> 0.0 should correspond to maximum abelian gauge.";
 setMinimumGauge[OptionsPattern[]] :=
-    Table[Block[{normSum = 0.0, update,
+ Block[{normSum = 0.0, update,
               damping = OptionValue["damping"], logLog},
    (* Take the log of a link, accumulating statistics
       on the first run through the checkerboard. *)
@@ -335,8 +335,7 @@ setMinimumGauge[OptionsPattern[]] :=
                             normSum += 2.0*Total[Re[y]^2+Im[y]^2]]; x]&;
    (* Take result from parallel computation and update gaugeField,
       accumulating statistics. *)
-   update = (Apply[setLink, Take[#, 3]];
-             If[#[[4]] =!= Null, normSum += #[[4]]])&;
+   update = (Apply[setLink, Take[#, 3]]; normSum += #[[4]])&;
    (* Shared variables are super-slow.  Instead, create a table
      of updated links, then update gaugeField and statistics after
      the parallel computation is completed.
@@ -357,17 +356,67 @@ setMinimumGauge[OptionsPattern[]] :=
                  Include statistics once. *)
                 Table[
                     {{dir, coords, gauge.getLink[dir, coords],
-                      If[dir==1, normSum, Null]},
+                      If[dir==1, normSum, 0]},
                      {dir, shift[dir, coords, -1],
                       getLink[dir, shift[dir, coords, -1]].
-                             ConjugateTranspose[gauge], Null}},
+                             ConjugateTranspose[gauge], 0}},
                     {dir, nd}],
                 Nothing]],
        {i, latticeVolume[]}, Method->"CoarsestGrained"], {3}], {cb, 0, 1}];
    (* The 2-norm of the initial links,
      averaging over the number of links. *)
-   Sqrt[normSum/(latticeVolume[]*nd)]],
-                {OptionValue["iterations"]}];
+   Sqrt[normSum/(latticeVolume[]*nd)]];
+
+Options[setLargeGauge] = {"center" -> True};
+setLargeGauge::usage = "Apply large gauge transform at each site if it reduces the gauge norm for the associated links.  Set gauge to minimum average link magnitude for the current lattice configuration.  This should be exact, so the average plaquette should be unchanged.  Option \"abelian\" -> 0.0 should correspond to maximum abelian gauge.";
+setLargeGauge[OptionsPattern[]] :=
+ Block[{normSum2 = 0.0, count = 0, update, norm2,
+   (* Add the identity:  do nothing if there is no improvement. *)
+   tt = Prepend[largeSUTransforms[], IdentityMatrix[nc]]},
+   (* Take the log of a link, accumulating statistics
+      on the first run through the checkerboard. *)
+   norm2 = First[SUNorm[#1, "center"->OptionValue["center"]]]^2&;
+   (* Take result from parallel computation and update gaugeField,
+      accumulating statistics. *)
+   update = (Apply[setLink, Take[#, 3]]; normSum2 += #[[4]];
+             count += #[[5]])&;
+   (* Shared variables are super-slow.  Instead, create a table
+     of updated links, then update gaugeField and statistics after
+     the parallel computation is completed.
+     Use checkerboard to avoid conflicts in link updates. *)
+   Do[Scan[update, ParallelTable[
+       Block[{coords = latticeCoordinates[i], sum2, idSum2,
+             updated = False, bestSum2 = Null, bestT = Null},
+             If[Mod[Total[coords], 2] == cb,
+                (* loop through transforms *)
+                Do[
+                    sum2 = Sum[
+                    norm2[t.getLink[dir, coords]]
+                    + norm2[getLink[dir, shift[dir, coords, -1]].
+                                               ConjugateTranspose[t]],
+                    {dir, nd}];
+                    (* The first iteration is the identity. *)
+                    If[bestSum2 == Null, idSum2 = sum2];
+                    If[bestSum2 == Null || sum2 < bestSum2,
+                       If[bestSum2 =!= Null, updated = True];
+                       bestSum2 = sum2;
+                       bestT = t],
+                    {t, tt}];
+                (* Create gauge transformed links.
+                 Include statistics once. *)
+                Table[
+                    {{dir, coords, bestT.getLink[dir, coords],
+                      If[dir==1 && cb==0, idSum2, 0],
+                      If[dir==1 && updated, 1, 0]},
+                     {dir, shift[dir, coords, -1],
+                      getLink[dir, shift[dir, coords, -1]].
+                             ConjugateTranspose[bestT], 0, 0}},
+                    {dir, nd}],
+                Nothing]],
+       {i, latticeVolume[]}, Method->"CoarsestGrained"], {3}], {cb, 0, 1}];
+   (* The 2-norm of the initial links,
+     averaging over the number of links. *)
+   {Sqrt[normSum2/(latticeVolume[]*nd)], count}];
 
 setMinimumAxialGauge::usage = "Set Axial gauge to minimize norm of all adjoining links.  In practice, this doesn't work very well.";
 Options[setMinimumAxialGauge] = {"center" -> False,
@@ -421,7 +470,8 @@ setMinimumAxialGauge[dir1_, OptionsPattern[]] :=
          Nothing]],
      {i, latticeVolume[]}, Method->"CoarsestGrained"], {4}], {cb, 0, 1}]];
 
-nStrategies = 6;
+
+nStrategies = 7;
 Options[applyGaugeTransforms] = {"abelian" -> False, "abelianWeight"->1};
 applyGaugeTransforms[s_, OptionsPattern[]] :=
  (* New direction each time setAxialGauge[] is called. *)
@@ -444,8 +494,10 @@ applyGaugeTransforms[s_, OptionsPattern[]] :=
        # == 6,
        setMinimumGauge["center" -> True, "damping" -> 1.5,
                        "abelianWeight" -> OptionValue["abelianWeight"]],
+       # == 7,
+       setLargeGauge["center" -> True],
        (* In practice, these don't work well *)
-      (* # == 7,
+       (* # == 7,
         setMinimumAxialGauge[dir[], "center" -> False, "damping" -> 1],
         # == 8,
         setMinimumAxialGauge[dir[], "center" -> True, "damping" -> 1],
