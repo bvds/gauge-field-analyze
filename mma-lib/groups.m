@@ -51,24 +51,6 @@ SUSymmetric[n_?IntegerQ] :=
   Block[{gen = SUGenerators[n]},
 	2 Outer[Tr[(#1.#2 + #2.#1).#3]&, gen, gen, gen, 1]];
 
-Clear[largeSUTransforms]; 
-largeSUTransforms::usage = "Set of gauge transforms that are a \
-maximum distance from any element of the center of the group.  Each \
-transform belongs to a distinct coset of the center of SU(N).  There \
-are (nc-1)! of these transforms."; 
-largeSUTransforms[] := largeSUTransforms[nc];
-largeSUTransforms[nc_] := 
- largeSUTransforms[nc] = 
-  Block[{z = cleanPhases[Table[2 Pi/nc, {nc}], nc], 
-    v = Table[(nc + 1 - 2 i) Pi/nc, {i, nc}], center}, 
-   center = 
-    Block[{q = Table[0, {nc}]}, 
-     Table[q = cleanPhases[q + z, nc], {nc}]]; 
-   Map[MatrixExp[DiagonalMatrix[I First[#]]] &, 
-    Union[Map[
-      Function[g, Union[Map[cleanPhases[g + #, nc] &, center]]], 
-      Permutations[v]]]]];
-
 centerPhases[mat_] :=(* Used for some testing *)
  Block[{delta, phases = Arg[Eigenvalues[mat]]},
   phases[[1]] -= Apply[Plus, phases];
@@ -90,9 +72,7 @@ cleanPhases[phases0_, nc_] :=
            fix,
            fix = False;
            Do[If[
-               (* Handle points on boundary carefully. *)
-               If[i>j, phases[[i]] - phases[[j]] >= 2*Pi,
-                  phases[[i]] - phases[[j]] > 2*Pi],
+               phases[[i]] - phases[[j]] > 2*Pi,
                delta = Floor[(phases[[i]] - phases[[j]] + 2*Pi)/(4*Pi)];
                phases[[i]] -= 2*Pi*delta; phases[[j]] += 2*Pi*delta;
                fix = True],
@@ -124,9 +104,7 @@ Module[
             fix,
             fix = False;
             Do[If[
-                (* Handle points on boundary carefully. *)
-                If[i>j, phases[[i]] - phases[[j]] >= 2*Pi,
-                   phases[[i]] - phases[[j]] > 2*Pi],
+                phases[[i]] - phases[[j]] > 2*Pi,
                 delta = Floor[(phases[[i]] - phases[[j]] + 2*Pi)/(4*Pi)];
                 phases[[i]] -= 2*Pi*delta; phases[[j]] += 2*Pi*delta;
                 fix = True],
@@ -172,6 +150,7 @@ stringOperator::usage = "See arXiv:hep-lat/0107007v2 1 Aug 2001, Appendix A.  Th
 stringOperator::unknown = "Unknown `1`";
 stringOperator[uu_, {op1_, op2_}] :=
     {stringOperator[uu, op1], stringOperator[uu, op2]};
+stringOperator[uu_, 1] := stringOperator[uu, "1"];
 stringOperator[uu_, op_String]:=
  Block[{nc = Length[uu]},
    Which[

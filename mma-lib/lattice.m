@@ -58,6 +58,8 @@ latticeDistance[lattice1_, lattice2_]:=
         (* These are all equivalent *)
         Which[
             True,
+            First[SUNorm[#1.ConjugateTranspose[#2]]],
+            False,
             First[SUNorm[LinearSolve[##]]],
             False,
             Sqrt[2] Norm[Flatten[SULog[LinearSolve[##]]]],
@@ -69,6 +71,7 @@ latticeDistance[lattice1_, lattice2_]:=
             {lattice1, lattice2}, 2]]},
           Norm[y]/Sqrt[Length[y]]];
 latticeNorm::usage = "SUNorm[] averaged over the lattice links.";
+Options[latticeNorm] = Options[SUNorm];
 latticeNorm[opts:OptionsPattern[]] := latticeNorm[gaugeField, opts];
 latticeNorm[lattice_, opts:OptionsPattern[]]:=
     Block[{y = Flatten[Map[
@@ -110,130 +113,310 @@ polyakovLoop[dir_, anchor_, op_] :=
    Do[If[False, Print[{i, Tr[u]}]];
       u = u.getLink[dir, shift[dir, anchor, i - 1]],
       {i, latticeDimensions[[dir]]}]; stringOperator[u, op]];
-polyakovLoop[dir0_, anchor_, {dir1_}, {width1_}, op_] :=
-  (* Smeared over a 1-dimensional strip of a given width. 
-  Normalization is so that the result is the same as the simple loop
-  for lattice links = 1. *)
+
+(* Calculate the distribution of paths across a given slice. *)
+polyakovLoopNorm::usage = "See notebook \"strings.nb\" for explanation.";
+Clear[polyakovLoopNorm];
+polyakovLoopNorm[ll_, width_, x_] :=
+    polyakovLoopNorm[ll, width, x] =
+ Block[{
+     ww = If[x==0,
+             IdentityMatrix[width+1],
+             MatrixPower[Table[x^Abs[k1 - k2],
+                 {k1, width + 1}, {k2, width + 1}], ll]]},
+       Simplify[Tr[ww]]];
+polyakovLoop[dir0_, dir1_Integer, anchor_List, width_, expAlpha_, op_] :=
+    (* Construct a strip that winds once around the lattice in direction \
+      dir0 and has width w in the transverse direction dir1.  
+      Calculate loop by averaging across all closed paths in the strip \
+      that wind once around the lattice, weighted by
+                    e^{-alpha (length of path)}.
+      To make this calculationally tractable, consider only paths
+      that don't move backward in the dir0 direction. *)
+    (* Tests:  
+      U_dir0 = const, U_dir1 = 1 should give same result as bare Polyakov loop. 
+      U_dir0 = 1, U_dir1 = const should give vacuum result.
+      Applying a random gauge transform should not affect results.
+      Moving anchor in dir0 direction should not affect results.
+      The case expAlpha=1 should be identical the old code (below). *)
+ Block[{aa = anchor, slice, cc},
+   cc = polyakovLoopNorm[
+       latticeDimensions[[dir0]], width, expAlpha];
+   (* We will apply the normalization at each dir0 step. *)
+   cc = 1/cc^(1.0/latticeDimensions[[dir0]]);
+   (* Choose slice containing anchor and for each dir0-
+   direction link coming out of the 
+   slice, look at paths containing that link, 
+   averaging across links. *)
+   Sum[
+    slice = Table[If[k == i, IdentityMatrix[nc], zeroMatrix[]],
+                  {k, width + 1}];
+    (* Now, iterate through the longitudinal direction, 
+    updating slice. *)
+    Do[
+     If[False, Print[{i,j,stringOperator[slice[[i]],op]}]];
+     (* First apply the longitudinal links *)
+     Do[slice[[k]] = 
+        slice[[k]].getLink[dir0, shift[dir1, aa, k - 1]],
+        {k, width + 1}];
+     aa = shift[dir0, anchor, j];
+     (* Find new slice values, multiplying by the normalization. *)
+     slice = cc*(slice +
+         (* Go left to right *) 
+         Block[{f = zeroMatrix[]}, 
+          Table[If[k > 1, 
+            f = expAlpha*(f + slice[[k - 1]]).getLink[dir1, 
+                  shift[dir1, aa, k - 2]]]; f,
+                {k, width + 1}]] +
+         (* Go right to left *)
+         Block[{f = zeroMatrix[]}, 
+          Reverse[Table[
+            If[k < width + 1, 
+             f = expAlpha*(f + slice[[k + 1]]).ConjugateTranspose[
+                 getLink[dir1, shift[dir1, aa, k - 1]]]]; 
+            f, {k, width + 1, 1, -1}]]]),
+        {j, latticeDimensions[[dir0]]}];
+    (* Finally, evaluate at starting point *)
+    stringOperator[slice[[i]], op], {i, width + 1}]
+ ]/;expAlpha =!=None;
+
+polyakovLoop[dir0_, dir1_, anchor_, width1_, None, op_] :=
+  (* Older version.  This is equivalent to the above in the
+    case expAlpha = 1.
+    Smeared over a 1-dimensional strip of a given width. 
+    Normalization is so that the result is the same as the simple loop
+    for lattice links = 1. *)
   Block[{aa = anchor, slice, tmpSlice, uu},
    slice = Table[
-     If[i == 1, IdentityMatrix[nc], zeroMatrix[]], {i, width1}];
+     If[i == 1, IdentityMatrix[nc], zeroMatrix[]], {i, width1 + 1}];
    Do[aa[[dir0]] = k; tmpSlice = slice;
     uu = zeroMatrix[];
     Do[uu += slice[[i - 1]];
      uu = uu.getLink[dir1, shift[dir1, aa, i - 2]];
-     tmpSlice[[i]] += uu, {i, 2, width1}]; uu = zeroMatrix[];
+     tmpSlice[[i]] += uu, {i, 2, width1 + 1}]; uu = zeroMatrix[];
     Do[uu += slice[[i + 1]];
      uu = uu.ConjugateTranspose[
         getLink[dir1, shift[dir1, aa, i - 1]]];
-     tmpSlice[[i]] += uu, {i, width1 - 1, 1, -1}];
+     tmpSlice[[i]] += uu, {i, width1, 1, -1}];
     (* Normalize to match simple Polyakov loop normalization *)   
-    tmpSlice *= 1/width1;
+    tmpSlice *= 1/(width1 + 1);
     If[False, Print[{k, Map[Tr, slice], Map[Tr, tmpSlice]}]];
     (* Move strip across links in the dir0 direction. *)
     Do[
      slice[[i]] =
      tmpSlice[[i]].getLink[dir0, shift[dir1, aa, i - 1]],
-     {i, width1}], {k, latticeDimensions[[dir0]]}];
+     {i, width1 + 1}], {k, latticeDimensions[[dir0]]}];
    aa[[dir0]] = 1;
-   uu = slice[[width1]];
+   uu = slice[[width1 + 1]];
    Do[uu = uu.ConjugateTranspose[
        getLink[dir1, shift[dir1, aa, i - 1]]];
-    uu += slice[[i]], {i, width1 - 1, 1, -1}]; stringOperator[uu, op]];
+      uu += slice[[i]], {i, width1, 1, -1}]; stringOperator[uu, op]];
+(*  *** Unfinished *** *)
+polyakovLoop[dir0_, anchor_List, width_, expAlpha_, op_] :=
+    (* Construct a D-dimensional box that winds once around the lattice
+       in direction dir0 and has width w in the D-1 transverse directions.  
+  Calculate the loop by averaging across all closed paths in the box that \
+wind once around the lattice, weighted by e^{- 
+  alpha (length of path)}.  To make this calculationally tractable, 
+  consider only paths that don't move backward in the dir0 direction \
+and have minimal length in each transverse hyper-plane ("slice").  *)
+    Block[{coords, 
+    sliceDimensions = Table[If[dir == dir0, 1, width + 1], {dir, nd}],
+    sliceVolume = (width + 1)^(nd - 1), aa = anchor, vec, slice, cc},
+    Print["Unfinished"]; Abort[];
+   (* To start with, 
+   we need to calculate the distribution of paths across any slice. *)
+      ww = Table[
+     expAlpha^Abs[k1 - k2], {k1, width + 1}, {k2, width + 1}];
+   (* Find eigenpair with positive eigenvector *)
+   {val, vec} = 
+    SelectFirst[Eigensystem[ww], Apply[Equal, Sign[#[[2]]]]];
+   vec = vec/Norm[vec];
+   (* Normalization for slice update. *)
+   cc = LinearSolve[ww, Table[1, {width + 1}]];
+   (* Distribute initial identity over slice *)
+   slice = Block[{f = IdentityMatrix[nc]}, 
+     Table[If[k > 1, f = f.getLink[dir1, shift[dir1, anchor, k - 1]]];
+       f vec[[k]], {k, width + 1}]];
+   (* Now, iterate through the longitudinal direction, 
+   updating slice. *)
+   Do[
+    (* First apply the longitudinal links *)
+    Do[slice[[j]] = 
+      slice[[j]].getLink[dir0, shift[dir1, aa, k - 1]], {k, 1, 
+      width + 1}]; aa = shift[dir0, anchor, j];(* 
+    Find new slice values *)
+    slice = cc*(slice +
+        (* Go left to right *) 
+        Block[{f = zeroMatrix[]}, 
+         Table[If[k > 1, 
+           f = expAlpha*(f + slice[[k - 1]]).getLink[dir1, 
+               shift[dir1, aa, k - 1]]]; f, {k, width + 1}]] +
+        (* Go right to left *)
+        Block[{f = zeroMatrix[]}, 
+         Reverse[Table[
+           If[k < width + 1, 
+            f = expAlpha*(f + slice[[k + 1]]).ConjugateTranspose[
+                getLink[dir1, shift[dir1, aa, k - 1]]]]; 
+           f, {k, width + 1, 1, -1}]]]), {j, 
+     latticeDimensions[[dir0]]}];
+   (* Finally, move back to anchor point *)
+   Block[{f}, 
+    Do[If[k < width + 1, 
+      f = slice[[k]] + 
+        f.ConjugateTranspose[
+          getLink[dir1, shift[dir1, anchor, k - 1]]], 
+      f = slice[[k]]], {k, width + 1, 1, -1}]; 
+    stringOperator[f, op]]];
 
 loopThickness[] := beta Sqrt[2 Pi]/nc^2;
+
+polyakovLoopTallies["simple", op_:"1"] :=
+ Block[{tallies = Association[{}]},
+  Do[
+   Block[{face = latticeDimensions, nf, ta,
+          lt = Lookup[tallies, latticeDimensions[[dir]], {}]},
+         face[[dir]] = 1;
+         nf = Apply[Times, face];
+         ta = ParallelTable[
+             polyakovLoop[dir, latticeCoordinates[k, face], op],
+             {k, nf}];
+         tallies[latticeDimensions[[dir]]] = Join[lt, ta]],
+   {dir, nd}];
+  tallies];
+polyakovLoopTallies["smeared", width1_, x_, op_:"1"] :=
+ Block[{tallies = Association[{}]},
+  Do[
+   If[dir0 != dir1,
+     Block[{face = latticeDimensions, skip, nf, ta,
+             lt = Lookup[tallies, latticeDimensions[[dir0]], {}]},
+       face[[dir0]] = 1; skip = Max[1, width1 - 1];
+       nf = Apply[Times, face];
+       ta = ParallelTable[
+           Block[{coords = latticeCoordinates[k, face]},
+                 If[Mod[coords[[dir1]] - 1, skip] == 0,
+                    polyakovLoop[dir0, dir1, coords, width1, x, op],
+                    Nothing]],
+           {k, nf}];
+       tallies[latticeDimensions[[dir0]]] = Join[lt, ta]],
+      Nothing],
+   {dir0, nd}, {dir1, nd}];
+  tallies];
 
 (* The Polyakov loop correlators are tallied as
   a function of the area enclosed by the two loops (ntL).
   This allows easy generalization to non-cubic lattices. *)
-SetAttributes[polyakovLoopAdd, HoldFirst];
-polyakovLoopAdd[tallies_, dir_, op_] :=
+polyakovCorrelators[dir_, op_] :=
  Block[{face = latticeDimensions, pp, nf}, face[[dir]] = 1;
   nf = Apply[Times, face];
-  pp = Table[polyakovLoop[dir, latticeCoordinates[k, face], op], {k, nf}];
-  Do[Block[
-      {x1 = latticeCoordinates[k1, face],
-       x2 = latticeCoordinates[k2, face], ntL, z, lt},
-      (* Here, we use the shortest distance, including wrapping
-        around the lattice.  In arXiv:hep-lat/0107007v2, Teper
-        fits to a cosh().  That is, he includes the direct distance
-        plus wrapping any number of times around the lattice.
-        However, this makes things complicated if we want to
-        include off-axis separation or contributions from wrappings in
-        the other direction transverse to the Polyakov loop.
+  pp = ParallelTable[
+      polyakovLoop[dir, latticeCoordinates[k, face], op], {k, nf}];
+  Merge[ParallelTable[
+   Block[{tallies = Association[]},
+    Do[Block[
+        {x1 = latticeCoordinates[k1, face],
+         x2 = latticeCoordinates[k2, face], ntL, z, lt},
+        (* Here, we use the shortest distance, including wrapping
+          around the lattice.  In arXiv:hep-lat/0107007v2, Teper
+          fits to a cosh().  That is, he includes the direct distance
+          plus wrapping any number of times around the lattice.
+          However, this makes things complicated if we want to
+          include off-axis separation or contributions from wrappings in
+          the other direction transverse to the Polyakov loop.
 
-        ntL is the area enclosed by the Polyakov loop.
-        and the length of the loop (for the leading correction). *)
-      ntL = {latticeDimensions[[dir]]*
-             Norm[Mod[x1 - x2 + face/2, face] - face/2],
-             latticeDimensions[[dir]]};
-      lt = Lookup[tallies, Key[ntL], {0, 0, 0}];
-      If[Head[op] === String,
-         (* Imaginary part cancels out when averaging over face *)
-         z = Re[Conjugate[pp[[k1]]] pp[[k2]]];
-         lt += {1, z, z^2},
-         z = Conjugate[pp[[k1, 1]]] pp[[k2, 2]];
-         lt += {1, z, Re[z]^2 + I*Im[z]^2};
-         z = Conjugate[pp[[k2, 1]]] pp[[k1, 2]];
-         lt += {1, z, Re[z]^2 + I*Im[z]^2}];
-      tallies[ntL] = lt],
-     {k1, nf - 1}, {k2, k1 + 1, nf}]];
-polyakovLoopAdd[tallies_, dir0_, dir1_, op_] :=
+          ntL is the area enclosed by the Polyakov loop.
+          and the length of the loop (for the leading correction). *)
+        ntL = {latticeDimensions[[dir]]*
+               Norm[Mod[x1 - x2 + face/2, face] - face/2],
+               latticeDimensions[[dir]]};
+        lt = Lookup[tallies, Key[ntL], {0, 0, 0}];
+        (* Imaginary part cancels out when averaging over face *)
+        z = Re[Conjugate[pp[[k1]]] pp[[k2]]];
+        lt += {1, z, z^2};
+        tallies[ntL] = lt],
+       {k1, kernel, nf - 1, $KernelCount}, {k2, k1, nf}];
+    tallies],
+   {kernel, $KernelCount}], Total]];
+polyakovCorrelators[dir0_, dir1_, width1_, x_, op_] :=
  Block[{
-  face = latticeDimensions, pp,
-  width1 = Floor[loopThickness[] + 0.5] + 1, skip, nf},
-       face[[dir0]] = 1; skip = Max[1, width1 - 1];
+  face = latticeDimensions, pp, skip, nf},
+       face[[dir0]] = 1; skip = Max[1, width1];
        nf = Apply[Times, face];
-  pp = Table[
+  pp = ParallelTable[
       Block[{coords = latticeCoordinates[k, face]},
             If[Mod[coords[[dir1]] - 1, skip] == 0,
-               polyakovLoop[dir0, coords, {dir1}, {width1}, op], Null]],
+               polyakovLoop[dir0, dir1, coords, width1, x, op], Null]],
       {k, nf}];
-  Do[If[pp[[k1]]=!=Null && pp[[k2]]=!=Null,
-    Block[{x1 = latticeCoordinates[k1, face],
-           x2 = latticeCoordinates[k2, face], dx, ntL, z, lt},
-     (* See comment above. *)
-     dx = Mod[x1 - x2 + face/2, face] - face/2;
-     If[2*dx[[dir1]]^2 < dx.dx,
-        (* ntL is the area enclosed by the Polyakov loop
-          and the length of the loop (for the leading correction). *)
-        ntL = {latticeDimensions[[dir0]]*Norm[dx],
-               latticeDimensions[[dir0]]};
-        lt = Lookup[tallies, Key[ntL], {0, 0, 0}];
-        If[Head[op]===String,
-           (* The imaginary part cancels out when averaging over the face. *)
-           z = Re[Conjugate[pp[[k1]]] pp[[k2]]];
-           lt += {1, z, z^2},
-           z = Conjugate[pp[[k1, 1]]] pp[[k2, 2]];
-           lt += {1, z, Re[z]^2 + I*Im[z]^2};
-           z = Conjugate[pp[[k2, 1]]] pp[[k1, 2]];
-           lt += {1, z, Re[z]^2 + I*Im[z]^2}];
-        tallies[ntL] = lt]]],
-     {k1, nf-1}, {k2, k1 + 1, nf}]];
+  Merge[ParallelTable[
+   Block[{tallies = Association[]},
+    Do[If[pp[[k1]]=!=Null && pp[[k2]]=!=Null,
+     Block[{x1 = latticeCoordinates[k1, face],
+            x2 = latticeCoordinates[k2, face], dx, ntL, z, lt},
+      (* See comment above. *)
+      dx = Mod[x1 - x2 + face/2, face] - face/2;
+      (* Include dx=0 case *)
+      If[dx[[dir1]]==0 || 2*dx[[dir1]]^2 < dx.dx,
+         (* ntL is the area enclosed by the Polyakov loop
+           and the length of the loop (for the leading correction). *)
+         ntL = {latticeDimensions[[dir0]]*Norm[dx],
+                latticeDimensions[[dir0]]};
+         lt = Lookup[tallies, Key[ntL], {0, 0, 0}];
+         (* The imaginary part cancels out when averaging over the face. *)
+         z = Re[Conjugate[pp[[k1]]] pp[[k2]]];
+         lt += {1, z, z^2};
+         tallies[ntL] = lt]]],
+       {k1, kernel, nf-1, $KernelCount}, {k2, k1, nf}];
+    tallies],
+   {kernel, $KernelCount}], Total]];
 
-polyakovLoopTallies["simple", op_:"1"] :=
-  Block[{tallies = Association[{}]},
-        Do[polyakovLoopAdd[tallies, dir, op], {dir, nd}]; tallies];
-polyakovLoopTallies["smeared", op_:"1"] :=
-  Block[{tallies = Association[{}]},
-	Do[If[dir0 != dir1, polyakovLoopAdd[tallies, dir0, dir1, op]],
-	   {dir0, nd}, {dir1, nd}]; tallies];
+polyakovCorrelatorTallies["simple", op_:"1"] :=
+    Merge[Table[polyakovCorrelators[dir, op], {dir, nd}],
+          Total];
+polyakovCorrelatorTallies["smeared", width_, x_, op_:"1"] :=
+  Merge[Flatten[
+      Table[If[dir0 != dir1,
+               polyakovCorrelators[dir0, dir1, width, x, op],
+            Nothing],
+	    {dir0, nd}, {dir1, nd}]], Total];
 
 talliesToAverageErrors[tallies_] :=
-    Map[{#[[2]]/#[[1]],
+    Map[valueError[#[[2]]/#[[1]],
          Sqrt[Re[#[[3]]] - Re[#[[2]]]^2/#[[1]]]/#[[1]]
-         + I Sqrt[Im[#[[3]]] - Im[#[[2]]]^2/#[[1]]]/#[[1]]}&, tallies];
+         + I Sqrt[Im[#[[3]]] - Im[#[[2]]]^2/#[[1]]]/#[[1]]]&, tallies];
+rescaleCorrelators[tallies_] :=
+    Association[Map[(#[[1]]->#[[2]]/tallies[{0,#[[1,2]]}])&, Normal[tallies]]];
 
-Options[exponentialModel] = {printResult -> False};
-exponentialModel[tallyData_, OptionsPattern[]] :=
-    Block[(* Protect against any global definitions of model paramters. *)
-	{ff, a2sigma, norm, c, x, casimir = Pi (nd-2)/6},
+modelChi2::usage = "Calculate chi^2 statistic from errors and differences.";
+modelChi2[model_, errors_] :=
+    Total[(model["FitResiduals"]/errors)^2];
+
+stringModel::usage = "Fit to an exponential plus a constant term, including the universal string correction.  See Andreas Athenodorou, Michael Teper, https://arxiv.org/abs/1609.03873; arXiv:1302.6257v2 [hep-th] 12 Mar 2013; http://arxiv.org/abs/0912.3339";
+Options[stringModel] = {printResult -> False, "lowerCutoff"->0,
+                        "state" -> 0};
+Format[c[k_Integer]]:=Subscript[c, k];
+stringModel[tallyData_, OptionsPattern[]] :=
+ Block[(* Protect against any global definitions of model parameters. *)
+     {ff, a2sigma, norm, c,
+      casimir = 8 Pi (OptionValue["state"] - (nd-2)/24),
+      llValues = Union[Map[Last, Keys[tallyData]]],
+      data = Select[Normal[tallyData],
+                    #[[1,1]]>OptionValue["lowerCutoff"]&]},
   ff = NonlinearModelFit[
-    Map[{#[[1, 1]], #[[1,2]], #[[2, 1]]}&, Normal[tallyData]],
-    norm Exp[-x*(a2sigma - casimir/ll^2)] + c,
-    {{norm, 1}, {a2sigma, 0.01}, {c, 0}}, {x, ll},
-    VarianceEstimatorFunction -> (1&),
-    Weights -> Map[(1/#[[2, 2]]^2)&, Normal[tallyData]]];
-  If[OptionValue[printResult], Print[ff["ParameterTable"]]]; ff];
+      Map[{#[[1, 1]], #[[1,2]], #[[2, 1]]}&, data],
+      norm*Exp[-area*a2sigma*Sqrt[Max[0, 1 + casimir/(a2sigma*ll^2)]]] +
+      If[Length[llValues] == 1, c,
+         Apply[Plus, Map[If[#==ll, c[#], 0]&, llValues]]],
+      Join[{{norm, 0.1}, {a2sigma, 0.032}},
+           If[Length[llValues]==1, {{c, 0.}}, Map[{c[#], 0.}&, llValues]]],
+      {area, ll},
+      VarianceEstimatorFunction -> (1&),
+      Weights -> Map[(1/#[[2, 2]]^2)&, data]];
+  If[OptionValue[printResult],
+     Print[ff["ParameterTable"]];
+     Print["chi^2: ", modelChi2[ff, Map[#[[2,2]]&, data]],
+           " for ",
+           Length[data]-Length[ff["BestFitParameters"]], " d.o.f."]];
+  ff];
 
 
 wilsonLoop::usage = "Planar Wilson loop.";
@@ -259,16 +442,13 @@ wilsonLoopDistribution[l1_, l2_, op_String:"1"] :=
 	{k, latticeVolume[]}, {dir1, 2, nd},
 	{dir2, dir1 - 1}], 3]];
 averageWilsonLoop::usage = "Return average value for a given size Wilson loop.";
-averageWilsonLoop[l1_, l2_, op_String:"1"] :=
-    (* Opposite loop orientations would cancel the imaginary part. *)
-    (ParallelSum[
-        Re[wilsonLoop[dir1, dir2, latticeCoordinates[k], l1, l2, op]],
-        + If[l1 != l2,
-             Re[wilsonLoop[dir1, dir2, latticeCoordinates[k], l2, l1, op]],
-             0],
-	{k, latticeVolume[]}, {dir1, 2, nd},
-	{dir2, dir1 - 1}]*2/(If[l1 == l2, 1, 2]*latticeVolume[]*nd*(nd - 1)));
+averageWilsonLoop[args__] :=
+    Block[{dist=Re[wilsonLoopDistribution[args]]},
+          valueError[Mean[dist], StandardDeviation[dist]/Sqrt[Length[dist]]]];
 
+setGlobalGauge::usage = "Perform global color rotation. u is a unitary matrix.";
+setGlobalGauge[u_] :=
+    (gaugeField = Map[u.#.ConjugateTranspose[u]&, gaugeField, {2}]);
 
 setAxialGauge::usage = "Set axial gauge for the current lattice configuration.
 That is, links along any Polyakov loop in direction dir are constant and diagonal.
@@ -321,13 +501,15 @@ setAxialGauge[dir_, opts:OptionsPattern[]] :=
          For saddle point, "center"->False then "center"->True:
                                              "damping"->1.8 works best
  *)
-Options[setMinimumGauge] = {"center" -> False,
-                            "abelianWeight" -> 1,
+Options[setLandauGauge] = {"center" -> False, "directions"->All,
+                            "maxAbelianGauge" -> False,
                             "damping" -> 1.7, "debug" -> False};
-setMimimumGauge::usage = "Set gauge to minimum average link magnitude for the current lattice configuration.  This should be exact, so the average plaquette should be unchanged.  Option \"abelian\" -> 0.0 should correspond to maximum abelian gauge.";
-setMinimumGauge[OptionsPattern[]] :=
+setLandauGauge::usage = "Set gauge to minimum average link magnitude for the current lattice configuration.  Repeated application should bring the fields into Landau gauge.  The option \"abelian\" -> 0.0 should correspond to maximum abelian gauge.  The option \"directions\" applies the gauge condition only to the specified directions; specifying a single direction would correspond to Axial gauge.";
+setLandauGauge[OptionsPattern[]] :=
  Block[{normSum = 0.0, update,
-              damping = OptionValue["damping"], logLog},
+        dirs = If[OptionValue["directions"] === All, nd,
+                  OptionValue["directions"]],
+        damping = OptionValue["damping"], logLog, ndirs},
    (* Take the log of a link, accumulating statistics
       on the first run through the checkerboard. *)
    logLog = Block[{x = SULog[#1, "center"->OptionValue["center"]], y},
@@ -336,6 +518,7 @@ setMinimumGauge[OptionsPattern[]] :=
    (* Take result from parallel computation and update gaugeField,
       accumulating statistics. *)
    update = (Apply[setLink, Take[#, 3]]; normSum += #[[4]])&;
+   ndirs = Sum[1, {dirs}];
    (* Shared variables are super-slow.  Instead, create a table
      of updated links, then update gaugeField and statistics after
      the parallel computation is completed.
@@ -345,13 +528,16 @@ setMinimumGauge[OptionsPattern[]] :=
               normSum = 0.0},
              If[Mod[Total[coords], 2] == cb,
                 (* Construct gauge transform *)
+                (* One can use the links themselves
+                  and project onto traceless antihermitian
+                  matrices, but the performance is a bit worse. *)
                 sum = Sum[
                     logLog[getLink[dir, coords], cb]
                     - logLog[getLink[dir, shift[dir, coords, -1]], cb],
-                    {dir, nd}];
-                If[OptionValue["abelianWeight"] != 1,
-                   Do[sum[[i,i]] *= OptionValue["abelianWeight"], {i, nc}]];
-                gauge = MatrixExp[-damping*sum/(2*nd)];
+                    {dir, dirs}];
+                If[OptionValue["maxAbelianGauge"],
+                   Do[sum[[i,i]] = 0, {i, nc}]];
+                gauge = MatrixExp[-damping*sum/(2*ndirs)];
                 (* Create gauge transformed links.
                  Include statistics once. *)
                 Table[
@@ -367,61 +553,10 @@ setMinimumGauge[OptionsPattern[]] :=
      averaging over the number of links. *)
    Sqrt[normSum/(latticeVolume[]*nd)]];
 
-Options[setLargeGauge] = {"center" -> True};
-setLargeGauge::usage = "Apply large gauge transform at each site if it reduces the gauge norm for the associated links.  Set gauge to minimum average link magnitude for the current lattice configuration.  This should be exact, so the average plaquette should be unchanged.  Option \"abelian\" -> 0.0 should correspond to maximum abelian gauge.";
-setLargeGauge[OptionsPattern[]] :=
- Block[{normSum2 = 0.0, count = 0, update, norm2,
-   (* Add the identity:  do nothing if there is no improvement. *)
-   tt = Prepend[largeSUTransforms[], IdentityMatrix[nc]]},
-   (* Take the log of a link, accumulating statistics
-      on the first run through the checkerboard. *)
-   norm2 = First[SUNorm[#1, "center"->OptionValue["center"]]]^2&;
-   (* Take result from parallel computation and update gaugeField,
-      accumulating statistics. *)
-   update = (Apply[setLink, Take[#, 3]]; normSum2 += #[[4]];
-             count += #[[5]])&;
-   (* Shared variables are super-slow.  Instead, create a table
-     of updated links, then update gaugeField and statistics after
-     the parallel computation is completed.
-     Use checkerboard to avoid conflicts in link updates. *)
-   Do[Scan[update, ParallelTable[
-       Block[{coords = latticeCoordinates[i], sum2, idSum2,
-             updated = False, bestSum2 = Null, bestT = Null},
-             If[Mod[Total[coords], 2] == cb,
-                (* loop through transforms *)
-                Do[
-                    sum2 = Sum[
-                    norm2[t.getLink[dir, coords]]
-                    + norm2[getLink[dir, shift[dir, coords, -1]].
-                                               ConjugateTranspose[t]],
-                    {dir, nd}];
-                    (* The first iteration is the identity. *)
-                    If[bestSum2 == Null, idSum2 = sum2];
-                    If[bestSum2 == Null || sum2 < bestSum2,
-                       If[bestSum2 =!= Null, updated = True];
-                       bestSum2 = sum2;
-                       bestT = t],
-                    {t, tt}];
-                (* Create gauge transformed links.
-                 Include statistics once. *)
-                Table[
-                    {{dir, coords, bestT.getLink[dir, coords],
-                      If[dir==1 && cb==0, idSum2, 0],
-                      If[dir==1 && updated, 1, 0]},
-                     {dir, shift[dir, coords, -1],
-                      getLink[dir, shift[dir, coords, -1]].
-                             ConjugateTranspose[bestT], 0, 0}},
-                    {dir, nd}],
-                Nothing]],
-       {i, latticeVolume[]}, Method->"CoarsestGrained"], {3}], {cb, 0, 1}];
-   (* The 2-norm of the initial links,
-     averaging over the number of links. *)
-   {Sqrt[normSum2/(latticeVolume[]*nd)], count}];
-
-setMinimumAxialGauge::usage = "Set Axial gauge to minimize norm of all adjoining links.  In practice, this doesn't work very well.";
+setLandauAxialGauge::usage = "Set Axial gauge to minimize norm of all adjoining links.  In practice, this doesn't work very well.";
 Options[setMinimumAxialGauge] = {"center" -> False,
                             "damping" -> 1.0, "debug" -> False};
-setMinimumAxialGauge[dir1_, OptionsPattern[]] :=
+setLaundauAxialGauge[dir1_, OptionsPattern[]] :=
  Block[{damping = OptionValue["damping"],
      (* Take the log of a link. *)
      logLog = SULog[#1, "center"->OptionValue["center"]]&,
@@ -471,8 +606,8 @@ setMinimumAxialGauge[dir1_, OptionsPattern[]] :=
      {i, latticeVolume[]}, Method->"CoarsestGrained"], {4}], {cb, 0, 1}]];
 
 
-nStrategies = 7;
-Options[applyGaugeTransforms] = {"abelian" -> False, "abelianWeight"->1};
+nStrategies = 6;
+Options[applyGaugeTransforms] = {"abelian" -> False, "maxAbelianGauge"->False};
 applyGaugeTransforms[s_, OptionsPattern[]] :=
  (* New direction each time setAxialGauge[] is called. *)
  Block[{lastDir = nd, dir},
@@ -483,19 +618,17 @@ applyGaugeTransforms[s_, OptionsPattern[]] :=
        # == 2, setAxialGauge[dir[], "center" -> True,
                              "abelian"->OptionValue["abelian"]],
        # == 3,
-       setMinimumGauge["center" -> False, "damping" -> 1,
-                       "abelianWeight" -> OptionValue["abelianWeight"]],
+       setLandauGauge["center" -> False, "damping" -> 1,
+                       "maxAbelianGauge" -> OptionValue["maxAbelianGauge"]],
        # == 4,
-       setMinimumGauge["center" -> True, "damping" -> 1,
-                       "abelianWeight" -> OptionValue["abelianWeight"]],
+       setLandauGauge["center" -> True, "damping" -> 1,
+                       "maxAbelianGauge" -> OptionValue["maxAbelianGauge"]],
        # == 5,
-       setMinimumGauge["center" -> False, "damping" -> 1.5,
-                       "abelianWeight" -> OptionValue["abelianWeight"]],
+       setLandauGauge["center" -> False, "damping" -> 1.5,
+                       "maxAbelianGauge" -> OptionValue["maxAbelianGauge"]],
        # == 6,
-       setMinimumGauge["center" -> True, "damping" -> 1.5,
-                       "abelianWeight" -> OptionValue["abelianWeight"]],
-       # == 7,
-       setLargeGauge["center" -> True],
+       setLandauGauge["center" -> True, "damping" -> 1.5,
+                       "maxAbelianGauge" -> OptionValue["maxAbelianGauge"]],
        (* In practice, these don't work well *)
        (* # == 7,
         setMinimumAxialGauge[dir[], "center" -> False, "damping" -> 1],
@@ -594,7 +727,7 @@ plaquetteCorrelationTallies[OptionsPattern[]] :=
        lt = Lookup[tallies, Key[{sameDirQ, dx2}], Table[0.0, {3}]];
        tallies[{sameDirQ, dx2}] = pabList[lt, pa, pb],
        {i, kernel, Length[pp]-1, $KernelCount},
-       {j, i+1, Length[pp]}];
+       {j, i, Length[pp]}];
    tallies],
   {kernel, $KernelCount}], Total]];
 (* From https://en.wikipedia.org/wiki/Correlation_and_dependence

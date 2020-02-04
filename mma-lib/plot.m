@@ -1,14 +1,15 @@
+(* See https://mathematica.stackexchange.com/questions/132454 *)
 printNumberError[a_, b_] :=
- Block[{exponent = Floor[Log[10, Abs[a]]]}, 
-   If[exponent < 6 && exponent > -4,
-      (* From https://mathematica.stackexchange.com/questions/132454 *)
-      NumberForm[
-       SetAccuracy[Row[{a, "\[PlusMinus]", b}, " "], 
-        Accuracy[SetPrecision[b, 2]]], ExponentFunction -> (Null & )], 
-      Block[{aa = a/10^exponent, bb = b/10^exponent}, 
-       Row[{"(", SetAccuracy[aa, Accuracy[SetPrecision[bb, 2]]], 
-         "\[PlusMinus]", SetAccuracy[bb, Accuracy[SetPrecision[bb, 2]]], 
-            ")","\[Times]", Superscript[10, exponent]}, " "]]]];
+    Block[{exponent = Floor[Max[RealExponent[{a, b}]]],
+   sas =  If[Floor[RealExponent[#1]] >= Floor[RealExponent[#2]] - 1,
+             SetAccuracy[#1, Accuracy[SetPrecision[#2, 2]]], 0]&},
+  If[exponent < 6 && exponent > -4,
+     NumberForm[Row[{sas[a, b], "±", SetPrecision[b, 2]}, " "],
+                ExponentFunction -> (Null &)],
+     Block[{aa = a/10^exponent, bb = b/10^exponent},
+           Row[{"(", sas[aa, bb], "±", SetPrecision[bb, 2], ")",
+                "×", Superscript[10, exponent]}, " "]]]];
+Format[valueError[a_, b_]] := printNumberError[a, b];
 
 plotActionLimits[] := {0, Min[2 n^2/3, 15]};
 plotActionPlane[dir1_, dir2_, anchor_, range_] :=
@@ -65,13 +66,46 @@ plotPlaquetteCorrelations[corr_, opts:OptionsPattern[]] :=
   Epilog -> {Dashing[0.01], 
              Line[{{0, 0}, {1/2 + Max[Map[First, corr]], 0}}]}];
 
+Options[plotStringModelFit] = {"lowerCutoff" -> 40};
+plotStringModelFit[tallyData_, OptionsPattern[]] :=
+ (Format[a2sigma] = Row[{Style[a, Italic]^2, \[Sigma]}];
+  Block[{lowerCutoff = OptionValue["lowerCutoff"], maxx, miny, maxy, nn, ff}, 
+    nn = Select[Normal[tallyData], #[[1, 1]] > 0 &]; 
+    ff = stringModel[tallyData, printResult -> True, 
+      "lowerCutoff" -> lowerCutoff]; maxx = Max[Map[First, nn]] + 0.5;
+     maxy = Max[Map[#[[2, 1]] + 1.5 #[[2, 2]] &, nn]]; 
+    miny = Min[0, Min[Map[#[[2, 1]] - 1.5 #[[2, 2]] &, nn]]]; 
+    Show[ErrorListPlot[
+      Map[{{N[#[[1, 1]]], #[[2, 1]]}, ErrorBar[#[[2, 2]]]} &, nn], 
+      PlotRange -> {{0, maxx}, {miny, maxy}}, 
+      Epilog -> {Text[
+         ColumnForm[
+          Join[Map[
+            Row[{#[[1, 1]], " = ", 
+               printNumberError[#[[1, 2]], #[[2]]]}] &, 
+            Transpose[
+             ff[{"BestFitParameters", 
+               "ParameterErrors"}]]], {Row[{"\[Beta] = ", N[beta], 
+              ", \!\(\*StyleBox[\"N\",\nFontSlant->\"Italic\"]\) = ", nc}], 
+            Row[{Row[latticeDimensions, "\[Times]"], "lattice"}, 
+             " "]}]], {maxx*0.9, maxy*0.9}, {1, 1}], {Dashing[.02], 
+         Gray, Line[{{0, 0}, {maxx, 0}}]}, 
+        If[lowerCutoff > 0, {Gray, 
+          Text["cutoff", {lowerCutoff, maxy/20}, {-1, -1}, {0, 1}], 
+          Line[{{lowerCutoff, 0}, {lowerCutoff, maxy/2}}]}, Nothing]},
+       Axes -> False, Frame -> True, 
+      FrameLabel -> {"area enclosed (plaquettes)", 
+        "Polyakov loop correlator"}], 
+         Table[Plot[ff[x, ll], {x, 0, maxx}, PlotRange -> All],
+               {ll, Union[latticeDimensions]}]]]);
+
 plotDist::usage = "Distribution of complex numbers in a unit circle in the complex plane, showing Im[z]<0 part, and the center of the gauge group.";
 plotDist[data_, op_:"1"] := (
     Print["{mean, Re stdev, Im stdev, count}: ",
           {Mean[Re[data]], StandardDeviation[Re[data]],
            Chop[Sqrt[Mean[Map[Im[#]^2&, data]]]], Length[data]}];
-  Show[{Histogram3D[Map[{Re[#], -Im[#]} &, data], 
-     PlotRange -> {{-1, 1}, {-1, 0.01}, {0, All}}, 
+  Show[{Histogram3D[Map[{Re[#], -Im[#]} &, data],
+     PlotRange -> {{-1, 1}, {0, -1}, {0, All}}, 
      BoxRatios -> {1, 0.5, 0.25}, 
      AxesLabel -> {"Re(\[CapitalPhi])", "Im(\[CapitalPhi])", None}, 
      FaceGrids -> {{0, 1, 0}}, BaseStyle -> journalStyle], 
@@ -196,7 +230,7 @@ plotLinksPlane[dir1_, dir2_, anchor_, range_, size_, groupFlag_] :=
        latticeDimensions[[dir1]]}, {x2, 0, 
        latticeDimensions[[dir2]]}], 2], 
     PlotRange -> {{1/2, latticeDimensions[[dir1]] + 1/2}, {1/2, 
-       latticeDimensions[[dir2]] + 1/2}}, ImageSize -> size]];
+       latticeDimensions[[dir2]] + 1/2}}, ImageSize -> size]]/;dir1!=dir2;
 plotLinksSides[dir0_, dir1_, dir2_, anchor_, range_, size_, 
    groupFlag_] := 
   Block[{coords = anchor, 
@@ -208,7 +242,8 @@ plotLinksSides[dir0_, dir1_, dir2_, anchor_, range_, size_,
          Pi/4, {0, 0}], {x1, x2}]}, {x1, 
        latticeDimensions[[dir1]]}, {x2, latticeDimensions[[dir2]]}], 
      2], PlotRange -> {{1/2, latticeDimensions[[dir1]] + 1/2}, {1/2, 
-       latticeDimensions[[dir2]] + 1/2}}, ImageSize -> size]];
+   latticeDimensions[[dir2]] + 1/2}}, ImageSize -> size]]/;
+  dir1!=dir2&&dir0!=dir1&&dir0!=dir2;
 Options[plotLinks] = {anchor :> Table[1, {nd}], PlotRange :> 1, 
    ImageSize -> All, groupFlag -> True};
 plotLinks[dir0_, dir1_, dir2_, OptionsPattern[]] := 

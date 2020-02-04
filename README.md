@@ -61,6 +61,10 @@ Mathematica input file:
     ../../chroma/3-3-build/mainprogs/main/purgaug -i periodic-16-28-in.xml -o periodic-16-28-out.xml
     ../../gauge-field-analyze/programs/ganalyze periodic-16-28.ini.xml5 periodic-16-28-5.m
 
+Or, if there is a lot of them:
+
+    perl -e 'for (1..100) {system "../../gauge-field-analyze/programs/ganalyze periodic-16-28.ini.xml$_ periodic-16-28-$_.m"}'
+
 
 ## Bibliography
 

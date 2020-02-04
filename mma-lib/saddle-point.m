@@ -49,7 +49,7 @@ exponential.  Thus, we set shift to zero when Norm[shift]>=Pi.  The \
 cutoff represents the Norm[shift] where the quadratic approximation \
 *starts* breaking down.  In that case, we scale back the size of the \
 shift.";
-applyCutoff1[hess_?VectorQ, grad_, cutoff_: 1, zzz_: 1] :=
+applyCutoff1[hess_?VectorQ, grad_, cutoff_: Pi, zzz_: 1] :=
  Block[ (* First, see if any component exceeds the cutoff.  Thus,
   we avoid any divide-by-zero error. *)
      {tooBig = Inner[(Pi zzz Abs[#1] <= Abs[#2])&, hess, grad, Or], shift},

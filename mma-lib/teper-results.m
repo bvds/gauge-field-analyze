@@ -9,6 +9,10 @@ valueError/:b_?NumericQ + valueError[a_, ae_] :=
      valueError[a+b, ae];
 valueError/:valueError[a_, ae_]^b_?NumericQ :=
      valueError[a^b, ae Abs[b*a^(b-1)]];
+valueError/:Exp[valueError[a_, ae_]] :=
+     valueError[Exp[a], ae Exp[a]];
+valueError/:Conjugate[valueError[a_, ae_]] :=
+     valueError[Conjugate[a], Conjugate[ae]];
 
 teperTension::usage = "Square root of the string tension in units of the lattice spacing for a specific beta.  From Athenodorou-Teper2017_Article_SUNGaugeTheoriesIn21Dimensions.pdf";
 teperTension[nd_, nc_, "1", beta_, plaquette_]:=
@@ -37,10 +41,10 @@ Module[{
             Null,
             {valueError[0.19486, 0.00017], valueError[-0.033, 0.005],
              Null}}},
-  teperTensionData[3] = data;       
+  teperTensionData[3] = data;
   teperTension[3, nc_, 1, beta_, plaquette_:1] :=
     Block[{betai = beta plaquette/(2 nc^2)},
-          (data[[nc, 1]] + data[[nc, 3]]/betai)/betai]]; 
+          (data[[nc, 1]] + data[[nc, 3]]/betai)/betai]];
 
 
 teperMass::usage = "Glueball masses in units of the lattice spacing,

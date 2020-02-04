@@ -1,3 +1,44 @@
+Options[makeStringModelTrajectory] = {
+    "step" -> "../data/3-3/step-16-28-5", 
+    "periodic" -> "../data/3-3/periodic-16-28-5", "lowerCutoff" -> 40}; 
+makeStringModelTrajectory[label_, n_, OptionsPattern[]] := 
+ Block[{gaugeField, tallyData, ff, gaugeField0, distance = 0, 
+   lastGaugeField}, Get[OptionValue["periodic"] <> ".m"]; 
+  lastGaugeField = gaugeField;
+  stringModelTrajectory[label] = 
+   Table[Print["Starting ", i]; 
+    If[i > 0, 
+     Get[OptionValue["step"] <> "-" <> label <> "-" <> ToString[i] <> 
+       ".m"]; gaugeField = gaugeField0;
+     distance += latticeDistance[gaugeField, lastGaugeField]; 
+     lastGaugeField = gaugeField]; 
+    tallyData = talliesToAverageErrors[polyakovLoopTallies["simple"]];
+     ff = stringModel[tallyData, 
+      "lowerCutoff" -> OptionValue["lowerCutoff"]]; 
+    Join[{i, distance}, 
+     MapThread[
+      valueError[#1[[2]], #2] &, {ff["BestFitParameters"], 
+                                  ff["ParameterErrors"]}]], {i, 0, n}]];
+
+Options[makeWilsonTrajectory] = {
+    "step" -> "../data/3-3/step-16-28-5",
+    "periodic" -> "../data/3-3/periodic-16-28-5"}; 
+makeWilsonTrajectory[label_, n_, OptionsPattern[]] := 
+ Block[{gaugeField, gaugeField0, distance, lastGaugeField}, 
+  Get[OptionValue["periodic"] <> ".m"];
+  Print["String tension ", 
+   stringTension = teperTension[3, 3, 1, beta, averagePlaquette[]]^2];
+   wilsonTrajectory[label] = 
+   Table[Print["Starting ", i]; 
+    If[i > 0, 
+     Get[OptionValue["step"] <> "-" <> label <> "-" <> ToString[i] <> 
+       ".m"]; gaugeField = gaugeField0;
+     distance += latticeDistance[gaugeField, lastGaugeField]; 
+     lastGaugeField = gaugeField]; {i, distance, 
+     averageWilsonLoop[1, 1], averageWilsonLoop[2, 2], 
+     averageWilsonLoop[4, 4], averageWilsonLoop[6, 6], 
+     averageWilsonLoop[8, 8]}, {i, 0, n}]];
+
 (*
   Do one link at a time.
 
@@ -7,7 +48,7 @@
 
 linkSaddlePointStep::usage = "One iteration of the saddle point search applied to a single link.  Set ignoreCutoff -> True to test this against the explicit calculation.";
 Options[linkSaddlePointStep] = {ignoreCutoff -> False,
-    linkCutoff :> Sqrt[nc^2/(3 beta)], rescaleCutoff -> 1, dampingFactor -> 1,
+    linkCutoff -> 1, rescaleCutoff -> 1, dampingFactor -> 1,
     printHessian -> False, printShift -> False};
 linkSaddlePointStep[u2Staples_, u1_, OptionsPattern[]] := 
  Block[{
@@ -57,11 +98,12 @@ makeCoordList[] := Block[
     Do[Block[{coord = latticeCoordinates[k]},
              result[[linearSiteIndex[coord]]] = coord],
        {k, latticeVolume[]}]; result];
-allLinkSaddlePoint::usage = "Apply one-link saddle point step to all links, returning associated statistics.  This starts with some given gaugeField and updates it.";
-Options[allLinkSaddlePoint] = Join[{maxAvgPlaquette -> 1},
-                                   Options[linkSaddlePoint]];
-allLinkSaddlePoint[n_, opts:OptionsPattern[]] :=
- Block[{gfi, tallyData, avgP = 0, ff, result, t0, t1,
+makeSingleLinkSaddlepointTrajectory::usage = "Apply one-link saddle point step to all links, returning associated statistics.  This starts with some given gaugeField and updates it.";
+Options[makeSingleLinkSaddlepointTrajectory] = Join[
+    {maxAvgPlaquette -> 1, "periodic" -> "../data/3-3/periodic-16-28-5"},
+    Options[linkSaddlePoint]];
+makeSingleLinkSaddlepointTrajectory[n_, opts:OptionsPattern[]] :=
+ Block[{tallyData, avgP = 0, ff, result, t0, t1,
         coordList = makeCoordList[],
         lspo = Apply[Sequence, FilterRules[{opts}, Options[linkSaddlePoint]]],
         debug = printLevel[OptionValue[printDetails], 1]},
