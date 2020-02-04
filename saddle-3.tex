@@ -598,12 +598,12 @@ multiples of $2\pi$:
 n_i\in\integer \; ,
 \eq
 such that $\sum_i \lambda_i^\prime = 0$ and
-$\lambda_i^\prime - \lambda_j^\prime < 2 \pi$.
+$\lambda_i^\prime - \lambda_j^\prime \le 2 \pi$.
 %
 \begin{figure}
 \includegraphics{hex3}
   \caption{In the case of $\SU(3)$, $(\lambda_1^\prime,\lambda_2^\prime)$ lie in the shaded hexagonal region.
-    Elements of the center of the group $z$, $z^2$, lie on the vertices of the hexagon. \label{hexagon}}
+    Elements of the center of the group $z$, $z^2$, lie on the vertices of the hexagon. The six triangular regions correspond to permuations of $\lambda_1$, $\lambda_2$, $\lambda_3$.   \label{hexagon}}
 \end{figure}
 %
 The $\SU(3)$ case is shown in Fig.~\ref{hexagon}.
@@ -622,7 +622,7 @@ Similarly, we define the logarithm of $U$ as:
     \lambda_1^\prime & & &\\
     & \lambda_2^\prime & &\\
     & & \ddots & \\
-    & & & \lambda_N^\prime\end{pmatrix} V
+    & & & \lambda_N^\prime\end{pmatrix} V \; .
 \eq
 
 \section{Solving a constrained linear system}
@@ -656,7 +656,7 @@ in less than 40 steps.
 We use the Lanczos library nu-TRLan~\cite{yamazaki_adaptive_2010},
 modified so that $P_G$ is applied to any Krylov space vector, to
 find the smallest eigenpairs of $\left(P_g H\right)^2$.  We then find
-$M$ eigenvectors $\left\{\mathbf{r}_1, \mathbf{r}_2, \ldots\right\}$
+the eigenvectors $\left\{\mathbf{r}_1, \mathbf{r}_2, \ldots\right\}$
 associated with eigenpairs $\left(\lambda_i^2, \mathbf{r}_i\right)$
 that violate the $\Lambda$ cutoffs,
 \begin{eqnarray}
@@ -667,7 +667,7 @@ that violate the $\Lambda$ cutoffs,
    \left\lVert \mathbf{r}_i\right\rVert_\mathrm{max}}{\left|\lambda_i\right| }
      &>& \Lambda_\mathrm{max} \; .
 \end{eqnarray}
-To ensure that we have found all the eigenpairs that violate the cutoff,
+To ensure that we have found all the eigenpairs that violate the cutoffs,
 we may need to calculate as many as 2000 to 4000 of the lowest eigenpairs
 in the Lanzos routine.  As one moves along a trajectory towards the
 saddle point, the gradient vector decreases in magnitude and fewer eigenpairs
@@ -677,7 +677,7 @@ Then we solve the linear system $H \mathbf{y} = \mathbf{q}$
 using the conjugate gradient algorithm,
 subroutine MINRES-QLP~\cite{choi_algorithm_2014}, modified so that
 the projection operators $P_G$ and 
-$\mathbb{I}- \sum_{k=1}^M \mathbf{r}_k \otimes \mathbf{r}_k$
+$\mathbb{I}- \sum_{k} \mathbf{r}_k \otimes \mathbf{r}_k$
 are applied to any Krylov space vector.
 
 \section{Lattice configurations}
