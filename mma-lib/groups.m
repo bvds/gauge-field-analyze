@@ -56,9 +56,9 @@ centerPhases[mat_] :=(* Used for some testing *)
   phases[[1]] -= Apply[Plus, phases];
   Do[If[phases[[i]] - phases[[j]] > 2*Pi,
     delta = Floor[(phases[[i]] - phases[[j]] + 2*Pi)/(4*Pi)];
-    phases[[i]] -= 2*Pi*delta; phases[[j]] += 2*Pi*delta], {i,
-    Length[phases]}, {j, Length[phases]}];
-  Sort[phases, Order[Abs[#1], Abs[#2]]&]];
+    phases[[i]] -= 2*Pi*delta; phases[[j]] += 2*Pi*delta],
+     {i, Length[phases]}, {j, Length[phases]}];
+  Sort[phases, Greater]];
 
 equalPhase::usage = "Determine whether two sets of phases represent the same element of the group.  Mostly for debugging:  verify that cleanPhases[] and getPhases[] handle the boundary cases correctly.";
 equalPhase[x_,y_] := MatrixExp[DiagonalMatrix[I x]] ==
@@ -196,7 +196,7 @@ stringOperator[uu_, op_String]:=
         can be inferred from these quantities. *)
       op == "phases",
       Block[{phases = First[getPhases[uu, False]]},
-            Reverse[Sort[phases]]],
+            Sort[phases, Greater]],
       True,
       Message[stringOperator::unknown, op]; $Failed
   ]];

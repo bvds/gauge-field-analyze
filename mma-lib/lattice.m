@@ -303,11 +303,30 @@ polyakovLoopTallies["smeared", width1_, x_, op_:"1"] :=
    {dir0, nd}, {dir1, nd}];
   tallies];
 
+
+makeVertices[{f_}] := {{0}, If[f>1, {-f}, Nothing], If[f>1, {f}, Nothing]}
+makeVertices[{f_, rest__}] :=
+    Flatten[Map[
+        {Prepend[#, 0], If[f>1, Prepend[#, -f], Nothing],
+         If[f>1, Prepend[#, f], Nothing]}&,
+        makeVertices[{rest}]], 1];
+aFirstCase::usage = "Return first value of an association whose key matches the pattern.";
+Attributes[aFirstCase] = {HoldFirst};
+aFirstCase[assoc_, pattern_] :=
+  assoc[FirstCase[Keys[assoc], pattern]];
+aCases::usage = "Return values of an association whose key matches the pattern.";
+Attributes[aCases] = {HoldFirst};
+aCases[assoc_, pattern_] :=
+    Map[assoc, Cases[Keys[assoc], pattern]];
+
 (* The Polyakov loop correlators are tallied as
   a function of the area enclosed by the two loops (ntL).
   This allows easy generalization to non-cubic lattices. *)
 polyakovCorrelators[dir_, op_] :=
- Block[{face = latticeDimensions, pp, nf}, face[[dir]] = 1;
+ Block[{nearest = Max[5, 2^(nd-1)],
+        face = latticeDimensions, pp, nf, vertices},
+  face[[dir]] = 1;
+  vertices = makeVertices[face];
   nf = Apply[Times, face];
   pp = ParallelTable[
       polyakovLoop[dir, latticeCoordinates[k, face], op], {k, nf}];
@@ -315,33 +334,38 @@ polyakovCorrelators[dir_, op_] :=
    Block[{tallies = Association[]},
     Do[Block[
         {x1 = latticeCoordinates[k1, face],
-         x2 = latticeCoordinates[k2, face], ntL, z, lt},
-        (* Here, we use the shortest distance, including wrapping
-          around the lattice.  In arXiv:hep-lat/0107007v2, Teper
-          fits to a cosh().  That is, he includes the direct distance
-          plus wrapping any number of times around the lattice.
-          However, this makes things complicated if we want to
-          include off-axis separation or contributions from wrappings in
-          the other direction transverse to the Polyakov loop.
+         x2 = latticeCoordinates[k2, face], ntL, z, lt, dx},
+        (* In arXiv:hep-lat/0107007v2, Teper fits to a cosh().
+          That is, he includes the direct distance plus wrapping
+          any number of times around the lattice.
 
-          ntL is the area enclosed by the Polyakov loop.
-          and the length of the loop (for the leading correction). *)
-        ntL = {latticeDimensions[[dir]]*
-               Norm[Mod[x1 - x2 + face/2, face] - face/2],
-               latticeDimensions[[dir]]};
+          We want to include off-axis contributions, as well.
+          We include all distances in a D-1 dimensional cube of sources
+          surrounding the point.
+
+          ntL is the area between the two loops for various
+          lattice wrappings plus the length of the loop
+          (for the leading correction). *)
+        dx = Abs[Mod[x1 - x2 + face/2, face] - face/2];
+        ntL = Append[
+            Take[Sort[Map[Norm[#-dx]&, vertices], Less], nearest]*
+            latticeDimensions[[dir]],
+            latticeDimensions[[dir]]];
         lt = Lookup[tallies, Key[ntL], {0, 0, 0}];
         (* Imaginary part cancels out when averaging over face *)
         z = Re[Conjugate[pp[[k1]]] pp[[k2]]];
         lt += {1, z, z^2};
         tallies[ntL] = lt],
-       {k1, kernel, nf - 1, $KernelCount}, {k2, k1, nf}];
+       {k1, kernel, nf, $KernelCount}, {k2, k1, nf}];
     tallies],
    {kernel, $KernelCount}], Total]];
 polyakovCorrelators[dir0_, dir1_, width1_, x_, op_] :=
- Block[{
-  face = latticeDimensions, pp, skip, nf},
-       face[[dir0]] = 1; skip = Max[1, width1];
-       nf = Apply[Times, face];
+ Block[{nearest = Max[5, 2^(nd-1)],
+        face = latticeDimensions, pp, skip, nf, vertices},
+  face[[dir0]] = 1;
+  vertices = makeVertices[face];
+  skip = Max[1, width1];
+  nf = Apply[Times, face];
   pp = ParallelTable[
       Block[{coords = latticeCoordinates[k, face]},
             If[Mod[coords[[dir1]] - 1, skip] == 0,
@@ -351,23 +375,28 @@ polyakovCorrelators[dir0_, dir1_, width1_, x_, op_] :=
    Block[{tallies = Association[]},
     Do[If[pp[[k1]]=!=Null && pp[[k2]]=!=Null,
      Block[{x1 = latticeCoordinates[k1, face],
-            x2 = latticeCoordinates[k2, face], dx, ntL, z, lt},
+            x2 = latticeCoordinates[k2, face], dx, ntL, z, lt, sdx},
       (* See comment above. *)
-      dx = Mod[x1 - x2 + face/2, face] - face/2;
-      (* Include dx=0 case *)
-      If[dx[[dir1]]==0 || 2*dx[[dir1]]^2 < dx.dx,
-         (* ntL is the area enclosed by the Polyakov loop
-           and the length of the loop (for the leading correction). *)
-         ntL = {latticeDimensions[[dir0]]*Norm[dx],
-                latticeDimensions[[dir0]]};
+      dx = Abs[Mod[x1 - x2 + face/2, face] - face/2];
+      (* dir0 component of dx is always zero *)
+      sdx = Rest[Sort[dx, Less]];
+      (* Demand that angle is less than 45 degrees *)
+      If[k1 == k2 || (dx[[dir1]]==First[sdx] && First[sdx]<sdx[[2]]),
+          (* ntL is the area between the two loops for various
+            lattice wrappings plus the length of the loop
+            (for the leading correction). *)
+         ntL = Append[
+             Take[Sort[Map[Norm[#-dx]&, vertices], Less], nearest]*
+             latticeDimensions[[dir0]],
+             latticeDimensions[[dir0]]];
          lt = Lookup[tallies, Key[ntL], {0, 0, 0}];
          (* The imaginary part cancels out when averaging over the face. *)
          z = Re[Conjugate[pp[[k1]]] pp[[k2]]];
          lt += {1, z, z^2};
          tallies[ntL] = lt]]],
-       {k1, kernel, nf-1, $KernelCount}, {k2, k1, nf}];
+       {k1, kernel, nf, $KernelCount}, {k2, k1, nf}];
     tallies],
-   {kernel, $KernelCount}], Total]];
+   {kernel, 1 $KernelCount}], Total]];
 
 polyakovCorrelatorTallies["simple", op_:"1"] :=
     Merge[Table[polyakovCorrelators[dir, op], {dir, nd}],
@@ -384,7 +413,9 @@ talliesToAverageErrors[tallies_] :=
          Sqrt[Re[#[[3]]] - Re[#[[2]]]^2/#[[1]]]/#[[1]]
          + I Sqrt[Im[#[[3]]] - Im[#[[2]]]^2/#[[1]]]/#[[1]]]&, tallies];
 rescaleCorrelators[tallies_] :=
-    Association[Map[(#[[1]]->#[[2]]/tallies[{0,#[[1,2]]}])&, Normal[tallies]]];
+    Association[Map[
+        (#->tallies[#]/aFirstCase[tallies, {0, __, Last[#]}])&,
+        Keys[tallies]]];
 
 modelChi2::usage = "Calculate chi^2 statistic from errors and differences.";
 modelChi2[model_, errors_] :=
@@ -397,18 +428,17 @@ Format[c[k_Integer]]:=Subscript[c, k];
 stringModel[tallyData_, OptionsPattern[]] :=
  Block[(* Protect against any global definitions of model parameters. *)
      {ff, a2sigma, norm, c,
+      na = Length[First[Keys[tallyData]]] - 1,
       casimir = 8 Pi (OptionValue["state"] - (nd-2)/24),
-      llValues = Union[Map[Last, Keys[tallyData]]],
       data = Select[Normal[tallyData],
                     #[[1,1]]>OptionValue["lowerCutoff"]&]},
   ff = NonlinearModelFit[
-      Map[{#[[1, 1]], #[[1,2]], #[[2, 1]]}&, data],
-      norm*Exp[-area*a2sigma*Sqrt[Max[0, 1 + casimir/(a2sigma*ll^2)]]] +
-      If[Length[llValues] == 1, c,
-         Apply[Plus, Map[If[#==ll, c[#], 0]&, llValues]]],
-      Join[{{norm, 0.1}, {a2sigma, 0.032}},
-           If[Length[llValues]==1, {{c, 0.}}, Map[{c[#], 0.}&, llValues]]],
-      {area, ll},
+      Map[Append[#[[1]], #[[2, 1]]]&, data],
+      norm*Sum[
+          Exp[-area[i]*a2sigma*Sqrt[Max[0, 1 + casimir/(a2sigma*ll^2)]]],
+          {i, na}] + c,
+      {{norm, 1.0}, {a2sigma, 0.016}, {c, 0.}},
+      Append[Table[area[i], {i, na}], ll],
       VarianceEstimatorFunction -> (1&),
       Weights -> Map[(1/#[[2, 2]]^2)&, data]];
   If[OptionValue[printResult],
@@ -471,7 +501,7 @@ setAxialGauge[dir_, opts:OptionsPattern[]] :=
      (* Since we want the diagonal part,
        use getPhases instead of SUPower. *)
      If[OptionValue["abelian"],
-        phases = Reverse[Sort[First[getPhases[v, False, popts]]]];
+        phases = Sort[First[getPhases[v, False, popts]], Greater];
         v = DiagonalMatrix[Exp[I*phases/latticeDimensions[[dir]]]],
         v = SUPower[v, 1/latticeDimensions[[dir]], popts]
      ];
@@ -738,7 +768,7 @@ sampleCorrelation[{q_, d_} -> x_] :=
 makePlaquetteCorrelations[opts:OptionsPattern[]] :=
     Map[sampleCorrelation,
         Sort[Normal[plaquetteCorrelationTallies[opts]],
-             Order[N[#1[[1, 2]]], N[#2[[1, 2]]]]&]];
+             Less[#1[[1, 2]], #2[[1, 2]]]&]];
 
 
 dualShift3 = {{0, 1, 1}, {1, 0, 1}, {1, 1, 0}};
