@@ -4,7 +4,9 @@
 randomSUMatrix[] := randomSUMatrix[nc];
 randomSUMatrix[n_] :=
  Block[{mat = RandomVariate[CircularUnitaryMatrixDistribution[n]]},
-       mat*Exp[2 Pi I RandomInteger[n-1]/n]/Det[mat]^(1/n)];
+  (* Arg[Det[mat]] is uniformly distributed on [-Pi, Pi],
+    so the distribution over SU(N) is uniform. *)
+  mat/Det[mat]^(1/n)];
 centerSUMatrix[j_] := centerSUMatrix[j, nc];
 centerSUMatrix[j_, n_] := IdentityMatrix[n] Exp[2 Pi I j/n];
 zeroMatrix[] := zeroMatrix[nc];
@@ -64,9 +66,8 @@ equalPhase::usage = "Determine whether two sets of phases represent the same ele
 equalPhase[x_,y_] := MatrixExp[DiagonalMatrix[I x]] ==
                      MatrixExp[DiagonalMatrix[I y]];
 
-cleanPhases[phases_] := cleanPhases[phases, nc];
-cleanPhases[phases0_, nc_] :=
- Block[{phases = phases0, fix = True},
+cleanPhases[phases0_] :=
+ Block[{phases = phases0, n = Length[phases0], fix = True},
        phases[[1]] -= Total[phases];
        While[
            fix,
@@ -76,7 +77,7 @@ cleanPhases[phases0_, nc_] :=
                delta = Floor[(phases[[i]] - phases[[j]] + 2*Pi)/(4*Pi)];
                phases[[i]] -= 2*Pi*delta; phases[[j]] += 2*Pi*delta;
                fix = True],
-              {i, nc}, {j, nc}]];
+              {i, n}, {j, n}]];
        phases];
 
 getPhases::phaseSum = "Invalid determinant, total phase = `1`";

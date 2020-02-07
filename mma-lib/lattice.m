@@ -71,13 +71,16 @@ latticeDistance[lattice1_, lattice2_]:=
             {lattice1, lattice2}, 2]]},
           Norm[y]/Sqrt[Length[y]]];
 latticeNorm::usage = "SUNorm[] averaged over the lattice links.";
-Options[latticeNorm] = Options[SUNorm];
+Options[latticeNorm] = Join[Options[SUNorm], {"tally" -> False}];
 latticeNorm[opts:OptionsPattern[]] := latticeNorm[gaugeField, opts];
 latticeNorm[lattice_, opts:OptionsPattern[]]:=
-    Block[{y = Flatten[Map[
-        First[SUNorm[#, opts]]&,
-             lattice, {2}]]},
-          Norm[y]/Sqrt[Length[y]]];
+    Block[{y, dis,
+           sopts = Apply[Sequence, FilterRules[{opts}, Options[SUNorm]]]},
+          {y, dis} = Transpose[Map[
+              SUNorm[#, sopts]&, Flatten[lattice, 1]]];
+          If[OptionValue["tally"],
+             {Norm[y]/Sqrt[Length[y]], Sort[Tally[dis]]},
+             Norm[y]/Sqrt[Length[y]]]];
 
 makeTrivialLattice::usage =
   "All links identity for a given nd,nc,latticeDimensions.
@@ -637,12 +640,13 @@ setLaundauAxialGauge[dir1_, OptionsPattern[]] :=
 
 
 nStrategies = 6;
-Options[applyGaugeTransforms] = {"abelian" -> False, "maxAbelianGauge"->False};
+Options[applyGaugeTransforms] = {"abelian" -> False, "maxAbelianGauge"->False,
+                                 "loopFunction" -> Identity};
 applyGaugeTransforms[s_, OptionsPattern[]] :=
  (* New direction each time setAxialGauge[] is called. *)
  Block[{lastDir = nd, dir},
    dir = Function[lastDir = Mod[lastDir, nd] + 1];
-   Scan[Which[
+   Scan[(Which[
        # == 1, setAxialGauge[dir[], "center" -> False,
                              "abelian"->OptionValue["abelian"]],
        # == 2, setAxialGauge[dir[], "center" -> True,
@@ -670,7 +674,8 @@ applyGaugeTransforms[s_, OptionsPattern[]] :=
         setMinimumAxialGauge[dir[], "center" -> True, "damping" -> 1.5]*)
        True,
        Abort[]
-        ] &, s]; latticeNorm["center" -> True]];
+         ];OptionValue["loopFunction"][])&, s];
+   latticeNorm["center" -> True]];
 
 sumStaples::usage = "Returns a general matrix in color space.";
 sumStaples[dir1_, coords_] := Block[{total = zeroMatrix[]},
