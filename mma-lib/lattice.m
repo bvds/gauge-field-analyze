@@ -62,12 +62,9 @@ latticeDistance[lattice1_, lattice2_]:=
             False,
             First[SUNorm[LinearSolve[##]]],
             False,
-            Sqrt[2] Norm[Flatten[SULog[LinearSolve[##]]]],
+            Norm[Flatten[SULog[LinearSolve[##]]]],
             False,
-            Sqrt[2 Tr[#.ConjugateTranspose[#]]]&[SULog[LinearSolve[##]]],
-            False,
-            (* The Im[] is to remove any floating point errors *)
-            2 Norm[Map[Tr, Im[SUGenerators[].SULog[LinearSolve[##]]]]]]&,
+            Sqrt[Tr[#.ConjugateTranspose[#]]]&[SULog[LinearSolve[##]]]]&,
             {lattice1, lattice2}, 2]]},
           Norm[y]/Sqrt[Length[y]]];
 latticeNorm::usage = "SUNorm[] averaged over the lattice links.";
@@ -779,7 +776,7 @@ makePlaquetteCorrelations[opts:OptionsPattern[]] :=
 dualShift3 = {{0, 1, 1}, {1, 0, 1}, {1, 1, 0}};
 makeFaradayLattice::usage = 
   "Construct a dual lattice containing a^2*g times the Faraday tensor.\
-This construction only makes sense in the context of the minimum norm gauge."; 
+This construction only makes sense in the context of Landau gauge.";
 makeFaradayLattice[] := 
  Block[{u1, u2, u1s2, u2s1, faces = {{2, 3}, {3, 1}, {1, 2}}, 
     dualLattice = Array[Null &, {nd, latticeVolume[]}], dir1, dir2, 

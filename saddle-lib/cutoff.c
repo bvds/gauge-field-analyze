@@ -9,6 +9,11 @@
      The norm is an L-2 norm applied to each nc^2-1 rows
      with an L-infinity norm applied to that.
 
+     This differs from the norm defined in the paper by
+     a factor of sqrt(2), but eigenCutoffMax, eigenCutoff2, 
+     and eigenCutoffRescale should match the associated lambda
+     parameters in the paper.
+
      Returns filtered vals & vecs arrays.
      The associated memory is re-allocated.
 

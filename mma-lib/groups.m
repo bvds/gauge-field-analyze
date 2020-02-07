@@ -139,12 +139,12 @@ SULog[mat_, opts:OptionsPattern[]] :=
  Block[{phases, vectors, center},
    {phases, vectors, center} = getPhases[mat, True, opts];
    Transpose[vectors].DiagonalMatrix[I phases].Conjugate[vectors]];
-SUNorm::usage = "Distance of group element from the identity (or the nearest element of the center) using the tangent space. Returns the norm and the associated element of the center (Z_N under addition).  The normalization convention is compatible with our normalization of the SU(N) generators.";
+SUNorm::usage = "Distance of group element from the identity (or the nearest element of the center) using the tangent space. Returns the norm and the associated element of the center (Z_N under addition).";
 Options[SUNorm] = Options[getPhases];
 SUNorm[mat_, opts:OptionsPattern[]] :=
  Block[{phases, center},
    {phases, center} = getPhases[mat, False, opts];
-   {Sqrt[2] Norm[phases], center}];
+   {Norm[phases], center}];
 
 
 stringOperator::usage = "See arXiv:hep-lat/0107007v2 1 Aug 2001, Appendix A.  There is a notational error in Teper's Eqns. (49) and (50).";

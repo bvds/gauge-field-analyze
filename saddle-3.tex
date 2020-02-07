@@ -28,7 +28,7 @@
 \newcommand{\be}{\begin{equation}}
 \newcommand{\eq}{\end{equation}}
 \newcommand{\integer}{\mathbb{Z}}       % set of integers
-\newcommand{\zentrum}{{\mathbb{Z}_N}}       % set of integers
+\newcommand{\zentrum}{\mathcal{Z}}       % set of integers
 \newcommand{\plaquette}{\Box}
 \newcommand{\config}{\mathcal{U}}
 \DeclareMathOperator{\SU}{SU}
@@ -187,12 +187,18 @@ It is useful to define a number of norms.  We define the norm
 for a link,
 %
 \be
-\left\lVert U_\mu(x) \right\rVert_2 =
-   \sqrt{2 \Tr B B^\dagger} \, \quad B = \log\left(U_\mu(x)\right) \; ,
+   \left\lVert U_\mu(x) \right\rVert_2 =
+   \sqrt{\Tr B B^\dagger} \quad \mbox{where}
+   \quad B = \log\left(U_\mu(x)\right)
+   \label{sunorm}
 \eq
-where the matrix logarithm is defined in Appendix~\ref{roots}.
-The factor of 2 maintains compatibility with the our normalization
-for the generators of $\SU(N)$, introduced later.
+and the matrix logarithm is defined in Appendix~\ref{roots}.
+Note that the norm reaches its maximum value for elements
+of the center $\zentrum$ of $\SU(N)$: 
+\be
+    \left\lVert z \right\rVert_2 = 2\pi \sqrt{\frac{N-1}{N}} \; ,
+     \quad z\in \zentrum \; .
+\eq
 The norm for a lattice configuration is:
 \be
    \left\lVert \config \right\rVert_2 =
@@ -209,7 +215,7 @@ The norm for a lattice configuration is:
 %The distance metric should not be taken too seriously, 
 %since it is not gauge invarient.
 %
-We can also define a link norm modulo the center $\zentrum$ of $\SU(N)$,
+We can also define a link norm modulo the center $\zentrum$,
 \be
 \left\lVert U_\mu(x) \right\rVert_\zentrum =
     \min_{z\in \zentrum} \left\lVert z U_\mu(x) \right\rVert_2 \; .
@@ -266,7 +272,9 @@ P_\mu(r) = c_0 \sum_{\mbox{images}}
       + c_1 \; .  \label{stringmodel}
 \eq    
 Since the lattices we use are relatively small, we include contributions from fields wrapping around the lattice in the plane transverse to $\hat{\mu}$.  Thus we sum over the two closest images of the Polyakokv loop in each transverse
-direction.  The constant $c_1$ should, in principle, not be necessary but when measuring the string tension for a single lattice configuration, we find large constant fluctuations that interfere with the fit.
+direction.  The constant $c_1$ should, in principle, not be necessary
+but when measuring the string tension for a single lattice configuration,
+we find large constant fluctuations will otherwise interfere with the fit.
 
 When finding the string tension, we fit $\Phi_\mu(r)$ to
 Eqn.~(\ref{stringmodel}) for each $\mu$.
@@ -284,15 +292,18 @@ Eqn.~(\ref{stringmodel}) for each $\mu$.
     see Appendix~\ref{configurations}. \label{pcorr16}}
 \end{figure}
 
-
 For precise measurement the string tension, the above process is
-not ideal since the correlators re-use the same fields for various
-values of $r$ and the $\Phi_\mu(r)$ are not statstically independent.
+not ideal since the correlator calculation re-uses the same link
+fields for various values of $r$ and the $\Phi_\mu(r)$ are not
+statstically independent.
 However, this does allows us to monitor the behavior of the correlator at
 various distance scales.  An example for a $16^3$ lattice is shown
 in Fig.~\ref{pcorr16}.  The string tension $\sigma a^2 = 0.023 \pm 0.00$
 is somewhat larger then Teper's value for $\beta=28$,
 $\sigma a^2 = 0.016\pm 0.0001$ and is likely due the small lattice volume.
+A similar calculation for a $L^3=20^3$ lattice yields
+$\sigma a^2 = 0.016\pm 0.0001$, consistant with Teper's value.
+{\bf add references and actual values}
 
 Similarly, we define a Wilson loop operator using the bare link
 fields:
@@ -311,7 +322,7 @@ one might look expectation values of higher order operators
 like $\Tr\left( \mathcal{O}^k\right)$.
 
 However, this is not the most general gauge-invarient observable.
-The most general physical observable is the distribution of the
+The most general physical observable {\bf reference for fundamental modular domain} is the distribution of the
 eigenvalues of $\mathcal{O}$.  If $e^{i\lambda_1}$,\ldots, $e^{i\lambda_N}$
 are the eigevalues of $\mathcal{O}$, we can order $\lambda_i$ in
 some fashion $\lambda_1\ge \lambda_2 \ge \ldots$ and demand that
@@ -574,20 +585,21 @@ However, since the Hessian represents the quadratic term, $G H G^T \neq 0$.
 Since we are using the Hessian, we are approximating
 the action $S$ as being quadratic in $\mathbf{w}$.  If $\mathbf{w}$
 is too large, the quadratic approximation is no longer valid.
-Thus, we need some measure of the size of $\mathbf{w}$.
-We define two norms:
-A lattice-wide $\infty$-norm, taking the ordinary norm at each link:
+Using Eqn.~(\ref{sunorm}), we will define two norms for the shifts:
+a lattice-wide $\infty$-norm, taking the ordinary norm at each link
 \be
 \left\lVert \mathbf{w}\right\rVert_{\mathrm{max}} =
-     \max_{x,\mu} \sqrt{\sum_a w_a^2(\mu, x)}
+     \max_{x,\mu} \left\lVert e^{i w_{a}(\mu, x) T_a} \right\rVert_2
+     = \max_{x,\mu} \sqrt{\frac{1}{2}\sum_a w_a^2(\mu, x)}
 \eq
 as well as an ordinary Euclidean norm, averaged over links
 \be
 \left\lVert \mathbf{w}\right\rVert_2 =
-     \sqrt{\frac{1}{V_L D} \sum_{x, \mu, a} w_a^2(\mu, x)}
+      \sqrt{\frac{1}{V_L D} \sum_{x, \mu}
+        \left\lVert e^{i w_{a}(\mu, x) T_a} \right\rVert_2^2}
+     = \sqrt{\frac{1}{2 V_L D} \sum_{x, \mu, a} w_a^2(\mu, x)}
         \; .
 \eq
-
 
 
 \section{Calculating the saddle point}
@@ -668,34 +680,36 @@ there will be a large shift that will dominate the solution
 to the linear system.
 Thus, we impose a cutoff $\Lambda_2$:
 \be
-    \frac{\left|\overline{q}_i\right|\left\lVert P_G^T \mathbf{v}_i\right\rVert_2}{\left|\lambda_i\right|}
+    \frac{\sqrt{2} \left|\overline{q}_i\right|\left\lVert P_G^T \mathbf{v}_i\right\rVert_2}{\left|\lambda_i\right|}
      < \Lambda_2 \label{lambda2}
 \eq
 %
 and set $\overline{y}_i=0$ whenever the cutoff is violated.
 That is, we remove any eigenpairs inside the v-shaped
 region shown in Fig.~\ref{shiftPairs}.  For additional safety, we
-we also impose maximum value cutoff
+we also impose a maximum value cutoff
 \be
-    \frac{\left|\overline{q}_i\right|
+    \frac{\sqrt{2} \left|\overline{q}_i\right|
       \left\lVert P_G^T \mathbf{v}_i\right\rVert_\mathrm{max}}
     {\left|\lambda_i\right|}
     < \Lambda_\mathrm{max} \; .
 \eq
 Thus,
 \be
-      \mathbf{y} = P_g^T \left. \mathcal{O}^T
+      \mathbf{y} = P_G^T \left. \mathcal{O}^T
                     \overline{\mathbf{y}}\right|_{\Lambda_2,\Lambda_\mathrm{max}} \; .
 \eq
 
 Finally, since the gauge symmetry of the action is non-linear,
 we do not want to shift the fields by too much before recalculating
-the matrix $G$.  We want to ensure the shift is small
+the matrix $G$.  In addition, we want to ensure the shift is small
 enough on each link to be consistant with the quadratic expansion.
 Thus, it is useful to add a damping factor $\gamma$ and
-further rescale by $\Lambda_s$, when needed:
+further rescale by $\Lambda_s$, when the shift would
+otherwise be large:
 \be
-    \mathbf{w} = - \gamma \mathbf{y} \min\left(1, \frac{\Lambda_s}{\left\lVert \mathbf{y}\right\rVert_\mathrm{max}}\right) \; .
+  \mathbf{w} = - \gamma \mathbf{y} \min\left(1, \frac{\Lambda_s}{
+    \sqrt{2} \left\lVert \mathbf{y}\right\rVert_\mathrm{max}}\right) \; .
 \eq
 Typically, $\Lambda_s = 1$ or $2$ is used.
 
@@ -893,7 +907,7 @@ the matrix power $U_c^t$, $t\in[0,1]$ should be a
 smooth map from $[0,1]$ onto the group manifold where
 $U_c^0=\mathbb{I}$, $U_c^1=U_c$, and $U_c^s U_c^t = U_c^{s+t}$;
 the image of the map should have minimal length.
-In general, a unitary matrix $U$ can be factored as
+A unitary matrix $U$ can be factored as
 %
 \be
 U = V^\da \begin{pmatrix}
@@ -973,7 +987,7 @@ in less than 40 steps.
 
 We use the Lanczos library nu-TRLan~\cite{yamazaki_adaptive_2010},
 modified so that $P_G$ is applied to any Krylov space vector, to
-find the smallest eigenpairs of $\left(P_g H\right)^2$.  We then find
+find the smallest eigenpairs of $\left(P_G H\right)^2$.  We then find
 the eigenvectors $\left\{\mathbf{r}_1, \mathbf{r}_2, \ldots\right\}$
 associated with eigenpairs $\left(\lambda_i^2, \mathbf{r}_i\right)$
 that violate the $\Lambda$ cutoffs,

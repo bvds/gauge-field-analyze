@@ -26,7 +26,10 @@ printLevel[opt_, default_] :=
 
 
 (* Define norms for shifts *)
-
+(* This differs from the norm defined in the paper by
+  a factor of sqrt(2), but eigenCutoffMax, eigenCutoff2, 
+  and eigenCutoffRescale should match the associated lambda
+  parameters in the paper. *)
 shiftNormMax[shifts_] :=
     Max[Map[Norm, Partition[shifts, nc^2 - 1]]];
 shiftNorm2[shifts_] :=
@@ -57,7 +60,7 @@ applyCutoff1[hess_?VectorQ, grad_, cutoff_: Pi, zzz_: 1] :=
    (* Otherwise, rescale based on the norm of the shift *)
    shift = grad/hess;
    Which[Pi zzz <= Norm[shift], Map[0&, shift],
-    Norm[shift] < cutoff  zzz, shift,
+         Norm[shift] < cutoff  zzz, shift,
     True, (cutoff/Norm[shift]) shift]]];
 applyCutoff2::usage = "Rescale shifts on an entire lattice so that \
 the largest norm of a shift on a link is less than the cutoff.";
@@ -72,17 +75,17 @@ meaning. We infer the effect on the lattice links by using the \
 rotation back onto the lattice.  We demand that the norm of the \
 largest shift on any single link be less than the cutoff (default \
 value Pi).";
-Options[applyCutoff3] = {"cutoffMax" -> Pi, "cutoff2" -> Pi, "zzz" -> 1};
+Options[applyCutoff3] = {"eigenCutoffMax" -> Pi, "eigenCutoff2" -> Pi, "zzz" -> 1};
 applyCutoff3[hess_, grad_, proj_, OptionsPattern[]] :=
  Block[{result, count = 0, countMax = 0, count2 = 0,
         firstValue = Null, lastValue = Null},
   result = MapThread[
       Block[{
           testMax = OptionValue["zzz"] < Infinity &&
-                    OptionValue["cutoffMax"] OptionValue["zzz"] Abs[#1] <=
+                    OptionValue["eigenCutoffMax"] OptionValue["zzz"] Abs[#1] <=
                                Abs[#2] shiftNormMax[#3],
           test2 = OptionValue["zzz"] < Infinity &&
-                  OptionValue["cutoff2"] OptionValue["zzz"] Abs[#1] <=
+                  OptionValue["eigenCutoff2"] OptionValue["zzz"] Abs[#1] <=
                              Abs[#2] shiftNorm2[#3]},
             If[testMax, countMax++];
             If[test2, count2++];
@@ -108,10 +111,10 @@ cutoffNullspace[hess_, grad_, proj_, OptionsPattern[]] :=
    result = MapThread[
       Block[{
           testMax = OptionValue["zzz"] < Infinity &&
-                    OptionValue["cutoffMax"] OptionValue["zzz"] Abs[#1] <=
+                    OptionValue["eigenCutoffMax"] OptionValue["zzz"] Abs[#1] <=
                                Abs[#2] shiftNormMax[#3],
           test2 = OptionValue["zzz"] < Infinity &&
-                  OptionValue["cutoff2"] OptionValue["zzz"] Abs[#1] <=
+                  OptionValue["eigenCutoff2"] OptionValue["zzz"] Abs[#1] <=
                              Abs[#2] shiftNorm2[#3]},
             If[testMax, countMax++];
             If[test2, count2++];
@@ -423,8 +426,8 @@ findDelta[{hess_, grad_, gauge_}, OptionsPattern[]] :=
     If[False, Print["Dynamic hess.grad: ", hess.grad]];
     {values, oo} = Eigensystem[Normal[hessp]];
     stepShifts = applyCutoff3[values, oo.gradp, oo.proj,
-                              "cutoffMax" -> OptionValue[eigenCutoffMax],
-                              "cutoff2" -> OptionValue[eigenCutoff2],
+                              "eigenCutoffMax" -> OptionValue[eigenCutoffMax],
+                              "eigenCutoff2" -> OptionValue[eigenCutoff2],
                               "zzz" -> zzz].oo.proj;
     Print["shifts norms and rescale:  ",
 	  {shiftNormMax[stepShifts], shiftNorm2[stepShifts],
@@ -482,8 +485,8 @@ findDelta[{hess_, grad_, gauge_}, opts:OptionsPattern[]] :=
          orthoSubspace -> dp,
 	 initialVector -> grad, printDetails -> 1];
      Module[{largeShiftSpace = cutoffNullspace[Sqrt[vals], vecs.grad, vecs,
-               "cutoffMax" -> OptionValue[eigenCutoffMax],
-               "cutoff2" -> OptionValue[eigenCutoff2], "zzz" -> zzz]},
+               "eigenCutoffMax" -> OptionValue[eigenCutoffMax],
+               "eigenCutoff2" -> OptionValue[eigenCutoff2], "zzz" -> zzz]},
 	    If[Length[largeShiftSpace] > 0,
 	       (# - (largeShiftSpace.#).largeShiftSpace)&, Identity]]];
    smallProj = (addTime[tsp, countsp++; smallProj0[#]]&);
