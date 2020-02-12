@@ -6,7 +6,11 @@ randomSUMatrix[n_] :=
  Block[{mat = RandomVariate[CircularUnitaryMatrixDistribution[n]]},
   (* Arg[Det[mat]] is uniformly distributed on [-Pi, Pi],
     so the distribution over SU(N) is uniform. *)
-  mat/Det[mat]^(1/n)];
+       mat/Det[mat]^(1/n)];
+randomPhaseDistribution[x_List] := 
+  Block[{nc = Length[x]}, 
+   2^((nc - 1)*(nc - 2)/2)/Pi^(nc - 1)*
+   Product[1 - Cos[x[[i]] - x[[j]]], {i, nc - 1}, {j, i + 1, nc}]];
 centerSUMatrix[j_] := centerSUMatrix[j, nc];
 centerSUMatrix[j_, n_] := IdentityMatrix[n] Exp[2 Pi I j/n];
 zeroMatrix[] := zeroMatrix[nc];
@@ -127,9 +131,9 @@ SUPower::usage = "Take some power of an SU(N) matrix with the property that U^z,
 Options[SUPower] = Options[getPhases];
 SUPower[mat_, power_, opts:OptionsPattern[]] :=
  Block[{vectors, phases, result, center},
-       {phases, vectors, center} = getPhases[mat, True, opts];
+  {phases, vectors, center} = getPhases[mat, True, opts];
   result = Transpose[vectors].DiagonalMatrix[
-     Exp[I*phases*power]].Conjugate[vectors];
+      Exp[I*phases*power]].Conjugate[vectors];
   If[OptionValue["debug"] && Not[SUMatrixQ[result, OptionValue[Tolerance]]],
      Print["matrix power not SU"]];
   result];
@@ -139,7 +143,7 @@ SULog[mat_, opts:OptionsPattern[]] :=
  Block[{phases, vectors, center},
    {phases, vectors, center} = getPhases[mat, True, opts];
    Transpose[vectors].DiagonalMatrix[I phases].Conjugate[vectors]];
-SUNorm::usage = "Distance of group element from the identity (or the nearest element of the center) using the tangent space. Returns the norm and the associated element of the center (Z_N under addition).";
+SUNorm::usage = "Distance of group element from the identity (or the nearest element of the center) using the tangent space. Returns the norm and the associated element of the center, labeled by associated element of Z_N.";
 Options[SUNorm] = Options[getPhases];
 SUNorm[mat_, opts:OptionsPattern[]] :=
  Block[{phases, center},

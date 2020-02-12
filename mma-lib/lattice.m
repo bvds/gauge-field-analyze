@@ -423,8 +423,9 @@ modelChi2[model_, errors_] :=
 
 stringModel::usage = "Fit to an exponential plus a constant term, including the universal string correction.  See Andreas Athenodorou, Michael Teper, https://arxiv.org/abs/1609.03873; arXiv:1302.6257v2 [hep-th] 12 Mar 2013; http://arxiv.org/abs/0912.3339";
 Options[stringModel] = {printResult -> False, "lowerCutoff"->0,
-                        "state" -> 0};
-Format[c[k_Integer]]:=Subscript[c, k];
+                        "state" -> 0, "constantTerm" -> True};
+Format[c0]:=Subscript["c", 0];
+Format[c1]:=Subscript["c", 1];
 stringModel[tallyData_, OptionsPattern[]] :=
  Block[(* Protect against any global definitions of model parameters. *)
      {ff, a2sigma, norm, c,
@@ -434,10 +435,11 @@ stringModel[tallyData_, OptionsPattern[]] :=
                     #[[1,1]]>OptionValue["lowerCutoff"]&]},
   ff = NonlinearModelFit[
       Map[Append[#[[1]], #[[2, 1]]]&, data],
-      norm*Sum[
+      c0*Sum[
           Exp[-area[i]*a2sigma*Sqrt[Max[0, 1 + casimir/(a2sigma*ll^2)]]],
-          {i, na}] + c,
-      {{norm, 1.0}, {a2sigma, 0.016}, {c, 0.}},
+          {i, na}] + If[OptionValue["constantTerm"], c1, 0],
+      {{c0, 1.0}, {a2sigma, 0.016},
+       If[OptionValue["constantTerm"], {c1, 0.}, Nothing]},
       Append[Table[area[i], {i, na}], ll],
       VarianceEstimatorFunction -> (1&),
       Weights -> Map[(1/#[[2, 2]]^2)&, data]];
@@ -461,9 +463,10 @@ wilsonLoop[dir1_, dir2_, coords_List, l1_, l2_, op_String] :=
           If[x != coords, Print["Wilson loop error"]; Abort[]];
           stringOperator[u, op]]
 wilsonLoopDistribution::usage = "Return distribution of loop values (complex) for a given size Wilson loop.  Just show values where the imaginary part is > 0.";
-wilsonLoopDistribution[l1_, l2_, op_String:"1"] :=
+wilsonLoopDistribution[l1_, l2_, op_String:"1", all_:False] :=
     (* Opposite loop orientations would give the complex conjugate *)
-    Block[{absIm = If[op == "phases", #, If[Im[#] > 0, #, Conjugate[#]]]&},
+    Block[{absIm = If[op == "phases" || all,
+                      #, If[Im[#] > 0, #, Conjugate[#]]]&},
     Flatten[ParallelTable[
         {absIm[wilsonLoop[dir1, dir2, latticeCoordinates[k], l1, l2, op]],
          If[l1 != l2,
@@ -480,17 +483,30 @@ setGlobalGauge::usage = "Perform global color rotation. u is a unitary matrix.";
 setGlobalGauge[u_] :=
     (gaugeField = Map[u.#.ConjugateTranspose[u]&, gaugeField, {2}]);
 
+setRandomGauge::usage = "Perform a random gauge transform.";
+setRandomGauge[] :=
+ Do[Block[
+   {coords = latticeCoordinates[i],
+    vt = randomSUMatrix[]},
+  Do[
+      setLink[dd, shift[dd, coords, -1],
+	      getLink[dd, shift[dd, coords, -1]].vt];
+      setLink[dd, coords, ConjugateTranspose[vt].getLink[dd, coords]],
+      {dd, nd}]],
+    {i, latticeVolume[]}];
+
 setAxialGauge::usage = "Set axial gauge for the current lattice configuration.
-That is, links along any Polyakov loop in direction dir are constant and diagonal.
-In the case \"center\" -> True,  set the gauge modulo the center of the group.
-For each Polyakov loop, one link will be assigned the total center
-rotation for that loop.  Option \"abelian\" -> True rotates the field so that it is diagonal.";
-Options[setAxialGauge] = Append[Options[getPhases], "abelian" -> True];
+That is, links along any Polyakov loop in direction dir are constant and
+diagonal.  In the case \"center\" -> True, set the gauge relative to the
+nearest element of the center of the group for each axial-direction link.
+Option \"abelian\" -> True rotates the field so that it is diagonal.";
+Options[setAxialGauge] = {"center" -> False, "abelian" -> True,
+                         "debug" -> False};
 setAxialGauge[dir_, opts:OptionsPattern[]] :=
  Do[Block[{coords = latticeCoordinates[i], debug = OptionValue["debug"],
        popts = Apply[Sequence, FilterRules[{opts}, Options[getPhases]]]},
    If[coords[[dir]] == 1,
-    Block[{v = IdentityMatrix[nc], vt, ct, phases},
+    Block[{v = IdentityMatrix[nc], vt, ct, phases, centerValues},
      (* Initial values *)
      If[False,
 	Do[Print[{j, getLink[dir, shift[dir, coords, j - 1]]}],
@@ -498,31 +514,42 @@ setAxialGauge[dir_, opts:OptionsPattern[]] :=
      Do[v = v.getLink[dir, shift[dir, coords, j - 1]],
 	{j, latticeDimensions[[dir]]}];
      If[debug, Print["Full product:", v]];
-     (* Since we want the diagonal part,
-       use getPhases instead of SUPower. *)
+     (* Undo "nearest center" that we will add later *)
+     If[OptionValue["center"],
+        centerValues = Table[
+            Last[SUNorm[getLink[dir, shift[dir, coords, j - 1]],
+                        "center"->True]],
+            {j, latticeDimensions[[dir]]}];
+        (* Modify the product to be equivalent to the product
+           of the links mod the nearest center element. *)
+        v *= Exp[-2 Pi I Total[centerValues]/nc]];
      If[OptionValue["abelian"],
-        phases = Sort[First[getPhases[v, False, popts]], Greater];
+        (* Since we want the diagonal part,
+          use getPhases instead of SUPower. *)
+        phases = Sort[First[getPhases[v, False]], Greater];
         v = DiagonalMatrix[Exp[I*phases/latticeDimensions[[dir]]]],
-        v = SUPower[v, 1/latticeDimensions[[dir]], popts]
-     ];
+        v = SUPower[v, 1/latticeDimensions[[dir]]]];
      If[debug, Print["Root:", v]];
      Do[
       (* Apply gauge choice to each site *)
       ct = shift[dir, coords, j - 1];
       vt = ConjugateTranspose[getLink[dir, shift[dir, ct, -1]]].v;
+      If[OptionValue["center"],
+         vt *= Exp[I 2 Pi centerValues[[j-1]]/nc]]; 
       Do[setLink[dd, shift[dd, ct, -1],
-	(* In order to decrease the floating point error,
-        just set the axial direction link to the correct value. *)
-        If[dd == dir, v, getLink[dd, shift[dd, ct, -1]].vt]];
+                 (* In order to decrease the floating point error,
+                   just set the axial direction link to the correct value. *)
+                 If[dd == dir && !OptionValue["center"],
+                    v, getLink[dd, shift[dd, ct, -1]].vt]];
 	 setLink[dd, ct, ConjugateTranspose[vt].getLink[dd, ct]],
-	   {dd, nd}], {j, 2, latticeDimensions[[dir]]}];
+	 {dd, nd}], {j, 2, latticeDimensions[[dir]]}];
      (* Verify that it all worked out *)
      If[debug,
 	Do[Print[{j, getLink[dir, shift[dir, coords, j - 1]]}],
 	   {j, latticeDimensions[[dir]]}];
       Print["Final link diff:",
 	    Chop[v - getLink[dir, shift[dir, coords, -1]]]]]]]],
-    {i, latticeVolume[]}];
+          {i, latticeVolume[]}];
 
 (*
   Using "center"->False then "center"->True works substantially better.
@@ -638,7 +665,7 @@ setLaundauAxialGauge[dir1_, OptionsPattern[]] :=
 
 nStrategies = 6;
 Options[applyGaugeTransforms] = {"abelian" -> False, "maxAbelianGauge"->False,
-                                 "loopFunction" -> Identity};
+                                 "loopFunction" -> (Null&)};
 applyGaugeTransforms[s_, OptionsPattern[]] :=
  (* New direction each time setAxialGauge[] is called. *)
  Block[{lastDir = nd, dir},

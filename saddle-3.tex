@@ -31,6 +31,8 @@
 \newcommand{\zentrum}{\mathcal{Z}}       % set of integers
 \newcommand{\plaquette}{\Box}
 \newcommand{\config}{\mathcal{U}}
+\newcommand{\orelax}{\xi}
+\newcommand{\heigen}{h}
 \DeclareMathOperator{\SU}{SU}
 \DeclareMathOperator{\Tr}{Tr}
 
@@ -69,18 +71,18 @@ calculations using Wilson's lattice have generated numerous
 physical results, the nature of the QCD vacuum itself
 has remained somewhat of a mystery.
 
-In 1982 't Hooft suggested that center vortices could
-explain confinement and subsequent numerical experiments
-using maximal abelian gauge have lent some evidence for this
-picture.  However, there has been little progress in taking
-this picture and creating a full description of the
-QCD vacuum state.  [Hugo Reinhardt's ugly paper is a
-  heroic attempt in this direction.]
+% In 1982 't Hooft suggested that center vortices could
+% explain confinement and subsequent numerical experiments
+% using maximal abelian gauge have lent some evidence for this
+% picture.  However, there has been little progress in taking
+% this picture and creating a full description of the
+% QCD vacuum state.  [Hugo Reinhardt's ugly paper is a
+% heroic attempt in this direction.]
 
 In 1979, Witten pointed out that QCD has some rather remarkable
 properties in the $N \to \infty$ limit.  In particular,
 expectation values of observables become dominated by a single
-configuration of the gauge field, the
+classical configuration of the gauge field, the
 ``master field''~\cite{witten_1/n_1980}.
 Although this idea was compelling, there seemed to be no
 way to figure out exactly what this Master Field could be.
@@ -90,15 +92,15 @@ To motivate our approach to studying the QCD vacuum, note the following:
 \begin{enumerate}
 
 \item Quarks are not important.  In the language of Lattice QCD,
-  one says that the quenched approximation (no dynamical
+ one says that the quenched approximation (no dynamical
  quarks) is a good approximation to the full theory.
 
 \item The $N\to\infty$ limit of QCD is a good approximation to the
-  physical case $N=3$.  This has been demonstrated in numerous
-  perturbative and non-perturbative calculations~\cite{lucini_sun_2013}.
-  In particular, Teper has shown this to be the case for
-  the glueball spectrum in both 2+1~\cite{teper_$mathrmsun$_1998,lucini_$mathrmsun$_2002}
-  and 3+1 dimensions~\cite{teper_large-n_2005}.
+ physical case $N=3$.  This has been demonstrated in numerous
+ perturbative and non-perturbative calculations~\cite{lucini_sun_2013}.
+ In particular, Teper and collborators have shown this to be the case for
+ the glueball spectrum in both 2+1~\cite{teper_$mathrmsun$_1998,lucini_$mathrmsun$_2002,athenodorou_sun_2017}
+ and 3+1 dimensions~\cite{teper_large-n_2005}.
 
 \item The behavior of $\SU(N)$ gauge theory in 3 space-time dimensions
   is remarkabley similar to the 4 dimensional theory~\cite{teper_$mathrmsun$_1998,lucini_$mathrmsun$_2002,teper_large-n_2005}.
@@ -129,7 +131,7 @@ I pursue the first step of this program in the following.
 We will start with conventional 2+1 dimension lattice gauge
 theory field configurations for various values of $N$ and
 calculate the nearest associated saddle-point configurations.
-These saddle-point field configurations should be
+These saddle-point field configurations should provide
 a good starting-point for understanding the 2+1 dimension
 vacuum in the $N\to\infty$ limit.
 
@@ -181,7 +183,7 @@ The Wilson action is invariant under $\SU(N)$ gauge transforms:
 %
 The lattice has a total of $n_G = V_L\left(N^2-1\right)$ gauge symmetries.
 
-\subsection{Norms}
+\section{Norms}
 
 It is useful to define a number of norms.  We define the norm
 for a link,
@@ -224,25 +226,25 @@ That is, $\left\lVert U_\mu(x) \right\rVert_\zentrum$ is the distance
 of $U_\mu(x)$ from the nearest element of $\zentrum$.
 Analogous to Eqn.~(\ref{latnorm2}), we can
 use $\left\lVert U_\mu(x) \right\rVert_\zentrum$ to define
-the associated lattice norm $\left\lVert \config \right\rVert_\zentrum$,
+the associated lattice norm $\left\lVert \config \right\rVert_\zentrum$.
 
 \section{Observables}
 
-A number of observables will be used to monitor the behavior of the
-gauge fields as we move toward the saddle-point and study the
-resulting field configurations.
+A number of observables and gauge choices will be used to
+monitor the behavior of the gauge fields when moving from
+the original Euclidean lattice configuration toward
+the saddle-point.
 
 \subsection{Loop Operators}
 
 As we move toward the saddle-point of a lattice configuration,
 we expect that the perturbative (quantum) fluctuations of
-the gauge field to change greatly.  The various strategies for
-improving lattice operators are designed precisely to ameliorate
-the effects of these fluctuations.
-It is not clear how they would (should) behave as these flucuations
+the gauge field to change greatly.  The standard strategies for
+improving lattice operators~\cite{teper_$mathrmsun$_1998,lucini_glueballs_2004}
+are designed precisely to ameliorate the effects of these fluctuations.
+It is not clear how they should behave as these flucuations
 are removed.  In the current work, we will stick to
 the bare (unimproved) operators.
-
 In particular, we will use Polyakov loop correlators to measure
 string tension and use Wilson loops and Wilson loop correlators to
 study properties of the fields.
@@ -250,7 +252,7 @@ study properties of the fields.
 Define a Polyakov loop that winds once around the lattice
 in the direction $\mu$ and goes through site $x$:
 \be
-         \phi_\mu(x)= \prod_{k=1}^L U_\mu(x+a \hat{\mu} k)
+         \phi_\mu(x)= \prod_{\rho=1}^L U_\mu(x+a \hat{\mu} \rho)
 \eq
 Define the correlator:
 \be
@@ -271,100 +273,109 @@ P_\mu(r) = c_0 \sum_{\mbox{images}}
       \exp\left(\sigma a^2 r L_\mu\sqrt{1-\frac{\pi}{3 a^2 \sigma L_\mu^2}}\right)
       + c_1 \; .  \label{stringmodel}
 \eq    
-Since the lattices we use are relatively small, we include contributions from fields wrapping around the lattice in the plane transverse to $\hat{\mu}$.  Thus we sum over the two closest images of the Polyakokv loop in each transverse
-direction.  The constant $c_1$ should, in principle, not be necessary
-but when measuring the string tension for a single lattice configuration,
-we find large constant fluctuations will otherwise interfere with the fit.
-
+Since the lattices we use are relatively small, we include contributions
+from fields wrapping around the lattice in the plane transverse to
+$\hat{\mu}$.  Thus we sum over the two closest images of the Polyakokv
+loop in each transverse direction.  The constant $c_1$ should,
+in principle, not be necessary but when measuring the string tension
+for a single lattice configuration, we find large constant
+fluctuations will otherwise interfere with the fit.
 When finding the string tension, we fit $\Phi_\mu(r)$ to
 Eqn.~(\ref{stringmodel}) for each $\mu$.
 
 \begin{figure}
-  \includegraphics{pcorr10.pdf}
-  \caption{Polyakov loop correlator vs. loop area together with
-    a fit to Eqn.~(\ref{stringmodel}) for $L\mu r>40$, summed over
-    $mu$.  The solid line
+  \includegraphics{polycorr16}
+  \caption{Polyakov loop correlator vs.\ loop area together with
+    a fit to Eqn.~(\ref{stringmodel}) for $L_\mu r>40$.  The solid line
     represents the case where the separation of $x$
     and $y$ is along a lattice axis and the dashed line
     represents the case where the separation is in
     a diagonal direction.  The data is from 100 lattice
-    configurations, generated with the Chroma library;
-    see Appendix~\ref{configurations}. \label{pcorr16}}
+    configurations. \label{pcorr16}}
 \end{figure}
 
 For precise measurement the string tension, the above process is
 not ideal since the correlator calculation re-uses the same link
-fields for various values of $r$ and the $\Phi_\mu(r)$ are not
+fields for various values of $r$ and $\mu$; the $\Phi_\mu(r)$ are not
 statstically independent.
-However, this does allows us to monitor the behavior of the correlator at
+However, this does allow us to monitor the behavior of the correlator at
 various distance scales.  An example for a $16^3$ lattice is shown
-in Fig.~\ref{pcorr16}.  The string tension $\sigma a^2 = 0.023 \pm 0.00$
-is somewhat larger then Teper's value for $\beta=28$,
-$\sigma a^2 = 0.016\pm 0.0001$ and is likely due the small lattice volume.
+in Fig.~\ref{pcorr16}.  The lattice configurations were generated with the
+Chroma library~\cite{edwards_chroma_2005};
+see Appendix~\ref{configurations} for details.
+The string tension $\sigma a^2 = 0.0266(34)$
+is somewhat larger then Lucini and Teper's continuum value for $\beta=28$,
+$\sigma a^2 = 0.016192(54)$ \cite{lucini_$mathrmsun$_2002,athenodorou_sun_2017}
+and is likely due to the small lattice volume.
 A similar calculation for a $L^3=20^3$ lattice yields
-$\sigma a^2 = 0.016\pm 0.0001$, consistant with Teper's value.
-{\bf add references and actual values}
+$\sigma a^2 = 0.0136(23)$, closer to Lucini and Teper's value.
+The fit has $\chi^2=8.2$ for 37 degrees of freedom, reflecting
+the fact that the correlators are not statistically independent.
 
-Similarly, we define a Wilson loop operator using the bare link
-fields:
+Similarly, we define a Wilson loop operator using a product of
+link fields lying on the perimeter a rectangle having the given
+dimensions:
 \be
        W_{m\times n} = \frac{1}{C_W} \sum_{\mu \ne \nu, x}
          \prod_{\mbox{$m\times n$ rectangle}}
-         U_\mu(x) \cdots U_\nu^\dagger (x)
+         U_\mu(x) U_\mu(x+a \hat{\mu}) \,\cdots\, U_\nu^\dagger (x)
 \eq
 with normalization $C_W$ chosen such that $W_{m\times n} = \mathbb{I}$
 for the bare vacuum.
 
-Generally for some loop operator $\mathcal{O}\in\SU(N)$ one generally
+Also, the quantity that is actually measured can be generalized.
+For some loop operator $\mathcal{O}\in\SU(N)$, one usually
 measures the expectation value of the trace,
 $\langle 0 | \frac{1}{N} \Tr \mathcal{O} |0\rangle$, or for $k$-strings,
-one might look expectation values of higher order operators
+one can measure expectation values of higher order operators
 like $\Tr\left( \mathcal{O}^k\right)$.
-
 However, this is not the most general gauge-invarient observable.
-The most general physical observable {\bf reference for fundamental modular domain} is the distribution of the
+The most general physical observable is the distribution of the
 eigenvalues of $\mathcal{O}$.  If $e^{i\lambda_1}$,\ldots, $e^{i\lambda_N}$
-are the eigevalues of $\mathcal{O}$, we can order $\lambda_i$ in
+are the eigevalues of $\mathcal{O}$, we can order $\lambda_j$ in
 some fashion $\lambda_1\ge \lambda_2 \ge \ldots$ and demand that
-$\lambda_i-\lambda_j\le \pi$ (see Appendix~\ref{roots}).
+$\lambda_j-\lambda_k\le 2\pi$ (see Appendix~\ref{roots}).
 In that case, physically
 distinct values lie on an ($N-1$)-simplex with the elements of the
 center of $\SU(N)$ on the vertices.
 
 \begin{figure}
-  \includegraphics{polydist1.pdf}
-  \includegraphics{polydistr.pdf}
-  \caption{Distribution for the Polyakov loop operator
-    $\phi_\mu(x)$ for $\SU(3)$, $\beta=28$, $L^3=16^2$,
+  \includegraphics{polydist1}
+  \includegraphics{polydistr}
+  \caption{Distribution for the Wilson loop operator
+    $W_{5\times 5}$ for $\SU(3)$, $\beta=28$, $L^3=16^2$,
     averaging over 100 lattice configurations.
     Also shown is the distribution for the high temperature
-    limit.  Since the distribution is symmetric under charge
-    conjugation, $\lamba_1 \leftrightarrow \lambda_2$, {\bf fix this!}
-    only half of the simplex is shown.
+    limit.  The distribution is
+    symmetric under charge conjugation,
+    % $2 \lambda_1 +\lambda_2 \to 2 \lambda_1 +\lambda_2 $,
+    $\lambda_2 \to -\lambda_2$.
    \label{polydist1}}
 \end{figure}
 \begin{figure}
-  \includegraphics{polydist2.pdf}
-  \caption{Distribution for $\Tr \phi_\mu(x)$ for
-    the data shown in Fig.~\ref{polydist1}.  Since
-    the distribution is symmetric under complex conjugation,
-    only the lower half of the real plane is shown.
+  \includegraphics{polydist2}
+  \caption{Distribution for $\Tr W_{5\times 5}/N$  for
+    the data shown in Fig.~\ref{polydist1}.  
+    The distribution is symmetric under complex conjugation,
+    $\mathcal{O}\to\mathcal{O}^\dagger$.
     The distribution lies inside the blue lines representing
     the edges of the 2-simplex in Fig.~\ref{polydist1}.
     \label{polydist2}}
 \end{figure}
 
 By way of example, we show the distribution of the
-Polyakov loop operator for $\SU(3)$ in Fig.~\ref{polydist1}.
+$5\times5$ Wilson loop operator for $\SU(3)$ in Fig.~\ref{polydist1}.
 For comparision, we also show the distribution for
 the high temperature limit (random $\SU(N)$ matrices).
 
+We can relate the distribution in $\lambda_j$-space to
+the trace $\Tr\mathcal{O}$.
 For $\SU(2)$, $\Tr \mathcal{O}$ is real and for $\SU(3)$, $\Tr \mathcal{O}$
-is complex.  In both cases, the map from the $\lambda_i$-space to
+is complex.  In both cases, the map from the $\lambda_j$-space to
 $\Tr \mathcal{O}$ is injective.  Thus, one can just as well look at the
 distribution of $\Tr \mathcal{O}$; see Fig.~\ref{polydist2}.
 However, for $N>3$, information is lost when taking the trace
-of $\mathcal{O}^m$.
+of $\mathcal{O}$.
 
 \subsection{Landau gauge}
 
@@ -372,133 +383,221 @@ The choice of Landau gauge $\partial_\mu A^\mu = 0$ is equivalent to
 minimizing $\Tr A_\mu A^\mu$ over all space.  The fact that
 $\partial_\mu A^\mu = 0$ has multiple solutions (the Gribov problem) is
 equivalent to the statement that $\Tr A_\mu A^\mu$, integrated over space,
-has multiple local minima.  We are interested here in Landau gauge mainly
+has multiple local minima.~\cite{maas_more_2009}.
+We are interested here in Landau gauge mainly
 because it allows us, if $\Tr A_\mu A^\mu$ is small enough, to connect the
 link fields to the continuum degrees of freedom.
 
 However, finding this minimum can be a bit tricky.
 We will start with local minimization.
 For some site $x$, we want to find a gauge transform $U_G$ on $x$
-that minimizes \left\lVert U_\mu(x) \right\rVert_2$ for the $2D$
+that minimizes $\left\lVert U_\mu(x) \right\rVert_2$ for the $2D$
 links connected to $x$.  Taylor expanding in the link fields,
-we find that, to lowest order in the fields,
+we find that, to lowest order in the fields, a gauge transform
+that minimizes this norm:
 %
 \be
           U_G(x) = e^{- B}
 \eq
 where
 \be
-   B = \frac{\zeta}{2 D} \sum_\mu \log\left(U_\mu(x)\right) -
+   B = \frac{\orelax}{2 D} \sum_\mu \log\left(U_\mu(x)\right) -
    \log(U_\mu\left(x-a \hat{\mu})\right)  \; . \label{landau}
 \eq
-One can calculate $U_G(x)$ and apply it at each site of the lattice
-in a checkerboard fashion, first for all the even sites and then for
-all the odd sites.  This constitutes one minimization step, a ``Landau
-step,''
-in a sucessive over relaxation (SOR) procedure.
-The relaxation factor $\zeta$ can be adjusted to speed numerical
+At each site of the lattice, one can calculate $U_G(x)$ and apply it,
+moving through the lattice sites in a checkerboard fashion,
+first all the even sites and then all the odd sites.
+This constitutes one minimization step, a ``Landau step,'' in a
+sucessive over-relaxation (SOR) procedure.
+The relaxation factor $\orelax$ can be adjusted to speed numerical
 convergence.
-In practice we find the fastest convergence for $\zeta \approx 1.7$; however,
-it can become unstable for slightly higher $\zeta$.
-We generally use $\zeta=1.5$ as a compromise between speed and stability.
+In practice, we find the fastest convergence for $\orelax \approx 1.7$; however,
+it can become unstable for slightly higher $\orelax$.
+We generally use $\orelax=1.5$ as a compromise between speed and stability.
 
-\subsection{Maximum center gauge}
+\subsection{Maximal center gauge}
+
+Although maximal center gauge~\cite{del_debbio_center_1997}
+has been an important topic in the
+literature~\cite{greensite_confinement_2003},
+we will not consider it separately from Landau gauge.
+This section explains why and introduces our best algorithm
+for finding Landau gauge.
 
 \begin{table}
-  \caption{Successive applications of ``center steps'' to
-    a lattice configuration, $L^3=16^3$, $N=3$, $\beta=28$.
+  \caption{Local search for maximal center gauge,
+    showing successive applications of ``center step'' to
+    an $\SU(3)$ lattice configuration ($L^3=16^3$, $N=3$, $\beta=28$).
+    The last three columns show the number of links closest
+    to each element of the center, $z^k \in \zentrum$.
+    \label{center1}}
+  \begin{tabular}{c|c|c|ccc}
+    iteration $i$ & operation & $\left\lVert \config_i \right\rVert_\zentrum$
+     & $z^0=\mathbb{I}$ & $z^1$ & $z^2$ \\
+    \hline
+    0 & original config & 2.377 & 4101 & 4121 & 4066\\
+    1 & center step     & 1.811 & 4090 & 4145 & 4053\\
+    2 & center step     & 1.625 & 4085 & 4147 & 4056\\
+    3 & center step     & 1.568 & 4085 & 4150 & 4053\\
+    \vdots & \vdots & \vdots & \multicolumn{3}{c}{\vdots}\\
+    11 & center step    & 1.503 & 4090 & 4144 & 4054\\
+    12 & center step    & 1.501 & 4090 & 4144 & 4054\\
+  \end{tabular}
+\end{table}
+
+\begin{table}
+  \caption{Successive applications of $\zentrum$-axial gauge
+    and ``center step'' to the lattice configuration
+    used in Table~\ref{center1}.
     The last three columns show the number of links closest
     to $z^k \in \zentrum$.
-    \label{center1}}
-  \begin{tabular}{cccccc}
-    iteration $k$ & operation & $\left\lVert \config_k \right\rVert_\zentrum$
+    \label{center2}}
+  \begin{tabular}{c|c|c|ccc}
+    iteration $i$ & operation & $\left\lVert \config_i \right\rVert_\zentrum$
      & $z^0=\mathbb{I}$ & $z^1$ & $z^2$ \\
-    \hline\\
-    0 & original config & 3.24 & 321 & 456 & 789\\
-    1 & center step     & 2.56 & 343 & 443 & 4345 \\
+    \hline
+    0 & original config              & 2.377  & 4101 & 4121 & 4066\\
+    1 & $\zentrum$-axial gauge $\mu=1$& 1.950  & 4140 & 4053 & 4095\\
+    2 & $\zentrum$-axial gauge $\mu=2$& 1.664  & 4189 & 4024 & 4075\\
+    3 & center step                  & 1.268  & 4191 & 4023 & 4074\\
+    4 & $\zentrum$-axial gauge $\mu=3$& 1.553  & 4116 & 4073 & 4099\\
+    5 & center step                  & 1.120  & 4121 & 4076 & 4091\\
+    6 & center step                  & 0.9565 & 4121 & 4080 & 4087\\
+    7 & center step                  & 0.9022 & 4115 & 4082 & 4091\\
+    \vdots & \vdots & \vdots & \multicolumn{3}{c}{\vdots}\\
+    19 & center step                 & 0.8636 & 4117 & 4082 & 4089\\
+    20 & center step                 & 0.8632 & 4117 & 4082 & 4089\\
   \end{tabular}
   \end{table}
 
 \begin{table}
   \caption{Successive applications of axial gauge
-    and ``center steps'' to
-    a lattice configuration, $L^3=16^3$, $N=3$, $\beta=28$.
+    and ``center step'' to the lattice configuration
+    used in Table~\ref{center1}.
     The last three columns show the number of links closest
     to $z^k \in \zentrum$.
-    \label{center2}}
-  \begin{tabular}{cccccc}
-    iteration $k$ & operation & $\left\lVert \config_k \right\rVert_\zentrum$
+    \label{center3}}
+  \begin{tabular}{c|c|c|ccc}
+    iteration $i$ & operation & $\left\lVert \config_i \right\rVert_\zentrum$
      & $z^0=\mathbb{I}$ & $z^1$ & $z^2$ \\
-    \hline\\
-    0 & original config & 3.24 & 321 & 456 & 789\\
-    1 & center step     & 2.56 & 343 & 443 & 4345 \\
+    \hline
+    0 & original config    & 2.377  & 4101 & 4121 & 4066\\
+    1 & axial gauge $\mu=1$& 1.945  & 6826 & 2805 & 2657\\
+    2 & axial gauge $\mu=2$& 1.626  & 9668 & 1450 & 1170\\
+    3 & center step        & 1.244  & 9674 & 1450 & 1164\\
+    4 & axial gauge $\mu=3$& 1.455  & 11369 & 386 & 533\\
+    5 & center step        & 1.035  & 11409 & 363 & 516\\
+    6 & center step        & 0.8543 & 11455 & 340 & 493\\
+    7 & center step        & 0.7887 & 11471 & 334 & 483\\
+    \vdots & \vdots & \vdots & \multicolumn{3}{c}{\vdots}\\
+    19 & center step       & 0.7219 & 11498 & 317 & 473\\
+    20 & center step       & 0.7214 & 11498 & 317 & 473\\
   \end{tabular}
   \end{table}
 
 \begin{table}
   \caption{Successive applications of axial gauge,
-    ``Landau steps,'' and ``center steps'' to
-    a lattice configuration, $L^3=16^3$, $N=3$, $\beta=28$.
+    ``Landau step,'' and ``center step'' to the lattice configuration
+    used in Table~\ref{center1}.
     The last three columns show the number of links closest
     to $z^k \in \zentrum$.
-    \label{center3}}
-  \begin{tabular}{cccccc}
-    iteration $k$ & operation & $\left\lVert \config_k \right\rVert_\zentrum$
+    \label{center4}}
+  \begin{tabular}{c|c|c|ccc}
+    iteration $i$ & operation & $\left\lVert \config_i \right\rVert_\zentrum$
      & $z^0=\mathbb{I}$ & $z^1$ & $z^2$ \\
-    \hline\\
-    0 & original config & 3.24 & 321 & 456 & 789\\
-    1 & center step     & 2.56 & 343 & 443 & 4345 \\
+    \hline
+    0 & original config    & 2.377  & 4101 & 4121 & 4066\\
+    1 & axial gauge $\mu=1$& 1.945  & 6826 & 2805 & 2657\\
+    2 & axial gauge $\mu=2$& 1.626  & 9668 & 1450 & 1170\\
+    3 & center step        & 1.244  & 9674 & 1450 & 1164\\
+    4 & axial gauge $\mu=3$& 1.455  & 11369 & 386 & 533\\
+    5 & Landau step        & 1.018  & 12271 &   8 &   9\\
+    6 & center step        & 0.7231 & 12268 &   9 &  11\\
+    7 & Landau step        & 0.6009 & 12287 &   0 &   1\\
+    8 & center step        & 0.5426 & 12286 &   1 &   1\\
+    9 & center step        & 0.5128 & 12286 &   1 &   1\\
+    10 & center step       & 0.4952 & 12286 &   1 &   1\\
+    11 & center step       & 0.4835 & 12286 &   1 &   1\\
+    12 & center step       & 0.4751 & 12287 &   1 &   0\\
   \end{tabular}
   \end{table}
 
-We can use a similar procedure to minimize the link fields
+We can use a procedure similar the one introduced
+in the previous section to minimize norm of the link fields
 relative to the center $\zentrum$ of the group.
-That is, we calculate the logarithms is Eqn.~(\ref{landau})
-using $\log\left( z^k U_\mu(x)\right)$, $z^k\in\zentrum$,
-where $z^k$ minimizes $\left\lVert z^k U_\mu(x) \right\rVert_2$.
-One can apply the associated gauge transform to each site of
-the lattice, as described above, a ``center step.''
-
+We can do this by computing the logarithms in Eqn.~(\ref{landau})
+using
+\be
+\log\left(U_\mu(x)\right) \to \log\left(z^k U_\mu(x)\right)
+\, , \;\mbox{
+  where $z^k\in\zentrum$ minimizes}\; \left\lVert z^k U_\mu(x) \right\rVert_2 \;.
+\eq
+One can then apply the associated gauge transform to each site of
+the lattice as described above, a ``center step.''
 If we apply some number of ``center steps'' to a lattice
 configuration, we find quick convergence to some local
 minimum of $\left\lVert \config \right\rVert_\zentrum$ with
 link fields distributed fairly evenly across $\zentrum$.
 See Table~\ref{center1} for an example.
 
-This procedure fails to remove field fluctuations associated
-with long length scale gauge transforms.  We can remove
+However, this procedure fails to remove long-range field fluctuations
+associated with the random choice of gauge.  We can remove
 such fluctuations by another gauge choice:  axial gauge
 $\partial_\mu A_\mu = 0$ (no sum on $\mu$).
 That is, we choose a gauge such that $U_\mu(x)$ is replaced
 by the $L_\mu^\mathrm{th}$ root of the associated Polyakov loop,
-$\phi_\mu(x)^{1/L_\mu}$.
-While not a complete gauge fixing, this gauge choice does
-remove long-scale fluctuations caused by the
-gauge choice itself.
-This leads us to a strategy where we apply axial gauge in several
-directions before applying any ``center steps.'' See Table~\ref{center2}.
-We see that there is a substantially lower lattice norm,
-relative to Table~\ref{center1},
-with somewhat more links near the identity element.
+$U_\mu(x) \to \phi_\mu(x)^{1/L_\mu}$ (the root is defined in
+Appendix~\ref{roots}).
+% While not a complete gauge fixing, this gauge choice does
+% remove most long-scale fluctuations caused by the
+% gauge choice itself.
+This gauge choice minimizes $\left\lVert U_\mu(x) \right\rVert_2$
+on the link fields in $\phi_\mu(x)$.  One might
+object that this is not appropriate for maximal center gauge
+since it preferetially minimizes the link fields
+with respect to $\mathbb{I}$ and not some other element of $\zentrum$.
+This leads us to a variation which we will call ``$\zentrum$-axial gauge''
+where we minimize $\left\lVert U_\mu(x) \right\rVert_\zentrum$
+on the link fields in $\phi_\mu(x)$.  In Table~\ref{center2},
+we apply this gauge transform in each direction before applying
+some number of local minimizations.  One can see that this
+results in a substantially improved lattice norm relative to
+Table~\ref{center1}.  We also see that the link fields
+remain relatively evenly distributed over the elements of $\zentrum$.
+
+But is $\zentrum$-axial gauge actually an improvement over
+conventional axial gauge?
+In Table~\ref{center3}, we apply axial gauge in each
+direction before applying some number of ``center steps.''
+We see that this produces a lattice norm that is, in fact,
+substantially lower than before.  We also can see, since
+axial gauge preferentially minimizes $U_\mu(x)$ with
+respect to $\mathbb{I}$, substantially more links near
+the identity element.
 
 Can we do better? Let us include some number of ``Landau steps''
-in the procedure; see Table~\ref{center3}.  (This strategy was
-the end result of a an extensive monte carlo study that
+in the procedure; see Table~\ref{center4}.  (The strategy illustrated
+here was the end result of a an extensive monte carlo study that
 included a number of other gauge fixing strategies, as well.)
 We see a substantially reduced lattice norm, relative to
-Table~\ref{center2}.  We also see that all the links are closest
-to identity element.
-In conclusion, we find that, for $D=3$ and $\SU(3)$,
-maximum center gauge is, in fact, identical to Landau gauge.
+Table~\ref{center3}.  We also see that virtually all the
+links are closest to identity element.  Thus, this gauge
+choice also minimizes $\left\lVert \config_k \right\rVert_2$,
+which corresponds to Landau gauge.
+We won't give details here, but similar calculations for
+$\SU(2)$ and $\SU(4)$ produce comparable results.
+In conclusion, we find evidence that, for $D=3$,
+``absolute'' maximal center gauge is identical to ``absolute''
+Landau gauge (using the language of Ref.~\cite{maas_more_2009});
+Table~\ref{center4} gives
+an effective strategy for finding the associated minimum.
 
-This result casts doubt on the various studies involving maximal
-center gauge and center projections.  Presumably,
-in these studies, relatively large local minima of
+This analysis casts doubt on the various lattice studies involving
+maximal center gauge and center projections~\cite{
+del_debbio_center_1997,del_debbio_detection_1998,de_forcrand_relevance_1999}.
+Presumably, in these studies, relatively large local minima of
 $\left\lVert \config_k \right\rVert_\zentrum$ were being investigated
 rather than configurations near the global minimum.
-If the researchers had been more careful with their minimization
-procedure, they would have found that ``center projections'' actually
-produce the bare vacuum configuration.
 
 
 \section{Shifts of the gauge fields}
@@ -510,7 +609,7 @@ produce the bare vacuum configuration.
     \hspace{0.25in} e^{i w_{a}(\mu, x) T_a}
     \hspace{0.25in} \sqrt{U_\mu(x)} \hspace{0.3in} x+a\hat{\mu} \\[-0.3in]
     %
-    %  Graphic generated in Matheatica file ``gauge.nb''
+    %  Graphic generated in Mathematica file ``gauge.nb''
     %
   \includegraphics{link}
   \end{array}
@@ -562,18 +661,18 @@ equivalent to infinitesimal gauge transforms.  Consider a gauge transform
 at site $x$; its action on link $U_\mu(x)$ is:
 \be
 U_\mu(x) \to e^{i C_a(x) T_a} U_\mu(x) = U_\mu(x) + i C_a(x) T_a U_\mu(x) +
-       \mathrm{O}\!\left(C_a^2(x)\right)
+       \mathrm{O}\!\left(C_a^2\right)
 \eq
 But this is equal to some infinitesimal shift $w_a(\mu, x)$ on
 the same link $U_\mu(x)$:
 \be
-U_\mu(x) \to U_\mu(x) + i w_a \sqrt{U_\mu(x)}T_a \sqrt{U_\mu(x)} +
+U_\mu(x) \to U_\mu(x) + i w_a(\mu,x) \sqrt{U_\mu(x)}T_a \sqrt{U_\mu(x)} +
        \mathrm{O}\!\left(w_a^2\right)
 \eq
 %
 Equating the two and taking the trace:
 \be
-w_a = 2 C_b(x) \Tr\left(\sqrt{U_\mu(x)} T_a
+w_a(\mu,x) = 2 C_b(x) \Tr\left(\sqrt{U_\mu(x)} T_a
                      \sqrt{U_\mu^\da(x)} T_b\right) \; . \label{gs}
 \eq
 Using Eqn.~(\ref{gs}), one can construct an $n_G \times n_L$ matrix
@@ -585,6 +684,7 @@ However, since the Hessian represents the quadratic term, $G H G^T \neq 0$.
 Since we are using the Hessian, we are approximating
 the action $S$ as being quadratic in $\mathbf{w}$.  If $\mathbf{w}$
 is too large, the quadratic approximation is no longer valid.
+Thus, we need to monitor the size of the shifts.
 Using Eqn.~(\ref{sunorm}), we will define two norms for the shifts:
 a lattice-wide $\infty$-norm, taking the ordinary norm at each link
 \be
@@ -598,9 +698,8 @@ as well as an ordinary Euclidean norm, averaged over links
       \sqrt{\frac{1}{V_L D} \sum_{x, \mu}
         \left\lVert e^{i w_{a}(\mu, x) T_a} \right\rVert_2^2}
      = \sqrt{\frac{1}{2 V_L D} \sum_{x, \mu, a} w_a^2(\mu, x)}
-        \; .
+        \; .  \label{shiftsize}
 \eq
-
 
 \section{Calculating the saddle point}
 \label{saddle}
@@ -658,29 +757,29 @@ still insufficient to yield a well-behaved linear system.
 \end{figure}
 
 To better understand this issue, let us find the eigenvalues
-$\left(\lambda_1, \lambda_2, \ldots\right)$ and
-eigenvectors $\mathcal{O}=\left(\mathbf{v}_1, \mathbf{v_2}, \ldots\right)$
+$\left(\heigen_1, \heigen_2, \ldots\right)$ and
+eigenvectors $V=\left(\mathbf{v}_1, \mathbf{v}_2, \ldots\right)$
 of $H^\prime$ and express Eqn.~(\ref{linear2}) in the eigenspace of $H^\prime$:
 \be
 \begin{pmatrix}
-    \lambda_1 & & \\
-    & \lambda_2 & \\
+    \heigen_1 & & \\
+    & \heigen_2 & \\
     & & \ddots  \end{pmatrix} \overline{\mathbf{y}} =
   \overline{\mathbf{q}} \label{linear3}
 \eq
-where $\overline{\mathbf{y}} = \mathcal{O} \mathbf{y}^\prime$ and
-$\overline{\mathbf{q}}  = \mathcal{O} \mathbf{q}^\prime$.
+where $\overline{\mathbf{y}} = V \mathbf{y}^\prime$ and
+$\overline{\mathbf{q}}  = V \mathbf{q}^\prime$.
 The solution is simply
 \be
-    \overline{y}_i = \frac{\overline{q}_i}{\lambda_i} \; .
+    \overline{y}_i = \frac{\overline{q}_i}{\heigen_i} \; .
 \eq
-In any case where $\left|\lambda_i\right|\ll
+In any case where $\left|\heigen_i\right|\ll
 \left|\overline{q}_i\right|$,
 there will be a large shift that will dominate the solution
 to the linear system.
 Thus, we impose a cutoff $\Lambda_2$:
 \be
-    \frac{\sqrt{2} \left|\overline{q}_i\right|\left\lVert P_G^T \mathbf{v}_i\right\rVert_2}{\left|\lambda_i\right|}
+    \frac{\sqrt{2} \left|\overline{q}_i\right|\left\lVert P_G^T \mathbf{v}_i\right\rVert_2}{\left|\heigen_i\right|}
      < \Lambda_2 \label{lambda2}
 \eq
 %
@@ -691,12 +790,12 @@ we also impose a maximum value cutoff
 \be
     \frac{\sqrt{2} \left|\overline{q}_i\right|
       \left\lVert P_G^T \mathbf{v}_i\right\rVert_\mathrm{max}}
-    {\left|\lambda_i\right|}
+    {\left|\heigen_i\right|}
     < \Lambda_\mathrm{max} \; .
 \eq
 Thus,
 \be
-      \mathbf{y} = P_G^T \left. \mathcal{O}^T
+      \mathbf{y} = P_G^T \left. V^T
                     \overline{\mathbf{y}}\right|_{\Lambda_2,\Lambda_\mathrm{max}} \; .
 \eq
 
@@ -705,7 +804,7 @@ we do not want to shift the fields by too much before recalculating
 the matrix $G$.  In addition, we want to ensure the shift is small
 enough on each link to be consistant with the quadratic expansion.
 Thus, it is useful to add a damping factor $\gamma$ and
-further rescale by $\Lambda_s$, when the shift would
+further rescale by $\Lambda_s$ when the shift would
 otherwise be large:
 \be
   \mathbf{w} = - \gamma \mathbf{y} \min\left(1, \frac{\Lambda_s}{
@@ -744,9 +843,19 @@ configurations.  Details of the numerical calculation
 are discussed in Appendices~\ref{krylov} and \ref{configurations}.
 
 By applying the procedure discussed in Section~\ref{saddle} iteratively,
-we produce a trajectory of lattice configurations $\config_0, \config_1, \ldots$
-in configuration space.  In Fig.~\ref{trajectory3}, we show some trajectories
-in terms of the string tension $\sigma a^2$ and $\plaquette_\mathrm{avg}$.
+we produce a trajectory of lattice configurations $\config_0$,
+$\config_1$, \ldots in configuration space.  For lattice configuration $\config_i$, we define
+$\Delta_i$ to be the total distance traveled through configuration
+space
+\be
+\Delta_i = \sum_{\rho=1}^i \left\lVert \mathbf{w}_\rho\right\rVert_2
+\eq
+where $\mathbf{w}_\rho$ is the shift used to generate $\config_\rho$
+from $\config_{\rho-1}$ and the norm is from Eqn.~(\ref{shiftsize}).
+This distance metric should not be taken too seriously since it
+is not gauge invariant.
+In Fig.~\ref{trajectory3}, we show some trajectories
+in terms of the string tension $\Delta$ and $\sigma a^2$.
 
 Lucini and Teper report a string tension $\sigma a^2=0.016282(76)$
 for $N=3$, and $\beta=28$ (Ref.~\cite{lucini_$mathrmsun$_2002}, Table~5).
@@ -920,17 +1029,17 @@ U = V^\da \begin{pmatrix}
 where $V$ is a unitary matrix and $-\pi < \lambda_i < \pi$.
 In the special case $U \in \SU(N)$, the $\det(U)=1$ condition implies that
 \be
-\sum_i \lambda_i = 2 \pi m\;, \quad m\in\integer \;.
+\sum_j \lambda_j = 2 \pi m\;, \quad m\in\integer \;.
 \eq
 When taking matrix roots, cases where $m\neq 0$ present a
-difficulty.  However, one can always shift $\lambda_i$ by
+difficulty.  However, one can always shift $\lambda_j$ by
 multiples of $2\pi$:
 \be
-\lambda_i \to \lambda_i^\prime = \lambda_i + 2 \pi n_i\;,\quad
-n_i\in\integer \; ,
+\lambda_j \to \lambda_j^\prime = \lambda_j + 2 \pi n_j\;,\quad
+n_j\in\integer \; ,
 \eq
-such that $\sum_i \lambda_i^\prime = 0$ and
-$\lambda_i^\prime - \lambda_j^\prime \le 2 \pi$.
+such that $\sum_j \lambda_j^\prime = 0$ and
+$\lambda_j^\prime - \lambda_k^\prime \le 2 \pi$.
 %
 \begin{figure}
 \includegraphics{hex3}
@@ -939,7 +1048,7 @@ $\lambda_i^\prime - \lambda_j^\prime \le 2 \pi$.
 \end{figure}
 %
 The $\SU(3)$ case is shown in Fig.~\ref{hexagon}.
-Using $\lambda_i^\prime$, we define $U^t$ as:
+Using $\lambda_j^\prime$, we define $U^t$ as:
 \be
 U^t = V^\da \begin{pmatrix}
     \mathrm{e}^{i\lambda_1^\prime t} & & &\\
@@ -956,6 +1065,11 @@ Similarly, we define the logarithm of $U$ as:
     & & \ddots & \\
     & & & \lambda_N^\prime\end{pmatrix} V \; .
 \eq
+Thus, the norm defined in Eqn.~(\ref{sunorm}) is simply
+\be
+\left\lVert U \right\rVert_2 = \sqrt{\sum_j {\lambda_j^\prime}^2} \; .
+\eq
+
 
 \section{Solving a constrained linear system}
 \label{krylov}
@@ -1022,9 +1136,10 @@ to the Chroma routine that calculates matrix determinants.  We then
 verified that Chroma-generated values of $\plaquette_\mathrm{avg}$ agree with
 Teper's results~\cite{lucini_$mathrmsun$_2002} for $N=3,4$.
 
-We used ... {\bf details of Monte Carlo: thermalizing steps,
-  over-relaxation, et cetera.
-  Details of Polyakov loop calculations.}
+The lattice configurations were sampled after 10,000 thermalizing
+steps, with 3000 steps between samples for results that use
+multiple lattice configurations.  We used 4 over-relaxations steps
+for every heat bath step.
 
 \bibliography{physics}  % Use physics.bib
 
