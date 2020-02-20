@@ -348,8 +348,7 @@ polyakovCorrelators[dir_, op_] :=
           (for the leading correction). *)
         dx = Abs[Mod[x1 - x2 + face/2, face] - face/2];
         ntL = Append[
-            Take[Sort[Map[Norm[#-dx]&, vertices], Less], nearest]*
-            latticeDimensions[[dir]],
+            Take[Sort[Map[Norm[#-dx]&, vertices], Less], nearest],
             latticeDimensions[[dir]]];
         lt = Lookup[tallies, Key[ntL], {0, 0, 0}];
         (* Imaginary part cancels out when averaging over face *)
@@ -386,8 +385,7 @@ polyakovCorrelators[dir0_, dir1_, width1_, x_, op_] :=
             lattice wrappings plus the length of the loop
             (for the leading correction). *)
          ntL = Append[
-             Take[Sort[Map[Norm[#-dx]&, vertices], Less], nearest]*
-             latticeDimensions[[dir0]],
+             Take[Sort[Map[Norm[#-dx]&, vertices], Less], nearest],
              latticeDimensions[[dir0]]];
          lt = Lookup[tallies, Key[ntL], {0, 0, 0}];
          (* The imaginary part cancels out when averaging over the face. *)
@@ -417,30 +415,56 @@ rescaleCorrelators[tallies_] :=
         (#->tallies[#]/aFirstCase[tallies, {0, __, Last[#]}])&,
         Keys[tallies]]];
 
+(* See file "coulomb.nb" *)
+selfEnergyCoulomb[w_, eps_:1] := w*(Log[w/eps] - 1);
+twoSidesCoulomb[wa_, wb_] :=
+    Block[{eta = Sqrt[wa^2 + wb^2]}, 
+          2 wa - 2*eta + 2*wb*Log[(eta + wb)/wa]];
+wilsonCoulomb[w1_, w2_, eps_:1]:=
+    2*selfEnergyCoulomb[w1, eps] + 2*selfEnergyCoulomb[w2, eps] -
+    twoSidesCoulomb[w1, w2] - twoSidesCoulomb[w2, w1];
+wilsonCoulomb[w1_, w2_, l1_, l2_, eps_:1]:=
+    wilsonCoulomb[w1, w2, eps] -
+    twoSidesCoulomb[l1 - w1, w2] - twoSidesCoulomb[l2 - w2, w1];
+
 modelChi2::usage = "Calculate chi^2 statistic from errors and differences.";
 modelChi2[model_, errors_] :=
     Total[(model["FitResiduals"]/errors)^2];
 
 stringModel::usage = "Fit to an exponential plus a constant term, including the universal string correction.  See Andreas Athenodorou, Michael Teper, https://arxiv.org/abs/1609.03873; arXiv:1302.6257v2 [hep-th] 12 Mar 2013; http://arxiv.org/abs/0912.3339";
 Options[stringModel] = {printResult -> False, "lowerCutoff"->0,
-                        "state" -> 0, "constantTerm" -> True};
+                        "state" -> 0, "constantTerm" -> False};
+Clear[c0, c1, cCoulomb, eEpsilon];
 Format[c0]:=Subscript["c", 0];
 Format[c1]:=Subscript["c", 1];
+Format[cCoulomb]:=Subscript["c", "q"];
+Format[cEpsilon]:=Subscript["c", "p"];
 stringModel[tallyData_, OptionsPattern[]] :=
  Block[(* Protect against any global definitions of model parameters. *)
-     {ff, a2sigma, norm, c,
+     {ff, r, ll,
+      nll = Length[Union[Map[Last, Keys[tallyData]]]],
       na = Length[First[Keys[tallyData]]] - 1,
       casimir = 8 Pi (OptionValue["state"] - (nd-2)/24),
       data = Select[Normal[tallyData],
-                    #[[1,1]]>OptionValue["lowerCutoff"]&]},
+                    #[[1,1]]*#[[1,2]]>OptionValue["lowerCutoff"]&]},
   ff = NonlinearModelFit[
       Map[Append[#[[1]], #[[2, 1]]]&, data],
+      (* The constrained version of NonLinearModelFit[] uses a
+        different algorithm and does not converge as well.  Instead,
+        add boundary terms to the fit function.
+
+       Tried Exp[-const*r[i]] factor in Coulomb term for 12x18x18,
+       but preferred sign was const<0. *)
       c0*Sum[
-          Exp[-area[i]*a2sigma*Sqrt[Max[0, 1 + casimir/(a2sigma*ll^2)]]],
+          Exp[-r[i]*ll*a2sigma*Sqrt[Max[0, 1 + casimir/(a2sigma*ll^2)] +
+                                    10^-10] +
+              If[nll>1, cEpsilon*ll, 0] - 2*cCoulomb*ll*Log[r[i]]] +
+          r[i]*If[cCoulomb<0, 100*cCoulomb, 0],
           {i, na}] + If[OptionValue["constantTerm"], c1, 0],
-      {{c0, 1.0}, {a2sigma, 0.016},
+      {{c0, 1.0}, {a2sigma, 0.016}, {cCoulomb, 0.02},
+       If[nll>1, {cEpsilon, 0.}, Nothing],
        If[OptionValue["constantTerm"], {c1, 0.}, Nothing]},
-      Append[Table[area[i], {i, na}], ll],
+      Append[Table[r[i], {i, na}], ll],
       VarianceEstimatorFunction -> (1&),
       Weights -> Map[(1/#[[2, 2]]^2)&, data]];
   If[OptionValue[printResult],
@@ -462,22 +486,27 @@ wilsonLoop[dir1_, dir2_, coords_List, l1_, l2_, op_String] :=
              u = u.ConjugateTranspose[getLink[dir2, x]], {l2}];
           If[x != coords, Print["Wilson loop error"]; Abort[]];
           stringOperator[u, op]]
-wilsonLoopDistribution::usage = "Return distribution of loop values (complex) for a given size Wilson loop.  Just show values where the imaginary part is > 0.";
+wilsonLoopDistribution::usage = "Return the distribution of loop values (complex) for a given size Wilson loop.  Default is to show values where the imaginary part is > 0.  The result is indexed by the lattice dimensions of the plane enclosing the loop.";
 wilsonLoopDistribution[l1_, l2_, op_String:"1", all_:False] :=
-    (* Opposite loop orientations would give the complex conjugate *)
-    Block[{absIm = If[op == "phases" || all,
-                      #, If[Im[#] > 0, #, Conjugate[#]]]&},
-    Flatten[ParallelTable[
-        {absIm[wilsonLoop[dir1, dir2, latticeCoordinates[k], l1, l2, op]],
-         If[l1 != l2,
-            absIm[wilsonLoop[dir1, dir2, latticeCoordinates[k], l2, l1, op]],
-            Nothing]},
-	{k, latticeVolume[]}, {dir1, 2, nd},
-	{dir2, dir1 - 1}], 3]];
+ (* Opposite loop orientations would give the complex conjugate *)
+ Block[{absIm = If[op == "phases" || all,
+                   #, If[Im[#] > 0, #, Conjugate[#]]]&},
+  Merge[Flatten[Table[
+      If[l1<=latticeDimensions[[dir1]] && l2<=latticeDimensions[[dir2]] &&
+         If[l1 == l2, dir1 > dir2, dir1 != dir2],
+         Association[{{latticeDimensions[[dir1]], latticeDimensions[[dir2]]} ->
+           ParallelTable[
+               absIm[wilsonLoop[dir1, dir2, latticeCoordinates[k],
+                                l1, l2, op]],
+	       {k, latticeVolume[]}]}],
+         Nothing],
+      {dir1, nd}, {dir2, nd}]], Flatten[#, 2]&]];
 averageWilsonLoop::usage = "Return average value for a given size Wilson loop.";
 averageWilsonLoop[args__] :=
-    Block[{dist=Re[wilsonLoopDistribution[args]]},
-          valueError[Mean[dist], StandardDeviation[dist]/Sqrt[Length[dist]]]];
+ Map[
+     Block[{dist=Re[#]},
+   valueError[Mean[dist], StandardDeviation[dist]/Sqrt[Length[dist]]]]&,
+       wilsonLoopDistribution[args]];
 
 setGlobalGauge::usage = "Perform global color rotation. u is a unitary matrix.";
 setGlobalGauge[u_] :=

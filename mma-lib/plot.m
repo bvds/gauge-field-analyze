@@ -77,11 +77,11 @@ plotStringModelFit[tallyData_, opts:OptionsPattern[]] :=
       Apply[Sequence, FilterRules[{opts}, Options[stringModel]]],
                      printResult -> True];
     nearest = Length[nn[[1,1]]] - 1;
-    maxx = Max[Map[#[[1, 1]]&, nn]] + Min[latticeDimensions]/2;
+    maxx = Max[Map[(#[[1, 1]]*#[[1,-1]])&, nn]] + Min[latticeDimensions]/2;
     maxy = Max[Map[#[[2, 1]] + 1.5 #[[2, 2]] &, nn]]; 
     miny = Min[0, Min[Map[#[[2, 1]] - 1.5 #[[2, 2]] &, nn]]]; 
     Show[ErrorListPlot[
-     Map[{{N[#[[1, 1]]], #[[2, 1]]}, ErrorBar[#[[2, 2]]]} &, nn],
+        Map[{{N[#[[1, 1]]]*#[[1,-1]], #[[2, 1]]}, ErrorBar[#[[2, 2]]]} &, nn],
      Apply[Sequence, FilterRules[{opts}, Options[ErrorListPlot]]],
      PlotRange -> {{0, maxx}, {miny, maxy}}, 
      Epilog -> {Text[
@@ -100,7 +100,7 @@ plotStringModelFit[tallyData_, opts:OptionsPattern[]] :=
                 If[lowerCutoff > 0,
                    {Gray, 
                     Text["cutoff", {lowerCutoff, 0}, {-1.5, -1}, {0, 1}],
-                    Line[{{lowerCutoff, miny}, {lowerCutoff, maxy/2}}]},
+                    Line[{{lowerCutoff, miny}, {lowerCutoff, maxy 2/3}}]},
                    Nothing]},
      Axes -> False, Frame -> True, 
      FrameLabel -> {"area enclosed (plaquettes)", 
@@ -111,14 +111,13 @@ plotStringModelFit[tallyData_, opts:OptionsPattern[]] :=
        vertices = makeVertices[face];
        {ParametricPlot[
          Block[{xx = x Last[vertices]/Norm[Last[vertices]]},
-                 {latticeDimensions[[dir0]]*x,
+          {latticeDimensions[[dir0]]*x,
            Apply[ff,
                  Append[
-                     Take[Sort[Map[Norm[#-xx]&, vertices], Less], nearest]*
-                     latticeDimensions[[dir0]],
+                     Take[Sort[Map[Norm[#-xx]&, vertices], Less], nearest],
                      latticeDimensions[[dir0]]]]}],
          {x, Sqrt[nd-1]-1/2, Norm[Last[vertices]]/2+1/2},
-         PlotRange -> All, PlotStyle->{Orange, Dashing[0.02]}],
+         PlotStyle->{Orange, Dashing[0.02]}],
         Table[If[
             dir1 != dir0,
             ParametricPlot[
@@ -126,8 +125,7 @@ plotStringModelFit[tallyData_, opts:OptionsPattern[]] :=
                {latticeDimensions[[dir0]]*x,
               Apply[ff,
                     Append[
-                        Take[Sort[Map[Norm[#-xx]&, vertices], Less], nearest]*
-                        latticeDimensions[[dir0]],
+                        Take[Sort[Map[Norm[#-xx]&, vertices], Less], nearest],
                         latticeDimensions[[dir0]]]]}],
              {x, 1/2, latticeDimensions[[dir1]]/2+1/2},
              PlotRange -> All],

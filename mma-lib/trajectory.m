@@ -1,44 +1,3 @@
-Options[makeStringModelTrajectory] = {
-    "step" -> "../data/3-3/step-16-28-5", 
-    "periodic" -> "../data/3-3/periodic-16-28-5", "lowerCutoff" -> 40}; 
-makeStringModelTrajectory[label_, n_, OptionsPattern[]] := 
- Block[{gaugeField, tallyData, ff, gaugeField0, distance = 0, 
-   lastGaugeField}, Get[OptionValue["periodic"] <> ".m"]; 
-  lastGaugeField = gaugeField;
-  stringModelTrajectory[label] = 
-   Table[Print["Starting ", i]; 
-    If[i > 0, 
-     Get[OptionValue["step"] <> "-" <> label <> "-" <> ToString[i] <> 
-       ".m"]; gaugeField = gaugeField0;
-     distance += latticeDistance[gaugeField, lastGaugeField]; 
-     lastGaugeField = gaugeField]; 
-    tallyData = talliesToAverageErrors[polyakovLoopTallies["simple"]];
-     ff = stringModel[tallyData, 
-      "lowerCutoff" -> OptionValue["lowerCutoff"]]; 
-    Join[{i, distance}, 
-     MapThread[
-      valueError[#1[[2]], #2] &, {ff["BestFitParameters"], 
-                                  ff["ParameterErrors"]}]], {i, 0, n}]];
-
-Options[makeWilsonTrajectory] = {
-    "step" -> "../data/3-3/step-16-28-5",
-    "periodic" -> "../data/3-3/periodic-16-28-5"}; 
-makeWilsonTrajectory[label_, n_, OptionsPattern[]] := 
- Block[{gaugeField, gaugeField0, distance, lastGaugeField}, 
-  Get[OptionValue["periodic"] <> ".m"];
-  Print["String tension ", 
-   stringTension = teperTension[3, 3, 1, beta, averagePlaquette[]]^2];
-   wilsonTrajectory[label] = 
-   Table[Print["Starting ", i]; 
-    If[i > 0, 
-     Get[OptionValue["step"] <> "-" <> label <> "-" <> ToString[i] <> 
-       ".m"]; gaugeField = gaugeField0;
-     distance += latticeDistance[gaugeField, lastGaugeField]; 
-     lastGaugeField = gaugeField]; {i, distance, 
-     averageWilsonLoop[1, 1], averageWilsonLoop[2, 2], 
-     averageWilsonLoop[4, 4], averageWilsonLoop[6, 6], 
-     averageWilsonLoop[8, 8]}, {i, 0, n}]];
-
 (*
   Do one link at a time.
 
@@ -70,62 +29,99 @@ linkSaddlePointStep[u2Staples_, u1_, OptionsPattern[]] :=
      Print["gradient:  ", Im[grad]]]; 
   If[OptionValue[printShift],
      Print["shifts:  ", deltas.oo]];
-  {u1.MatrixExp[I deltas.oo.SUGenerators[]], Max[Abs[deltas]]}]; 
+  u1.MatrixExp[I deltas.oo.SUGenerators[]]]; 
 
-linkSaddlePoint::usage = "Saddle point search applied to a single link.";
+linkSaddlePoint::usage = "Saddle point search applied to a single link.  Returns new link value and norm of the change.";
 Options[linkSaddlePoint] = 
   Join[{Tolerance -> 10^-6, maxCount -> 1, printHessian -> False, 
         printDetails -> True},
        Options[linkSaddlePointStep]];
-linkSaddlePoint[dir_, coords_, opts : OptionsPattern[]] := 
- Block[{maxShift = 4 Pi, u1 = SUPower[getLink[dir, coords], 0.5], u2, 
+linkSaddlePoint[dir_, coords_, opts:OptionsPattern[]] := 
+ Block[{maxShift = 4 Pi, u0 = getLink[dir, coords], u1, u2,
+        linkShiftNorm,
+        sopts = Apply[Sequence, FilterRules[
+            {opts}, Options[linkSaddlePointStep]]],
         u2SumStaples, count = 0, uu,
         debug = printLevel[OptionValue[printDetails], 1]},
-  u2 = u1;
+  u2 = u1 = SUPower[u0, 0.5];
   u2SumStaples = u2.sumStaples[dir, coords];
   While[maxShift > OptionValue[Tolerance] && 
 	count < OptionValue[maxCount],
 	count++;
-	{u1, maxShift} = linkSaddlePointStep[
-	    u2SumStaples, u1, Apply[Sequence, 
-	     FilterRules[{opts}, Options[linkSaddlePointStep]]]]; 
-	If[debug > 2, Print["Max shift:  ", maxShift]]]; 
+	u1 = linkSaddlePointStep[u2SumStaples, u1, sopts]];
   uu = u1.u2;
   If[debug > 0, SUMatrixQ[uu, Tolerance -> 10^-7]];
-  {uu, maxShift}];
+  {uu, First[SUNorm[uu.ConjugateTranspose[u0]]]}];
+
 makeCoordList[] := Block[
     {result = Array[Null&, latticeVolume[]]},
     Do[Block[{coord = latticeCoordinates[k]},
              result[[linearSiteIndex[coord]]] = coord],
        {k, latticeVolume[]}]; result];
-makeSingleLinkSaddlepointTrajectory::usage = "Apply one-link saddle point step to all links, returning associated statistics.  This starts with some given gaugeField and updates it.";
-Options[makeSingleLinkSaddlepointTrajectory] = Join[
-    {maxAvgPlaquette -> 1, "periodic" -> "../data/3-3/periodic-16-28-5"},
-    Options[linkSaddlePoint]];
-makeSingleLinkSaddlepointTrajectory[n_, opts:OptionsPattern[]] :=
- Block[{tallyData, avgP = 0, ff, result, t0, t1,
-        coordList = makeCoordList[],
-        lspo = Apply[Sequence, FilterRules[{opts}, Options[linkSaddlePoint]]],
-        debug = printLevel[OptionValue[printDetails], 1]},
-  gfi = gaugeField;
-  (* Sow[] and Reap[] allow an early exit from the loop. *)
-  Reap[Do[
-      If[avgP >= OptionValue[maxAvgPlaquette], Break[]];
-      t0 = SessionTime[];
-      If[i>0,
-         gaugeField = Table[
-             ParallelMap[First[linkSaddlePoint[dir, #, lspo]]&,
-                              coordList],
-	     {dir, nd}];
-         ];
-      t1 = SessionTime[];
-      If[debug > 1, Print["Step ", i, " in ", t1 - t0, " seconds"]];
-      tallyData = talliesToAverageErrors[polyakovLoopTallies["smeared"]];
-      ff = exponentialModel[tallyData];
-      avgP = averagePlaquette[];
-      result = Join[{i, avgP},
-           Inner[{#1[[1]], #1[[2]], #2} &, ff["BestFitParameters"], 
-                 ff["ParameterErrors"], List]];
-      If[debug > 0, Print[result]];
-      Sow[result],
-      {i, 0, n}]][[2,1]]];
+singleLinkStep::usage = "Apply one-link saddle point step to all links, returning the updated links and the size of the step.";
+Options[singleLinkStep] = Options[linkSaddlePoint];
+singleLinkStep[coordList_List:Null, opts:OptionsPattern[]] :=
+    Block[{tt = Table[
+              ParallelMap[
+                  linkSaddlePoint[dir, #, opts]&,
+                                 If[coordList === Null,
+                                    makeCoordList[], coordList]],
+	      {dir, nd}]},
+          {Map[First, tt, {2}],
+           Sqrt[Mean[Flatten[Map[Last[#]^2&, tt, {2}]]]]}];
+
+
+Options[makeObservableTrajectory] = Join[
+    Options[singleLinkStep], {
+    "step" -> "../data/3-3/step-16-28", 
+    "periodic" -> "../data/3-3/periodic-16-28",
+    "constantTerm" -> True,
+    "lowerCutoff" -> 25}]; 
+makeObservableTrajectory[set_, label_, n_, observable_, 
+                            opts:OptionsPattern[]] := 
+ Block[{gaugeField, delta, tallyData, ff, gaugeField0, distance = 0,
+        lastGaugeField, coordList, dd,
+        sopts = Apply[Sequence, FilterRules[
+            {opts}, Options[singleLinkStep]]]},
+  Get[OptionValue["periodic"] <> "-" <> ToString[set] <> ".m"];
+  If[StringMatchQ[label, "single*"],
+     coordList = makeCoordList[]];
+  lastGaugeField = gaugeField;
+  observableTrajectory[set, label, observable] = 
+   Table[Print["Starting ", i]; 
+    If[i > 0,
+       If[StringMatchQ[label, "single*"],
+          {gaugeField, dd} = singleLinkStep[coordList, sopts],
+          Get[StringRiffle[{OptionValue["step"], ToString[set],
+                            label, ToString[i]},"-"]<>".m"];
+          gaugeField = gaugeField0;
+          dd = If[True,
+                  (* These are equivalent *)
+                  Norm[delta]/Sqrt[2*nd*latticeVolume[]],
+                  latticeDistance[gaugeField, lastGaugeField];
+                  lastGaugeField = gaugeField]];
+       distance += dd];
+    Join[{i, distance},
+         Which[
+             observable == "stringModel",
+             tallyData = talliesToAverageErrors[
+                 polyakovCorrelatorTallies["simple","1"]];
+             ff = stringModel[tallyData, 
+                              "lowerCutoff" -> OptionValue["lowerCutoff"],
+                              "constantTerm" -> OptionValue["constantTerm"]];
+             MapThread[
+                 valueError[#1[[2]], #2] &,
+                           {ff["BestFitParameters"], 
+                            ff["ParameterErrors"]}],
+             observable == "wilsonDiagonal",
+             {averageWilsonLoop[1, 1], averageWilsonLoop[2, 2],
+              averageWilsonLoop[3, 3], averageWilsonLoop[4, 4],
+              averageWilsonLoop[5, 6], averageWilsonLoop[8, 8],
+              averageWilsonLoop[11, 12]},
+             observable == "wilsonTriangle",
+             Apply[averageWilsonLoop,
+                   {{4, 4}, {4, 8}, {6, 6}, {4, 10}, {4, 12}, {8, 8},
+                    {8, 10}, {10, 10}}, {1}],
+             True,
+             Abort[]
+         ]], {i, 0, n}]];

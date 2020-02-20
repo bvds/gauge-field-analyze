@@ -264,7 +264,7 @@ Define the correlator:
 \eq
 %
 where the normalization constant $C_\Phi$ is chosen such that
-$\Phi(r)=1$ for the bare vacuum.  To obtain the string tension,
+$\Phi_\mu(r)=1$ for the bare vacuum.  To obtain the string tension,
 we fit the correlator to an exponential plus a constant term,
 including the bosonic string correction in the $\hat{\mu}$
 direction:
@@ -304,9 +304,9 @@ in Fig.~\ref{pcorr16}.  The lattice configurations were generated with the
 Chroma library~\cite{edwards_chroma_2005};
 see Appendix~\ref{configurations} for details.
 The string tension $\sigma a^2 = 0.0266(34)$
-is somewhat larger then Lucini and Teper's continuum value for $\beta=28$,
+is somewhat larger then Lucini and Teper's value for $\beta=28$,
 $\sigma a^2 = 0.016192(54)$ \cite{lucini_$mathrmsun$_2002,athenodorou_sun_2017}
-and is likely due to the small lattice volume.
+and is likely due to the Coulomb force. {\bf fix this!}
 A similar calculation for a $L^3=20^3$ lattice yields
 $\sigma a^2 = 0.0136(23)$, closer to Lucini and Teper's value.
 The fit has $\chi^2=8.2$ for 37 degrees of freedom, reflecting
@@ -367,9 +367,12 @@ By way of example, we show the distribution of the
 $5\times5$ Wilson loop operator for $\SU(3)$ in Fig.~\ref{polydist1}.
 For comparision, we also show the distribution for
 the high temperature limit (random $\SU(N)$ matrices).
+Notice that the shape of the two distributions appear to
+be quite similar, except that the $W_{5\times5}$ distribution
+is shifted toward $\mathbb{I}$, reflecting the fact that
+$\langle\Tr W_{5\times5}\rangle >0$.
 
-We can relate the distribution in $\lambda_j$-space to
-the trace $\Tr\mathcal{O}$.
+We can relate the distribution in $\lambda_j$-space to $\Tr\mathcal{O}$.
 For $\SU(2)$, $\Tr \mathcal{O}$ is real and for $\SU(3)$, $\Tr \mathcal{O}$
 is complex.  In both cases, the map from the $\lambda_j$-space to
 $\Tr \mathcal{O}$ is injective.  Thus, one can just as well look at the
@@ -1043,8 +1046,12 @@ $\lambda_j^\prime - \lambda_k^\prime \le 2 \pi$.
 %
 \begin{figure}
 \includegraphics{hex3}
-  \caption{In the case of $\SU(3)$, $(\lambda_1^\prime,\lambda_2^\prime)$ lie in the shaded hexagonal region.
-    Elements of the center of the group $z$, $z^2$, lie on the vertices of the hexagon. The six triangular regions correspond to permuations of $\lambda_1$, $\lambda_2$, $\lambda_3$.   \label{hexagon}}
+\caption{In the case of $\SU(3)$, $(\lambda_1^\prime,\lambda_2^\prime)$
+  lie in the shaded hexagonal region.
+  Elements of the center of the group $z$, $z^2$, lie on the vertices
+  of the hexagon with the identity at the origin.
+  The six triangular regions correspond to permuations of
+  $\lambda_1$, $\lambda_2$, $\lambda_3$.   \label{hexagon}}
 \end{figure}
 %
 The $\SU(3)$ case is shown in Fig.~\ref{hexagon}.
@@ -1077,7 +1084,6 @@ Thus, the norm defined in Eqn.~(\ref{sunorm}) is simply
 For lattices of interest, the basis size $n_L$ is large enough
 that direct solution is not possible and one must resort to Krylov
 space methods (sparse matrix methods).
-
 The Hessian matrix $H$ is sparse, with an $(N^2-1)\times(N^2-1)$
 color block structure and $6D+1$ nonzero blocks per row/column.
 The gauge transform matrix $G$ has the same color block structure
@@ -1101,18 +1107,20 @@ in less than 40 steps.
 
 We use the Lanczos library nu-TRLan~\cite{yamazaki_adaptive_2010},
 modified so that $P_G$ is applied to any Krylov space vector, to
-find the smallest eigenpairs of $\left(P_G H\right)^2$.  We then find
+find the smallest eigenpairs of $\left(P_G H\right)^2$.  From these, we find
 the eigenvectors $\left\{\mathbf{r}_1, \mathbf{r}_2, \ldots\right\}$
-associated with eigenpairs $\left(\lambda_i^2, \mathbf{r}_i\right)$
+associated with eigenpairs $\left(\heigen_i^2, \mathbf{r}_i\right)$
 that violate the $\Lambda$ cutoffs,
+%
 \begin{eqnarray}
-   \frac{ \mathbf{r}_i \mathbf{\cdot} \mathbf{q}
-   \left\lVert \mathbf{r}_i\right\rVert_2}{\left|\lambda_i\right| }
+   \frac{\sqrt{2}\, \mathbf{r}_i \mathbf{\cdot} \mathbf{q}
+   \left\lVert \mathbf{r}_i\right\rVert_2}{\left|\heigen_i\right| }
      &>& \Lambda_2  \quad\mbox{or} \\
-   \frac{ \mathbf{r}_i\mathbf{\cdot} \mathbf{q}
-   \left\lVert \mathbf{r}_i\right\rVert_\mathrm{max}}{\left|\lambda_i\right| }
+   \frac{\sqrt{2}\, \mathbf{r}_i\mathbf{\cdot} \mathbf{q}
+   \left\lVert \mathbf{r}_i\right\rVert_\mathrm{max}}{\left|\heigen_i\right| }
      &>& \Lambda_\mathrm{max} \; .
 \end{eqnarray}
+%
 To ensure that we have found all the eigenpairs that violate the cutoffs,
 we may need to calculate as many as 2000 to 4000 of the lowest eigenpairs
 in the Lanzos routine.  As one moves along a trajectory towards the
@@ -1123,7 +1131,7 @@ Then we solve the linear system $H \mathbf{y} = \mathbf{q}$
 using the conjugate gradient algorithm,
 subroutine MINRES-QLP~\cite{choi_algorithm_2014}, modified so that
 the projection operators $P_G$ and 
-$\mathbb{I}- \sum_{k} \mathbf{r}_k \otimes \mathbf{r}_k$
+$\mathbb{I}- \sum_{i} \mathbf{r}_i \otimes \mathbf{r}_i$
 are applied to any Krylov space vector.
 
 \section{Lattice configurations}
