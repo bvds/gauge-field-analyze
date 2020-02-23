@@ -201,7 +201,8 @@ of the center $\zentrum$ of $\SU(N)$:
     \left\lVert z \right\rVert_2 = 2\pi \sqrt{\frac{N-1}{N}} \; ,
      \quad z\in \zentrum \; .
 \eq
-The norm for a lattice configuration is:
+One can use this to define a norm for an entire
+lattice configuration:
 \be
    \left\lVert \config \right\rVert_2 =
    \sqrt{\frac{1}{V_L D} \sum_{\mu,x} \left\lVert U_\mu(x) \right\rVert_2^2}
@@ -233,28 +234,124 @@ the associated lattice norm $\left\lVert \config \right\rVert_\zentrum$.
 A number of observables and gauge choices will be used to
 monitor the behavior of the gauge fields when moving from
 the original Euclidean lattice configuration toward
-the saddle-point.
-
-\subsection{Loop Operators}
+the saddle-point.  The goal here is not to make a precise
+measurement of the string tension and glueball spectra
+but to measure a wide set of observables in a more qualitative
+fashion for a single lattice configuration.
 
 As we move toward the saddle-point of a lattice configuration,
 we expect that the perturbative (quantum) fluctuations of
-the gauge field to change greatly.  The standard strategies for
-improving lattice operators~\cite{teper_$mathrmsun$_1998,lucini_glueballs_2004}
-are designed precisely to ameliorate the effects of these fluctuations.
-It is not clear how they should behave as these flucuations
-are removed.  In the current work, we will stick to
-the bare (unimproved) operators.
+the gauge field to change greatly.  It is not clear how the
+standard strategies for improving lattice
+operators~\cite{teper_$mathrmsun$_1998,lucini_glueballs_2004}
+might behave during this process.  We will not tackle that
+issue in the present investigation, but will stick to the bare
+(unimproved) operators.
 In particular, we will use Polyakov loop correlators to measure
-string tension and use Wilson loops and Wilson loop correlators to
-study properties of the fields.
+string tension at various length scales and will use Wilson loops
+and Wilson loop correlators to further probe the system.
 
-Define a Polyakov loop that winds once around the lattice
+\subsection{Coulomb corrections}
+
+In $D=4$ spacetime directions, there is a clear separation---both
+experimentally and in lattice calculations---between a
+short distance regime where the heavy quark potential is
+dominated by a $1/r$ Coulomb-type potential and a
+long-distance regime where interaction is dominated by the confining linear
+potential~\cite{bali_static_2000,brambilla_effective-field_2005}.
+In $D=3$, the Coulomb potential goes as $\log(r)$ and there is no 
+clear separation; some care must be taken to distinguish it from
+the linear confining potential.
+
+If we consider a pair of charges separated by some
+distance $r$ at some instant in time, the Coulomb potential is
+equal to the energy stored in the electric
+field produced by those charges (electrostatics in $D-1$
+dimensions).  However, we are working
+with currents in $D$ Euclidean spacetime dimensions.  In that case,
+the classical action associated with the abelian field is equal to the
+energy of the magentic field produced by those currents
+(magnetostatics in $D$ dimensions).  Using the textbook
+formula~\cite{jackson_classical_1975}
+for the magnetostatic energy associated with a current density
+$\mathbf{J}(\mathbf{x})$,
+%
+\be
+S = \frac{1}{2} \int d^3\mathbf{x}\, d^3\mathbf{x}^\prime\,
+\frac{\mathbf{J}(\mathbf{x}) \cdot
+  \mathbf{J}(\mathbf{x}^\prime)}{
+  \left| \mathbf{x}-\mathbf{x}^\prime\right|} \, ,
+\eq
+%
+we can find the action associated with a number of thin wires
+carrying a constant current. (We set the current equal to 1 in
+the following.)
+
+In the case of two Polyakov loops with opposite currents separated
+by distance $r$ with periodic boundary conditions, period $L$,
+there is a self-energy term plus an interaction term:
+%
+\begin{eqnarray}
+S_\Phi &=& 2 \int_0^L dx \int_{x+\varepsilon/2}^\infty dy
+\left(\frac{1}{y-x} -\frac{1}{\sqrt{(y-x)^2 + r^2}}\right) \\
+  &=& 2 L \log\left(\frac{r}{\varepsilon}\right) + O(\varepsilon)\, .
+\end{eqnarray}
+%
+Thus, we get the usual $L \log(r)$ term plus a
+self-energy term proportional to the length
+of the currents, $2L$.  The $\log(\varepsilon)$ divergence
+is from approximating the current density as a thin wire.
+Since the normalization
+of this field relative to the bare link fields is
+unknown, one can fit the Coulomb contribution to the
+Polyakov loop correlator using
+\be
+       c_q 2 L \log(r) + c_p 2 L \, , \label{cpf}
+\eq
+where $c_q$ and $c_p$ are unknown.
+
+In the case of a $w_1\times w_2$ Wilson loop, we obtain
+a more complicated expression
+%
+\begin{eqnarray}
+  S_W &=& 2 \int_0^{w_1} dx \int_{x+\varepsilon}^{w_1} \frac{dx^\prime}{x^\prime-x}
+               \nonumber\\
+               & &  - \int_0^{w_1} dx \int_{0}^{w_1} \frac{dx^\prime}{
+                 \sqrt{(x^\prime-x)^2+ w_2^2}}
+               \nonumber\\
+               & &  +\left[w_1 \leftrightarrow w_2 \right]\\
+   &=&  2 w_1 \log\left(\frac{w_1}{\varepsilon}\right)
+       + 2 \eta - 2\left(w_1+w_2\right)
+            - 2 w_1 \log\left(\frac{\eta +w_1}{w_2}\right)               
+               \nonumber\\
+   & &  +\left[w_1 \leftrightarrow w_2\right] + O(\varepsilon) \, ,\\
+\end{eqnarray}
+where $\eta=\sqrt{w_1^2+w_2^2}$.  Similar the the above, 
+we obtain a self-energy term that is proportional to the perimeter of
+the rectangle.  Thus, we can fit the Coulomb
+contribution to the Wilson loop using
+%
+\begin{eqnarray}
+  \mathcal{S}_{w_1\times w_2}\left(c_q, c_p\right) & = &
+     c_q 2 \left(w_1 \log\left({w_1}\right) + \eta
+        -  w_1 - w_2
+        -  w_1 \log\left(\frac{\eta +w_1}{w_2}\right)
+        + \left[w_1 \leftrightarrow w_2\right]\right)
+        \nonumber\\ 
+ &&  + c_p  2\left(w_1+w_2\right)  \label{cwf}
+\end{eqnarray}
+%
+where $c_p$ and $c_q$ in Eqns.~(\ref{cpf}) and (\ref{cwf})
+should be equivalent.
+
+\subsection{Loop Operators}
+
+Let us define a Polyakov loop that winds once around the lattice
 in the direction $\mu$ and goes through site $x$:
 \be
          \phi_\mu(x)= \prod_{\rho=1}^L U_\mu(x+a \hat{\mu} \rho)
 \eq
-Define the correlator:
+and define the correlator:
 \be
 \Phi_\mu(r) = \frac{1}{C_\phi} \sum_{x, x_\mu=1} \sum_{y, y_\mu=1}
            \delta_{r,|x-y|}
@@ -265,51 +362,54 @@ Define the correlator:
 %
 where the normalization constant $C_\Phi$ is chosen such that
 $\Phi_\mu(r)=1$ for the bare vacuum.  To obtain the string tension,
-we fit the correlator to an exponential plus a constant term,
-including the bosonic string correction in the $\hat{\mu}$
-direction:
+we fit the correlator $\Phi_\mu(r)$ to an exponential plus a constant term,
+%  M. Teper, “Large N and confining flux tubes as strings -
+%  a view from the lattice,”
+%  Acta Phys. Polon. B 40, 3249 (2009). [arXiv:0912.3339 [hep-lat]].
+%
+including the bosonic string
+correction~\cite{teper_large_2009,aharony_effective_2013} in the $\hat{\mu}$
+direction as well as the Coulomb terms from Eqn.~(\ref{cpf}):
 \be
-P_\mu(r) = c_0 \sum_{\mbox{images}}
-      \exp\left(\sigma a^2 r L_\mu\sqrt{1-\frac{\pi}{3 a^2 \sigma L_\mu^2}}\right)
-      + c_1 \; .  \label{stringmodel}
+         c_0 \sum_{\mbox{images}} \exp\left(
+         -\sigma a^2 r L_\mu\sqrt{1-\frac{\pi}{3 a^2 \sigma L_\mu^2}}
+         - c_q 2 L_\mu \log(r) - c_p 2 L_\mu\right)
+         + c_1 \; .  \label{stringmodel}
 \eq    
 Since the lattices we use are relatively small, we include contributions
 from fields wrapping around the lattice in the plane transverse to
-$\hat{\mu}$.  Thus we sum over the two closest images of the Polyakokv
+$\hat{\mu}$.  That is, we sum over the two closest images of the Polyakokv
 loop in each transverse direction.  The constant $c_1$ should,
-in principle, not be necessary but when measuring the string tension
+in principle, not be necessary; but when measuring the string tension
 for a single lattice configuration, we find large constant
 fluctuations will otherwise interfere with the fit.
 When finding the string tension, we fit $\Phi_\mu(r)$ to
-Eqn.~(\ref{stringmodel}) for each $\mu$.
+Eqn.~(\ref{stringmodel}) for each $\mu$.  In the case of
+a cube-shaped lattice $L_\mu = L$, the $c_p$ term can be absorbed into
+the normalization constant $c_0$.
 
 \begin{figure}
   \includegraphics{polycorr16}
   \caption{Polyakov loop correlator vs.\ loop area together with
-    a fit to Eqn.~(\ref{stringmodel}) for $L_\mu r>40$.  The solid line
-    represents the case where the separation of $x$
-    and $y$ is along a lattice axis and the dashed line
-    represents the case where the separation is in
-    a diagonal direction.  The data is from 100 lattice
+    a fit to Eqn.~(\ref{stringmodel}) for $L_\mu r>21$.
+    Each color represents a different Polyakov loop direction.
+    The data is from 100 lattice
     configurations. \label{pcorr16}}
 \end{figure}
 
-For precise measurement the string tension, the above process is
+For precise measurement the string tension, this process is
 not ideal since the correlator calculation re-uses the same link
 fields for various values of $r$ and $\mu$; the $\Phi_\mu(r)$ are not
 statstically independent.
 However, this does allow us to monitor the behavior of the correlator at
-various distance scales.  An example for a $16^3$ lattice is shown
-in Fig.~\ref{pcorr16}.  The lattice configurations were generated with the
-Chroma library~\cite{edwards_chroma_2005};
+various distance scales.  An example for a $16\times 20 \times 24$
+lattice is shown in Fig.~\ref{pcorr16}.  The lattice configurations
+were generated with the Chroma library~\cite{edwards_chroma_2005};
 see Appendix~\ref{configurations} for details.
-The string tension $\sigma a^2 = 0.0266(34)$
-is somewhat larger then Lucini and Teper's value for $\beta=28$,
-$\sigma a^2 = 0.016192(54)$ \cite{lucini_$mathrmsun$_2002,athenodorou_sun_2017}
-and is likely due to the Coulomb force. {\bf fix this!}
-A similar calculation for a $L^3=20^3$ lattice yields
-$\sigma a^2 = 0.0136(23)$, closer to Lucini and Teper's value.
-The fit has $\chi^2=8.2$ for 37 degrees of freedom, reflecting
+The string tension $\sigma a^2 = 0.01595(62)$
+agrees with Teper's value for $\beta=28$,
+$\sigma a^2 = 0.016210(54)$~\cite{lucini_$mathrmsun$_2002,athenodorou_sun_2017}.
+The fit has $\chi^2=220$ for 347 degrees of freedom, reflecting
 the fact that the correlators are not statistically independent.
 
 Similarly, we define a Wilson loop operator using a product of
@@ -321,9 +421,15 @@ dimensions:
          U_\mu(x) U_\mu(x+a \hat{\mu}) \,\cdots\, U_\nu^\dagger (x)
 \eq
 with normalization $C_W$ chosen such that $W_{m\times n} = \mathbb{I}$
-for the bare vacuum.
+for the bare vacuum.  In this case, we can fit $\left\langle 0 \right|
+W_{w_1\times w_2} \left|0\right\rangle $ to the function
+\be
+     c_0^\prime \exp\left(
+     -\sigma a^2 w_1 w_2 - \mathcal{S}_{w_1\times w_2}\left(c_q, c_p\right)
+     \right)  \; .  \label{wfit}
+\eq
 
-Also, the quantity that is actually measured can be generalized.
+The quantity that is actually measured can be generalized, as well.
 For some loop operator $\mathcal{O}\in\SU(N)$, one usually
 measures the expectation value of the trace,
 $\langle 0 | \frac{1}{N} \Tr \mathcal{O} |0\rangle$, or for $k$-strings,
@@ -359,7 +465,7 @@ center of $\SU(N)$ on the vertices.
     The distribution is symmetric under complex conjugation,
     $\mathcal{O}\to\mathcal{O}^\dagger$.
     The distribution lies inside the blue lines representing
-    the edges of the 2-simplex in Fig.~\ref{polydist1}.
+    the edges of the triangle in Fig.~\ref{polydist1}.
     \label{polydist2}}
 \end{figure}
 
@@ -372,7 +478,8 @@ be quite similar, except that the $W_{5\times5}$ distribution
 is shifted toward $\mathbb{I}$, reflecting the fact that
 $\langle\Tr W_{5\times5}\rangle >0$.
 
-We can relate the distribution in $\lambda_j$-space to $\Tr\mathcal{O}$.
+We can relate the distribution in $\lambda_j$-space to the
+distribution of $\Tr\mathcal{O}$.
 For $\SU(2)$, $\Tr \mathcal{O}$ is real and for $\SU(3)$, $\Tr \mathcal{O}$
 is complex.  In both cases, the map from the $\lambda_j$-space to
 $\Tr \mathcal{O}$ is injective.  Thus, one can just as well look at the
@@ -391,7 +498,8 @@ We are interested here in Landau gauge mainly
 because it allows us, if $\Tr A_\mu A^\mu$ is small enough, to connect the
 link fields to the continuum degrees of freedom.
 
-However, finding this minimum can be a bit tricky.
+However, finding this minimum can be a bit tricky.  In this
+section, we will explore some strategies for finding the minimum.
 We will start with local minimization.
 For some site $x$, we want to find a gauge transform $U_G$ on $x$
 that minimizes $\left\lVert U_\mu(x) \right\rVert_2$ for the $2D$
@@ -414,8 +522,8 @@ This constitutes one minimization step, a ``Landau step,'' in a
 sucessive over-relaxation (SOR) procedure.
 The relaxation factor $\orelax$ can be adjusted to speed numerical
 convergence.
-In practice, we find the fastest convergence for $\orelax \approx 1.7$; however,
-it can become unstable for slightly higher $\orelax$.
+In practice, we find the fastest convergence for $\orelax \approx 1.7$;
+however, it can become unstable for slightly higher $\orelax$.
 We generally use $\orelax=1.5$ as a compromise between speed and stability.
 
 \subsection{Maximal center gauge}
@@ -579,7 +687,7 @@ respect to $\mathbb{I}$, substantially more links near
 the identity element.
 
 Can we do better? Let us include some number of ``Landau steps''
-in the procedure; see Table~\ref{center4}.  (The strategy illustrated
+in the procedure; see Table~\ref{center4}.  (The strategy shown
 here was the end result of a an extensive monte carlo study that
 included a number of other gauge fixing strategies, as well.)
 We see a substantially reduced lattice norm, relative to
@@ -840,14 +948,16 @@ that are of physical interest.
   \label{trajectory3}}
 \end{figure}
   
-We will apply our procedure to $\SU(3)$, $16^3$ and $20^3$ lattice
-configurations, as well as $\SU(4)$, $16^3$ lattice
+We will apply our procedure to $\SU(3)$, $16 \times 20 \times 24$
+and $12 \times 16 \times 20$ lattice
+configurations, as well as $\SU(4)$, $12 \times 16 \times 20$ lattice
 configurations.  Details of the numerical calculation
 are discussed in Appendices~\ref{krylov} and \ref{configurations}.
 
 By applying the procedure discussed in Section~\ref{saddle} iteratively,
 we produce a trajectory of lattice configurations $\config_0$,
-$\config_1$, \ldots in configuration space.  For lattice configuration $\config_i$, we define
+$\config_1$, \ldots in configuration space.  For lattice configuration
+$\config_i$, we define
 $\Delta_i$ to be the total distance traveled through configuration
 space
 \be
@@ -999,7 +1109,7 @@ Fig.~\ref{corrLink995}.
 
 The master field idea is a statement about the $N\to \infty$ limit
 of $\SU(N)$ gauge theory.  However, if finite $N$ is similar
-to the $N\to\infty$ limit, we should expect to properties of
+to the $N\to\infty$ limit, we should expect that properties of
 the master field emerge, approximately, at finite $N$.
 As an example of this, we
 see that a saddle point of a single lattice configuration
@@ -1127,7 +1237,7 @@ in the Lanzos routine.  As one moves along a trajectory towards the
 saddle point, the gradient vector decreases in magnitude and fewer eigenpairs
 exceed the $\Lambda$ cutoffs.
 
-Then we solve the linear system $H \mathbf{y} = \mathbf{q}$
+Finally, we solve the linear system $H \mathbf{y} = \mathbf{q}$
 using the conjugate gradient algorithm,
 subroutine MINRES-QLP~\cite{choi_algorithm_2014}, modified so that
 the projection operators $P_G$ and 

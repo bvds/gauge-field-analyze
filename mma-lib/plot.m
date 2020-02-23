@@ -67,71 +67,79 @@ plotPlaquetteCorrelations[corr_, opts:OptionsPattern[]] :=
              Line[{{0, 0}, {1/2 + Max[Map[First, corr]], 0}}]}];
 
 Options[plotStringModelFit] = Join[Options[ErrorListPlot],
-                                   Options[stringModel]];
+                                   Options[stringModel],
+                                   {"maxx" -> Automatic}];
 plotStringModelFit[tallyData_, opts:OptionsPattern[]] :=
- (Format[a2sigma] = Row[{Style[a, Italic]^2, \[Sigma]}];
-  Block[{lowerCutoff = OptionValue["lowerCutoff"],
-         nearest, maxx, miny, maxy, nn, ff}, 
-    nn = Select[Normal[tallyData], #[[1, 1]] > 0 &]; 
-    ff = stringModel[tallyData,
-      Apply[Sequence, FilterRules[{opts}, Options[stringModel]]],
-                     printResult -> True];
-    nearest = Length[nn[[1,1]]] - 1;
-    maxx = Max[Map[(#[[1, 1]]*#[[1,-1]])&, nn]] + Min[latticeDimensions]/2;
-    maxy = Max[Map[#[[2, 1]] + 1.5 #[[2, 2]] &, nn]]; 
-    miny = Min[0, Min[Map[#[[2, 1]] - 1.5 #[[2, 2]] &, nn]]]; 
-    Show[ErrorListPlot[
-        Map[{{N[#[[1, 1]]]*#[[1,-1]], #[[2, 1]]}, ErrorBar[#[[2, 2]]]} &, nn],
-     Apply[Sequence, FilterRules[{opts}, Options[ErrorListPlot]]],
-     PlotRange -> {{0, maxx}, {miny, maxy}}, 
-     Epilog -> {Text[
-         ColumnForm[
-             Join[Map[
-                 Row[{#[[1, 1]], " = ", 
-                      printNumberError[#[[1, 2]], #[[2]]]}] &, 
-                    Transpose[
-                        ff[{"BestFitParameters", 
-                            "ParameterErrors"}]]],
-                  {Row[{"\[Beta] = ", N[beta], 
-                        ", \!\(\*StyleBox[\"N\",\nFontSlant->\"Italic\"]\) = ", nc}],
-                   Row[{Row[latticeDimensions, "\[Times]"], "lattice"}, 
-                       " "]}]], {maxx, maxy}, {1.1, 1.1}]},
-     Prolog -> {{Gray, Line[{{0, 0}, {maxx, 0}}]}, 
-                If[lowerCutoff > 0,
-                   {Gray, 
-                    Text["cutoff", {lowerCutoff, 0}, {-1.5, -1}, {0, 1}],
-                    Line[{{lowerCutoff, miny}, {lowerCutoff, maxy 2/3}}]},
-                   Nothing]},
-     Axes -> False, Frame -> True, 
-     FrameLabel -> {"area enclosed (plaquettes)", 
-                    "Polyakov loop correlator"}], 
-     Table[
-      Block[{face = latticeDimensions, vertices},
-       face[[dir0]] = 1;
-       vertices = makeVertices[face];
-       {ParametricPlot[
-         Block[{xx = x Last[vertices]/Norm[Last[vertices]]},
-          {latticeDimensions[[dir0]]*x,
-           Apply[ff,
-                 Append[
-                     Take[Sort[Map[Norm[#-xx]&, vertices], Less], nearest],
-                     latticeDimensions[[dir0]]]]}],
-         {x, Sqrt[nd-1]-1/2, Norm[Last[vertices]]/2+1/2},
-         PlotStyle->{Orange, Dashing[0.02]}],
-        Table[If[
-            dir1 != dir0,
-            ParametricPlot[
-             Block[{xx = Table[If[i==dir1, x, 0], {i, nd}]},
-               {latticeDimensions[[dir0]]*x,
-              Apply[ff,
-                    Append[
-                        Take[Sort[Map[Norm[#-xx]&, vertices], Less], nearest],
-                        latticeDimensions[[dir0]]]]}],
-             {x, 1/2, latticeDimensions[[dir1]]/2+1/2},
-             PlotRange -> All],
-            Nothing],
-              {dir1, nd}]}],
-      {dir0, nd}]]]);
+ Block[{lowerCutoff = OptionValue["lowerCutoff"],
+        nearest, maxx, miny, maxy, nn, ff, cd = ColorData[1]}, 
+  nn = Select[Normal[tallyData], #[[1, 1]] > 0 &]; 
+  ff = stringModel[tallyData,
+       Apply[Sequence, FilterRules[{opts}, Options[stringModel]]],
+                   printResult -> True];
+  nearest = Length[nn[[1,1]]] - 1;
+  maxx = If[OptionValue["maxx"] === Automatic,
+            Max[Map[(#[[1, 1]]*#[[1,-1]])&, nn]] + Min[latticeDimensions]/2,
+            OptionValue["maxx"]];
+  maxy = Max[Map[#[[2, 1]] + 1.5 #[[2, 2]] &, nn]]; 
+  miny = Min[0, Min[Map[#[[2, 1]] - 1.5 #[[2, 2]] &, nn]]]; 
+  Show[ErrorListPlot[
+      Map[
+          {{N[#[[1, 1]]]*#[[1,-1]], #[[2, 1]]}, ErrorBar[#[[2, 2]]]}&,
+          (* Group by ll value *)
+          GatherBy[nn, #[[1,-1]]&], {2}],
+      Apply[Sequence, FilterRules[{opts}, Options[ErrorListPlot]]],
+      PlotRange -> {{0, maxx}, {miny, maxy}}, 
+      Epilog -> {Text[
+          ColumnForm[
+              Join[Map[
+                  Row[{#[[1, 1]], " = ", 
+                       printNumberError[#[[1, 2]], #[[2]]]}] &, 
+                     Transpose[
+                         ff[{"BestFitParameters", 
+                             "ParameterErrors"}]]],
+                   {Row[{"\[Beta] = ", N[beta], 
+                         ", \!\(\*StyleBox[\"N\",\nFontSlant->\"Italic\"]\) = ", nc}],
+                    Row[{Row[latticeDimensions, "\[Times]"], "lattice"}, 
+                        " "]}]], {maxx, maxy}, {1.1, 1.1}]},
+      Prolog -> {{Gray, Line[{{0, 0}, {maxx, 0}}]}, 
+                 If[lowerCutoff > 0,
+                    {Gray, 
+                     Text["cutoff", {lowerCutoff, 0}, {-1.5, -1}, {0, 1}],
+                     Line[{{lowerCutoff, miny}, {lowerCutoff, maxy 2/3}}]},
+                    Nothing]},
+      PlotStyle->cd,
+      Axes -> False, Frame -> True, 
+      FrameLabel -> {"area enclosed (plaquettes)", 
+                     "Polyakov loop correlator"}], 
+       Table[
+        Block[{face = latticeDimensions, vertices},
+         face[[dir0]] = 1;
+         vertices = makeVertices[face];
+         {ParametricPlot[
+           Block[{xx = x Last[vertices]/Norm[Last[vertices]]},
+            {latticeDimensions[[dir0]]*x,
+             Apply[ff,
+                   Append[
+                       Take[Sort[Map[Norm[#-xx]&, vertices], Less], nearest],
+                       latticeDimensions[[dir0]]]]}],
+           {x, Sqrt[nd-1]-1/2, Norm[Last[vertices]]/2+1/2},
+           PlotStyle->{cd[dir0], Opacity[0.5], Thickness[0.004],
+                       Dashing[0.02]}],
+          Table[If[
+              dir1 != dir0,
+              ParametricPlot[
+               Block[{xx = Table[If[i==dir1, x, 0], {i, nd}]},
+                {latticeDimensions[[dir0]]*x,
+                 Apply[ff,
+                       Append[
+                           Take[Sort[Map[Norm[#-xx]&, vertices], Less], nearest],
+                           latticeDimensions[[dir0]]]]}],
+               {x, 1/2, latticeDimensions[[dir1]]/2+1/2},
+               PlotStyle -> {cd[dir0], Opacity[0.5], Thickness[0.004]},
+               PlotRange -> All],
+              Nothing],
+                {dir1, nd}]}],
+        {dir0, nd}]]];
 
 plotDist::usage = "Distribution of complex numbers in a unit circle in the complex plane, showing Im[z]<0 part, and the center of the gauge group.";
 Options[plotDist] := Options[Histogram3D];
