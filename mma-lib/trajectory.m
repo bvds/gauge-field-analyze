@@ -76,7 +76,7 @@ Options[makeObservableTrajectory] = Join[
     "step" -> "../data/3-3/step-16-28", 
     "periodic" -> "../data/3-3/periodic-16-28",
     "constantTerm" -> True,
-    "lowerCutoff" -> 25}]; 
+    "lowerCutoff" -> 0}]; 
 makeObservableTrajectory[set_, label_, n_, observable_, 
                             opts:OptionsPattern[]] := 
  Block[{gaugeField, delta, tallyData, ff, gaugeField0, distance = 0,
@@ -109,10 +109,14 @@ makeObservableTrajectory[set_, label_, n_, observable_,
              ff = stringModel[tallyData, 
                               "lowerCutoff" -> OptionValue["lowerCutoff"],
                               "constantTerm" -> OptionValue["constantTerm"]];
-             MapThread[
+             Append[MapThread[
                  valueError[#1[[2]], #2] &,
                            {ff["BestFitParameters"], 
                             ff["ParameterErrors"]}],
+                    (* chi^2 *)
+                    {ff["chiSquared"], Length[ff["Data"]] -
+                                       Length[ff["BestFitParameters"]]}
+             ],
              observable == "wilsonDiagonal",
              {Merge[Apply[averageWilsonLoop,
                           Table[{w, w}, {w, Max[latticeDimensions]-1}],

@@ -140,8 +140,9 @@ vacuum in the $N\to\infty$ limit.
 The purpose of the section is to set some notation.
 We introduce a $D$-dimensional spacetime lattice with lattice
 spacing $a$ and sites labeled by $x$, with a total of $V_L$ sites.
-We will focus on cubic lattices with $L$ sites in each direction,
-$V_L = L^D$.
+The lattice has $L_\mu$ sites in direction $\mu$;
+in the case of a cubic lattice, we will drop the $\mu$ subscript
+and $V_L = L^D$.
 Define $U_\mu(x) \in \SU(N)$ to be the link going from site $x$ to
 site $x+a \hat{\mu}$.
 The lattice has $n_L=V_L D \left(N^2-1\right)$ degrees of freedom.
@@ -186,12 +187,12 @@ The lattice has a total of $n_G = V_L\left(N^2-1\right)$ gauge symmetries.
 \section{Norms}
 
 It is useful to define a number of norms.  We define the norm
-for a link,
+a link field using the Frobenius norm of the logarithm,
 %
 \be
    \left\lVert U_\mu(x) \right\rVert_2 =
-   \sqrt{\Tr B B^\dagger} \quad \mbox{where}
-   \quad B = \log\left(U_\mu(x)\right)
+   \sqrt{\Tr M M^\dagger} \quad \mbox{where}
+   \quad M = \log\left(U_\mu(x)\right)
    \label{sunorm}
 \eq
 and the matrix logarithm is defined in Appendix~\ref{roots}.
@@ -199,7 +200,7 @@ Note that the norm reaches its maximum value for elements
 of the center $\zentrum$ of $\SU(N)$: 
 \be
     \left\lVert z \right\rVert_2 = 2\pi \sqrt{\frac{N-1}{N}} \; ,
-     \quad z\in \zentrum \; .
+     \quad z\in \zentrum,\; z\ne\mathbb{I} \; .
 \eq
 One can use this to define a norm for an entire
 lattice configuration:
@@ -416,13 +417,13 @@ Similarly, we define a Wilson loop operator using a product of
 link fields lying on the perimeter a rectangle having the given
 dimensions:
 \be
-       W_{m\times n} = \frac{1}{C_W} \sum_{\mu \ne \nu, x}
-         \prod_{\mbox{$m\times n$ rectangle}}
-         U_\mu(x) U_\mu(x+a \hat{\mu}) \,\cdots\, U_\nu^\dagger (x)
+       W_{w_1\times w_2} = \frac{1}{C_W} \sum_{\mu \ne \nu, x}\,
+         \underbrace{U_\mu(x) U_\mu(x+a \hat{\mu}) \,\cdots\, U_\nu^\dagger (x)
+         }_{\mbox{$w_1\times w_2$ rectangle}}
 \eq
 with normalization $C_W$ chosen such that $W_{m\times n} = \mathbb{I}$
 for the bare vacuum.  In this case, we can fit $\left\langle 0 \right|
-W_{w_1\times w_2} \left|0\right\rangle $ to the function
+\frac{1}{N} \Tr W_{w_1\times w_2} \left|0\right\rangle $ to the function
 \be
      c_0^\prime \exp\left(
      -\sigma a^2 w_1 w_2 - \mathcal{S}_{w_1\times w_2}\left(c_q, c_p\right)
@@ -433,7 +434,7 @@ The quantity that is actually measured can be generalized, as well.
 For some loop operator $\mathcal{O}\in\SU(N)$, one usually
 measures the expectation value of the trace,
 $\langle 0 | \frac{1}{N} \Tr \mathcal{O} |0\rangle$, or for $k$-strings,
-one can measure expectation values of higher order operators
+one measures expectation values of higher order operators
 like $\Tr\left( \mathcal{O}^k\right)$.
 However, this is not the most general gauge-invarient observable.
 The most general physical observable is the distribution of the
@@ -489,18 +490,19 @@ of $\mathcal{O}$.
 
 \subsection{Landau gauge}
 
-The choice of Landau gauge $\partial_\mu A^\mu = 0$ is equivalent to
-minimizing $\Tr A_\mu A^\mu$ over all space.  The fact that
+In the continuum, the choice of Landau gauge $\partial_\mu A^\mu = 0$
+is equivalent to minimizing $\Tr A_\mu A^\mu$ over all space.  The fact that
 $\partial_\mu A^\mu = 0$ has multiple solutions (the Gribov problem) is
 equivalent to the statement that $\Tr A_\mu A^\mu$, integrated over space,
 has multiple local minima.~\cite{maas_more_2009}.
 We are interested here in Landau gauge mainly
-because it allows us, if $\Tr A_\mu A^\mu$ is small enough, to connect the
+because it gives us, if $\Tr A_\mu A^\mu$ is small enough, the
+possiblity of connecting the
 link fields to the continuum degrees of freedom.
-
 However, finding this minimum can be a bit tricky.  In this
 section, we will explore some strategies for finding the minimum.
-We will start with local minimization.
+
+Let us start with local minimization.
 For some site $x$, we want to find a gauge transform $U_G$ on $x$
 that minimizes $\left\lVert U_\mu(x) \right\rVert_2$ for the $2D$
 links connected to $x$.  Taylor expanding in the link fields,
@@ -508,11 +510,11 @@ we find that, to lowest order in the fields, a gauge transform
 that minimizes this norm:
 %
 \be
-          U_G(x) = e^{- B}
+          U_G(x) = e^{- \overline{M}}
 \eq
 where
 \be
-   B = \frac{\orelax}{2 D} \sum_\mu \log\left(U_\mu(x)\right) -
+   \overline{M} = \frac{\orelax}{2 D} \sum_\mu \log\left(U_\mu(x)\right) -
    \log(U_\mu\left(x-a \hat{\mu})\right)  \; . \label{landau}
 \eq
 At each site of the lattice, one can calculate $U_G(x)$ and apply it,
@@ -543,7 +545,7 @@ for finding Landau gauge.
     to each element of the center, $z^k \in \zentrum$.
     \label{center1}}
   \begin{tabular}{c|c|c|ccc}
-    iteration $i$ & operation & $\left\lVert \config_i \right\rVert_\zentrum$
+    iteration $\kappa$ & operation & $\left\lVert \config_\kappa \right\rVert_\zentrum$
      & $z^0=\mathbb{I}$ & $z^1$ & $z^2$ \\
     \hline
     0 & original config & 2.377 & 4101 & 4121 & 4066\\
@@ -564,7 +566,7 @@ for finding Landau gauge.
     to $z^k \in \zentrum$.
     \label{center2}}
   \begin{tabular}{c|c|c|ccc}
-    iteration $i$ & operation & $\left\lVert \config_i \right\rVert_\zentrum$
+    iteration $\kappa$ & operation & $\left\lVert \config_\kappa \right\rVert_\zentrum$
      & $z^0=\mathbb{I}$ & $z^1$ & $z^2$ \\
     \hline
     0 & original config              & 2.377  & 4101 & 4121 & 4066\\
@@ -589,7 +591,7 @@ for finding Landau gauge.
     to $z^k \in \zentrum$.
     \label{center3}}
   \begin{tabular}{c|c|c|ccc}
-    iteration $i$ & operation & $\left\lVert \config_i \right\rVert_\zentrum$
+    iteration $\kappa$ & operation & $\left\lVert \config_\kappa \right\rVert_\zentrum$
      & $z^0=\mathbb{I}$ & $z^1$ & $z^2$ \\
     \hline
     0 & original config    & 2.377  & 4101 & 4121 & 4066\\
@@ -614,7 +616,7 @@ for finding Landau gauge.
     to $z^k \in \zentrum$.
     \label{center4}}
   \begin{tabular}{c|c|c|ccc}
-    iteration $i$ & operation & $\left\lVert \config_i \right\rVert_\zentrum$
+    iteration $\kappa$ & operation & $\left\lVert \config_\kappa \right\rVert_\zentrum$
      & $z^0=\mathbb{I}$ & $z^1$ & $z^2$ \\
     \hline
     0 & original config    & 2.377  & 4101 & 4121 & 4066\\
@@ -668,7 +670,7 @@ object that this is not appropriate for maximal center gauge
 since it preferetially minimizes the link fields
 with respect to $\mathbb{I}$ and not some other element of $\zentrum$.
 This leads us to a variation which we will call ``$\zentrum$-axial gauge''
-where we minimize $\left\lVert U_\mu(x) \right\rVert_\zentrum$
+where we instead minimize $\left\lVert U_\mu(x) \right\rVert_\zentrum$
 on the link fields in $\phi_\mu(x)$.  In Table~\ref{center2},
 we apply this gauge transform in each direction before applying
 some number of local minimizations.  One can see that this
@@ -683,17 +685,17 @@ direction before applying some number of ``center steps.''
 We see that this produces a lattice norm that is, in fact,
 substantially lower than before.  We also can see, since
 axial gauge preferentially minimizes $U_\mu(x)$ with
-respect to $\mathbb{I}$, substantially more links near
+respect to $\mathbb{I}$, substantially more links lie near
 the identity element.
 
 Can we do better? Let us include some number of ``Landau steps''
-in the procedure; see Table~\ref{center4}.  (The strategy shown
-here was the end result of a an extensive monte carlo study that
+in the procedure; see Table~\ref{center4}.  (The strategy presented
+here was the end result of a an extensive Monte Carlo study that
 included a number of other gauge fixing strategies, as well.)
 We see a substantially reduced lattice norm, relative to
 Table~\ref{center3}.  We also see that virtually all the
 links are closest to identity element.  Thus, this gauge
-choice also minimizes $\left\lVert \config_k \right\rVert_2$,
+choice also minimizes $\left\lVert \config \right\rVert_2$,
 which corresponds to Landau gauge.
 We won't give details here, but similar calculations for
 $\SU(2)$ and $\SU(4)$ produce comparable results.
@@ -707,11 +709,16 @@ This analysis casts doubt on the various lattice studies involving
 maximal center gauge and center projections~\cite{
 del_debbio_center_1997,del_debbio_detection_1998,de_forcrand_relevance_1999}.
 Presumably, in these studies, relatively large local minima of
-$\left\lVert \config_k \right\rVert_\zentrum$ were being investigated
-rather than configurations near the global minimum.
+$\left\lVert \config \right\rVert_\zentrum$ were being investigated
+rather than configurations near a global minimum.
 
+\section{Finding the saddle point}
 
-\section{Shifts of the gauge fields}
+In the following, we will introduce an iterative procedure
+for finding the saddle-point associated with a single
+lattice configuration.
+
+\subsection{Shifts of the gauge fields}
 
 \begin{figure}
   \[
@@ -812,7 +819,7 @@ as well as an ordinary Euclidean norm, averaged over links
         \; .  \label{shiftsize}
 \eq
 
-\section{Calculating the saddle point}
+\subsection{Calculating the saddle point}
 \label{saddle}
 
 \begin{figure}
@@ -912,7 +919,7 @@ Thus,
 
 Finally, since the gauge symmetry of the action is non-linear,
 we do not want to shift the fields by too much before recalculating
-the matrix $G$.  In addition, we want to ensure the shift is small
+the matrix $G$.  Likewise, we want to ensure the shift is small
 enough on each link to be consistant with the quadratic expansion.
 Thus, it is useful to add a damping factor $\gamma$ and
 further rescale by $\Lambda_s$ when the shift would
@@ -927,6 +934,7 @@ Armed with these three tools:  removing infinitesimal-gauge-transform shifts,
 imposing the $\Lambda$ cutoffs, and using the damping factor $\gamma$,
 we can apply the shift iteratively and find saddle-point configurations
 that are of physical interest.
+
 
 \section{Trajectories}
 
@@ -949,32 +957,30 @@ that are of physical interest.
 \end{figure}
   
 We will apply our procedure to $\SU(3)$, $16 \times 20 \times 24$
-and $12 \times 16 \times 20$ lattice
-configurations, as well as $\SU(4)$, $12 \times 16 \times 20$ lattice
-configurations.  Details of the numerical calculation
+and $14 \times 18 \times 22$ lattice
+configurations, as well as a $\SU(4)$, $12 \times 16 \times 20$ lattice
+configuration.  Details of the numerical calculation
 are discussed in Appendices~\ref{krylov} and \ref{configurations}.
 
 By applying the procedure discussed in Section~\ref{saddle} iteratively,
 we produce a trajectory of lattice configurations $\config_0$,
 $\config_1$, \ldots in configuration space.  For lattice configuration
-$\config_i$, we define
-$\Delta_i$ to be the total distance traveled through configuration
+$\config_\kappa$, we define
+$\Delta_\kappa$ to be the total distance traveled through configuration
 space
 \be
-\Delta_i = \sum_{\rho=1}^i \left\lVert \mathbf{w}_\rho\right\rVert_2
+\Delta_\kappa = \sum_{\rho=1}^\kappa \left\lVert \mathbf{w}_\rho\right\rVert_2
 \eq
 where $\mathbf{w}_\rho$ is the shift used to generate $\config_\rho$
 from $\config_{\rho-1}$ and the norm is from Eqn.~(\ref{shiftsize}).
-This distance metric should not be taken too seriously since it
-is not gauge invariant.
 In Fig.~\ref{trajectory3}, we show some trajectories
-in terms of the string tension $\Delta$ and $\sigma a^2$.
+in terms of $\Delta_\kappa$ and the string tension  $\sigma a^2$.
 
 Lucini and Teper report a string tension $\sigma a^2=0.016282(76)$
 for $N=3$, and $\beta=28$ (Ref.~\cite{lucini_$mathrmsun$_2002}, Table~5).
 For the initial configuration $\config_0$ used in Fig.\ref{trajectory3},
 we measure $\sigma a^2=0.0155(56)$;
-with errors that remain about that size for $\config_k$, $k>0$.
+with errors that remain about that size for $\config_\kappa$, $\kappa>0$.
 For $\config_0$, $\plaquette_\mathrm{avg}=0.902$ and the
 action is dominated by perturbative fluctuations of the gauge fields.
 One can use the string tension to
@@ -997,14 +1003,34 @@ saddle point search is applied to each link individually).
 This procedure is much easier to apply numerically.
 As shown in trajectory {\bf lc},
 we see that that the string tension can remain relatively stable,
-but $\config_k$ eventually degrades to the trivial vacuum.
+but $\config_\kappa$ eventually degrades to the trivial vacuum.
 
 {\bf  To do:
   finish $\SU(3)$, $L^3=20^3$ calculation and
   add results for $\SU(4)$}
 
+\subsection{gauge invariance}
 
-\section{Spectrum}
+{\bf Either give an example or delete }
+
+The procedure described above is not gauge invariant.
+However, in our numerical calculations we do see approximate
+gauge invariance in the following
+sense.  Starting with a gauge configuration $\config_0$ generated
+by Euclidean lattice Monte Carlo, one can
+use our procedure to generate a trajectory of configurations
+$\config_1$, $\config_2$, \ldots
+with distances $\Delta_1$, $\Delta_2$, \ldots.
+If one first performs a gauge transform on the initial
+configuration $\config_0 \to \config_0^\prime$ and then generates a
+new trajectory $\config_1^\prime$, $\config_2^\prime$, \ldots
+with distance $\Delta_\kappa^\prime$,
+gauge invarient observables
+measured for $\config_\kappa$ and $\config_\kappa^\prime$ are appximately equal.
+Moreover,  $\Delta_\kappa \approx \Delta_\kappa^\prime$.
+
+
+\subsection{Spectrum}
 
 \begin{figure}
    configuration $\config_0$\\

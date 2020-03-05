@@ -21,7 +21,7 @@ latticeVolume[dimensions_] := Apply[Times, dimensions];
 latticeCoordinates::usage = "Given an integer-valued site index,
 return lattice coordinates.  This is not necessarily the inverse of
 linearSiteIndex.  It is simply a way to iterate over the whole lattice.";
-latticeCoordinates[i_] := latticeCoordinates[i, latticeDimensions]
+latticeCoordinates[i_] := latticeCoordinates[i, latticeDimensions];
 latticeCoordinates[ii_, dimensions_] :=
  Block[{i = ii - 1, j},
   Map[({i, j} = QuotientRemainder[i, #]; j + 1)&, dimensions]];
@@ -48,6 +48,9 @@ averagePlaquette[] :=
     Sum[Re[plaquette[dir1, dir2, latticeCoordinates[k]]],
 	     {k, latticeVolume[]}, {dir1, 2, nd},
 	     {dir2, dir1 - 1}]*2/(latticeVolume[]*nc*nd*(nd - 1));
+averagePlaquette[dir1_, dir2_] :=
+    Sum[Re[plaquette[dir1, dir2, latticeCoordinates[k]]],
+	     {k, latticeVolume[]}]/(latticeVolume[]*nc);
 makeRootLattice[] := makeRootLattice[gaugeField];
 makeRootLattice[gf_] := ParallelMap[SUPower[#, 0.5]&, gf, {2}];
 latticeDistance::usage = "Distance between two lattice configurations
@@ -498,9 +501,12 @@ stringModel[tallyData_, OptionsPattern[]] :=
       Append[Table[r[i], {i, na}], ll],
       VarianceEstimatorFunction -> (1&),
       Weights -> Map[(1/#[[2, 2]]^2)&, data]];
+  Unprotect[FittedModel];
+  ff["chiSquared"] =  modelChi2[ff, Map[#[[2,2]]&, data]];
+  Protect[FittedModel];
   If[OptionValue[printResult],
      Print[ff["ParameterTable"]];
-     Print["chi^2: ", modelChi2[ff, Map[#[[2,2]]&, data]],
+     Print["chi^2: ", ff["chiSquared"],
            " for ",
            Length[data]-Length[ff["BestFitParameters"]], " d.o.f."]];
   ff];
@@ -594,15 +600,17 @@ setAxialGauge[dir_, opts:OptionsPattern[]] :=
      Do[
       (* Apply gauge choice to each site *)
       ct = shift[dir, coords, j - 1];
-      vt = ConjugateTranspose[getLink[dir, shift[dir, ct, -1]]].v;
+      (* Solving the linear system instead of using the Hermitian
+        conjugate decreases the floating point error. *)
+      vt = LinearSolve[getLink[dir, shift[dir, ct, -1]], v];
       If[OptionValue["center"],
          vt *= Exp[I 2 Pi centerValues[[j-1]]/nc]]; 
       Do[setLink[dd, shift[dd, ct, -1],
-                 (* In order to decrease the floating point error,
-                   just set the axial direction link to the correct value. *)
-                 If[dd == dir && !OptionValue["center"],
-                    v, getLink[dd, shift[dd, ct, -1]].vt]];
-	 setLink[dd, ct, ConjugateTranspose[vt].getLink[dd, ct]],
+                 getLink[dd, shift[dd, ct, -1]].vt];
+	 setLink[dd, ct,
+                 (* Solving the linear system instead of using the
+                   Hermitian conjugate decreases the floating point error. *)
+                 LinearSolve[vt, getLink[dd,ct]]],
 	 {dd, nd}], {j, 2, latticeDimensions[[dir]]}];
      (* Verify that it all worked out *)
      If[debug,
@@ -644,6 +652,8 @@ setLandauGauge[OptionsPattern[]] :=
    Do[Scan[update, ParallelTable[
        Block[{coords = latticeCoordinates[i], sum, gauge,
               normSum = 0.0},
+             If[Not[ListQ[coords]],
+                Messsage[General::list, coords, 0]];
              If[Mod[Total[coords], 2] == cb,
                 (* Construct gauge transform *)
                 (* One can use the links themselves

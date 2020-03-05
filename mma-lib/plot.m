@@ -68,7 +68,7 @@ plotPlaquetteCorrelations[corr_, opts:OptionsPattern[]] :=
 
 Options[plotStringModelFit] = Join[Options[ErrorListPlot],
                                    Options[stringModel],
-                                   {"maxx" -> Automatic}];
+                                   {"maxx" -> All}];
 plotStringModelFit[tallyData_, opts:OptionsPattern[]] :=
  Block[{lowerCutoff = OptionValue["lowerCutoff"],
         nearest, maxx, miny, maxy, nn, ff, cd = ColorData[1]}, 
@@ -77,7 +77,7 @@ plotStringModelFit[tallyData_, opts:OptionsPattern[]] :=
        Apply[Sequence, FilterRules[{opts}, Options[stringModel]]],
                    printResult -> True];
   nearest = Length[nn[[1,1]]] - 1;
-  maxx = If[OptionValue["maxx"] === Automatic,
+  maxx = If[OptionValue["maxx"] === All,
             Max[Map[(#[[1, 1]]*#[[1,-1]])&, nn]] + Min[latticeDimensions]/2,
             OptionValue["maxx"]];
   maxy = Max[Map[#[[2, 1]] + 1.5 #[[2, 2]] &, nn]]; 

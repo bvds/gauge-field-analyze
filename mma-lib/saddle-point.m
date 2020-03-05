@@ -392,7 +392,8 @@ Options[findDelta] = {dynamicPartMethod -> Automatic, printDetails -> True,
      Extensive benchmarking shows 2 threads * maximum MPI processes
      is optimal. *)
   threads -> 2,
-  (* A numerical value will invoke the MPI version. *)
+  (* A numerical value will invoke the MPI version.
+     Number of MPI processes.*)
   processes -> Automatic,
   (* Currently, hard-coded for a single AMD Epyc processor. *)
   mpiFlags -> None,
