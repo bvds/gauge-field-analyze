@@ -434,26 +434,30 @@ modelChi2::usage = "Calculate chi^2 statistic from errors and differences.";
 modelChi2[model_, errors_] :=
     Total[(model["FitResiduals"]/errors)^2];
 
-stringModel::usage = "Fit to an exponential plus a constant term, including the universal string correction.  See Andreas Athenodorou, Michael Teper, https://arxiv.org/abs/1609.03873; arXiv:1302.6257v2 [hep-th] 12 Mar 2013; http://arxiv.org/abs/0912.3339  For option \"stringTension\"->Automatic (default), fit string tension, else use value given.";
+(* For these constants to be used in plots and tables, they
+  are defined as global variables.
+  Alternatively, one could wrap these and the function in Module[]
+  to define a unique instance. *)
+Clear[c0, c1, cCoulomb, cPerimeter, a2sigma, cConstant, chiSquared];
+Format[a2sigma] = Row[{Style["a", Italic]^2, "\[Sigma]"}];
+Format[c0]:=Subscript["c", 0];
+Format[cConstant[i_]]:=Subscript["c", i];
+Format[cCoulomb]:=Subscript["c", "q"];
+Format[cPerimeter]:=Subscript["c", "p"];
+Format[chiSquared]:=Superscript["\[Chi]", 2];
+
+stringModel::usage = "Fit to an exponential plus a constant term, including the universal string correction as well as Coulomb force contributions.  See Andreas Athenodorou, Michael Teper, https://arxiv.org/abs/1609.03873; arXiv:1302.6257v2 [hep-th] 12 Mar 2013; http://arxiv.org/abs/0912.3339  The Coulomb force contributions consist of a log(r) term plus a perimeter term.  For option \"stringTension\"->Automatic (default), fit string tension, else use value given.  Likewise for \"coulomb\" and \"perimeter.\"";
 Options[stringModel] = {printResult -> False, "lowerCutoff"->0,
                         "upperCutoff" -> Infinity,
                         "state" -> 0, "constantTerm" -> False,
                         "stringTension" -> Automatic,
-                        "coulomb" -> Automatic};
-(* For these constants to be used in plots and tables, they
-  must be global variables.  One could wrap these and the function
-  in Module[] to define a unique instance. *)
-Clear[c0, c1, cCoulomb, eEpsilon, a2sigma];
-Format[a2sigma] = Row[{Style[a, Italic]^2, \[Sigma]}];
-Format[c0]:=Subscript["c", 0];
-Format[c1]:=Subscript["c", 1];
-Format[cCoulomb]:=Subscript["c", "q"];
-Format[cEpsilon]:=Subscript["c", "p"];
+                        "coulomb" -> Automatic, "perimeter" -> Automatic};
 stringModel[tallyData_, OptionsPattern[]] :=
  Block[(* Protect against any global definitions of model parameters
          and allow for local constant value. *)
-     {ff, f0, r, ll, a2sigma, cCoulomb,
+     {ff, f0, r, ll, a2sigma, cCoulomb, cPerimeter,
       nll = Length[Union[Map[Last, Keys[tallyData]]]],
+      llValues = Union[Map[Last, Keys[tallyData]]],
       na = Length[First[Keys[tallyData]]] - 1,
       casimir = 8 Pi (OptionValue["state"] - (nd-2)/24),
       data = Select[
@@ -464,47 +468,111 @@ stringModel[tallyData_, OptionsPattern[]] :=
      a2sigma = OptionValue["stringTension"]];
   If[OptionValue["coulomb"] =!= Automatic,
      cCoulomb = OptionValue["coulomb"]];
+  If[OptionValue["perimeter"] =!= Automatic,
+     cPerimeter = OptionValue["perimeter"]];
   (* Perform a simple fit to get decent starting values *)
   f0 = NonlinearModelFit[
       Map[{#[[1, 1]], #[[1,-1]], #[[2, 1]]}&, data],
       c0*Exp[-r*ll*a2sigma] +
-      If[OptionValue["constantTerm"], c1, 0],
+      Total[Map[If[ll==# && OptionValue["constantTerm"],
+                   cConstant[#], 0]&, llValues]],
       {{c0, 1.0},
        If[OptionValue["stringTension"] === Automatic,
           {a2sigma, 0.016}, Nothing],
-       If[OptionValue["constantTerm"], {c1, 0.}, Nothing]},
-      {r, ll},
+       If[OptionValue["constantTerm"],
+          Apply[Sequence,
+                Map[{cConstant[#], 0.0}&, llValues]],
+          Nothing]},
+     {r, ll},
       VarianceEstimatorFunction -> (1&),
-      Weights -> Map[(1/#[[2, 2]]^2)&, data]];
+      Weights -> Map[(1/#[[2, 2]]^2)&, data],
+      Method -> "LevenbergMarquardt"];
   ff = NonlinearModelFit[
       Map[Append[#[[1]], #[[2, 1]]]&, data],
-      (* The constrained version of NonLinearModelFit[] uses a
-        different algorithm and does not converge as well.  Instead,
-        add boundary terms to the fit function.
+      (* The constrained version of NonLinearModelFit[] does not  
+        use Levenberg-Marquardt and does not converge as well.
+        Instead, add boundary terms to the fit function.
 
        Tried Exp[-const*r[i]] factor in Coulomb term for 12x18x18,
        but preferred sign was const<0. *)
       c0*Sum[
           Exp[-r[i]*ll*a2sigma*Sqrt[Max[0, 1 + casimir/(a2sigma*ll^2)] +
                                     10^-10] -
-              If[nll>1, 2*cEpsilon*ll, 0] - 2*cCoulomb*ll*Log[r[i]]] +
-          r[i]*If[cCoulomb<0, 100*cCoulomb, 0],
-          {i, na}] + If[OptionValue["constantTerm"], c1, 0],
+              If[nll>1, 2*cPerimeter*ll, 0] - 2*cCoulomb*ll*Log[r[i]]] +
+          ll*If[cPerimeter<0 && nll>1, 20*cPerimeter, 0] +
+          ll*r[i]*If[cCoulomb<0, 20*cCoulomb, 0],
+          {i, na}] +
+      Total[Map[
+          If[ll==# && OptionValue["constantTerm"],
+             cConstant[#], 0]&, llValues]],
       {{c0, c0/.f0["BestFitParameters"]},
        If[OptionValue["stringTension"] === Automatic,
           {a2sigma, a2sigma/.f0["BestFitParameters"]}, Nothing],
        If[OptionValue["coulomb"] === Automatic,
           {cCoulomb, 0.02}, Nothing],
-       If[nll>1, {cEpsilon, 0.}, Nothing],
+       If[nll>1, {cPerimeter, 0.}, Nothing],
        If[OptionValue["constantTerm"],
-          {c1, c1/.f0["BestFitParameters"]}, Nothing]},
+          Apply[Sequence,
+                Map[{cConstant[#], cConstant[#]/.f0["BestFitParameters"]}&,
+                    llValues]],
+          Nothing]},
       Append[Table[r[i], {i, na}], ll],
       VarianceEstimatorFunction -> (1&),
-      Weights -> Map[(1/#[[2, 2]]^2)&, data]];
+      Weights -> Map[(1/#[[2, 2]]^2)&, data],
+      Method -> "LevenbergMarquardt"];
   Unprotect[FittedModel];
   ff["chiSquared"] =  modelChi2[ff, Map[#[[2,2]]&, data]];
   Protect[FittedModel];
   If[OptionValue[printResult],
+     Print["Correlation matrix: ",ff["CorrelationMatrix"]];
+     (* Print["Covariance matrix: ",ff["CovarianceMatrix"]]; *)
+     Print[ff["ParameterTable"]];
+     Print["chi^2: ", ff["chiSquared"],
+           " for ",
+           Length[data]-Length[ff["BestFitParameters"]], " d.o.f."]];
+  ff];
+
+wilsonModel::usage = "Fit to an exponential, including Coulomb force contributions and an optional excited state.  The Coulomb force contributions consist of a complicated normal term plus a perimeter term.  For option \"stringTension\"->Automatic (default), fit string tension, else use value given.  Likewise for \"coulomb\" and \"perimeter.\"";
+Options[wilsonModel] = {printResult -> False, "state" -> 0,
+                        "stringTension" -> Automatic,
+                        "coulomb" -> Automatic, "perimeter" -> Automatic};
+wilsonModel[data0_, OptionsPattern[]] :=
+ Block[(* Protect against any global definitions of model parameters
+         and allow for local constant value. *)
+     {data = Normal[data0], ff, w1, w2, l1, l2, a2sigma, cCoulomb, cPerimeter},
+  If[OptionValue["stringTension"] =!= Automatic,
+     a2sigma = OptionValue["stringTension"]];
+  If[OptionValue["coulomb"] =!= Automatic,
+     cCoulomb = OptionValue["coulomb"]];
+  If[OptionValue["perimeter"] =!= Automatic,
+     cPerimeter = OptionValue["perimeter"]];
+  ff = NonlinearModelFit[
+    Map[Append[#[[1]], #[[2, 1]]] &, data], 
+    c0 Exp[-w1*w2*a2sigma - cCoulomb*wilsonCoulomb[w1, w2] -
+           cPerimeter*2*(w1 + w2)] +
+    (* Exterior rectangle using lattice periodicity *)
+    c0 Exp[-(l1*l2 - w1*w2)*a2sigma -
+           cCoulomb*wilsonCoulomb[w1, w2, l1, l2] -
+           cPerimeter*2*(w1 + w2)] + 
+    If[OptionValue["state"] > 0, c2*Exp[-w1*w2*c3], 0],
+    {{c0, 1.0},
+     If[OptionValue["state"] >0, {c2, 0.0}, Nothing],
+     If[OptionValue["state"] >0, {c3, 0.05}, Nothing], 
+     If[OptionValue["stringTension"] === Automatic, 
+        {a2sigma, 0.016}, Nothing],
+     If[OptionValue["coulomb"] === Automatic, {cCoulomb, 0.01}, Nothing],
+     If[OptionValue["perimeter"] === Automatic,
+        {cPerimeter, 0.01}, Nothing]},
+    {w1, w2, l1, l2},
+    VarianceEstimatorFunction -> (1 &), 
+    Weights -> Map[(1/#[[2, 2]]^2) &, data],
+    Method -> "LevenbergMarquardt"];
+  Unprotect[FittedModel];
+  ff["chiSquared"] =  modelChi2[ff, Map[#[[2,2]]&, data]];
+  Protect[FittedModel];
+  If[OptionValue[printResult],
+     Print["Correlation matrix: ",ff["CorrelationMatrix"]];
+     (* Print["Covariance matrix: ",ff["CovarianceMatrix"]]; *)
      Print[ff["ParameterTable"]];
      Print["chi^2: ", ff["chiSquared"],
            " for ",

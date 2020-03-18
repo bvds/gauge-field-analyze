@@ -1,19 +1,3 @@
-valueError::usage = "valueError[a, b] represents value a with standard error b.";
-valueError/:valueError[a_, ae_] + valueError[b_, be_] :=
-     valueError[a+b, Norm[{ae, be}]];
-valueError/:valueError[a_, ae_] * valueError[b_, be_] :=
-    valueError[a*b, Abs[a*b] Norm[{ae/a, be/b}]];
-valueError/:b_?NumericQ*valueError[a_, ae_] :=
-     valueError[a*b, ae*Abs[b]];
-valueError/:b_?NumericQ + valueError[a_, ae_] :=
-     valueError[a+b, ae];
-valueError/:valueError[a_, ae_]^b_?NumericQ :=
-     valueError[a^b, ae Abs[b*a^(b-1)]];
-valueError/:Exp[valueError[a_, ae_]] :=
-     valueError[Exp[a], ae Exp[a]];
-valueError/:Conjugate[valueError[a_, ae_]] :=
-     valueError[Conjugate[a], Conjugate[ae]];
-
 teperTension::usage = "Square root of the string tension in units of the lattice spacing for a specific beta.  From Athenodorou-Teper2017_Article_SUNGaugeTheoriesIn21Dimensions.pdf";
 teperTension[nd_, nc_, "1", beta_, plaquette_]:=
     teperTension[nc, nc, 1, beta, plaquette];

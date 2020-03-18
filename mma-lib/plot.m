@@ -1,16 +1,3 @@
-(* See https://mathematica.stackexchange.com/questions/132454 *)
-printNumberError[a_, b_] :=
-    Block[{exponent = Floor[Max[RealExponent[{a, b}]]],
-   sas =  If[Floor[RealExponent[#1]] >= Floor[RealExponent[#2]] - 1,
-             SetAccuracy[#1, Accuracy[SetPrecision[#2, 2]]], 0]&},
-  If[exponent < 6 && exponent > -4,
-     NumberForm[Row[{sas[a, b], "±", SetPrecision[b, 2]}, " "],
-                ExponentFunction -> (Null &)],
-     Block[{aa = a/10^exponent, bb = b/10^exponent},
-           Row[{"(", sas[aa, bb], "±", SetPrecision[bb, 2], ")",
-                "×", Superscript[10, exponent]}, " "]]]];
-Format[valueError[a_, b_]] := printNumberError[a, b];
-
 plotActionLimits[] := {0, Min[2 n^2/3, 15]};
 plotActionPlane[dir1_, dir2_, anchor_, range_] :=
  Block[{coords = anchor},
@@ -111,35 +98,112 @@ plotStringModelFit[tallyData_, opts:OptionsPattern[]] :=
       Axes -> False, Frame -> True, 
       FrameLabel -> {"area enclosed (plaquettes)", 
                      "Polyakov loop correlator"}], 
-       Table[
-        Block[{face = latticeDimensions, vertices},
-         face[[dir0]] = 1;
-         vertices = makeVertices[face];
-         {ParametricPlot[
-           Block[{xx = x Last[vertices]/Norm[Last[vertices]]},
-            {latticeDimensions[[dir0]]*x,
-             Apply[ff,
-                   Append[
-                       Take[Sort[Map[Norm[#-xx]&, vertices], Less], nearest],
-                       latticeDimensions[[dir0]]]]}],
-           {x, Sqrt[nd-1]-1/2, Norm[Last[vertices]]/2+1/2},
-           PlotStyle->{cd[dir0], Opacity[0.5], Thickness[0.004],
-                       Dashing[0.02]}],
-          Table[If[
-              dir1 != dir0,
-              ParametricPlot[
-               Block[{xx = Table[If[i==dir1, x, 0], {i, nd}]},
-                {latticeDimensions[[dir0]]*x,
-                 Apply[ff,
-                       Append[
-                           Take[Sort[Map[Norm[#-xx]&, vertices], Less], nearest],
-                           latticeDimensions[[dir0]]]]}],
-               {x, 1/2, latticeDimensions[[dir1]]/2+1/2},
-               PlotStyle -> {cd[dir0], Opacity[0.5], Thickness[0.004]},
-               PlotRange -> All],
-              Nothing],
-                {dir1, nd}]}],
-        {dir0, nd}]]];
+      Table[
+       Block[{face = latticeDimensions, vertices},
+        face[[dir0]] = 1;
+        vertices = makeVertices[face];
+        {ParametricPlot[
+          Block[{xx = x Last[vertices]/Norm[Last[vertices]]},
+           {latticeDimensions[[dir0]]*x,
+            Apply[ff,
+                  Append[
+                      Take[Sort[Map[Norm[#-xx]&, vertices], Less], nearest],
+                      latticeDimensions[[dir0]]]]}],
+          {x, Sqrt[nd-1]-1/2, Norm[Last[vertices]]/2+1/2},
+          PlotStyle->{cd[dir0], Opacity[0.5], Thickness[0.004],
+                      Dashing[0.02]}],
+         Table[If[
+             dir1 != dir0,
+             ParametricPlot[
+              Block[{xx = Table[If[i==dir1, x, 0], {i, nd}]},
+               {latticeDimensions[[dir0]]*x,
+               Apply[ff,
+                     Append[
+                         Take[Sort[Map[Norm[#-xx]&, vertices], Less], nearest],
+                         latticeDimensions[[dir0]]]]}],
+              {x, 1/2, latticeDimensions[[dir1]]/2+1/2},
+              PlotStyle -> {cd[dir0], Opacity[0.5], Thickness[0.004]},
+              PlotRange -> All],
+             Nothing],
+               {dir1, nd}]}],
+       {dir0, nd}]]];
+
+
+Options[plotWilsonModelFit] = Join[Options[Graphics3D],
+                                   Options[wilsonModel],
+                                   {"maxx" -> All}];
+plotWilsonModelFit[data0_, diffFlag_, opts___]:=
+Block[{bord = 0.025, dims, ff, min, max,
+ (* Switch around dimensions to minimize number of plots.
+    This does not affect the model fitting. *)
+ data = Normal[
+     KeyMap[If[#[[3]] > #[[4]], #[[{2, 1, 4, 3}]], #]&, data0]],
+ gopts = Apply[Sequence, FilterRules[{opts}, Options[Graphics3D]]]},
+ dims = Union[Map[Take[First[#], -2] &, data]]; 
+ ff = wilsonModel[data,
+      Apply[Sequence, FilterRules[{opts}, Options[stringModel]]],
+                  printResult -> True]; 
+ If[False, Print["Fit residuals: ", ff["StandardizedResiduals"]]]; 
+ If[diffFlag,
+  max = Max[Map[Block[{y=#[[2, 1]] - Apply[ff, #[[1]]]},
+                        Max[#[[2,2]]+{y,-y}]]&, data]];
+  min = -max; 
+  GraphicsColumn[
+   Apply[Function[{l1, l2}, 
+     Block[{sdata = 
+        Select[data, (#[[1, 3]] == l1 && #[[1, 4]] == l2) &]}, 
+      Show[Graphics3D[
+        Map[Block[{fff = #[[2, 1]] - Apply[ff, #[[1]]]}, {{Thickness[
+              0.004], Green, 
+             If[Abs[fff] > #[[2, 2]], 
+              Line[{{#[[1, 1]], #[[1, 2]], 0}, {#[[1, 1]], #[[1, 2]], 
+                 If[fff > 0, fff - #[[2, 2]], fff + #[[2, 2]]]}}], 
+              Nothing]}, {Thickness[0.008], Blue, 
+             Line[{{#[[1, 1]], #[[1, 2]], 
+                fff - #[[2, 2]]}, {#[[1, 1]], #[[1, 2]], 
+                                   fff + #[[2, 2]]}}]}}] &, sdata],
+        gopts,
+        Axes -> True, 
+        AxesLabel -> {"w1", "w2", "diff"}, 
+        BoxRatios -> {1, l2/l1, 0.5}, 
+        PlotLabel -> Row[{l1, "\[Times]", l2, " lattice slice"}], 
+        PlotRange -> {min, max}], 
+       Plot3D[0, {w1, Min[Map[#[[1, 1]] &, sdata]] - bord, 
+         Max[Map[#[[1, 1]] &, sdata]] + bord}, {w2, 
+         Min[Map[#[[1, 2]] &, sdata]] - bord, 
+         Max[Map[#[[1, 2]] &, sdata]] + bord}, PlotRange -> All, 
+        RegionFunction -> (l1 != l2 || #1 >= #2 &), 
+        ClippingStyle -> None, PlotStyle -> {Opacity[0.5]}]]]], 
+         dims, {1}]],
+  min = Min[Map[(#[[2, 1]] - #[[2, 2]] 1.5) &, data]];
+  max = Max[Map[(#[[2, 1]] + #[[2, 2]] 1.5) &, data]]; 
+  GraphicsColumn[
+   Apply[Function[{l1, l2}, 
+     Block[{sdata = 
+        Select[data, (#[[1, 3]] == l1 && #[[1, 4]] == l2) &]}, 
+      Show[Graphics3D[
+        Map[{{Thickness[0.004], Gray, 
+            Line[{{#[[1, 1]], #[[1, 2]], 
+               min}, {#[[1, 1]], #[[1, 
+                2]], #[[2, 1]] - #[[2, 2]]}}]}, {Thickness[0.008], 
+            Blue, Line[{{#[[1, 1]], #[[1, 
+                2]], #[[2, 1]] - #[[2, 2]]}, {#[[1, 1]], #[[1, 
+                  2]], #[[2, 1]] + #[[2, 2]]}}]}} &, sdata],
+        gopts,
+        Axes -> True, 
+        AxesLabel -> {"w1", "w2", 
+          "\[LeftAngleBracket]W\[RightAngleBracket]"}, 
+        BoxRatios -> {1, l2/l1, 0.5}, FaceGrids -> {{0, 0, -1}}, 
+        PlotLabel -> Row[{l1, "\[Times]", l2, " lattice slice"}], 
+        PlotRange -> {min, max}], 
+       Plot3D[ff[w1, w2, l1, l2], {w1, 
+         Min[Map[#[[1, 1]] &, sdata]] - bord, 
+         Max[Map[#[[1, 1]] &, sdata]] + bord}, {w2, 
+         Min[Map[#[[1, 2]] &, sdata]] - bord, 
+         Max[Map[#[[1, 2]] &, sdata]] + bord}, PlotRange -> All, 
+        RegionFunction -> (l1 != l2 || #1 >= #2 &), 
+        ClippingStyle -> None, PlotStyle -> {Opacity[0.5]}]]]], 
+    dims, {1}]]]];
 
 plotDist::usage = "Distribution of complex numbers in a unit circle in the complex plane, showing Im[z]<0 part, and the center of the gauge group.";
 Options[plotDist] := Options[Histogram3D];

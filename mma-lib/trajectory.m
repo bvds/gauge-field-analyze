@@ -73,59 +73,56 @@ singleLinkStep[coordList_List:Null, opts:OptionsPattern[]] :=
 
 Options[makeObservableTrajectory] = Join[
     Options[singleLinkStep], {
-    "step" -> "../data/3-3/step-16-28", 
-    "periodic" -> "../data/3-3/periodic-16-28",
-    "constantTerm" -> True,
-    "lowerCutoff" -> 0}]; 
-makeObservableTrajectory[set_, label_, n_, observable_, 
+        "observables" -> {"distance", "polyakovCorrelator",
+                          "wilsonDiagonal", "wilsonTriangle"},
+        "skip" -> 1,
+        "step" -> "../data/3-3/step-16-28", 
+        "periodic" -> "../data/3-3/periodic-16-28"}]; 
+makeObservableTrajectory[set_, label_, n_, 
                             opts:OptionsPattern[]] := 
- Block[{gaugeField, delta, tallyData, ff, gaugeField0, distance = 0,
-        lastGaugeField, coordList, dd,
+ Block[{gaugeField, delta, gaugeField0, distance = 0,
+        lastGaugeField, coordList, dd, results,
         sopts = Apply[Sequence, FilterRules[
             {opts}, Options[singleLinkStep]]]},
   Get[OptionValue["periodic"] <> "-" <> ToString[set] <> ".m"];
   If[StringMatchQ[label, "single*"],
      coordList = makeCoordList[]];
   lastGaugeField = gaugeField;
-  observableTrajectory[set, label, observable] = 
-   Table[Print["Starting ", i]; 
-    If[i > 0,
-       If[StringMatchQ[label, "single*"],
-          {gaugeField, dd} = singleLinkStep[coordList, sopts],
-          Get[StringRiffle[{OptionValue["step"], ToString[set],
-                            label, ToString[i]},"-"]<>".m"];
-          gaugeField = gaugeField0;
-          dd = If[True,
-                  (* These are equivalent *)
-                  Norm[delta]/Sqrt[2*nd*latticeVolume[]],
-                  latticeDistance[gaugeField, lastGaugeField];
-                  lastGaugeField = gaugeField]];
-       distance += dd];
-    Join[{i, distance},
-         Which[
-             observable == "stringModel",
-             tallyData = talliesToAverageErrors[
-                 polyakovCorrelatorTallies["simple","1"]];
-             ff = stringModel[tallyData, 
-                              "lowerCutoff" -> OptionValue["lowerCutoff"],
-                              "constantTerm" -> OptionValue["constantTerm"]];
-             Append[MapThread[
-                 valueError[#1[[2]], #2] &,
-                           {ff["BestFitParameters"], 
-                            ff["ParameterErrors"]}],
-                    (* chi^2 *)
-                    {ff["chiSquared"], Length[ff["Data"]] -
-                                       Length[ff["BestFitParameters"]]}
-             ],
-             observable == "wilsonDiagonal",
-             {Merge[Apply[averageWilsonLoop,
-                          Table[{w, w}, {w, Max[latticeDimensions]-1}],
-                          {1}], Total]},
-             observable == "wilsonTriangle",
-             {Merge[Apply[averageWilsonLoop,
-                          Flatten[Table[{w1, w2},
-                                        {w1, 4, Max[latticeDimensions]-1,  2},
-                                        {w2, 4, w1, 2}], 1], {1}], Total]},
-             True,
-             Abort[]
-         ]], {i, 0, n}]];
+  
+  results = Transpose[Table[
+      Print["Starting ", i]; 
+      If[i > 0,
+         If[StringMatchQ[label, "single*"],
+            {gaugeField, dd} = singleLinkStep[coordList, sopts],
+            Get[StringRiffle[{OptionValue["step"], ToString[set],
+                              label, ToString[i]},"-"]<>".m"];
+            gaugeField = gaugeField0;
+            dd = If[True,
+                    (* These are equivalent *)
+                    Norm[delta]/Sqrt[2*nd*latticeVolume[]],
+                    latticeDistance[gaugeField, lastGaugeField];
+                    lastGaugeField = gaugeField]];
+         distance += dd];
+      If[Mod[i, OptionValue["skip"]] == 0, Table[
+          {i, Which[
+              observable == "distance",
+              distance,
+              observable == "polyakovCorrelator",
+              talliesToAverageErrors[
+                  polyakovCorrelatorTallies["simple","1"]],
+              observable == "wilsonDiagonal",
+              Merge[Apply[averageWilsonLoop,
+                           Table[{w, w}, {w, Max[latticeDimensions]-1}],
+                           {1}], Total],
+              observable == "wilsonTriangle",
+              Merge[Apply[averageWilsonLoop,
+                           Flatten[Table[{w1, w2},
+                                         {w1, 4, Max[latticeDimensions]-1,  2},
+                                         {w2, 4, w1, 2}], 1], {1}], Total],
+              True,
+              Abort[]
+              ]}, {observable, OptionValue["observables"]}], Nothing],
+      {i, 0, n}]];
+  Block[{i=1}, Do[
+      observableTrajectory[set, label, observable] = results[[i++]],
+      {observable, OptionValue["observables"]}]]];
