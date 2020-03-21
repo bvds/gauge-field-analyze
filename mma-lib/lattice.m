@@ -438,18 +438,23 @@ modelChi2[model_, errors_] :=
   are defined as global variables.
   Alternatively, one could wrap these and the function in Module[]
   to define a unique instance. *)
-Clear[c0, c1, cCoulomb, cPerimeter, a2sigma, cConstant, chiSquared];
-Format[a2sigma] = Row[{Style["a", Italic]^2, "\[Sigma]"}];
+Clear[c0, c1, c2, c3, cCoulomb, cPerimeter, a2sigma, cConstant, chiSquared];
+Format[a2sigma[0]] := Row[{Style["a", Italic]^2, "\[Sigma]"}];
+Format[a2sigma[j_]] := Row[{Style["a", Italic]^2,
+                            Subscript["\[Sigma]", j]}]/;j>0;
 Format[c0]:=Subscript["c", 0];
+Format[c1]:=Subscript["c", 1];
+Format[c2]:=Subscript["c", 2];
+Format[c3]:=Subscript["c", 3];
 Format[cConstant[i_]]:=Subscript["c", i];
 Format[cCoulomb]:=Subscript["c", "q"];
 Format[cPerimeter]:=Subscript["c", "p"];
 Format[chiSquared]:=Superscript["\[Chi]", 2];
 
 stringModel::usage = "Fit to an exponential plus a constant term, including the universal string correction as well as Coulomb force contributions.  See Andreas Athenodorou, Michael Teper, https://arxiv.org/abs/1609.03873; arXiv:1302.6257v2 [hep-th] 12 Mar 2013; http://arxiv.org/abs/0912.3339  The Coulomb force contributions consist of a log(r) term plus a perimeter term.  For option \"stringTension\"->Automatic (default), fit string tension, else use value given.  Likewise for \"coulomb\" and \"perimeter.\"";
-Options[stringModel] = {printResult -> False, "lowerCutoff"->0,
-                        "upperCutoff" -> Infinity,
-                        "state" -> 0, "constantTerm" -> False,
+Options[stringModel] = {printResult -> False, "lowerCutoff" -> 0,
+                        "upperCutoff" -> Infinity, "order" -> 0,
+                        "eigenstate" -> 0, "constantTerm" -> False,
                         "stringTension" -> Automatic,
                         "coulomb" -> Automatic, "perimeter" -> Automatic};
 stringModel[tallyData_, OptionsPattern[]] :=
@@ -459,13 +464,13 @@ stringModel[tallyData_, OptionsPattern[]] :=
       nll = Length[Union[Map[Last, Keys[tallyData]]]],
       llValues = Union[Map[Last, Keys[tallyData]]],
       na = Length[First[Keys[tallyData]]] - 1,
-      casimir = 8 Pi (OptionValue["state"] - (nd-2)/24),
+      casimir = Function[state, 8 Pi (state - (nd-2)/24)],
       data = Select[
           Normal[tallyData],
           (#[[1,1]]*#[[1,-1]] > OptionValue["lowerCutoff"] &&
            #[[1,1]]*#[[1,-1]] < OptionValue["upperCutoff"])&]},
   If[OptionValue["stringTension"] =!= Automatic,
-     a2sigma = OptionValue["stringTension"]];
+     a2sigma[0] = OptionValue["stringTension"]];
   If[OptionValue["coulomb"] =!= Automatic,
      cCoulomb = OptionValue["coulomb"]];
   If[OptionValue["perimeter"] =!= Automatic,
@@ -473,12 +478,12 @@ stringModel[tallyData_, OptionsPattern[]] :=
   (* Perform a simple fit to get decent starting values *)
   f0 = NonlinearModelFit[
       Map[{#[[1, 1]], #[[1,-1]], #[[2, 1]]}&, data],
-      c0*Exp[-r*ll*a2sigma] +
+      c0*Exp[-r*ll*a2sigma[0]] +
       Total[Map[If[ll==# && OptionValue["constantTerm"],
                    cConstant[#], 0]&, llValues]],
       {{c0, 1.0},
        If[OptionValue["stringTension"] === Automatic,
-          {a2sigma, 0.016}, Nothing],
+          {a2sigma[0], 0.016}, Nothing],
        If[OptionValue["constantTerm"],
           Apply[Sequence,
                 Map[{cConstant[#], 0.0}&, llValues]],
@@ -493,24 +498,56 @@ stringModel[tallyData_, OptionsPattern[]] :=
         use Levenberg-Marquardt and does not converge as well.
         Instead, add boundary terms to the fit function.
 
-       Tried Exp[-const*r[i]] factor in Coulomb term for 12x18x18,
-       but preferred sign was const<0. *)
-      c0*Sum[
-          Exp[-r[i]*ll*a2sigma*Sqrt[Max[0, 1 + casimir/(a2sigma*ll^2)] +
-                                    10^-10] -
-              If[nll>1, 2*cPerimeter*ll, 0] - 2*cCoulomb*ll*Log[r[i]]] +
-          ll*If[cPerimeter<0 && nll>1, 20*cPerimeter, 0] +
-          ll*r[i]*If[cCoulomb<0, 20*cCoulomb, 0],
+        Tried Exp[-const*r[i]] factor in Coulomb term for 12x18x18,
+        but preferred sign was const<0. *)
+      Sum[
+          If[OptionValue["eigenstate"] == 0,
+             (* potentianl shape with corrections *)
+             c0*Exp[-r[i]*ll*a2sigma[0] - 2*cCoulomb*ll*Log[r[i]] -
+                    If[nll>1, 2*cPerimeter*ll, 0] -
+                    If[OptionValue["order"]>0, cConstant[-1] r[i], 0] -
+                    If[OptionValue["order"]>1, c1 r[i]/ll, 0] -
+                    If[OptionValue["order"]>1, c2 ll/r[i], 0]
+             ],
+             (* Sum over eigenstates, with universal correction *)
+             Sum[eigenNorm[j]*Exp[-r[i]*ll*a2sigma[j]*
+                             Sqrt[Max[
+                                 1 + casimir[j]/(a2sigma[j]*ll^2),
+                                 10.0^-10]]] +
+                 (* Order eigenvalues *)
+                 If[j>0, Max[0, a2sigma[j-1] - a2sigma[j]]*1000.0, 0],
+                 {j, 0, OptionValue["eigenstate"] - 1}]],
           {i, na}] +
       Total[Map[
           If[ll==# && OptionValue["constantTerm"],
              cConstant[#], 0]&, llValues]],
-      {{c0, c0/.f0["BestFitParameters"]},
+      {If[OptionValue["eigenstate"] == 0,
+          {c0, c0/.f0["BestFitParameters"]}, Nothing],
+       If[OptionValue["eigenstate"] == 0 && OptionValue["order"]>0,
+          {cConstant[-1], 0.0}, Nothing],
+       If[OptionValue["eigenstate"] == 0 && OptionValue["order"]>1,
+          {c1, 0.0}, Nothing],
+       If[OptionValue["eigenstate"] == 0 && OptionValue["order"]>1,
+          {c2, 0.0}, Nothing],
        If[OptionValue["stringTension"] === Automatic,
-          {a2sigma, a2sigma/.f0["BestFitParameters"]}, Nothing],
-       If[OptionValue["coulomb"] === Automatic,
+          {a2sigma[0], a2sigma[0]/.f0["BestFitParameters"]}, Nothing],
+       If[OptionValue["coulomb"] === Automatic &&
+          OptionValue["eigenstate"] == 0,
           {cCoulomb, 0.02}, Nothing],
-       If[nll>1, {cPerimeter, 0.}, Nothing],
+       If[nll>1 && OptionValue["eigenstate"] == 0 &&
+          OptionValue["perimeter"] === Automatic,
+          {cPerimeter, 0.}, Nothing],
+       If[OptionValue["eigenstate"]>0,
+          Apply[Sequence,
+                Table[{eigenNorm[j], If[j==0, c0/.f0["BestFitParameters"], 0.0]},
+                      {j, 0, OptionValue["eigenstate"] - 1}]],
+          Nothing],
+       If[OptionValue["eigenstate"]>1,
+          Apply[Sequence,
+                Table[{a2sigma[j], (5*Log[j+1.0] + 1) *
+                      a2sigma[0]/.f0["BestFitParameters"]},
+                      {j, 1, OptionValue["eigenstate"] -1}]],
+          Nothing],
        If[OptionValue["constantTerm"],
           Apply[Sequence,
                 Map[{cConstant[#], cConstant[#]/.f0["BestFitParameters"]}&,
@@ -533,33 +570,37 @@ stringModel[tallyData_, OptionsPattern[]] :=
   ff];
 
 wilsonModel::usage = "Fit to an exponential, including Coulomb force contributions and an optional excited state.  The Coulomb force contributions consist of a complicated normal term plus a perimeter term.  For option \"stringTension\"->Automatic (default), fit string tension, else use value given.  Likewise for \"coulomb\" and \"perimeter.\"";
-Options[wilsonModel] = {printResult -> False, "state" -> 0,
+Options[wilsonModel] = {printResult -> False, "order" -> 0,
                         "stringTension" -> Automatic,
                         "coulomb" -> Automatic, "perimeter" -> Automatic};
 wilsonModel[data0_, OptionsPattern[]] :=
  Block[(* Protect against any global definitions of model parameters
          and allow for local constant value. *)
-     {data = Normal[data0], ff, w1, w2, l1, l2, a2sigma, cCoulomb, cPerimeter},
+     {data = Normal[data0], ff, w1, w2, l1, l2,
+      a2sigma, cCoulomb, cPerimeter},
   If[OptionValue["stringTension"] =!= Automatic,
-     a2sigma = OptionValue["stringTension"]];
+     a2sigma[0] = OptionValue["stringTension"]];
   If[OptionValue["coulomb"] =!= Automatic,
      cCoulomb = OptionValue["coulomb"]];
   If[OptionValue["perimeter"] =!= Automatic,
      cPerimeter = OptionValue["perimeter"]];
   ff = NonlinearModelFit[
     Map[Append[#[[1]], #[[2, 1]]] &, data], 
-    c0 Exp[-w1*w2*a2sigma - cCoulomb*wilsonCoulomb[w1, w2] -
-           cPerimeter*2*(w1 + w2)] +
-    (* Exterior rectangle using lattice periodicity *)
-    c0 Exp[-(l1*l2 - w1*w2)*a2sigma -
+    c0 Exp[-w1*w2*a2sigma[0] - cCoulomb*wilsonCoulomb[w1, w2] -
+           cPerimeter*2*(w1 + w2) -
+           If[OptionValue["order"]>0, c1*(w1/w2 + w2/w1), 0] -
+           If[OptionValue["order"]>1, c2*(w1/w2^2 + w2/w1^2) +
+                                      c3*(1/w1 + 1/w2), 0]] +
+    (* Exterior of loop using lattice periodicity *)
+    c0 Exp[-(l1*l2 - w1*w2)*a2sigma[0] -
            cCoulomb*wilsonCoulomb[w1, w2, l1, l2] -
-           cPerimeter*2*(w1 + w2)] + 
-    If[OptionValue["state"] > 0, c2*Exp[-w1*w2*c3], 0],
-    {{c0, 1.0},
-     If[OptionValue["state"] >0, {c2, 0.0}, Nothing],
-     If[OptionValue["state"] >0, {c3, 0.05}, Nothing], 
+           cPerimeter*2*(w1 + w2) - cConstant[-1] (l1 + l2 - w1 - w2)],
+    {{c0, 1.0}, {cConstant[-1], 0.0},
+     If[OptionValue["order"]>0, {c1, 0.0}, Nothing],
+     If[OptionValue["order"]>1, {c2, 0.0}, Nothing], 
+     If[OptionValue["order"]>1, {c3, 0.0}, Nothing], 
      If[OptionValue["stringTension"] === Automatic, 
-        {a2sigma, 0.016}, Nothing],
+        {a2sigma[0], 0.016}, Nothing],
      If[OptionValue["coulomb"] === Automatic, {cCoulomb, 0.01}, Nothing],
      If[OptionValue["perimeter"] === Automatic,
         {cPerimeter, 0.01}, Nothing]},

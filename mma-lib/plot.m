@@ -131,7 +131,7 @@ plotStringModelFit[tallyData_, opts:OptionsPattern[]] :=
 
 Options[plotWilsonModelFit] = Join[Options[Graphics3D],
                                    Options[wilsonModel],
-                                   {"maxx" -> All}];
+                                   {}];
 plotWilsonModelFit[data0_, diffFlag_, opts___]:=
 Block[{bord = 0.025, dims, ff, min, max,
  (* Switch around dimensions to minimize number of plots.
@@ -141,7 +141,7 @@ Block[{bord = 0.025, dims, ff, min, max,
  gopts = Apply[Sequence, FilterRules[{opts}, Options[Graphics3D]]]},
  dims = Union[Map[Take[First[#], -2] &, data]]; 
  ff = wilsonModel[data,
-      Apply[Sequence, FilterRules[{opts}, Options[stringModel]]],
+      Apply[Sequence, FilterRules[{opts}, Options[wilsonModel]]],
                   printResult -> True]; 
  If[False, Print["Fit residuals: ", ff["StandardizedResiduals"]]]; 
  If[diffFlag,

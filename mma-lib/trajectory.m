@@ -126,3 +126,37 @@ makeObservableTrajectory[set_, label_, n_,
   Block[{i=1}, Do[
       observableTrajectory[set, label, observable] = results[[i++]],
       {observable, OptionValue["observables"]}]]];
+
+bulkPolyakovLoops[inPath_, outFile_, steps_] :=
+Block[{tallyData = 
+   Table[Block[{gaugeField}, 
+     Get[inPath <> ToString[i] <> ".m"]; 
+     polyakovCorrelatorTallies["simple", "1"]], {i, 1, steps}], data}, 
+ stringModelValuesState = 
+  Map[Block[{ff = 
+       stringModel[talliesToAverageErrors[#], printResult -> False, 
+        "eigenstate" -> 2, "constantTerm" -> False]}, 
+     Append[Map[valueError[#[[1]], #[[2]]] &, 
+       ff["ParameterTableEntries"]], {ff["chiSquared"], 
+       Length[#] - Length[ff["BestFitParameters"]]}]] &, tallyData]; 
+ stringModelValuesPotential = 
+  Map[Block[{ff = 
+       stringModel[talliesToAverageErrors[#], printResult -> False, 
+        "eigenstate" -> 0, "order" -> 0, "constantTerm" -> False]}, 
+     Append[Map[valueError[#[[1]], #[[2]]] &, 
+       ff["ParameterTableEntries"]], {ff["chiSquared"], 
+       Length[#] - Length[ff["BestFitParameters"]]}]] &, tallyData]; 
+ polyakovCorrelatorKeys = Keys[First[tallyData]]; 
+ data = Transpose[Map[#[[2]]/#[[1]] &, Values[tallyData], {2}]];
+ polyakovCorrelatorCovariance = Outer[Covariance, data, data, 1];
+ polyakovCorrelatorMerged = 
+  talliesToAverageErrors[Merge[tallyData, Total]]; 
+ polyakovCorrelatorGrouped = 
+  talliesToAverageErrors[
+   Merge[Map[{1, #[[2]]/#[[1]], (#[[2]]/#[[1]])^2} &, tallyData, {2}],
+         Total]];
+ DeleteFile[outFile];
+ Save[outFile,
+      {"polyakovCorrelatorMerged", "polyakovCorrelatorGrouped",
+       "polyakovCorrelatorCovariance", "polyakovCorrelatorKeys",
+       "stringModelValuesState", "stringModelValuesPotential"}]]
