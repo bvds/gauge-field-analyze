@@ -10553,7 +10553,7 @@ Cell[BoxData[
   ";"}]], "Input",ExpressionUUID->"34345205-2760-409e-84a4-3756855286a5"],
 
 Cell[BoxData["0.8919768695155285`"], \
-"Print",ExpressionUUID->"64584ccf-df33-4ed7-82ed-08379eacafa0"]
+"Print",ExpressionUUID->"0893e775-b6bc-42c3-a000-54d768694784"]
 }, Open  ]],
 
 Cell[CellGroupData[{
@@ -10594,130 +10594,11 @@ Cell["Calculate new value and save :", \
 Cell[CellGroupData[{
 
 Cell[BoxData[
- RowBox[{" ", 
-  RowBox[{"Block", "[", 
-   RowBox[{
-    RowBox[{"{", 
-     RowBox[{"tallyData", "=", 
-      RowBox[{"Table", "[", 
-       RowBox[{
-        RowBox[{"Block", "[", 
-         RowBox[{
-          RowBox[{"{", "gaugeField", "}"}], ",", 
-          RowBox[{
-           RowBox[{"Get", "[", 
-            RowBox[{"\"\<../data/3-4/periodic-12.16.20-48-\>\"", "<>", 
-             RowBox[{"ToString", "[", "i", "]"}], "<>", "\"\<.m\>\""}], "]"}],
-            ";", 
-           RowBox[{"polyakovCorrelatorTallies", "[", 
-            RowBox[{"\"\<simple\>\"", ",", "\"\<1\>\""}], "]"}]}]}], "]"}], 
-        ",", 
-        RowBox[{"{", 
-         RowBox[{"i", ",", "1", ",", "100"}], "}"}]}], "]"}]}], "}"}], ",", 
-    RowBox[{
-     RowBox[{"stringModelValues0", "=", 
-      RowBox[{"Map", "[", 
-       RowBox[{
-        RowBox[{
-         RowBox[{"Block", "[", 
-          RowBox[{
-           RowBox[{"{", 
-            RowBox[{"ff", "=", 
-             RowBox[{"stringModel", "[", 
-              RowBox[{
-               RowBox[{"talliesToAverageErrors", "[", "#", "]"}], ",", 
-               RowBox[{"printResult", "\[Rule]", "False"}], ",", 
-               RowBox[{"\"\<lowerCutoff\>\"", "\[Rule]", "0"}], ",", 
-               RowBox[{"\"\<constantTerm\>\"", "\[Rule]", "False"}]}], 
-              "]"}]}], "}"}], ",", 
-           RowBox[{"Append", "[", 
-            RowBox[{
-             RowBox[{"Map", "[", 
-              RowBox[{
-               RowBox[{
-                RowBox[{"valueError", "[", 
-                 RowBox[{
-                  RowBox[{"#", "[", 
-                   RowBox[{"[", "1", "]"}], "]"}], ",", 
-                  RowBox[{"#", "[", 
-                   RowBox[{"[", "2", "]"}], "]"}]}], "]"}], "&"}], ",", 
-               RowBox[{"ff", "[", "\"\<ParameterTableEntries\>\"", "]"}]}], 
-              "]"}], ",", 
-             RowBox[{"{", 
-              RowBox[{
-               RowBox[{"ff", "[", "\"\<chiSquared\>\"", "]"}], ",", 
-               RowBox[{
-                RowBox[{"Length", "[", "#", "]"}], "-", 
-                RowBox[{"Length", "[", 
-                 RowBox[{"ff", "[", "\"\<BestFitParameters\>\"", "]"}], 
-                 "]"}]}]}], "}"}]}], "]"}]}], "]"}], "&"}], ",", 
-        "tallyData"}], "]"}]}], ";", 
-     RowBox[{"stringModelValues1", "=", 
-      RowBox[{"Map", "[", 
-       RowBox[{
-        RowBox[{
-         RowBox[{"Block", "[", 
-          RowBox[{
-           RowBox[{"{", 
-            RowBox[{"ff", "=", 
-             RowBox[{"stringModel", "[", 
-              RowBox[{
-               RowBox[{"talliesToAverageErrors", "[", "#", "]"}], ",", 
-               RowBox[{"printResult", "\[Rule]", "False"}], ",", 
-               RowBox[{"\"\<lowerCutoff\>\"", "\[Rule]", "0"}], ",", 
-               RowBox[{"\"\<constantTerm\>\"", "\[Rule]", "True"}]}], "]"}]}],
-             "}"}], ",", 
-           RowBox[{"Append", "[", 
-            RowBox[{
-             RowBox[{"Map", "[", 
-              RowBox[{
-               RowBox[{
-                RowBox[{"valueError", "[", 
-                 RowBox[{
-                  RowBox[{"#", "[", 
-                   RowBox[{"[", "1", "]"}], "]"}], ",", 
-                  RowBox[{"#", "[", 
-                   RowBox[{"[", "2", "]"}], "]"}]}], "]"}], "&"}], ",", 
-               RowBox[{"ff", "[", "\"\<ParameterTableEntries\>\"", "]"}]}], 
-              "]"}], ",", 
-             RowBox[{"{", 
-              RowBox[{
-               RowBox[{"ff", "[", "\"\<chiSquared\>\"", "]"}], ",", 
-               RowBox[{
-                RowBox[{"Length", "[", "#", "]"}], "-", 
-                RowBox[{"Length", "[", 
-                 RowBox[{"ff", "[", "\"\<BestFitParameters\>\"", "]"}], 
-                 "]"}]}]}], "}"}]}], "]"}]}], "]"}], "&"}], ",", 
-        "tallyData"}], "]"}]}], ";", 
-     RowBox[{"polyakovCorrelatorMerged", "=", 
-      RowBox[{"talliesToAverageErrors", "[", 
-       RowBox[{"Merge", "[", 
-        RowBox[{"tallyData", ",", "Total"}], "]"}], "]"}]}], ";", 
-     RowBox[{"polyakovCorrelatorGrouped", "=", 
-      RowBox[{"talliesToAverageErrors", "[", 
-       RowBox[{"Merge", "[", 
-        RowBox[{
-         RowBox[{"Map", "[", 
-          RowBox[{
-           RowBox[{
-            RowBox[{"{", 
-             RowBox[{"1", ",", 
-              RowBox[{
-               RowBox[{"#", "[", 
-                RowBox[{"[", "2", "]"}], "]"}], "/", 
-               RowBox[{"#", "[", 
-                RowBox[{"[", "1", "]"}], "]"}]}], ",", 
-              RowBox[{
-               RowBox[{"(", 
-                RowBox[{
-                 RowBox[{"#", "[", 
-                  RowBox[{"[", "2", "]"}], "]"}], "/", 
-                 RowBox[{"#", "[", 
-                  RowBox[{"[", "1", "]"}], "]"}]}], ")"}], "^", "2"}]}], 
-             "}"}], "&"}], ",", "tallyData", ",", 
-           RowBox[{"{", "2", "}"}]}], "]"}], ",", "Total"}], "]"}], "]"}]}], 
-     ";"}]}], "]"}]}]], \
-"Input",ExpressionUUID->"bf62d081-1960-4d57-a880-8a4dd95e75d8"],
+ RowBox[{"bulkPolyakovLoops", "[", 
+  RowBox[{
+  "\"\<../data/3-4/periodic-12.16.20-48-\>\"", ",", 
+   "\"\<../data/3-4/correlators-12.16.20-48.m\>\"", ",", "100"}], 
+  "]"}]], "Input",ExpressionUUID->"775cfa47-b653-4795-ad84-0f48088cc339"],
 
 Cell[BoxData[
  TemplateBox[{
@@ -10725,321 +10606,65 @@ Cell[BoxData[
    "\"The step size in the search has become less than the tolerance \
 prescribed by the PrecisionGoal option, but the gradient is larger than the \
 tolerance specified by the AccuracyGoal option. There is a possibility that \
-the method has stalled at a point that is not a local minimum.\"",2,67,40,
-   31758554736713710614,"Local"},
+the method has stalled at a point that is not a local minimum.\"",2,458,147,
+   31760030339772785057,"Local"},
   "MessageTemplate"]], "Message", \
-"MSG",ExpressionUUID->"b766b5dd-3fa7-4f3f-936f-cab9d15bceed"],
-
-Cell[BoxData[
- TemplateBox[{
-  "NonlinearModelFit","sszero",
-   "\"The step size in the search has become less than the tolerance \
-prescribed by the PrecisionGoal option, but the gradient is larger than the \
-tolerance specified by the AccuracyGoal option. There is a possibility that \
-the method has stalled at a point that is not a local minimum.\"",2,67,41,
-   31758554736713710614,"Local"},
-  "MessageTemplate"]], "Message", \
-"MSG",ExpressionUUID->"1f882908-3cbf-44be-9ebf-6ad3108cab83"],
-
-Cell[BoxData[
- TemplateBox[{
-  "NonlinearModelFit","sszero",
-   "\"The step size in the search has become less than the tolerance \
-prescribed by the PrecisionGoal option, but the gradient is larger than the \
-tolerance specified by the AccuracyGoal option. There is a possibility that \
-the method has stalled at a point that is not a local minimum.\"",2,67,42,
-   31758554736713710614,"Local"},
-  "MessageTemplate"]], "Message", \
-"MSG",ExpressionUUID->"69276446-4533-429f-bd86-838dbb0b7627"],
-
-Cell[BoxData[
- TemplateBox[{
-  "General","stop",
-   "\"Further output of \\!\\(\\*StyleBox[RowBox[{\\\"NonlinearModelFit\\\", \
-\\\"::\\\", \\\"sszero\\\"}], \\\"MessageName\\\"]\\) will be suppressed \
-during this calculation.\"",2,67,43,31758554736713710614,"Local"},
-  "MessageTemplate"]], "Message", \
-"MSG",ExpressionUUID->"f89dfa93-af54-403e-ba37-2ca0ec1143f1"],
-
-Cell[BoxData[
- TemplateBox[{
-  "NonlinearModelFit","cvmit",
-   "\"Failed to converge to the requested accuracy or precision within \\!\\(\
-\\*RowBox[{\\\"100\\\"}]\\) iterations.\"",2,67,44,31758554736713710614,
-   "Local"},
-  "MessageTemplate"]], "Message", \
-"MSG",ExpressionUUID->"3c28626d-1768-4a44-a461-4dab8c428e57"],
-
-Cell[BoxData[
- TemplateBox[{
-  "NonlinearModelFit","cvmit",
-   "\"Failed to converge to the requested accuracy or precision within \\!\\(\
-\\*RowBox[{\\\"100\\\"}]\\) iterations.\"",2,67,45,31758554736713710614,
-   "Local"},
-  "MessageTemplate"]], "Message", \
-"MSG",ExpressionUUID->"81a4446c-8100-4926-b6ff-bfc3f6d844c3"],
-
-Cell[BoxData[
- TemplateBox[{
-  "NonlinearModelFit","cvmit",
-   "\"Failed to converge to the requested accuracy or precision within \\!\\(\
-\\*RowBox[{\\\"100\\\"}]\\) iterations.\"",2,67,46,31758554736713710614,
-   "Local"},
-  "MessageTemplate"]], "Message", \
-"MSG",ExpressionUUID->"6d19af15-1d51-41bb-8ca5-93a868b248b1"],
-
-Cell[BoxData[
- TemplateBox[{
-  "General","stop",
-   "\"Further output of \\!\\(\\*StyleBox[RowBox[{\\\"NonlinearModelFit\\\", \
-\\\"::\\\", \\\"cvmit\\\"}], \\\"MessageName\\\"]\\) will be suppressed \
-during this calculation.\"",2,67,47,31758554736713710614,"Local"},
-  "MessageTemplate"]], "Message", \
-"MSG",ExpressionUUID->"d2664939-e622-4eaf-869f-0c47a0f754c5"]
+"MSG",ExpressionUUID->"3c7bafe0-a672-4e63-99a8-1b3e06088cdd"]
 }, Open  ]],
 
 Cell[BoxData[
- RowBox[{"Block", "[", 
+ RowBox[{"bulkPolyakovLoops", "[", 
   RowBox[{
-   RowBox[{"{", 
-    RowBox[{"f", "=", "\"\<../data/3-4/correlators-12.16.20-48.m\>\""}], 
-    "}"}], ",", 
-   RowBox[{
-    RowBox[{"DeleteFile", "[", "f", "]"}], ";", 
-    RowBox[{"Save", "[", 
-     RowBox[{"f", ",", 
-      RowBox[{"{", 
-       RowBox[{
-       "\"\<polyakovCorrelatorMerged\>\"", ",", 
-        "\"\<polyakovCorrelatorGrouped\>\"", ",", " ", 
-        "\"\<stringModelValues0\>\"", ",", " ", 
-        "\"\<stringModelValues1\>\""}], "}"}]}], "]"}]}]}], 
-  "]"}]], "Input",ExpressionUUID->"5a4d772d-2aaa-4242-ad4a-2d76f260c564"],
+  "\"\<../data/3-4/periodic-16-48-\>\"", ",", 
+   "\"\<../data/3-4/correlators-16-48.m\>\"", ",", "100"}], 
+  "]"}]], "Input",ExpressionUUID->"fa59a99c-38c2-4cc7-bc0f-f0c0959c0a07"],
 
 Cell[CellGroupData[{
 
 Cell[BoxData[
- RowBox[{" ", 
-  RowBox[{"Block", "[", 
+ RowBox[{"Sqrt", "[", 
+  RowBox[{"Take", "[", 
    RowBox[{
-    RowBox[{"{", 
-     RowBox[{"tallyData", "=", 
-      RowBox[{"Table", "[", 
-       RowBox[{
-        RowBox[{"Block", "[", 
-         RowBox[{
-          RowBox[{"{", "gaugeField", "}"}], ",", 
-          RowBox[{
-           RowBox[{"Get", "[", 
-            RowBox[{"\"\<../data/3-4/periodic-16-48-\>\"", "<>", 
-             RowBox[{"ToString", "[", "i", "]"}], "<>", "\"\<.m\>\""}], "]"}],
-            ";", 
-           RowBox[{"polyakovCorrelatorTallies", "[", 
-            RowBox[{"\"\<simple\>\"", ",", "\"\<1\>\""}], "]"}]}]}], "]"}], 
-        ",", 
-        RowBox[{"{", 
-         RowBox[{"i", ",", "1", ",", "100"}], "}"}]}], "]"}]}], "}"}], ",", 
-    RowBox[{
-     RowBox[{"stringModelValues0", "=", 
-      RowBox[{"Map", "[", 
-       RowBox[{
-        RowBox[{
-         RowBox[{"Block", "[", 
-          RowBox[{
-           RowBox[{"{", 
-            RowBox[{"ff", "=", 
-             RowBox[{"stringModel", "[", 
-              RowBox[{
-               RowBox[{"talliesToAverageErrors", "[", "#", "]"}], ",", 
-               RowBox[{"printResult", "\[Rule]", "False"}], ",", 
-               RowBox[{"\"\<lowerCutoff\>\"", "\[Rule]", "0"}], ",", 
-               RowBox[{"\"\<constantTerm\>\"", "\[Rule]", "False"}]}], 
-              "]"}]}], "}"}], ",", 
-           RowBox[{"Append", "[", 
-            RowBox[{
-             RowBox[{"Map", "[", 
-              RowBox[{
-               RowBox[{
-                RowBox[{"valueError", "[", 
-                 RowBox[{
-                  RowBox[{"#", "[", 
-                   RowBox[{"[", "1", "]"}], "]"}], ",", 
-                  RowBox[{"#", "[", 
-                   RowBox[{"[", "2", "]"}], "]"}]}], "]"}], "&"}], ",", 
-               RowBox[{"ff", "[", "\"\<ParameterTableEntries\>\"", "]"}]}], 
-              "]"}], ",", 
-             RowBox[{"{", 
-              RowBox[{
-               RowBox[{"ff", "[", "\"\<chiSquared\>\"", "]"}], ",", 
-               RowBox[{
-                RowBox[{"Length", "[", "#", "]"}], "-", 
-                RowBox[{"Length", "[", 
-                 RowBox[{"ff", "[", "\"\<BestFitParameters\>\"", "]"}], 
-                 "]"}]}]}], "}"}]}], "]"}]}], "]"}], "&"}], ",", 
-        "tallyData"}], "]"}]}], ";", 
-     RowBox[{"stringModelValues1", "=", 
-      RowBox[{"Map", "[", 
-       RowBox[{
-        RowBox[{
-         RowBox[{"Block", "[", 
-          RowBox[{
-           RowBox[{"{", 
-            RowBox[{"ff", "=", 
-             RowBox[{"stringModel", "[", 
-              RowBox[{
-               RowBox[{"talliesToAverageErrors", "[", "#", "]"}], ",", 
-               RowBox[{"printResult", "\[Rule]", "False"}], ",", 
-               RowBox[{"\"\<lowerCutoff\>\"", "\[Rule]", "0"}], ",", 
-               RowBox[{"\"\<constantTerm\>\"", "\[Rule]", "True"}]}], "]"}]}],
-             "}"}], ",", 
-           RowBox[{"Append", "[", 
-            RowBox[{
-             RowBox[{"Map", "[", 
-              RowBox[{
-               RowBox[{
-                RowBox[{"valueError", "[", 
-                 RowBox[{
-                  RowBox[{"#", "[", 
-                   RowBox[{"[", "1", "]"}], "]"}], ",", 
-                  RowBox[{"#", "[", 
-                   RowBox[{"[", "2", "]"}], "]"}]}], "]"}], "&"}], ",", 
-               RowBox[{"ff", "[", "\"\<ParameterTableEntries\>\"", "]"}]}], 
-              "]"}], ",", 
-             RowBox[{"{", 
-              RowBox[{
-               RowBox[{"ff", "[", "\"\<chiSquared\>\"", "]"}], ",", 
-               RowBox[{
-                RowBox[{"Length", "[", "#", "]"}], "-", 
-                RowBox[{"Length", "[", 
-                 RowBox[{"ff", "[", "\"\<BestFitParameters\>\"", "]"}], 
-                 "]"}]}]}], "}"}]}], "]"}]}], "]"}], "&"}], ",", 
-        "tallyData"}], "]"}]}], ";", 
-     RowBox[{"polyakovCorrelatorMerged", "=", 
-      RowBox[{"talliesToAverageErrors", "[", 
-       RowBox[{"Merge", "[", 
-        RowBox[{"tallyData", ",", "Total"}], "]"}], "]"}]}], ";", 
-     RowBox[{"polyakovCorrelatorGrouped", "=", 
-      RowBox[{"talliesToAverageErrors", "[", 
-       RowBox[{"Merge", "[", 
-        RowBox[{
-         RowBox[{"Map", "[", 
-          RowBox[{
-           RowBox[{
-            RowBox[{"{", 
-             RowBox[{"1", ",", 
-              RowBox[{
-               RowBox[{"#", "[", 
-                RowBox[{"[", "2", "]"}], "]"}], "/", 
-               RowBox[{"#", "[", 
-                RowBox[{"[", "1", "]"}], "]"}]}], ",", 
-              RowBox[{
-               RowBox[{"(", 
-                RowBox[{
-                 RowBox[{"#", "[", 
-                  RowBox[{"[", "2", "]"}], "]"}], "/", 
-                 RowBox[{"#", "[", 
-                  RowBox[{"[", "1", "]"}], "]"}]}], ")"}], "^", "2"}]}], 
-             "}"}], "&"}], ",", "tallyData", ",", 
-           RowBox[{"{", "2", "}"}]}], "]"}], ",", "Total"}], "]"}], "]"}]}], 
-     ";"}]}], "]"}]}]], \
-"Input",ExpressionUUID->"cd70e5f0-b392-4992-8bd3-fad3f8954ae0"],
+    RowBox[{"Diagonal", "[", "polyakovCorrelatorCovariance", "]"}], ",", 
+    "10"}], "]"}], 
+  "]"}]], "Input",ExpressionUUID->"a02bf32c-9da7-4518-bbcc-b8f3961d1b09"],
 
 Cell[BoxData[
- TemplateBox[{
-  "NonlinearModelFit","sszero",
-   "\"The step size in the search has become less than the tolerance \
-prescribed by the PrecisionGoal option, but the gradient is larger than the \
-tolerance specified by the AccuracyGoal option. There is a possibility that \
-the method has stalled at a point that is not a local minimum.\"",2,69,48,
-   31758554736713710614,"Local"},
-  "MessageTemplate"]], "Message", \
-"MSG",ExpressionUUID->"6c48ab80-9cf2-4ef7-b2ce-e837d1baf979"],
-
-Cell[BoxData[
- TemplateBox[{
-  "NonlinearModelFit","sszero",
-   "\"The step size in the search has become less than the tolerance \
-prescribed by the PrecisionGoal option, but the gradient is larger than the \
-tolerance specified by the AccuracyGoal option. There is a possibility that \
-the method has stalled at a point that is not a local minimum.\"",2,69,49,
-   31758554736713710614,"Local"},
-  "MessageTemplate"]], "Message", \
-"MSG",ExpressionUUID->"6c194324-00ee-4c58-8394-744ade63aae4"],
-
-Cell[BoxData[
- TemplateBox[{
-  "NonlinearModelFit","sszero",
-   "\"The step size in the search has become less than the tolerance \
-prescribed by the PrecisionGoal option, but the gradient is larger than the \
-tolerance specified by the AccuracyGoal option. There is a possibility that \
-the method has stalled at a point that is not a local minimum.\"",2,69,50,
-   31758554736713710614,"Local"},
-  "MessageTemplate"]], "Message", \
-"MSG",ExpressionUUID->"438f8999-925f-408a-937e-77f6967f20fe"],
-
-Cell[BoxData[
- TemplateBox[{
-  "General","stop",
-   "\"Further output of \\!\\(\\*StyleBox[RowBox[{\\\"NonlinearModelFit\\\", \
-\\\"::\\\", \\\"sszero\\\"}], \\\"MessageName\\\"]\\) will be suppressed \
-during this calculation.\"",2,69,51,31758554736713710614,"Local"},
-  "MessageTemplate"]], "Message", \
-"MSG",ExpressionUUID->"43ea5098-6a43-411b-a26b-8d18931041e8"],
-
-Cell[BoxData[
- TemplateBox[{
-  "NonlinearModelFit","cvmit",
-   "\"Failed to converge to the requested accuracy or precision within \\!\\(\
-\\*RowBox[{\\\"100\\\"}]\\) iterations.\"",2,69,52,31758554736713710614,
-   "Local"},
-  "MessageTemplate"]], "Message", \
-"MSG",ExpressionUUID->"92824148-455c-42a9-8d21-db499437d145"],
-
-Cell[BoxData[
- TemplateBox[{
-  "NonlinearModelFit","cvmit",
-   "\"Failed to converge to the requested accuracy or precision within \\!\\(\
-\\*RowBox[{\\\"100\\\"}]\\) iterations.\"",2,69,53,31758554736713710614,
-   "Local"},
-  "MessageTemplate"]], "Message", \
-"MSG",ExpressionUUID->"959cd16e-5dbe-4fcd-801d-57564632f89e"],
-
-Cell[BoxData[
- TemplateBox[{
-  "NonlinearModelFit","cvmit",
-   "\"Failed to converge to the requested accuracy or precision within \\!\\(\
-\\*RowBox[{\\\"100\\\"}]\\) iterations.\"",2,69,54,31758554736713710614,
-   "Local"},
-  "MessageTemplate"]], "Message", \
-"MSG",ExpressionUUID->"956fe014-8162-49e2-b366-c1a32d36c3e2"],
-
-Cell[BoxData[
- TemplateBox[{
-  "General","stop",
-   "\"Further output of \\!\\(\\*StyleBox[RowBox[{\\\"NonlinearModelFit\\\", \
-\\\"::\\\", \\\"cvmit\\\"}], \\\"MessageName\\\"]\\) will be suppressed \
-during this calculation.\"",2,69,55,31758554736713710614,"Local"},
-  "MessageTemplate"]], "Message", \
-"MSG",ExpressionUUID->"434a4c3d-6d56-41b8-870c-a7b0ec78e5b4"]
+ RowBox[{"{", 
+  RowBox[{
+  "0.004427474831373839`", ",", "0.006079895949616503`", ",", 
+   "0.004303225861085413`", ",", "0.005299328876892239`", ",", 
+   "0.008123311144975422`", ",", "0.009555392800341886`", ",", 
+   "0.004454417796699148`", ",", "0.009269556344003142`", ",", 
+   "0.010757963869990388`", ",", "0.007591631406814579`"}], 
+  "}"}]], "Output",ExpressionUUID->"1d4da60d-3b7f-4970-ba72-655b20f1b75f"]
 }, Open  ]],
 
+Cell[CellGroupData[{
+
 Cell[BoxData[
- RowBox[{"Block", "[", 
+ RowBox[{"InputForm", "[", 
   RowBox[{
-   RowBox[{"{", 
-    RowBox[{"f", "=", "\"\<../data/3-4/correlators-16-48.m\>\""}], "}"}], ",", 
-   RowBox[{
-    RowBox[{"DeleteFile", "[", "f", "]"}], ";", 
-    RowBox[{"Save", "[", 
-     RowBox[{"f", ",", 
-      RowBox[{"{", 
-       RowBox[{
-       "\"\<polyakovCorrelatorMerged\>\"", ",", 
-        "\"\<polyakovCorrelatorGrouped\>\"", ",", " ", 
-        "\"\<stringModelValues0\>\"", ",", " ", 
-        "\"\<stringModelValues1\>\""}], "}"}]}], "]"}]}]}], 
-  "]"}]], "Input",ExpressionUUID->"a707d79a-07a8-4455-9ecc-9c5f6cb61daa"]
-}, Closed]],
+   RowBox[{"Values", "[", 
+    RowBox[{"Take", "[", 
+     RowBox[{"polyakovCorrelatorGrouped", ",", "10"}], "]"}], "]"}], "*", 
+   "2"}], "]"}]], \
+"Input",ExpressionUUID->"9f7dfe87-1915-43f4-92ef-e9e509dc3144"],
+
+Cell["\<\
+{valueError[0.13508239758331164, 0.004427474831373955], 
+ valueError[0.054102291576636936, 0.0060798959496164975], 
+ valueError[0.03124463192280323, 0.004303225861085415], 
+ valueError[0.02207658286682433, 0.005299328876892237], 
+ valueError[0.01707043162110431, 0.008123311144975422], 
+ valueError[0.010263078074231706, 0.009555392800341884], 
+ valueError[0.010909681007784907, 0.004454417796699147], 
+ valueError[0.007415932604986988, 0.009269556344003142], 
+ valueError[0.01040803123602559, 0.010757963869990388], 
+ valueError[0.051163132186455476, 0.007591631406814599]}\
+\>", "Output",ExpressionUUID->"5a516fc4-77c6-47ba-9300-93b92b36bacb"]
+}, Open  ]]
+}, Open  ]],
 
 Cell[CellGroupData[{
 
@@ -11460,10 +11085,10 @@ Cell[BoxData[
      RowBox[{"If", "[", 
       RowBox[{"True", ",", "Automatic", ",", "0.01888"}], "]"}]}], ",", 
     RowBox[{"\"\<lowerCutoff\>\"", "\[Rule]", "0"}], ",", 
-    RowBox[{"\"\<constantTerm\>\"", "\[Rule]", "True"}], ",", 
-    RowBox[{"(*", 
-     RowBox[{
-      RowBox[{"\"\<maxx\>\"", "\[Rule]", "150"}], ","}], "*)"}], 
+    RowBox[{"\"\<upperCutoff\>\"", "\[Rule]", "Infinity"}], ",", 
+    RowBox[{"\"\<constantTerm\>\"", "\[Rule]", "False"}], ",", 
+    RowBox[{"\"\<order\>\"", "\[Rule]", "0"}], ",", 
+    RowBox[{"\"\<eigenstate\>\"", "\[Rule]", "2"}], ",", 
     RowBox[{"BaseStyle", "\[Rule]", 
      RowBox[{"If", "[", 
       RowBox[{"True", ",", "journalStyle", ",", 
@@ -11490,63 +11115,29 @@ Cell[BoxData[
    RowBox[{"{", 
     RowBox[{
      RowBox[{"{", 
-      RowBox[{"1.`", ",", 
-       RowBox[{"-", "0.7970567960080069`"}], ",", "0.6996569952610942`", ",", 
-       "0.9809083307551659`", ",", 
-       RowBox[{"-", "0.8288576377185658`"}], ",", 
-       RowBox[{"-", "0.7861561636906612`"}], ",", 
-       RowBox[{"-", "0.6805501212809062`"}]}], "}"}], ",", 
+      RowBox[{
+      "1.`", ",", "0.9264879349106867`", ",", "0.3362908981646454`", ",", 
+       "0.4565031355966392`"}], "}"}], ",", 
      RowBox[{"{", 
       RowBox[{
-       RowBox[{"-", "0.797056796008007`"}], ",", "1.`", ",", 
-       RowBox[{"-", "0.9093945338387376`"}], ",", 
-       RowBox[{"-", "0.8843774457763307`"}], ",", "0.9854543211279995`", ",", 
-       "0.9676858584815707`", ",", "0.914872344359572`"}], "}"}], ",", 
-     RowBox[{"{", 
-      RowBox[{"0.6996569952610942`", ",", 
-       RowBox[{"-", "0.9093945338387376`"}], ",", "1.`", ",", 
-       "0.777453585101335`", ",", 
-       RowBox[{"-", "0.833422576198798`"}], ",", 
-       RowBox[{"-", "0.79187287099453`"}], ",", 
-       RowBox[{"-", "0.7195538542044526`"}]}], "}"}], ",", 
-     RowBox[{"{", 
-      RowBox[{"0.9809083307551659`", ",", 
-       RowBox[{"-", "0.8843774457763306`"}], ",", "0.777453585101335`", ",", 
-       "1.`", ",", 
-       RowBox[{"-", "0.9039194652487547`"}], ",", 
-       RowBox[{"-", "0.8647304516954044`"}], ",", 
-       RowBox[{"-", "0.7667336147177217`"}]}], "}"}], ",", 
+      "0.9264879349106865`", ",", "0.9999999999999999`", ",", 
+       "0.39614749227663465`", ",", "0.5337177474298668`"}], "}"}], ",", 
      RowBox[{"{", 
       RowBox[{
-       RowBox[{"-", "0.8288576377185657`"}], ",", "0.9854543211279996`", ",", 
-       
-       RowBox[{"-", "0.8334225761987981`"}], ",", 
-       RowBox[{"-", "0.9039194652487548`"}], ",", "1.`", ",", 
-       "0.9880337347576873`", ",", "0.9400752221688866`"}], "}"}], ",", 
+      "0.33629089816464547`", ",", "0.39614749227663465`", ",", "1.`", ",", 
+       "0.9735268484961773`"}], "}"}], ",", 
      RowBox[{"{", 
       RowBox[{
-       RowBox[{"-", "0.7861561636906611`"}], ",", "0.9676858584815707`", ",", 
-       
-       RowBox[{"-", "0.79187287099453`"}], ",", 
-       RowBox[{"-", "0.8647304516954046`"}], ",", "0.9880337347576873`", ",", 
-       "1.0000000000000002`", ",", "0.9500034710369373`"}], "}"}], ",", 
-     RowBox[{"{", 
-      RowBox[{
-       RowBox[{"-", "0.6805501212809062`"}], ",", "0.914872344359572`", ",", 
-       RowBox[{"-", "0.7195538542044527`"}], ",", 
-       RowBox[{"-", "0.7667336147177217`"}], ",", "0.9400752221688867`", ",", 
-       "0.9500034710369373`", ",", "1.0000000000000002`"}], "}"}]}], "}"}]}],
-  SequenceForm["Correlation matrix: ", CompressedData["
-1:eJxTTMoPSmViYGBgh2II+GD/W/SvQ23jy/2NPEqC05Of2d/8IndvZvJ7+9CA
-h8UMba/2fzSZ/MNA4+V+NXE3HsHjT/f/gaqH6Rf8sn/CIcm3+1323n170efN
-/vtecg3XO97bZ8bEh3p8f2dv6fgwdpHbW3uY+TD1MP0nE13Dnz14YV+8ecKl
-1NWv9ptEFxxjDX+5f9GsD2ensj3fD3OPM9R8mHqYfutD65pfvHmz/0GSjdH9
-1a/3V83+906k88X+EKj7H0DdUwI13waqHqb/goLLmx9z39u33Ly/UEL0nf0H
-qH9h7oe55xHUfJh6Rqj+TtFna3PT3tnDwgfm38VQ98Pc0wo1H6Yeph8ASz3I
-cA==
-   "]],
+      "0.4565031355966392`", ",", "0.5337177474298669`", ",", 
+       "0.9735268484961773`", ",", "0.9999999999999998`"}], "}"}]}], "}"}]}],
+  SequenceForm[
+  "Correlation matrix: ", {{1., 0.9264879349106867, 0.3362908981646454, 
+   0.4565031355966392}, {0.9264879349106865, 0.9999999999999999, 
+   0.39614749227663465`, 0.5337177474298668}, {0.33629089816464547`, 
+   0.39614749227663465`, 1., 0.9735268484961773}, {0.4565031355966392, 
+   0.5337177474298669, 0.9735268484961773, 0.9999999999999998}}],
   Editable->
-   False]], "Print",ExpressionUUID->"fae041dd-ca32-4887-9616-a2ce24c533ec"],
+   False]], "Print",ExpressionUUID->"5945e976-9c40-43e3-a4fe-11e49040a154"],
 
 Cell[BoxData[
  StyleBox[
@@ -11554,25 +11145,20 @@ Cell[BoxData[
      {"\<\"\"\>", "\<\"Estimate\"\>", "\<\"Standard Error\"\>", "\<\"t\
 \[Hyphen]Statistic\"\>", "\<\"P\[Hyphen]Value\"\>"},
      {
-      SubscriptBox["\<\"c\"\>", "0"], "0.05877525660405739`", 
-      "0.005809901121808841`", "10.116395334755445`", 
-      "4.000703811816965`*^-20"},
-     {"a2sigma", "0.015312179901026622`", "0.003526903339230889`", 
-      "4.34153659123693`", "0.000021247541564198717`"},
-     {"cCoulomb", "0.026558621457654183`", "0.0022836522969239175`", 
-      "11.629888443800608`", "7.142873339384102`*^-25"},
-     {"cPerimeter", "0.037185970477179836`", "0.0040567626893217665`", 
-      "9.16641502719914`", "2.882774354839375`*^-17"},
+      RowBox[{"a2sigma", "[", "0", "]"}], "0.024220300980982573`", 
+      "0.000318916152666534`", "75.94567029130026`", 
+      "7.251377705056753`*^-166"},
      {
-      SubscriptBox["\<\"c\"\>", "12"], 
-      RowBox[{"-", "0.0007447145247584912`"}], "0.0016050486907369056`", 
-      RowBox[{"-", "0.4639825128398939`"}], "0.6431010217734112`"},
+      RowBox[{"eigenNorm", "[", "0", "]"}], "0.01275197726834553`", 
+      "0.0003567462889105157`", "35.74522753211924`", 
+      "2.5072742452547556`*^-96"},
      {
-      SubscriptBox["\<\"c\"\>", "16"], "0.0005244968790430281`", 
-      "0.00044496411606782414`", "1.1787397232793513`", "0.2397251406510973`"},
+      RowBox[{"eigenNorm", "[", "1", "]"}], "0.29740345364216514`", 
+      "0.05190803749918761`", "5.729429737096488`", 
+      "3.111329797636048`*^-8"},
      {
-      SubscriptBox["\<\"c\"\>", "20"], "0.00014903970353248442`", 
-      "0.00016370000335238022`", "0.910444108004457`", "0.3635456522799483`"}
+      RowBox[{"a2sigma", "[", "1", "]"}], "0.2011894738611424`", 
+      "0.01261791654359113`", "15.944745962306287`", "3.804599436550292`*^-39"}
     },
     AutoDelete->False,
     GridBoxAlignment->{"Columns" -> {{Left}}, "Rows" -> {{Automatic}}},
@@ -11584,16 +11170,16 @@ Cell[BoxData[
      "ColumnsIndexed" -> {2 -> 1}, "RowsIndexed" -> {2 -> 0.75}}],
    "Grid"], "DialogStyle",
   StripOnInput->
-   False]], "Print",ExpressionUUID->"ac63852b-555a-4f80-9ea0-e3047ddb076b"],
+   False]], "Print",ExpressionUUID->"f6320c28-d9d8-48b2-813c-c5daccbafcf7"],
 
 Cell[BoxData[
  InterpretationBox[
-  RowBox[{"\<\"chi^2: \"\>", "\[InvisibleSpace]", "83.45560570832257`", 
-   "\[InvisibleSpace]", "\<\" for \"\>", "\[InvisibleSpace]", "229", 
+  RowBox[{"\<\"chi^2: \"\>", "\[InvisibleSpace]", "712.7543800948713`", 
+   "\[InvisibleSpace]", "\<\" for \"\>", "\[InvisibleSpace]", "232", 
    "\[InvisibleSpace]", "\<\" d.o.f.\"\>"}],
-  SequenceForm["chi^2: ", 83.45560570832257, " for ", 229, " d.o.f."],
+  SequenceForm["chi^2: ", 712.7543800948713, " for ", 232, " d.o.f."],
   Editable->
-   False]], "Print",ExpressionUUID->"320bab38-6fce-4a35-aed0-c712f9edf848"]
+   False]], "Print",ExpressionUUID->"d6c80f29-0ae2-47a3-893f-d94a3d04ef29"]
 }, Open  ]]
 }, Open  ]],
 
@@ -12436,8 +12022,8 @@ Cell[BoxData[
       "0.0036466995094049386`", "2.1679502953059795`", "0.03207248444690828`"},
      {
       SubscriptBox["\<\"c\"\>", "\<\"p\"\>"], "0.0386623360936576`", 
-      "0.012773876634724108`", "3.026672105831922`", 
-      "0.003007686031763366`"},
+      "0.012773876634724108`", "3.026672105831922`", "0.003007686031763366`"},
+     
      {
       SubscriptBox["\<\"c\"\>", "1"], 
       RowBox[{"-", "0.5634223084551007`"}], "0.15773911330916637`", 
@@ -16207,7 +15793,7 @@ Cell[BoxData[
   ";"}]], "Input",ExpressionUUID->"1a725012-25df-456e-ba62-eb7a06f92388"],
 
 Cell[BoxData["0.8919768695155285`"], \
-"Print",ExpressionUUID->"f991bdfc-387a-4578-99b4-147b2a969462"]
+"Print",ExpressionUUID->"5684908a-33ed-4607-8d32-d45d59ed677b"]
 }, Open  ]],
 
 Cell[CellGroupData[{
@@ -16701,88 +16287,21 @@ Cell[CellGroupData[{
 Cell["Analyze", \
 "Subsubsection",ExpressionUUID->"a54b617b-1bec-4537-a520-c8d1c536031c"],
 
-Cell[CellGroupData[{
+Cell["131.48 5 parameters  122.2 for 6 parameters", \
+"Text",ExpressionUUID->"44075a77-663a-48e8-9eba-6527ffaa1176"],
 
 Cell[BoxData[
  RowBox[{"plotWilsonModelFit", "[", 
   RowBox[{"wilsonTriangleGrouped", ",", "True", ",", 
-   RowBox[{"\"\<state\>\"", "\[Rule]", "1"}], ",", 
-   RowBox[{"\"\<stringTension\>\"", "\[Rule]", "0.01888"}], ",", 
-   RowBox[{"\"\<coulomb\>\"", "\[Rule]", "0.0222"}]}], 
-  "]"}]], "Input",ExpressionUUID->"4176f748-3408-4282-8d91-0344b6835e20"],
-
-Cell[CellGroupData[{
-
-Cell[BoxData[
- InterpretationBox[
-  RowBox[{"\<\"Correlation matrix: \"\>", "\[InvisibleSpace]", 
-   RowBox[{"{", 
-    RowBox[{
-     RowBox[{"{", 
-      RowBox[{"1.`", ",", 
-       RowBox[{"-", "0.3991424634304764`"}], ",", 
-       RowBox[{"-", "0.8056812235442338`"}], ",", "0.6899111539371605`"}], 
-      "}"}], ",", 
-     RowBox[{"{", 
-      RowBox[{
-       RowBox[{"-", "0.3991424634304763`"}], ",", "1.`", ",", 
-       "0.738542622699748`", ",", "0.3716411192221572`"}], "}"}], ",", 
-     RowBox[{"{", 
-      RowBox[{
-       RowBox[{"-", "0.8056812235442338`"}], ",", "0.738542622699748`", ",", 
-       "0.9999999999999998`", ",", 
-       RowBox[{"-", "0.28525794961068857`"}]}], "}"}], ",", 
-     RowBox[{"{", 
-      RowBox[{"0.6899111539371605`", ",", "0.3716411192221572`", ",", 
-       RowBox[{"-", "0.28525794961068857`"}], ",", "1.0000000000000002`"}], 
-      "}"}]}], "}"}]}],
-  SequenceForm[
-  "Correlation matrix: ", {{1., -0.3991424634304764, -0.8056812235442338, 
-   0.6899111539371605}, {-0.3991424634304763, 1., 0.738542622699748, 
-   0.3716411192221572}, {-0.8056812235442338, 0.738542622699748, 
-   0.9999999999999998, -0.28525794961068857`}, {0.6899111539371605, 
-   0.3716411192221572, -0.28525794961068857`, 1.0000000000000002`}}],
-  Editable->
-   False]], "Print",ExpressionUUID->"48c56624-29bc-40fe-b0e9-ca3037de6898"],
-
-Cell[BoxData[
- StyleBox[
-  TagBox[GridBox[{
-     {"\<\"\"\>", "\<\"Estimate\"\>", "\<\"Standard Error\"\>", "\<\"t\
-\[Hyphen]Statistic\"\>", "\<\"P\[Hyphen]Value\"\>"},
-     {
-      SubscriptBox["\<\"c\"\>", "0"], "0.9229048673455378`", 
-      "0.012816182849603956`", "72.01090045106974`", 
-      "5.627679859931105`*^-88"},
-     {"c2", "0.2580386467513399`", "0.004028472092208211`", 
-      "64.05372579108419`", "5.353419781274243`*^-83"},
-     {"c3", "0.03391711642486284`", "0.00020229306191564891`", 
-      "167.66327081946795`", "2.4027440113997167`*^-124"},
-     {"cPerimeter", "0.08330635994192719`", "0.0008927704492240527`", 
-      "93.31218345581725`", "4.5865062928443145`*^-99"}
-    },
-    AutoDelete->False,
-    GridBoxAlignment->{"Columns" -> {{Left}}, "Rows" -> {{Automatic}}},
-    GridBoxDividers->{
-     "ColumnsIndexed" -> {2 -> GrayLevel[0.7]}, 
-      "RowsIndexed" -> {2 -> GrayLevel[0.7]}},
-    GridBoxItemSize->{"Columns" -> {{Automatic}}, "Rows" -> {{Automatic}}},
-    GridBoxSpacings->{
-     "ColumnsIndexed" -> {2 -> 1}, "RowsIndexed" -> {2 -> 0.75}}],
-   "Grid"], "DialogStyle",
-  StripOnInput->
-   False]], "Print",ExpressionUUID->"d2331c0d-bbd5-4117-b304-1b2f0c4defea"],
-
-Cell[BoxData[
- InterpretationBox[
-  RowBox[{"\<\"chi^2: \"\>", "\[InvisibleSpace]", "1291.0299107352203`", 
-   "\[InvisibleSpace]", "\<\" for \"\>", "\[InvisibleSpace]", "100", 
-   "\[InvisibleSpace]", "\<\" d.o.f.\"\>"}],
-  SequenceForm["chi^2: ", 1291.0299107352203`, " for ", 100, " d.o.f."],
-  Editable->
-   False]], "Print",ExpressionUUID->"efbe9638-9065-406f-bdcc-89fb133eea69"]
-}, Open  ]]
-}, Open  ]]
+   RowBox[{"\"\<order\>\"", "\[Rule]", "2"}], ",", 
+   RowBox[{"\"\<stringTension\>\"", "\[Rule]", 
+    RowBox[{"If", "[", 
+     RowBox[{"False", ",", "Automatic", ",", "0.01888"}], "]"}]}], ",", 
+   RowBox[{"\"\<coulomb\>\"", "\[Rule]", 
+    RowBox[{"If", "[", 
+     RowBox[{"True", ",", "Automatic", ",", 
+      RowBox[{"0", "*", "0.0222"}]}], "]"}]}]}], 
+  "]"}]], "Input",ExpressionUUID->"4176f748-3408-4282-8d91-0344b6835e20"]
 }, Open  ]]
 }, Open  ]]
 }, Open  ]],
@@ -30346,6 +29865,40 @@ Cell[BoxData[
 }, Open  ]]
 }, Open  ]],
 
+Cell[CellGroupData[{
+
+Cell[BoxData[
+ RowBox[{"FullSimplify", "[", 
+  RowBox[{
+   RowBox[{"(", 
+    RowBox[{
+     RowBox[{"l1", " ", "l2"}], "-", " ", 
+     RowBox[{"w1", " ", "w2"}]}], ")"}], 
+   RowBox[{"(", 
+    RowBox[{
+     RowBox[{"1", "/", 
+      RowBox[{"(", 
+       RowBox[{"l1", "-", "w1"}], ")"}]}], "+", 
+     RowBox[{"1", "/", 
+      RowBox[{"(", 
+       RowBox[{"l2", "-", "w2"}], ")"}]}]}], ")"}]}], 
+  "]"}]], "Input",ExpressionUUID->"0b355f02-281d-4bbd-a868-1da961c5b183"],
+
+Cell[BoxData[
+ RowBox[{
+  RowBox[{"(", 
+   RowBox[{
+    FractionBox["1", 
+     RowBox[{"l1", "-", "w1"}]], "+", 
+    FractionBox["1", 
+     RowBox[{"l2", "-", "w2"}]]}], ")"}], " ", 
+  RowBox[{"(", 
+   RowBox[{
+    RowBox[{"l1", " ", "l2"}], "-", 
+    RowBox[{"w1", " ", "w2"}]}], 
+   ")"}]}]], "Output",ExpressionUUID->"e51dd934-5398-435b-9b19-a83276b6eb27"]
+}, Open  ]],
+
 Cell["\<\
 Trajectory for string tension.  Picture in paper uses \
 \[OpenCurlyDoubleQuote]3-3/trajectory-16-28.m\[CloseCurlyDoubleQuote]\
@@ -35448,7 +35001,7 @@ Cell[BoxData[
 }, Open  ]]
 },
 WindowSize->{913, 610},
-WindowMargins->{{48, Automatic}, {65, Automatic}},
+WindowMargins->{{48, Automatic}, {35, Automatic}},
 PrivateNotebookOptions->{"FileOutlineCache"->False},
 TrackCellChangeTimes->False,
 PrintPrecision->10,
