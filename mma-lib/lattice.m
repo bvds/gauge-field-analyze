@@ -430,9 +430,6 @@ wilsonCoulomb[w1_, w2_, l1_, l2_, eps_:1]:=
     2*selfEnergyCoulomb[w1, eps] + 2*selfEnergyCoulomb[w2, eps] -
     twoSidesCoulomb[w2, l1 - w1] - twoSidesCoulomb[w1, l2 - w2];
 
-modelChi2::usage = "Calculate chi^2 statistic from errors and differences.";
-modelChi2[model_, errors_] :=
-    Total[(model["FitResiduals"]/errors)^2];
 
 (* For these constants to be used in plots and tables, they
   are defined as global variables.
@@ -557,9 +554,7 @@ stringModel[tallyData_, OptionsPattern[]] :=
       VarianceEstimatorFunction -> (1&),
       Weights -> Map[(1/#[[2, 2]]^2)&, data],
       Method -> "LevenbergMarquardt"];
-  Unprotect[FittedModel];
-  ff["chiSquared"] =  modelChi2[ff, Map[#[[2,2]]&, data]];
-  Protect[FittedModel];
+  addChi2[ff, Map[#[[2,2]]&, data]^2];
   If[OptionValue[printResult],
      Print["Correlation matrix: ",ff["CorrelationMatrix"]];
      (* Print["Covariance matrix: ",ff["CovarianceMatrix"]]; *)
@@ -608,9 +603,7 @@ wilsonModel[data0_, OptionsPattern[]] :=
     VarianceEstimatorFunction -> (1 &), 
     Weights -> Map[(1/#[[2, 2]]^2) &, data],
     Method -> "LevenbergMarquardt"];
-  Unprotect[FittedModel];
-  ff["chiSquared"] =  modelChi2[ff, Map[#[[2,2]]&, data]];
-  Protect[FittedModel];
+  addChi2[ff, Map[#[[2,2]]&, data]^2];
   If[OptionValue[printResult],
      Print["Correlation matrix: ",ff["CorrelationMatrix"]];
      (* Print["Covariance matrix: ",ff["CovarianceMatrix"]]; *)

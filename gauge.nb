@@ -38,6 +38,7 @@ Cell[BoxData[
 
 Cell[BoxData[
  RowBox[{
+  RowBox[{"<<", "\"\<mma-lib/covariant-fit.m\>\""}], ";", 
   RowBox[{"<<", "\"\<mma-lib/value-error.m\>\""}], ";", 
   RowBox[{"<<", "\"\<mma-lib/lattice.m\>\""}], ";", 
   RowBox[{"<<", "\"\<mma-lib/linear-algebra.m\>\""}], ";"}]], "Input",
@@ -35001,7 +35002,7 @@ Cell[BoxData[
 }, Open  ]]
 },
 WindowSize->{913, 610},
-WindowMargins->{{48, Automatic}, {35, Automatic}},
+WindowMargins->{{48, Automatic}, {5, Automatic}},
 PrivateNotebookOptions->{"FileOutlineCache"->False},
 TrackCellChangeTimes->False,
 PrintPrecision->10,
