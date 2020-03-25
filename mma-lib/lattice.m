@@ -453,7 +453,8 @@ Options[stringModel] = {printResult -> False, "lowerCutoff" -> 0,
                         "upperCutoff" -> Infinity, "order" -> 0,
                         "eigenstate" -> 0, "constantTerm" -> False,
                         "stringTension" -> Automatic,
-                        "coulomb" -> Automatic, "perimeter" -> Automatic};
+                        "coulomb" -> Automatic, "perimeter" -> Automatic,
+                        "covarianceMatrix" -> None};
 stringModel[tallyData_, OptionsPattern[]] :=
  Block[(* Protect against any global definitions of model parameters
          and allow for local constant value. *)
@@ -462,10 +463,12 @@ stringModel[tallyData_, OptionsPattern[]] :=
       llValues = Union[Map[Last, Keys[tallyData]]],
       na = Length[First[Keys[tallyData]]] - 1,
       casimir = Function[state, 8 Pi (state - (nd-2)/24)],
-      data = Select[
-          Normal[tallyData],
-          (#[[1,1]]*#[[1,-1]] > OptionValue["lowerCutoff"] &&
-           #[[1,1]]*#[[1,-1]] < OptionValue["upperCutoff"])&]},
+      data,
+      filter = Map[First, Select[
+          MapIndexed[{#2[[1]], #1}&, Keys[tallyData]],
+          (#[[2,1]]*#[[2,-1]] > OptionValue["lowerCutoff"] &&
+           #[[2,1]]*#[[2,-1]] < OptionValue["upperCutoff"])&]]},
+     data = Normal[tallyData][[filter]];
   If[OptionValue["stringTension"] =!= Automatic,
      a2sigma[0] = OptionValue["stringTension"]];
   If[OptionValue["coulomb"] =!= Automatic,
@@ -473,7 +476,10 @@ stringModel[tallyData_, OptionsPattern[]] :=
   If[OptionValue["perimeter"] =!= Automatic,
      cPerimeter = OptionValue["perimeter"]];
   (* Perform a simple fit to get decent starting values *)
-  f0 = NonlinearModelFit[
+  f0 = covariantFit1[
+      If[OptionValue["covarianceMatrix"] === None,
+         Map[(#[[2, 2]]^2)&, data],
+         OptionValue["covarianceMatrix"][[filter,filter]]],
       Map[{#[[1, 1]], #[[1,-1]], #[[2, 1]]}&, data],
       c0*Exp[-r*ll*a2sigma[0]] +
       Total[Map[If[ll==# && OptionValue["constantTerm"],
@@ -485,11 +491,12 @@ stringModel[tallyData_, OptionsPattern[]] :=
           Apply[Sequence,
                 Map[{cConstant[#], 0.0}&, llValues]],
           Nothing]},
-     {r, ll},
-      VarianceEstimatorFunction -> (1&),
-      Weights -> Map[(1/#[[2, 2]]^2)&, data],
+      {r, ll},
       Method -> "LevenbergMarquardt"];
-  ff = NonlinearModelFit[
+  ff = covariantFit1[
+      If[OptionValue["covarianceMatrix"] === None,
+         Map[(#[[2, 2]]^2)&, data],
+         OptionValue["covarianceMatrix"][[filter,filter]]],
       Map[Append[#[[1]], #[[2, 1]]]&, data],
       (* The constrained version of NonLinearModelFit[] does not  
         use Levenberg-Marquardt and does not converge as well.
@@ -551,10 +558,7 @@ stringModel[tallyData_, OptionsPattern[]] :=
                     llValues]],
           Nothing]},
       Append[Table[r[i], {i, na}], ll],
-      VarianceEstimatorFunction -> (1&),
-      Weights -> Map[(1/#[[2, 2]]^2)&, data],
       Method -> "LevenbergMarquardt"];
-  addChi2[ff, Map[#[[2,2]]&, data]^2];
   If[OptionValue[printResult],
      Print["Correlation matrix: ",ff["CorrelationMatrix"]];
      (* Print["Covariance matrix: ",ff["CovarianceMatrix"]]; *)
@@ -567,7 +571,8 @@ stringModel[tallyData_, OptionsPattern[]] :=
 wilsonModel::usage = "Fit to an exponential, including Coulomb force contributions and an optional excited state.  The Coulomb force contributions consist of a complicated normal term plus a perimeter term.  For option \"stringTension\"->Automatic (default), fit string tension, else use value given.  Likewise for \"coulomb\" and \"perimeter.\"";
 Options[wilsonModel] = {printResult -> False, "order" -> 0,
                         "stringTension" -> Automatic,
-                        "coulomb" -> Automatic, "perimeter" -> Automatic};
+                        "coulomb" -> Automatic, "perimeter" -> Automatic,
+                        "covarianceMatrix" -> None};
 wilsonModel[data0_, OptionsPattern[]] :=
  Block[(* Protect against any global definitions of model parameters
          and allow for local constant value. *)
@@ -579,7 +584,10 @@ wilsonModel[data0_, OptionsPattern[]] :=
      cCoulomb = OptionValue["coulomb"]];
   If[OptionValue["perimeter"] =!= Automatic,
      cPerimeter = OptionValue["perimeter"]];
-  ff = NonlinearModelFit[
+  ff = covariantFit1[
+    If[OptionValue["covarianceMatrix"] === None,
+       Map[(#[[2, 2]]^2)&, data],
+       OptionValue["covarianceMatrix"]],
     Map[Append[#[[1]], #[[2, 1]]] &, data], 
     c0 Exp[-w1*w2*a2sigma[0] - cCoulomb*wilsonCoulomb[w1, w2] -
            cPerimeter*2*(w1 + w2) -
@@ -600,10 +608,7 @@ wilsonModel[data0_, OptionsPattern[]] :=
      If[OptionValue["perimeter"] === Automatic,
         {cPerimeter, 0.01}, Nothing]},
     {w1, w2, l1, l2},
-    VarianceEstimatorFunction -> (1 &), 
-    Weights -> Map[(1/#[[2, 2]]^2) &, data],
     Method -> "LevenbergMarquardt"];
-  addChi2[ff, Map[#[[2,2]]&, data]^2];
   If[OptionValue[printResult],
      Print["Correlation matrix: ",ff["CorrelationMatrix"]];
      (* Print["Covariance matrix: ",ff["CovarianceMatrix"]]; *)

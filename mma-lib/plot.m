@@ -105,7 +105,7 @@ plotStringModelFit[tallyData_, opts:OptionsPattern[]] :=
         {ParametricPlot[
           Block[{xx = x Last[vertices]/Norm[Last[vertices]]},
            {latticeDimensions[[dir0]]*x,
-            Apply[ff,
+            Apply[ff["Function"],
                   Append[
                       Take[Sort[Map[Norm[#-xx]&, vertices], Less], nearest],
                       latticeDimensions[[dir0]]]]}],
@@ -117,7 +117,7 @@ plotStringModelFit[tallyData_, opts:OptionsPattern[]] :=
              ParametricPlot[
               Block[{xx = Table[If[i==dir1, x, 0], {i, nd}]},
                {latticeDimensions[[dir0]]*x,
-               Apply[ff,
+               Apply[ff["Function"],
                      Append[
                          Take[Sort[Map[Norm[#-xx]&, vertices], Less], nearest],
                          latticeDimensions[[dir0]]]]}],

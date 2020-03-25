@@ -36,6 +36,8 @@ Cell[BoxData[
  InitializationCell->
   True,ExpressionUUID->"82b967b6-90b2-4ea7-a4bc-3758585a483d"],
 
+Cell[CellGroupData[{
+
 Cell[BoxData[
  RowBox[{
   RowBox[{"<<", "\"\<mma-lib/covariant-fit.m\>\""}], ";", 
@@ -44,6 +46,19 @@ Cell[BoxData[
   RowBox[{"<<", "\"\<mma-lib/linear-algebra.m\>\""}], ";"}]], "Input",
  InitializationCell->
   True,ExpressionUUID->"6f2e5a19-f9be-44f0-a0fe-17c2835d6055"],
+
+Cell[BoxData[
+ TemplateBox[{
+  "MessageName","messg",
+   "\"\\!\\(\\*StyleBox[RowBox[{\\\"covariantFit1\\\", \\\"::\\\", \
+\\\"SlotConflict\\\"}], \\\"MessageName\\\"]\\) cannot be set to \
+\\!\\(\\*RowBox[{\\\"\\\\\\\"Form contains a slot variable \\\\\\\\\\\\\\\"#n\
+\\\\\\\\\\\\\\\" which may conflict with the \\\\\\\"\\\", \\\" \\\", \
+\\\"\\\\\\\" method.\\\\\\\"\\\", \\\" \\\", \\\"Function\\\"}]\\). It must \
+be set to a string.\"",2,77,14,31763658680419644426,"Local"},
+  "MessageTemplate"]], "Message", \
+"MSG",ExpressionUUID->"ec034917-bffa-4b34-aea2-49396688297a"]
+}, Open  ]],
 
 Cell[BoxData[
  RowBox[{
@@ -10554,7 +10569,7 @@ Cell[BoxData[
   ";"}]], "Input",ExpressionUUID->"34345205-2760-409e-84a4-3756855286a5"],
 
 Cell[BoxData["0.8919768695155285`"], \
-"Print",ExpressionUUID->"0893e775-b6bc-42c3-a000-54d768694784"]
+"Print",ExpressionUUID->"734f5962-bc0a-4855-8e7b-48c680ede660"]
 }, Open  ]],
 
 Cell[CellGroupData[{
@@ -10569,7 +10584,7 @@ Cell[BoxData[
   ";"}]], "Input",ExpressionUUID->"445d1c4d-3c90-4887-b742-ba16dbeaefa8"],
 
 Cell[BoxData["0.892482743008007`"], \
-"Print",ExpressionUUID->"ec89328f-dd1e-4ce8-83cf-871e9ca864f4"]
+"Print",ExpressionUUID->"4eae9589-56d6-4fb0-bf91-4c5b4277d51e"]
 }, Open  ]],
 
 Cell["\<\
@@ -10618,53 +10633,7 @@ Cell[BoxData[
   RowBox[{
   "\"\<../data/3-4/periodic-16-48-\>\"", ",", 
    "\"\<../data/3-4/correlators-16-48.m\>\"", ",", "100"}], 
-  "]"}]], "Input",ExpressionUUID->"fa59a99c-38c2-4cc7-bc0f-f0c0959c0a07"],
-
-Cell[CellGroupData[{
-
-Cell[BoxData[
- RowBox[{"Sqrt", "[", 
-  RowBox[{"Take", "[", 
-   RowBox[{
-    RowBox[{"Diagonal", "[", "polyakovCorrelatorCovariance", "]"}], ",", 
-    "10"}], "]"}], 
-  "]"}]], "Input",ExpressionUUID->"a02bf32c-9da7-4518-bbcc-b8f3961d1b09"],
-
-Cell[BoxData[
- RowBox[{"{", 
-  RowBox[{
-  "0.004427474831373839`", ",", "0.006079895949616503`", ",", 
-   "0.004303225861085413`", ",", "0.005299328876892239`", ",", 
-   "0.008123311144975422`", ",", "0.009555392800341886`", ",", 
-   "0.004454417796699148`", ",", "0.009269556344003142`", ",", 
-   "0.010757963869990388`", ",", "0.007591631406814579`"}], 
-  "}"}]], "Output",ExpressionUUID->"1d4da60d-3b7f-4970-ba72-655b20f1b75f"]
-}, Open  ]],
-
-Cell[CellGroupData[{
-
-Cell[BoxData[
- RowBox[{"InputForm", "[", 
-  RowBox[{
-   RowBox[{"Values", "[", 
-    RowBox[{"Take", "[", 
-     RowBox[{"polyakovCorrelatorGrouped", ",", "10"}], "]"}], "]"}], "*", 
-   "2"}], "]"}]], \
-"Input",ExpressionUUID->"9f7dfe87-1915-43f4-92ef-e9e509dc3144"],
-
-Cell["\<\
-{valueError[0.13508239758331164, 0.004427474831373955], 
- valueError[0.054102291576636936, 0.0060798959496164975], 
- valueError[0.03124463192280323, 0.004303225861085415], 
- valueError[0.02207658286682433, 0.005299328876892237], 
- valueError[0.01707043162110431, 0.008123311144975422], 
- valueError[0.010263078074231706, 0.009555392800341884], 
- valueError[0.010909681007784907, 0.004454417796699147], 
- valueError[0.007415932604986988, 0.009269556344003142], 
- valueError[0.01040803123602559, 0.010757963869990388], 
- valueError[0.051163132186455476, 0.007591631406814599]}\
-\>", "Output",ExpressionUUID->"5a516fc4-77c6-47ba-9300-93b92b36bacb"]
-}, Open  ]]
+  "]"}]], "Input",ExpressionUUID->"fa59a99c-38c2-4cc7-bc0f-f0c0959c0a07"]
 }, Open  ]],
 
 Cell[CellGroupData[{
@@ -11022,6 +10991,24 @@ Cell[BoxData[
   "}"}]], "Output",ExpressionUUID->"ca359fb1-7e4c-470e-913b-c086cb00fa96"]
 }, Open  ]],
 
+Cell["\<\
+Evoluation of the correlation matix as lattice configurations are added.\
+\>", "Text",ExpressionUUID->"f617e580-42f1-4834-b7b9-73b065727028"],
+
+Cell[BoxData[
+ RowBox[{"ListLogPlot", "[", 
+  RowBox[{
+   RowBox[{"Transpose", "[", "covarianceEigenvalues", "]"}], ",", 
+   RowBox[{"Joined", "\[Rule]", "True"}], ",", 
+   RowBox[{"Axes", "\[Rule]", "False"}], ",", 
+   RowBox[{"Frame", "\[Rule]", "True"}], ",", 
+   RowBox[{"FrameLabel", "\[Rule]", 
+    RowBox[{"{", 
+     RowBox[{
+     "\"\<number of configurations\>\"", ",", 
+      "\"\<covariance matrix eigenvalues\>\""}], "}"}]}]}], 
+  "]"}]], "Input",ExpressionUUID->"78ac9ef8-1af6-4814-a096-3c603ad330b5"],
+
 Cell[CellGroupData[{
 
 Cell[BoxData[
@@ -11035,14 +11022,14 @@ Cell[BoxData[
  TagBox[
   TemplateBox[{
    "\[ThinSpace]","\" \"",InterpretationBox[
-    "\"0.01890\"", 0.0188960672620338381`4.205667667064814, AutoDelete -> 
+    "\"0.01888\"", 0.0188753093812966503`4.205888339630378, AutoDelete -> 
      True],"\"\[PlusMinus]\"",InterpretationBox[
-    "\"0.00012\"", 0.0001176802979009842`2., AutoDelete -> True]},
+    "\"0.00012\"", 0.0001174913081201688`2., AutoDelete -> True]},
    "RowWithSeparators"],
   NumberForm[#, 
    ExponentFunction -> (
     Null& )]& ]], \
-"Output",ExpressionUUID->"26bb8d64-3663-40dd-8ac4-39404774905b"]
+"Output",ExpressionUUID->"8646a57e-54ec-4a14-8e81-1cc260b4e737"]
 }, Open  ]],
 
 Cell["\<\
@@ -11075,6 +11062,18 @@ agreement for \[OpenCurlyDoubleQuote]lowerCutoff\[CloseCurlyDoubleQuote]<20.\
 Cell[CellGroupData[{
 
 Cell[BoxData[
+ RowBox[{"Dimensions", "[", "stringModelValuesState", 
+  "]"}]], "Input",ExpressionUUID->"6520548f-ee29-4616-b09a-2ec18e254191"],
+
+Cell[BoxData[
+ RowBox[{"{", 
+  RowBox[{"100", ",", "5"}], 
+  "}"}]], "Output",ExpressionUUID->"f8a3fe42-8811-4e1b-bc2d-d10459d42457"]
+}, Open  ]],
+
+Cell[CellGroupData[{
+
+Cell[BoxData[
  RowBox[{"polyCorr", "=", 
   RowBox[{"plotStringModelFit", "[", 
    RowBox[{
@@ -11082,14 +11081,19 @@ Cell[BoxData[
      RowBox[{
      "True", ",", "polyakovCorrelatorGrouped", ",", 
       "polyakovCorrelatorMerged"}], "]"}], ",", 
+    RowBox[{"\"\<covarianceMatrix\>\"", "\[Rule]", 
+     RowBox[{"If", "[", 
+      RowBox[{"True", ",", 
+       RowBox[{"polyakovCorrelatorCovariance", "/", "100"}], ",", "None"}], 
+      "]"}]}], ",", 
     RowBox[{"\"\<stringTension\>\"", "\[Rule]", 
      RowBox[{"If", "[", 
       RowBox[{"True", ",", "Automatic", ",", "0.01888"}], "]"}]}], ",", 
-    RowBox[{"\"\<lowerCutoff\>\"", "\[Rule]", "0"}], ",", 
+    RowBox[{"\"\<lowerCutoff\>\"", "\[Rule]", "40"}], ",", 
     RowBox[{"\"\<upperCutoff\>\"", "\[Rule]", "Infinity"}], ",", 
     RowBox[{"\"\<constantTerm\>\"", "\[Rule]", "False"}], ",", 
     RowBox[{"\"\<order\>\"", "\[Rule]", "0"}], ",", 
-    RowBox[{"\"\<eigenstate\>\"", "\[Rule]", "2"}], ",", 
+    RowBox[{"\"\<eigenstate\>\"", "\[Rule]", "0"}], ",", 
     RowBox[{"BaseStyle", "\[Rule]", 
      RowBox[{"If", "[", 
       RowBox[{"True", ",", "journalStyle", ",", 
@@ -11116,29 +11120,22 @@ Cell[BoxData[
    RowBox[{"{", 
     RowBox[{
      RowBox[{"{", 
-      RowBox[{
-      "1.`", ",", "0.9264879349106867`", ",", "0.3362908981646454`", ",", 
-       "0.4565031355966392`"}], "}"}], ",", 
+      RowBox[{"1.0000000000000002`", ",", 
+       RowBox[{"-", "0.8009733374351297`"}], ",", "0.9057050056748436`"}], 
+      "}"}], ",", 
      RowBox[{"{", 
       RowBox[{
-      "0.9264879349106865`", ",", "0.9999999999999999`", ",", 
-       "0.39614749227663465`", ",", "0.5337177474298668`"}], "}"}], ",", 
+       RowBox[{"-", "0.8009733374351297`"}], ",", "1.`", ",", 
+       RowBox[{"-", "0.9656553255401342`"}]}], "}"}], ",", 
      RowBox[{"{", 
-      RowBox[{
-      "0.33629089816464547`", ",", "0.39614749227663465`", ",", "1.`", ",", 
-       "0.9735268484961773`"}], "}"}], ",", 
-     RowBox[{"{", 
-      RowBox[{
-      "0.4565031355966392`", ",", "0.5337177474298669`", ",", 
-       "0.9735268484961773`", ",", "0.9999999999999998`"}], "}"}]}], "}"}]}],
+      RowBox[{"0.9057050056748436`", ",", 
+       RowBox[{"-", "0.9656553255401342`"}], ",", "1.`"}], "}"}]}], "}"}]}],
   SequenceForm[
-  "Correlation matrix: ", {{1., 0.9264879349106867, 0.3362908981646454, 
-   0.4565031355966392}, {0.9264879349106865, 0.9999999999999999, 
-   0.39614749227663465`, 0.5337177474298668}, {0.33629089816464547`, 
-   0.39614749227663465`, 1., 0.9735268484961773}, {0.4565031355966392, 
-   0.5337177474298669, 0.9735268484961773, 0.9999999999999998}}],
+  "Correlation matrix: ", {{1.0000000000000002`, -0.8009733374351297, 
+   0.9057050056748436}, {-0.8009733374351297, 1., -0.9656553255401342}, {
+   0.9057050056748436, -0.9656553255401342, 1.}}],
   Editable->
-   False]], "Print",ExpressionUUID->"5945e976-9c40-43e3-a4fe-11e49040a154"],
+   False]], "Print",ExpressionUUID->"9cd1e5f7-4fd2-4fb3-b2e3-9a23f33d1a87"],
 
 Cell[BoxData[
  StyleBox[
@@ -11146,20 +11143,15 @@ Cell[BoxData[
      {"\<\"\"\>", "\<\"Estimate\"\>", "\<\"Standard Error\"\>", "\<\"t\
 \[Hyphen]Statistic\"\>", "\<\"P\[Hyphen]Value\"\>"},
      {
-      RowBox[{"a2sigma", "[", "0", "]"}], "0.024220300980982573`", 
-      "0.000318916152666534`", "75.94567029130026`", 
-      "7.251377705056753`*^-166"},
+      SubscriptBox["\<\"c\"\>", "0"], "0.016499625093969517`", 
+      "0.001756669394233642`", "9.392561371041353`", 
+      "2.4612508583692978`*^-11"},
      {
-      RowBox[{"eigenNorm", "[", "0", "]"}], "0.01275197726834553`", 
-      "0.0003567462889105157`", "35.74522753211924`", 
-      "2.5072742452547556`*^-96"},
-     {
-      RowBox[{"eigenNorm", "[", "1", "]"}], "0.29740345364216514`", 
-      "0.05190803749918761`", "5.729429737096488`", 
-      "3.111329797636048`*^-8"},
-     {
-      RowBox[{"a2sigma", "[", "1", "]"}], "0.2011894738611424`", 
-      "0.01261791654359113`", "15.944745962306287`", "3.804599436550292`*^-39"}
+      RowBox[{"a2sigma", "[", "0", "]"}], "0.014567598021409531`", 
+      "0.0033769220824094387`", "4.313868566080604`", 
+      "0.0001145901476967476`"},
+     {"cCoulomb", "0.020757436544748098`", "0.00769365781583437`", 
+      "2.6979932096833155`", "0.010445909022049907`"}
     },
     AutoDelete->False,
     GridBoxAlignment->{"Columns" -> {{Left}}, "Rows" -> {{Automatic}}},
@@ -11171,16 +11163,16 @@ Cell[BoxData[
      "ColumnsIndexed" -> {2 -> 1}, "RowsIndexed" -> {2 -> 0.75}}],
    "Grid"], "DialogStyle",
   StripOnInput->
-   False]], "Print",ExpressionUUID->"f6320c28-d9d8-48b2-813c-c5daccbafcf7"],
+   False]], "Print",ExpressionUUID->"18d78d37-ac90-49ae-acf5-847fba6def88"],
 
 Cell[BoxData[
  InterpretationBox[
-  RowBox[{"\<\"chi^2: \"\>", "\[InvisibleSpace]", "712.7543800948713`", 
-   "\[InvisibleSpace]", "\<\" for \"\>", "\[InvisibleSpace]", "232", 
+  RowBox[{"\<\"chi^2: \"\>", "\[InvisibleSpace]", "55.17303037575003`", 
+   "\[InvisibleSpace]", "\<\" for \"\>", "\[InvisibleSpace]", "37", 
    "\[InvisibleSpace]", "\<\" d.o.f.\"\>"}],
-  SequenceForm["chi^2: ", 712.7543800948713, " for ", 232, " d.o.f."],
+  SequenceForm["chi^2: ", 55.17303037575003, " for ", 37, " d.o.f."],
   Editable->
-   False]], "Print",ExpressionUUID->"d6c80f29-0ae2-47a3-893f-d94a3d04ef29"]
+   False]], "Print",ExpressionUUID->"3f3a489f-20da-4028-8708-9eb9add50b96"]
 }, Open  ]]
 }, Open  ]],
 
@@ -12023,8 +12015,8 @@ Cell[BoxData[
       "0.0036466995094049386`", "2.1679502953059795`", "0.03207248444690828`"},
      {
       SubscriptBox["\<\"c\"\>", "\<\"p\"\>"], "0.0386623360936576`", 
-      "0.012773876634724108`", "3.026672105831922`", "0.003007686031763366`"},
-     
+      "0.012773876634724108`", "3.026672105831922`", 
+      "0.003007686031763366`"},
      {
       SubscriptBox["\<\"c\"\>", "1"], 
       RowBox[{"-", "0.5634223084551007`"}], "0.15773911330916637`", 
@@ -35002,7 +34994,7 @@ Cell[BoxData[
 }, Open  ]]
 },
 WindowSize->{913, 610},
-WindowMargins->{{48, Automatic}, {5, Automatic}},
+WindowMargins->{{58, Automatic}, {0, Automatic}},
 PrivateNotebookOptions->{"FileOutlineCache"->False},
 TrackCellChangeTimes->False,
 PrintPrecision->10,

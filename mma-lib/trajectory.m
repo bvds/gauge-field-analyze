@@ -127,11 +127,20 @@ makeObservableTrajectory[set_, label_, n_,
       observableTrajectory[set, label, observable] = results[[i++]],
       {observable, OptionValue["observables"]}]]];
 
+bulkPolyakovLoops::usage = "Aggregate Polyakov loop correlators over a number of lattice configurations.";
 bulkPolyakovLoops[inPath_, outFile_, steps_] :=
-Block[{tallyData = 
-   Table[Block[{gaugeField}, 
-     Get[inPath <> ToString[i] <> ".m"]; 
-     polyakovCorrelatorTallies["simple", "1"]], {i, 1, steps}], data}, 
+Block[{tallyData = Table[Block[{gaugeField}, 
+        Get[inPath <> ToString[i] <> ".m"]; 
+        polyakovCorrelatorTallies["simple", "1"]], {i, 1, steps}],
+       data}, 
+ configurationCount = Length[tallyData];
+ data = Transpose[Map[#[[2]]/#[[1]] &, Values[tallyData], {2}]];
+ covarianceEigenvalues = Table[
+     Block[{dd = Map[Take[#, k]&, data]},
+           Map[{k, #}&, Chop[Sort[Eigenvalues[
+               Outer[Covariance, dd, dd, 1]]]]]],
+     {k, 2, configurationCount}];
+ polyakovCorrelatorCovariance = Outer[Covariance, data, data, 1];
  stringModelValuesState = 
   Map[Block[{ff = 
        stringModel[talliesToAverageErrors[#], printResult -> False, 
@@ -146,9 +155,6 @@ Block[{tallyData =
      Append[Map[valueError[#[[1]], #[[2]]] &, 
        ff["ParameterTableEntries"]], {ff["chiSquared"], 
        Length[#] - Length[ff["BestFitParameters"]]}]] &, tallyData]; 
- polyakovCorrelatorKeys = Keys[First[tallyData]]; 
- data = Transpose[Map[#[[2]]/#[[1]] &, Values[tallyData], {2}]];
- polyakovCorrelatorCovariance = Outer[Covariance, data, data, 1];
  polyakovCorrelatorMerged = 
   talliesToAverageErrors[Merge[tallyData, Total]]; 
  polyakovCorrelatorGrouped = 
@@ -158,5 +164,6 @@ Block[{tallyData =
  DeleteFile[outFile];
  Save[outFile,
       {"polyakovCorrelatorMerged", "polyakovCorrelatorGrouped",
-       "polyakovCorrelatorCovariance", "polyakovCorrelatorKeys",
+       "polyakovCorrelatorCovariance", "configurationCount",
+       "covarianceEigenvalues",
        "stringModelValuesState", "stringModelValuesPotential"}]]
