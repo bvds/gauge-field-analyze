@@ -156,7 +156,7 @@ Block[{tallyData = Table[Block[{gaugeField},
        ff["ParameterTableEntries"]], {ff["chiSquared"], 
        Length[#] - Length[ff["BestFitParameters"]]}]] &, tallyData]; 
  polyakovCorrelatorMerged = 
-  talliesToAverageErrors[Merge[tallyData, Total]]; 
+  talliesToAverageErrors[Merge[tallyData, Total]];
  polyakovCorrelatorGrouped = 
   talliesToAverageErrors[
    Merge[Map[{1, #[[2]]/#[[1]], (#[[2]]/#[[1]])^2} &, tallyData, {2}],

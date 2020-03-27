@@ -14,7 +14,7 @@ handle constraints.  It is computationally inefficient since it \
 evaluates \"form\" n^2 times for every step, where n is the \
 number of data points.  Methods associated with the fit function itself \
 will not work."; 
-covariantFit1::SlotConflict = "Form contains a slot variable \"#n\" which may conflict with the "Function" method.";
+covariantFit1::SlotConflict = "Form contains a slot variable \"#n\" which may conflict with the \"Function\" method.";
 Options[covariantFit1] = 
  FilterRules[
   Options[NonlinearModelFit], {Except[Weights], 

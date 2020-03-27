@@ -1,5 +1,4 @@
-Clear[valueError];
-valueError::usage = "valueError[a, b] represents value a with standard error b.";
+valueError::usage = "valueError[a, b] represents value a with standard error b. When combining the product or sum of two valueError terms, it assumes each valueError term is statistically independent.";
 valueError/:valueError[a_, ae_] + valueError[b_, be_] :=
      valueError[a+b, Norm[{ae, be}]];
 valueError/:valueError[a_, ae_] * valueError[b_, be_] :=

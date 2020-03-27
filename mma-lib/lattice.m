@@ -409,10 +409,11 @@ polyakovCorrelatorTallies["smeared", width_, x_, op_:"1"] :=
             Nothing],
 	    {dir0, nd}, {dir1, nd}]], Total];
 
-talliesToAverageErrors[tallies_] :=
-    Map[valueError[#[[2]]/#[[1]],
-         Sqrt[Re[#[[3]]] - Re[#[[2]]]^2/#[[1]]]/#[[1]]
-         + I Sqrt[Im[#[[3]]] - Im[#[[2]]]^2/#[[1]]]/#[[1]]]&, tallies];
+talliesToAverageErrors[tallies_] := Map[valueError[
+    #[[2]]/#[[1]],
+    (* Use sample standard deviation (with Bessel's correction). *)
+    Sqrt[(Re[#[[3]]] - Re[#[[2]]]^2/#[[1]])/(#[[1]]*(#[[1]]-1))] +
+    I Sqrt[(Im[#[[3]]] - Im[#[[2]]]^2/#[[1]])/(#[[1]]*(#[[1]]-1))]]&, tallies];
 rescaleCorrelators[tallies_] :=
     Association[Map[
         (#->tallies[#]/aFirstCase[tallies, {0, __, Last[#]}])&,
