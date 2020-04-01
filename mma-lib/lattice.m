@@ -349,9 +349,15 @@ polyakovCorrelators[dir_, op_] :=
           ntL is the area between the two loops for various
           lattice wrappings plus the length of the loop
           (for the leading correction). *)
-        dx = Abs[Mod[x1 - x2 + face/2, face] - face/2];
+        dx = Mod[x1 - x2 + face/2, face] - face/2;
         ntL = Append[
-            Take[Sort[Map[Norm[#-dx]&, vertices], Less], nearest],
+            Map[
+                (* Longitudinal component is always zero *)
+                Rest[Sort[Abs[#], Less]]&,
+                Take[Sort[
+                    Map[(#-dx)&, vertices],
+                    Less[Norm[#1], Norm[#2]]&],
+                     nearest]],
             latticeDimensions[[dir]]];
         lt = Lookup[tallies, Key[ntL], {0, 0, 0}];
         (* Imaginary part cancels out when averaging over face *)
@@ -387,9 +393,14 @@ polyakovCorrelators[dir0_, dir1_, width1_, x_, op_] :=
           (* ntL is the area between the two loops for various
             lattice wrappings plus the length of the loop
             (for the leading correction). *)
-         ntL = Append[
-             Take[Sort[Map[Norm[#-dx]&, vertices], Less], nearest],
-             latticeDimensions[[dir0]]];
+        ntL = Append[
+            Map[
+                (* Longitudinal component is always zero *)
+                Rest[Sort[Abs[#-dx], Less]]&, 
+                Take[Sort[Map[(#-dx)&, vertices],
+                          Less[Norm[#1], Norm[#2]]&],
+                     nearest]],
+            latticeDimensions[[dir0]]];
          lt = Lookup[tallies, Key[ntL], {0, 0, 0}];
          (* The imaginary part cancels out when averaging over the face. *)
          z = Re[Conjugate[pp[[k1]]] pp[[k2]]];
@@ -416,7 +427,7 @@ talliesToAverageErrors[tallies_] := Map[valueError[
     I Sqrt[(Im[#[[3]]] - Im[#[[2]]]^2/#[[1]])/(#[[1]]*(#[[1]]-1))]]&, tallies];
 rescaleCorrelators[tallies_] :=
     Association[Map[
-        (#->tallies[#]/aFirstCase[tallies, {0, __, Last[#]}])&,
+        (#->tallies[#]/aFirstCase[tallies, {{0..}, __, Last[#]}])&,
         Keys[tallies]]];
 
 (* See file "coulomb.nb" *)
@@ -436,23 +447,25 @@ wilsonCoulomb[w1_, w2_, l1_, l2_, eps_:1]:=
   are defined as global variables.
   Alternatively, one could wrap these and the function in Module[]
   to define a unique instance. *)
-Clear[c0, c1, c2, c3, cCoulomb, cPerimeter, a2sigma, cConstant, chiSquared];
-Format[a2sigma[0]] := Row[{Style["a", Italic]^2, "\[Sigma]"}];
-Format[a2sigma[j_]] := Row[{Style["a", Italic]^2,
-                            Subscript["\[Sigma]", j]}]/;j>0;
+Clear[c0, c1, c2, c3, cCoulomb, cPerimeter, a2sigma, cConstant,
+      chiSquared, eigenNorm, sConstant];
+Format[a2sigma] := Row[{Style["a", Italic]^2, "\[Sigma]"}];
 Format[c0]:=Subscript["c", 0];
 Format[c1]:=Subscript["c", 1];
 Format[c2]:=Subscript["c", 2];
 Format[c3]:=Subscript["c", 3];
 Format[cConstant[i_]]:=Subscript["c", i];
+Format[sConstant[i_]]:=Subscript["\[Theta]", i];
+Format[eigenNorm[i_]]:=Subscript["\[Omega]", i];
 Format[cCoulomb]:=Subscript["c", "q"];
 Format[cPerimeter]:=Subscript["c", "p"];
 Format[chiSquared]:=Superscript["\[Chi]", 2];
 
-stringModel::usage = "Fit to an exponential plus a constant term, including the universal string correction as well as Coulomb force contributions.  See Andreas Athenodorou, Michael Teper, https://arxiv.org/abs/1609.03873; arXiv:1302.6257v2 [hep-th] 12 Mar 2013; http://arxiv.org/abs/0912.3339  The Coulomb force contributions consist of a log(r) term plus a perimeter term.  For option \"stringTension\"->Automatic (default), fit string tension, else use value given.  Likewise for \"coulomb\" and \"perimeter.\"";
+stringModel::usage = "Fit to an exponential plus a constant term, including the universal string correction as well as Coulomb force contributions.  See Andreas Athenodorou, Barak Bringoltz, Michael Teper https://arxiv.org/abs/0709.0693; Ofer Aharony & Zohar Komargodski arXiv:1302.6257v2 [hep-th] 12 Mar 2013; Teper review article http://arxiv.org/abs/0912.3339  The Coulomb force contribution consists of a log(r) term plus a perimeter term.  For option \"stringTension\"->Automatic (default), fit string tension, else use value given.  Likewise for \"coulomb\" and \"perimeter.\"";
 Options[stringModel] = {printResult -> False, "lowerCutoff" -> 0,
                         "upperCutoff" -> Infinity, "order" -> 0,
-                        "eigenstate" -> 0, "constantTerm" -> False,
+                        "eigenstate" -> 0, "NambuGoto" -> False,
+                        "linearLCorrection" -> False,
                         "stringTension" -> Automatic,
                         "coulomb" -> Automatic, "perimeter" -> Automatic,
                         "covarianceMatrix" -> None};
@@ -463,42 +476,37 @@ stringModel[tallyData_, OptionsPattern[]] :=
       nll = Length[Union[Map[Last, Keys[tallyData]]]],
       llValues = Union[Map[Last, Keys[tallyData]]],
       na = Length[First[Keys[tallyData]]] - 1,
-      casimir = Function[state, 8 Pi (state - (nd-2)/24)],
+      degeneracy = Function[state, {0, 1, 2, 2, 2, 2}[[state + 1]]],
+      casimir = Function[state, 8 Pi (degeneracy[state] - (nd-2)/24)],
       data,
       filter = Map[First, Select[
           MapIndexed[{#2[[1]], #1}&, Keys[tallyData]],
-          (#[[2,1]]*#[[2,-1]] > OptionValue["lowerCutoff"] &&
-           #[[2,1]]*#[[2,-1]] < OptionValue["upperCutoff"])&]]},
+          (Norm[#[[2,1]]]*#[[2,-1]] > OptionValue["lowerCutoff"] &&
+           Norm[#[[2,1]]]*#[[2,-1]] < OptionValue["upperCutoff"])&]]},
      data = Normal[tallyData][[filter]];
   If[OptionValue["stringTension"] =!= Automatic,
-     a2sigma[0] = OptionValue["stringTension"]];
+     a2sigma = OptionValue["stringTension"]];
   If[OptionValue["coulomb"] =!= Automatic,
      cCoulomb = OptionValue["coulomb"]];
   If[OptionValue["perimeter"] =!= Automatic,
      cPerimeter = OptionValue["perimeter"]];
   (* Perform a simple fit to get decent starting values *)
-  f0 = covariantFit1[
+  f0 = covariantFit2[
       If[OptionValue["covarianceMatrix"] === None,
          Map[(#[[2, 2]]^2)&, data],
          OptionValue["covarianceMatrix"][[filter,filter]]],
-      Map[{#[[1, 1]], #[[1,-1]], #[[2, 1]]}&, data],
-      c0*Exp[-r*ll*a2sigma[0]] +
-      Total[Map[If[ll==# && OptionValue["constantTerm"],
-                   cConstant[#], 0]&, llValues]],
-      {{c0, 1.0},
+      Map[{Norm[#[[1, 1]]], #[[1,-1]], #[[2, 1]]}&, data],
+      c0*Exp[-r*ll*a2sigma],
+      {{c0, 0.05},
        If[OptionValue["stringTension"] === Automatic,
-          {a2sigma[0], 0.016}, Nothing],
-       If[OptionValue["constantTerm"],
-          Apply[Sequence,
-                Map[{cConstant[#], 0.0}&, llValues]],
-          Nothing]},
+          {a2sigma, 0.01888}, Nothing]},
       {r, ll},
       Method -> "LevenbergMarquardt"];
-  ff = covariantFit1[
+  ff = covariantFit2[
       If[OptionValue["covarianceMatrix"] === None,
          Map[(#[[2, 2]]^2)&, data],
          OptionValue["covarianceMatrix"][[filter,filter]]],
-      Map[Append[#[[1]], #[[2, 1]]]&, data],
+      Map[Join[Map[Norm, Drop[#[[1]], -1]], {#[[1, -1]], #[[2, 1]]}]&, data],
       (* The constrained version of NonLinearModelFit[] does not  
         use Levenberg-Marquardt and does not converge as well.
         Instead, add boundary terms to the fit function.
@@ -506,36 +514,54 @@ stringModel[tallyData_, OptionsPattern[]] :=
         Tried Exp[-const*r[i]] factor in Coulomb term for 12x18x18,
         but preferred sign was const<0. *)
       Sum[
-          If[OptionValue["eigenstate"] == 0,
-             (* potentianl shape with corrections *)
-             c0*Exp[-r[i]*ll*a2sigma[0] - 2*cCoulomb*ll*Log[r[i]] -
-                    If[nll>1, 2*cPerimeter*ll, 0] -
-                    If[OptionValue["order"]>0, cConstant[-1] r[i], 0] -
-                    If[OptionValue["order"]>1, c1 r[i]/ll, 0] -
-                    If[OptionValue["order"]>1, c2 ll/r[i], 0]
-             ],
-             (* Sum over eigenstates, with universal correction *)
-             Sum[eigenNorm[j]*Exp[-r[i]*ll*a2sigma[j]*
-                             Sqrt[Max[
-                                 1 + casimir[j]/(a2sigma[j]*ll^2),
-                                 10.0^-10]]] +
-                 (* Order eigenvalues *)
-                 If[j>0, Max[0, a2sigma[j-1] - a2sigma[j]]*1000.0, 0],
-                 {j, 0, OptionValue["eigenstate"] - 1}]],
-          {i, na}] +
-      Total[Map[
-          If[ll==# && OptionValue["constantTerm"],
-             cConstant[#], 0]&, llValues]],
+          Which[
+              OptionValue["eigenstate"] == 0,
+              (* area law potential shape with Coulomb correction
+                and power law  corrections *)
+              c0*Exp[-r[i]*ll*a2sigma - Sqrt[Max[a2sigma, 0]]*(
+                  cCoulomb*ll*Log[r[i]^2*Max[a2sigma, 10^-10]] +
+                  If[nll>1, 2*cPerimeter*ll, 0] +
+                  If[OptionValue["linearLCorrection"],
+                     cConstant[-1] r[i], 0]) -
+                     If[OptionValue["order"]>0, c1 r[i]/ll, 0] -
+                     If[OptionValue["order"]>0, c2 ll/r[i], 0]
+              ],
+              (* Match Nambu-Goto spectrum *)
+              OptionValue["NambuGoto"],
+              Sum[eigenNorm[j]*Exp[-r[i]*Sqrt[Max[
+                  (a2sigma*ll)^2 + a2sigma*casimir[j] +
+                  (* Fits in Table III are a bit of a mess and
+                    we can't distinguish powers of L, so we
+                    make an arbitrary choice. *)
+                  If[j>0 && OptionValue["order"]>0,
+                     cConstant[j]/ll^2, 0], 10^-10]]] (*+
+                  If[eigenNorm[j]<0, -100*eigenNorm[j], 0]*),
+                  {j, 0, OptionValue["eigenstate"] - 1}],
+              True,
+              (* Fit spectrum, but don't make any assumption
+                about agreement with Nambu-Goto.  However,
+                assume the leading correction is 1/L^2. *)
+              Sum[eigenNorm[j]*Exp[-r[i]*ll*a2sigma*(
+                  If[j==0, 1, sConstant[j]] +
+                  If[OptionValue["order"]>0, cConstant[j]/(a2sigma ll^2), 0])] (*+
+                  If[j==1 && sConstant[j]<1, 10*(sConstant[j]-1), 0] +
+                  If[j>1 && sConstant[j]<sConstant[j-1],
+                     10*(sConstant[j]-sConstant[j-1]), 0] +
+                  If[eigenNorm[j]<0, 10*eigenNorm[j], 0] *),
+                  {j, 0, OptionValue["eigenstate"] - 1}]
+          ],
+          {i, na}],
       {If[OptionValue["eigenstate"] == 0,
           {c0, c0/.f0["BestFitParameters"]}, Nothing],
-       If[OptionValue["eigenstate"] == 0 && OptionValue["order"]>0,
+       If[OptionValue["eigenstate"] == 0 &&
+          OptionValue["linearLCorrection"],
           {cConstant[-1], 0.0}, Nothing],
-       If[OptionValue["eigenstate"] == 0 && OptionValue["order"]>1,
+       If[OptionValue["eigenstate"] == 0 && OptionValue["order"]>0,
           {c1, 0.0}, Nothing],
-       If[OptionValue["eigenstate"] == 0 && OptionValue["order"]>1,
+       If[OptionValue["eigenstate"] == 0 && OptionValue["order"]>0,
           {c2, 0.0}, Nothing],
        If[OptionValue["stringTension"] === Automatic,
-          {a2sigma[0], a2sigma[0]/.f0["BestFitParameters"]}, Nothing],
+          {a2sigma, a2sigma/.f0["BestFitParameters"]}, Nothing],
        If[OptionValue["coulomb"] === Automatic &&
           OptionValue["eigenstate"] == 0,
           {cCoulomb, 0.02}, Nothing],
@@ -544,19 +570,19 @@ stringModel[tallyData_, OptionsPattern[]] :=
           {cPerimeter, 0.}, Nothing],
        If[OptionValue["eigenstate"]>0,
           Apply[Sequence,
-                Table[{eigenNorm[j], If[j==0, c0/.f0["BestFitParameters"], 0.0]},
+                Table[{eigenNorm[j], c0/(j+1.0)/.f0["BestFitParameters"]},
                       {j, 0, OptionValue["eigenstate"] - 1}]],
           Nothing],
-       If[OptionValue["eigenstate"]>1,
+       If[OptionValue["eigenstate"]>0 && Not[OptionValue["NambuGoto"]],
           Apply[Sequence,
-                Table[{a2sigma[j], (5*Log[j+1.0] + 1) *
-                      a2sigma[0]/.f0["BestFitParameters"]},
-                      {j, 1, OptionValue["eigenstate"] -1}]],
+                Table[{sConstant[j], j+1.0},
+                      {j, 1, OptionValue["eigenstate"] - 1}]],
           Nothing],
-       If[OptionValue["constantTerm"],
+       If[OptionValue["eigenstate"]>0 && OptionValue["order"]>0,
           Apply[Sequence,
-                Map[{cConstant[#], cConstant[#]/.f0["BestFitParameters"]}&,
-                    llValues]],
+                Table[{cConstant[j], 0.0},
+                      {j, If[OptionValue["NambuGoto"], 1, 0],
+                       OptionValue["eigenstate"] -1}]],
           Nothing]},
       Append[Table[r[i], {i, na}], ll],
       Method -> "LevenbergMarquardt"];
@@ -580,7 +606,7 @@ wilsonModel[data0_, OptionsPattern[]] :=
      {data = Normal[data0], ff, w1, w2, l1, l2,
       a2sigma, cCoulomb, cPerimeter},
   If[OptionValue["stringTension"] =!= Automatic,
-     a2sigma[0] = OptionValue["stringTension"]];
+     a2sigma = OptionValue["stringTension"]];
   If[OptionValue["coulomb"] =!= Automatic,
      cCoulomb = OptionValue["coulomb"]];
   If[OptionValue["perimeter"] =!= Automatic,
@@ -590,13 +616,13 @@ wilsonModel[data0_, OptionsPattern[]] :=
        Map[(#[[2, 2]]^2)&, data],
        OptionValue["covarianceMatrix"]],
     Map[Append[#[[1]], #[[2, 1]]] &, data], 
-    c0 Exp[-w1*w2*a2sigma[0] - cCoulomb*wilsonCoulomb[w1, w2] -
+    c0 Exp[-w1*w2*a2sigma - cCoulomb*wilsonCoulomb[w1, w2] -
            cPerimeter*2*(w1 + w2) -
            If[OptionValue["order"]>0, c1*(w1/w2 + w2/w1), 0] -
            If[OptionValue["order"]>1, c2*(w1/w2^2 + w2/w1^2) +
                                       c3*(1/w1 + 1/w2), 0]] +
     (* Exterior of loop using lattice periodicity *)
-    c0 Exp[-(l1*l2 - w1*w2)*a2sigma[0] -
+    c0 Exp[-(l1*l2 - w1*w2)*a2sigma -
            cCoulomb*wilsonCoulomb[w1, w2, l1, l2] -
            cPerimeter*2*(w1 + w2) - cConstant[-1] (l1 + l2 - w1 - w2)],
     {{c0, 1.0}, {cConstant[-1], 0.0},
@@ -604,7 +630,7 @@ wilsonModel[data0_, OptionsPattern[]] :=
      If[OptionValue["order"]>1, {c2, 0.0}, Nothing], 
      If[OptionValue["order"]>1, {c3, 0.0}, Nothing], 
      If[OptionValue["stringTension"] === Automatic, 
-        {a2sigma[0], 0.016}, Nothing],
+        {a2sigma, 0.016}, Nothing],
      If[OptionValue["coulomb"] === Automatic, {cCoulomb, 0.01}, Nothing],
      If[OptionValue["perimeter"] === Automatic,
         {cPerimeter, 0.01}, Nothing]},
