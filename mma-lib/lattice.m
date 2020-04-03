@@ -396,7 +396,7 @@ polyakovCorrelators[dir0_, dir1_, width1_, x_, op_] :=
         ntL = Append[
             Map[
                 (* Longitudinal component is always zero *)
-                Rest[Sort[Abs[#-dx], Less]]&, 
+                Rest[Sort[Abs[#], Less]]&, 
                 Take[Sort[Map[(#-dx)&, vertices],
                           Less[Norm[#1], Norm[#2]]&],
                      nearest]],
@@ -447,13 +447,16 @@ wilsonCoulomb[w1_, w2_, l1_, l2_, eps_:1]:=
   are defined as global variables.
   Alternatively, one could wrap these and the function in Module[]
   to define a unique instance. *)
-Clear[c0, c1, c2, c3, cCoulomb, cPerimeter, a2sigma, cConstant,
+Clear[c0, c1, c2, c3, c4, c5, c6,
+      coff, coffl, coffp, coffq, coff1, coff2, coff3,
+      cl, cCoulomb, cPerimeter, a2sigma, cConstant,
       chiSquared, eigenNorm, sConstant];
 Format[a2sigma] := Row[{Style["a", Italic]^2, "\[Sigma]"}];
 Format[c0]:=Subscript["c", 0];
 Format[c1]:=Subscript["c", 1];
 Format[c2]:=Subscript["c", 2];
 Format[c3]:=Subscript["c", 3];
+Format[coff]:=Subscript["c", "off"];
 Format[cConstant[i_]]:=Subscript["c", i];
 Format[sConstant[i_]]:=Subscript["\[Theta]", i];
 Format[eigenNorm[i_]]:=Subscript["\[Omega]", i];
@@ -465,14 +468,19 @@ stringModel::usage = "Fit to an exponential plus a constant term, including the 
 Options[stringModel] = {printResult -> False, "lowerCutoff" -> 0,
                         "upperCutoff" -> Infinity, "order" -> 0,
                         "eigenstate" -> 0, "NambuGoto" -> False,
-                        "linearLCorrection" -> False,
+                        "offAxis" -> 0,
+                        "linearLCorrections" -> False,
                         "stringTension" -> Automatic,
                         "coulomb" -> Automatic, "perimeter" -> Automatic,
                         "covarianceMatrix" -> None};
 stringModel[tallyData_, OptionsPattern[]] :=
  Block[(* Protect against any global definitions of model parameters
          and allow for local constant value. *)
-     {ff, f0, r, ll, a2sigma, cCoulomb, cPerimeter,
+     {ff, f0, r, offAxis, ll, a2sigma, cl, cCoulomb, cPerimeter,
+      c1, c2, c3, c4, c5, c6,
+      coff, coffl, coffp, coffq, coff1, coff2, coff3,
+      potentialForm = (OptionValue["eigenstate"] == 0),
+      zeroQ = Function[x, NumericQ[x] && x==0],
       nll = Length[Union[Map[Last, Keys[tallyData]]]],
       llValues = Union[Map[Last, Keys[tallyData]]],
       na = Length[First[Keys[tallyData]]] - 1,
@@ -483,18 +491,39 @@ stringModel[tallyData_, OptionsPattern[]] :=
           MapIndexed[{#2[[1]], #1}&, Keys[tallyData]],
           (Norm[#[[2,1]]]*#[[2,-1]] > OptionValue["lowerCutoff"] &&
            Norm[#[[2,1]]]*#[[2,-1]] < OptionValue["upperCutoff"])&]]},
-     data = Normal[tallyData][[filter]];
+  data = Normal[tallyData][[filter]];
   If[OptionValue["stringTension"] =!= Automatic,
      a2sigma = OptionValue["stringTension"]];
   If[OptionValue["coulomb"] =!= Automatic,
      cCoulomb = OptionValue["coulomb"]];
   If[OptionValue["perimeter"] =!= Automatic,
-     cPerimeter = OptionValue["perimeter"]];
+     cPerimeter = OptionValue["perimeter"],
+     (* With only one longitudinal value, this can
+       be absorbed into c0. *)
+     If[nll<2, cPerimeter = 0]];
+  If[!OptionValue["linearLCorrections"], cl = 0];
+  If[potentialForm && OptionValue["order"]<1, c1 = 0];
+  If[potentialForm && OptionValue["order"]<2, c2 = 0];
+  If[potentialForm && OptionValue["order"]<3, c3 = 0];
+  (* With two longitudinal values, this can be
+    absorbed into c0 and cPerimeter.
+    Numerically, its contribution is not significant for
+    300 configs nc=4, 12.16.20-48, no cutoff. *)
+  If[OptionValue["order"]<4 || nll<3, c4 = 0];
+  If[OptionValue["order"]<4 || !OptionValue["linearLCorrections"], c5 = 0];
+  If[OptionValue["order"]<4 || !OptionValue["linearLCorrections"], c6 = 0];
+  If[OptionValue["offAxis"]<1, coff = 0];
+  If[OptionValue["offAxis"]<2, coffp = 0];
+  If[OptionValue["offAxis"]<2, coffq = 0];
+  If[OptionValue["offAxis"]<2, coffl = 0];
+  If[OptionValue["offAxis"]<3, coff1 = 0];
+  If[OptionValue["offAxis"]<3, coff2 = 0];
+  If[OptionValue["offAxis"]<4, coff3 = 0];
   (* Perform a simple fit to get decent starting values *)
   f0 = covariantFit2[
       If[OptionValue["covarianceMatrix"] === None,
          Map[(#[[2, 2]]^2)&, data],
-         OptionValue["covarianceMatrix"][[filter,filter]]],
+         OptionValue["covarianceMatrix"][[filter, filter]]],
       Map[{Norm[#[[1, 1]]], #[[1,-1]], #[[2, 1]]}&, data],
       c0*Exp[-r*ll*a2sigma],
       {{c0, 0.05},
@@ -506,7 +535,10 @@ stringModel[tallyData_, OptionsPattern[]] :=
       If[OptionValue["covarianceMatrix"] === None,
          Map[(#[[2, 2]]^2)&, data],
          OptionValue["covarianceMatrix"][[filter,filter]]],
-      Map[Join[Map[Norm, Drop[#[[1]], -1]], {#[[1, -1]], #[[2, 1]]}]&, data],
+      Map[Join[Map[Norm, Drop[#[[1]], -1]],
+               (* sin(2*theta)^2 *)
+               Map[(2*#[[1]]*#[[2]]/(#[[1]]^2+#[[2]]^2))^2&, Drop[#[[1]], -1]],
+               {#[[1, -1]], #[[2, 1]]}]&, data],
       (* The constrained version of NonLinearModelFit[] does not  
         use Levenberg-Marquardt and does not converge as well.
         Instead, add boundary terms to the fit function.
@@ -515,21 +547,24 @@ stringModel[tallyData_, OptionsPattern[]] :=
         but preferred sign was const<0. *)
       Sum[
           Which[
-              OptionValue["eigenstate"] == 0,
+              potentialForm,
               (* area law potential shape with Coulomb correction
                 and power law  corrections *)
-              c0*Exp[-r[i]*ll*a2sigma - Sqrt[Max[a2sigma, 0]]*(
-                  cCoulomb*ll*Log[r[i]^2*Max[a2sigma, 10^-10]] +
-                  If[nll>1, 2*cPerimeter*ll, 0] +
-                  If[OptionValue["linearLCorrection"],
-                     cConstant[-1] r[i], 0]) -
-                     If[OptionValue["order"]>0, c1 r[i]/ll, 0] -
-                     If[OptionValue["order"]>0, c2 ll/r[i], 0]
-              ],
+              c0*Exp[-r[i]*ll*a2sigma*(1 + coff*offAxis[i]) -
+                     2*cCoulomb*(1 + coffq*offAxis[i])*ll*Log[r[i]] -
+                     2*cPerimeter*ll*(1 + coffp*offAxis[i]) -
+                     cl*r[i]*(1 + coffl*offAxis[i]) -
+                     c1*ll/r[i]*(1 + coff1*offAxis[i]) -
+                     c2*r[i]/ll*(1 + coff2*offAxis[i]) -
+                     c3*ll/r[i]^2*(1 + coff3*offAxis[i]) -
+                     c4/ll -
+                     c5/r[i] -
+                     c6*r[i]/ll^2],
               (* Match Nambu-Goto spectrum *)
               OptionValue["NambuGoto"],
               Sum[eigenNorm[j]*Exp[-r[i]*Sqrt[Max[
-                  (a2sigma*ll)^2 + a2sigma*casimir[j] +
+                  (a2sigma*ll*(1 + coff*offAxis[i]))^2 +
+                  a2sigma*(1 + coff*offAxis[i])*casimir[j] +
                   (* Fits in Table III are a bit of a mess and
                     we can't distinguish powers of L, so we
                     make an arbitrary choice. *)
@@ -541,9 +576,11 @@ stringModel[tallyData_, OptionsPattern[]] :=
               (* Fit spectrum, but don't make any assumption
                 about agreement with Nambu-Goto.  However,
                 assume the leading correction is 1/L^2. *)
-              Sum[eigenNorm[j]*Exp[-r[i]*ll*a2sigma*(
+              Sum[eigenNorm[j]*Exp[-r[i]*ll*a2sigma*(1 + co*offAxis[i])*(
                   If[j==0, 1, sConstant[j]] +
-                  If[OptionValue["order"]>0, cConstant[j]/(a2sigma ll^2), 0])] (*+
+                  If[OptionValue["order"]>0,
+                     cConstant[j]/
+                     (a2sigma*(1 + coff*offAxis[i])*ll^2), 0])] (*+
                   If[j==1 && sConstant[j]<1, 10*(sConstant[j]-1), 0] +
                   If[j>1 && sConstant[j]<sConstant[j-1],
                      10*(sConstant[j]-sConstant[j-1]), 0] +
@@ -551,40 +588,45 @@ stringModel[tallyData_, OptionsPattern[]] :=
                   {j, 0, OptionValue["eigenstate"] - 1}]
           ],
           {i, na}],
-      {If[OptionValue["eigenstate"] == 0,
+      {If[potentialForm,
           {c0, c0/.f0["BestFitParameters"]}, Nothing],
-       If[OptionValue["eigenstate"] == 0 &&
-          OptionValue["linearLCorrection"],
-          {cConstant[-1], 0.0}, Nothing],
-       If[OptionValue["eigenstate"] == 0 && OptionValue["order"]>0,
-          {c1, 0.0}, Nothing],
-       If[OptionValue["eigenstate"] == 0 && OptionValue["order"]>0,
-          {c2, 0.0}, Nothing],
-       If[OptionValue["stringTension"] === Automatic,
-          {a2sigma, a2sigma/.f0["BestFitParameters"]}, Nothing],
-       If[OptionValue["coulomb"] === Automatic &&
-          OptionValue["eigenstate"] == 0,
+       If[potentialForm && !NumericQ[cl], {cl, 0.0}, Nothing],
+       If[potentialForm && !NumericQ[c1], {c1, 0.0}, Nothing],
+       If[potentialForm && !NumericQ[c2], {c2, 0.0}, Nothing],
+       If[potentialForm && !NumericQ[c3], {c3, 0.0}, Nothing],
+       If[potentialForm && !NumericQ[c4], {c4, 0.0}, Nothing],
+       If[potentialForm && !NumericQ[c5], {c5, 0.0}, Nothing],
+       If[potentialForm && !NumericQ[c6], {c6, 0.0}, Nothing],
+       If[!NumericQ[a2sigma],
+          {a2sigma, a2sigma/.f0["BestFitParameters"]},  Nothing],
+       If[!NumericQ[coff], {coff, 0.0}, Nothing],
+       If[!NumericQ[coffl] && !zeroQ[cl], {coffl, 0.0}, Nothing],
+       If[!NumericQ[coffq] && !zeroQ[cCoulomb], {coffq, 0.0}, Nothing],
+       If[!NumericQ[coffp] && !zeroQ[cPerimeter], {coffp, 0.0}, Nothing],
+       If[!NumericQ[coff1] && !zeroQ[c1], {coff1, 0.0}, Nothing],
+       If[!NumericQ[coff2] && !zeroQ[c2], {coff2, 0.0}, Nothing],
+       If[!NumericQ[coff3] && !zeroQ[c3], {coff3, 0.0}, Nothing],
+       If[!NumericQ[cCoulomb] && potentialForm,
           {cCoulomb, 0.02}, Nothing],
-       If[nll>1 && OptionValue["eigenstate"] == 0 &&
-          OptionValue["perimeter"] === Automatic,
+       If[nll>1 && potentialForm && !NumericQ[cPerimeter],
           {cPerimeter, 0.}, Nothing],
-       If[OptionValue["eigenstate"]>0,
+       If[!potentialForm,
           Apply[Sequence,
                 Table[{eigenNorm[j], c0/(j+1.0)/.f0["BestFitParameters"]},
                       {j, 0, OptionValue["eigenstate"] - 1}]],
           Nothing],
-       If[OptionValue["eigenstate"]>0 && Not[OptionValue["NambuGoto"]],
+       If[!potentialForm && !OptionValue["NambuGoto"],
           Apply[Sequence,
                 Table[{sConstant[j], j+1.0},
                       {j, 1, OptionValue["eigenstate"] - 1}]],
           Nothing],
-       If[OptionValue["eigenstate"]>0 && OptionValue["order"]>0,
+       If[!potentialForm && OptionValue["order"]>0,
           Apply[Sequence,
                 Table[{cConstant[j], 0.0},
                       {j, If[OptionValue["NambuGoto"], 1, 0],
                        OptionValue["eigenstate"] -1}]],
           Nothing]},
-      Append[Table[r[i], {i, na}], ll],
+      Join[Table[r[i], {i, na}], Table[offAxis[i], {i, na}], {ll}],
       Method -> "LevenbergMarquardt"];
   If[OptionValue[printResult],
      Print["Correlation matrix: ",ff["CorrelationMatrix"]];

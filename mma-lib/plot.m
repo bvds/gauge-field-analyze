@@ -57,23 +57,28 @@ Options[plotStringModelFit] = Join[Options[ErrorListPlot],
                                    Options[stringModel],
                                    {"maxx" -> All}];
 plotStringModelFit[tallyData_, opts:OptionsPattern[]] :=
- Block[{lowerCutoff = OptionValue["lowerCutoff"],
+ Block[{lowerCutoff = OptionValue["lowerCutoff"], diffs,
+        (* Sin[2*theta]^2 *)
+        sin2theta2 = Function[{x, y}, (2*x*y/(x^2+y^ 2))^2],
+        offAxis = Function[dir, Apply[sin2theta2, Drop[#, {dir}]]&],
         nearest, maxx, miny, maxy, nn, ff, cd = ColorData[1]}, 
-  nn = Select[Normal[tallyData], #[[1, 1]] > 0 &]; 
+  nn = Select[Normal[tallyData], Norm[#[[1, 1]]] > 0 &]; 
   ff = stringModel[tallyData,
        Apply[Sequence, FilterRules[{opts}, Options[stringModel]]],
                    printResult -> True];
-  nearest = Length[nn[[1,1]]] - 1;
+  nearest = Length[nn[[1, 1]]] - 1;
   maxx = If[OptionValue["maxx"] === All,
-            Max[Map[(#[[1, 1]]*#[[1,-1]])&, nn]] + Min[latticeDimensions]/2,
+            Max[Map[(Norm[#[[1, 1]]]*#[[1,-1]])&, nn]] +
+            Min[latticeDimensions]/2,
             OptionValue["maxx"]];
   maxy = Max[Map[#[[2, 1]] + 1.5 #[[2, 2]] &, nn]]; 
-  miny = Min[0, Min[Map[#[[2, 1]] - 1.5 #[[2, 2]] &, nn]]]; 
+  miny = Min[0, Min[Map[#[[2, 1]] - 1.5 #[[2, 2]] &, nn]]];
+  (* Print["limits", {nearest, maxx, miny, maxy, ff}]; *)
   Show[ErrorListPlot[
       Map[
-          {{N[#[[1, 1]]]*#[[1,-1]], #[[2, 1]]}, ErrorBar[#[[2, 2]]]}&,
+          {{N[Norm[#[[1, 1]]]]*#[[1,-1]], #[[2, 1]]}, ErrorBar[#[[2, 2]]]}&,
           (* Group by ll value *)
-          GatherBy[nn, #[[1,-1]]&], {2}],
+          GatherBy[nn, #[[1, -1]]&], {2}],
       Apply[Sequence, FilterRules[{opts}, Options[ErrorListPlot]]],
       PlotRange -> {{0, maxx}, {miny, maxy}}, 
       Epilog -> {Text[
@@ -94,7 +99,7 @@ plotStringModelFit[tallyData_, opts:OptionsPattern[]] :=
                      Text["cutoff", {lowerCutoff, 0}, {-1.5, -1}, {0, 1}],
                      Line[{{lowerCutoff, miny}, {lowerCutoff, maxy 2/3}}]},
                     Nothing]},
-      PlotStyle->cd,
+      PlotStyle -> cd,
       Axes -> False, Frame -> True, 
       FrameLabel -> {"area enclosed (plaquettes)", 
                      "Polyakov loop correlator"}], 
@@ -102,25 +107,34 @@ plotStringModelFit[tallyData_, opts:OptionsPattern[]] :=
        Block[{face = latticeDimensions, vertices},
         face[[dir0]] = 1;
         vertices = makeVertices[face];
-        {ParametricPlot[
+        { (* off-axis case
+            Last[vertices] is a highest norm corner. *)
+         ParametricPlot[
           Block[{xx = x Last[vertices]/Norm[Last[vertices]]},
+                (* Reconstruct the mirrors for this separation.
+                  It would be safer to pull this from nn? *)
+           diffs = Take[Sort[Map[#-xx&, vertices],
+                             Less[Norm[#1], Norm[#2]]&], nearest];
            {latticeDimensions[[dir0]]*x,
             Apply[ff["Function"],
-                  Append[
-                      Take[Sort[Map[Norm[#-xx]&, vertices], Less], nearest],
-                      latticeDimensions[[dir0]]]]}],
+                  Join[
+                      Map[Norm, diffs],
+                      Map[offAxis[dir0], diffs],
+                      {latticeDimensions[[dir0]]}]]}],
           {x, Sqrt[nd-1]-1/2, Norm[Last[vertices]]/2+1/2},
           PlotStyle->{cd[dir0], Opacity[0.5], Thickness[0.004],
                       Dashing[0.02]}],
          Table[If[
              dir1 != dir0,
+             (* on axis *)
              ParametricPlot[
               Block[{xx = Table[If[i==dir1, x, 0], {i, nd}]},
                {latticeDimensions[[dir0]]*x,
                Apply[ff["Function"],
-                     Append[
+                     Join[
                          Take[Sort[Map[Norm[#-xx]&, vertices], Less], nearest],
-                         latticeDimensions[[dir0]]]]}],
+                         Table[0, {nearest}],
+                         {latticeDimensions[[dir0]]}]]}],
               {x, 1/2, latticeDimensions[[dir1]]/2+1/2},
               PlotStyle -> {cd[dir0], Opacity[0.5], Thickness[0.004]},
               PlotRange -> All],

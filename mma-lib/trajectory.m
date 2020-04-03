@@ -155,7 +155,7 @@ bulkPolyakovLoops[inPath_, outFile_, opts:OptionsPattern[]] :=
           Message[General::npdef, polyakovCorrelatorCovariance];
           DiagonalMatrix[Diagonal[polyakovCorrelatorCovariance]]];
  t2 = SessionTime[];
- Print["Finished correlators in ", t2-t1, " s, covFlag=", covFlag];
+ Print["Finished correlators in ", t2-t1, "s"];
  stringModelValuesState = 
   Map[Block[{ff = 
        stringModel[talliesToAverageErrors[#], printResult -> False, 
