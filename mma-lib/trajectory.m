@@ -108,7 +108,7 @@ makeObservableTrajectory[set_, label_, n_,
               observable == "distance",
               distance,
               observable == "polyakovCorrelator",
-              talliesToAverageErrors[
+              Map[talliesToAverageErrors,
                   polyakovCorrelatorTallies["simple","1"]],
               observable == "wilsonDiagonal",
               Merge[Apply[averageWilsonLoop,
@@ -130,35 +130,34 @@ makeObservableTrajectory[set_, label_, n_,
 bulkPolyakovLoops::usage = "Aggregate Polyakov loop correlators over a number of lattice configurations.";
 Options[bulkPolyakovLoops] = {"lower" -> 1, "upper" -> 1};
 bulkPolyakovLoops[inPath_, outFile_, opts:OptionsPattern[]] :=
- Block[{t0 = SessionTime[], t1, t2, t3,
-  tallyData = Table[Block[{gaugeField}, 
-                          Get[inPath <> ToString[i] <> ".m"]; 
-                          polyakovCorrelatorTallies["simple", "1"]],
-                    {i, OptionValue["lower"], OptionValue["upper"]}],
-        data, cov},
- t1 = SessionTime[];
- Print["Finished aggregating data. tallyData memory:  ",
-       ByteCount[tallyData], " in ", t1-t0, " s"];
- configurationCount = Length[tallyData];
- data = Transpose[Map[#[[2]]/#[[1]] &, Values[tallyData], {2}]];
- covarianceEigenvalues = Table[
-     Block[{dd = Map[Take[#, k]&, data]},
-           Map[{k, #}&, Chop[Sort[Eigenvalues[
-               Outer[Covariance, dd, dd, 1]]]]]],
-     {k, 2, configurationCount}];
- polyakovCorrelatorCovariance = Outer[Covariance, data, data, 1];
- cov = If[Min[Eigenvalues[polyakovCorrelatorCovariance]] > 0,
-          polyakovCorrelatorCovariance,
-          (* One could revert back to "None" but this is better
-            for code testing before scaling up to a longer
-            calculation. *)
-          Message[General::npdef, polyakovCorrelatorCovariance];
-          DiagonalMatrix[Diagonal[polyakovCorrelatorCovariance]]];
- t2 = SessionTime[];
- Print["Finished correlators in ", t2-t1, "s"];
- stringModelValuesState = 
-  Map[Block[{ff = 
-       stringModel[talliesToAverageErrors[#], printResult -> False, 
+ Block[{t0 = SessionTime[], t1, t2, t3, t4,
+        tallyData, data, cov},
+  tallyData = Merge[Table[
+      Block[{gaugeField},
+            Get[inPath <> ToString[i] <> ".m"]; 
+            polyakovCorrelatorTallies["simple", "1"]],
+      {i, OptionValue["lower"], OptionValue["upper"]}], Join];
+  t1 = SessionTime[];
+  Print["Finished aggregating data. tallyData memory:  ",
+        ByteCount[tallyData], " in ", t1-t0, " s"];
+  polyakovCorrelatorValues = Map[#[[2]]/#[[1]] &, tallyData, {2}];
+  data = Values[polyakovCorrelatorValues];
+  polyakovCorrelatorCovariance = Outer[Covariance, data, data, 1];
+  (* version for one-configuration fit. *)
+  cov = If[Min[Eigenvalues[polyakovCorrelatorCovariance]] > 0,
+           polyakovCorrelatorCovariance,
+           (* One could revert back to "None" but this is better
+             for code testing before scaling up to a longer
+             calculation. *)
+           Message[General::npdef, polyakovCorrelatorCovariance];
+           DiagonalMatrix[Diagonal[polyakovCorrelatorCovariance]]];
+  t2 = SessionTime[];
+  Print["Finished correlators in ", t2-t1, "s"];
+  stringModelValuesState = Null;
+  stringModelValuesPotential = Null;
+  (* stringModelValuesState = 
+   Map[Block[{ff = 
+       stringModel[Map[talliesToAverageErrors, #], printResult -> False, 
                    "covarianceMatrix" -> cov,
                    "eigenstate" -> 2]},
      Append[Map[valueError[#[[1]], #[[2]]] &, 
@@ -166,23 +165,24 @@ bulkPolyakovLoops[inPath_, outFile_, opts:OptionsPattern[]] :=
        Length[#] - Length[ff["BestFitParameters"]]}]] &, tallyData]; 
  stringModelValuesPotential = 
   Map[Block[{ff = 
-       stringModel[talliesToAverageErrors[#], printResult -> False, 
+       stringModel[Map[talliesToAverageErrors, #], printResult -> False, 
                    "covarianceMatrix" -> cov,
                    "eigenstate" -> 0, "order" -> 0]}, 
      Append[Map[valueError[#[[1]], #[[2]]] &, 
        ff["ParameterTableEntries"]], {ff["chiSquared"], 
-       Length[#] - Length[ff["BestFitParameters"]]}]] &, tallyData]; 
- t3 = SessionTime[];
- Print["Finished models in ", t3-t2, " s"];
- polyakovCorrelatorMerged = 
-  talliesToAverageErrors[Merge[tallyData, Total]];
- polyakovCorrelatorGrouped = 
+       Length[#] - Length[ff["BestFitParameters"]]}]] &, tallyData]; *)
+  t3 = SessionTime[];
+  Print["Finished models in ", t3-t2, " s"];
+  polyakovCorrelatorMerged = Map[
+      talliesToAverageErrors[Total[#]]&, tallyData];
+  polyakovCorrelatorGrouped = Map[
   talliesToAverageErrors[
-   Merge[Map[{1, #[[2]]/#[[1]], (#[[2]]/#[[1]])^2} &, tallyData, {2}],
-         Total]];
- DeleteFile[outFile];
- Save[outFile,
-      {"polyakovCorrelatorMerged", "polyakovCorrelatorGrouped",
-       "polyakovCorrelatorCovariance", "configurationCount",
-       "covarianceEigenvalues",
-       "stringModelValuesState", "stringModelValuesPotential"}]];
+      Total[Map[{1, #, #^2} &, #]]]&,
+                              polyakovCorrelatorValues];
+  DeleteFile[outFile];
+  Save[outFile,
+       {"polyakovCorrelatorMerged", "polyakovCorrelatorGrouped",
+        "polyakovCorrelatorCovariance", "polyakovCorrelatorValues",
+        "stringModelValuesState", "stringModelValuesPotential"}];
+  t4 = SessionTime[];
+  Print["Merged and grouped correlators, dump results ", t4-t3, " s"]];

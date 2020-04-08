@@ -420,11 +420,11 @@ polyakovCorrelatorTallies["smeared", width_, x_, op_:"1"] :=
             Nothing],
 	    {dir0, nd}, {dir1, nd}]], Total];
 
-talliesToAverageErrors[tallies_] := Map[valueError[
+talliesToAverageErrors = valueError[
     #[[2]]/#[[1]],
     (* Use sample standard deviation (with Bessel's correction). *)
     Sqrt[(Re[#[[3]]] - Re[#[[2]]]^2/#[[1]])/(#[[1]]*(#[[1]]-1))] +
-    I Sqrt[(Im[#[[3]]] - Im[#[[2]]]^2/#[[1]])/(#[[1]]*(#[[1]]-1))]]&, tallies];
+    I Sqrt[(Im[#[[3]]] - Im[#[[2]]]^2/#[[1]])/(#[[1]]*(#[[1]]-1))]]&;
 rescaleCorrelators[tallies_] :=
     Association[Map[
         (#->tallies[#]/aFirstCase[tallies, {{0..}, __, Last[#]}])&,
@@ -468,7 +468,7 @@ stringModel::usage = "Fit to an exponential plus a constant term, including the 
 Options[stringModel] = {printResult -> False, "lowerCutoff" -> 0,
                         "upperCutoff" -> Infinity, "order" -> 0,
                         "eigenstate" -> 0, "NambuGoto" -> False,
-                        "offAxis" -> 0,
+                        "offAxis" -> 0, "offAxisTension" -> False,
                         "linearLCorrections" -> False,
                         "stringTension" -> Automatic,
                         "coulomb" -> Automatic, "perimeter" -> Automatic,
@@ -484,7 +484,9 @@ stringModel[tallyData_, OptionsPattern[]] :=
       nll = Length[Union[Map[Last, Keys[tallyData]]]],
       llValues = Union[Map[Last, Keys[tallyData]]],
       na = Length[First[Keys[tallyData]]] - 1,
-      degeneracy = Function[state, {0, 1, 2, 2, 2, 2}[[state + 1]]],
+      (* For the Nambu-Goto string picture.  The plain Polyakov
+        loop correlators will only couple to the even parity states. *)
+      degeneracy = Function[state, {0, 1, 2, 2}[[state + 1]]],
       casimir = Function[state, 8 Pi (degeneracy[state] - (nd-2)/24)],
       data,
       filter = Map[First, Select[
@@ -512,7 +514,7 @@ stringModel[tallyData_, OptionsPattern[]] :=
   If[OptionValue["order"]<4 || nll<3, c4 = 0];
   If[OptionValue["order"]<4 || !OptionValue["linearLCorrections"], c5 = 0];
   If[OptionValue["order"]<4 || !OptionValue["linearLCorrections"], c6 = 0];
-  If[OptionValue["offAxis"]<1, coff = 0];
+  If[OptionValue["offAxis"]<1 || !OptionValue["offAxisTension"], coff = 0];
   If[OptionValue["offAxis"]<2, coffp = 0];
   If[OptionValue["offAxis"]<2, coffq = 0];
   If[OptionValue["offAxis"]<2, coffl = 0];
@@ -588,44 +590,40 @@ stringModel[tallyData_, OptionsPattern[]] :=
                   {j, 0, OptionValue["eigenstate"] - 1}]
           ],
           {i, na}],
-      {If[potentialForm,
-          {c0, c0/.f0["BestFitParameters"]}, Nothing],
-       If[potentialForm && !NumericQ[cl], {cl, 0.0}, Nothing],
-       If[potentialForm && !NumericQ[c1], {c1, 0.0}, Nothing],
-       If[potentialForm && !NumericQ[c2], {c2, 0.0}, Nothing],
-       If[potentialForm && !NumericQ[c3], {c3, 0.0}, Nothing],
-       If[potentialForm && !NumericQ[c4], {c4, 0.0}, Nothing],
-       If[potentialForm && !NumericQ[c5], {c5, 0.0}, Nothing],
-       If[potentialForm && !NumericQ[c6], {c6, 0.0}, Nothing],
-       If[!NumericQ[a2sigma],
-          {a2sigma, a2sigma/.f0["BestFitParameters"]},  Nothing],
-       If[!NumericQ[coff], {coff, 0.0}, Nothing],
-       If[!NumericQ[coffl] && !zeroQ[cl], {coffl, 0.0}, Nothing],
-       If[!NumericQ[coffq] && !zeroQ[cCoulomb], {coffq, 0.0}, Nothing],
-       If[!NumericQ[coffp] && !zeroQ[cPerimeter], {coffp, 0.0}, Nothing],
-       If[!NumericQ[coff1] && !zeroQ[c1], {coff1, 0.0}, Nothing],
-       If[!NumericQ[coff2] && !zeroQ[c2], {coff2, 0.0}, Nothing],
-       If[!NumericQ[coff3] && !zeroQ[c3], {coff3, 0.0}, Nothing],
-       If[!NumericQ[cCoulomb] && potentialForm,
-          {cCoulomb, 0.02}, Nothing],
-       If[nll>1 && potentialForm && !NumericQ[cPerimeter],
-          {cPerimeter, 0.}, Nothing],
-       If[!potentialForm,
-          Apply[Sequence,
-                Table[{eigenNorm[j], c0/(j+1.0)/.f0["BestFitParameters"]},
-                      {j, 0, OptionValue["eigenstate"] - 1}]],
-          Nothing],
-       If[!potentialForm && !OptionValue["NambuGoto"],
-          Apply[Sequence,
-                Table[{sConstant[j], j+1.0},
-                      {j, 1, OptionValue["eigenstate"] - 1}]],
-          Nothing],
-       If[!potentialForm && OptionValue["order"]>0,
-          Apply[Sequence,
-                Table[{cConstant[j], 0.0},
-                      {j, If[OptionValue["NambuGoto"], 1, 0],
-                       OptionValue["eigenstate"] -1}]],
-          Nothing]},
+      Join[
+          {If[!NumericQ[a2sigma],
+              {a2sigma, a2sigma/.f0["BestFitParameters"]},  Nothing],
+           If[!NumericQ[coff], {coff, 0.0}, Nothing]},
+          If[potentialForm,
+             {{c0, c0/.f0["BestFitParameters"]},
+              If[!NumericQ[cl], {cl, 0.0}, Nothing],
+              If[!NumericQ[c1], {c1, 0.0}, Nothing],
+              If[!NumericQ[c2], {c2, 0.0}, Nothing],
+              If[!NumericQ[c3], {c3, 0.0}, Nothing],
+              If[!NumericQ[c4], {c4, 0.0}, Nothing],
+              If[!NumericQ[c5], {c5, 0.0}, Nothing],
+              If[!NumericQ[c6], {c6, 0.0}, Nothing],
+              If[!NumericQ[coffl] && !zeroQ[cl], {coffl, 0.0}, Nothing],
+              If[!NumericQ[coffq] && !zeroQ[cCoulomb], {coffq, 0.0}, Nothing],
+              If[!NumericQ[coffp] && !zeroQ[cPerimeter], {coffp, 0.0}, Nothing],
+              If[!NumericQ[coff1] && !zeroQ[c1], {coff1, 0.0}, Nothing],
+              If[!NumericQ[coff2] && !zeroQ[c2], {coff2, 0.0}, Nothing],
+              If[!NumericQ[coff3] && !zeroQ[c3], {coff3, 0.0}, Nothing],
+              If[!NumericQ[cCoulomb], {cCoulomb, 0.02}, Nothing],
+              If[nll>1 && !NumericQ[cPerimeter], {cPerimeter, 0.}, Nothing]},
+             Join[
+                 Table[{eigenNorm[j], c0/(j+1.0)/.f0["BestFitParameters"]},
+                       {j, 0, OptionValue["eigenstate"] - 1}],
+                 If[!OptionValue["NambuGoto"],
+                    Table[{sConstant[j], j+1.0},
+                          {j, 1, OptionValue["eigenstate"] - 1}],
+                    {}],
+                 If[OptionValue["order"]>0,
+                    Table[{cConstant[j], 0.0},
+                          {j, If[OptionValue["NambuGoto"], 1, 0],
+                           OptionValue["eigenstate"] -1}],
+                    {}]
+             ]]],
       Join[Table[r[i], {i, na}], Table[offAxis[i], {i, na}], {ll}],
       Method -> "LevenbergMarquardt"];
   If[OptionValue[printResult],
