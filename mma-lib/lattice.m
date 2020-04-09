@@ -626,6 +626,7 @@ stringModel[tallyData_, OptionsPattern[]] :=
              ]]],
       Join[Table[r[i], {i, na}], Table[offAxis[i], {i, na}], {ll}],
       Method -> "LevenbergMarquardt"];
+  ff["filter"] = filter;
   If[OptionValue[printResult],
      Print["Correlation matrix: ",ff["CorrelationMatrix"]];
      (* Print["Covariance matrix: ",ff["CovarianceMatrix"]]; *)
