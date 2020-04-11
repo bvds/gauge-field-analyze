@@ -100,7 +100,7 @@ plotStringModelFit[tallyData_, opts:OptionsPattern[]] :=
                      Line[{{lowerCutoff, miny}, {lowerCutoff, maxy 2/3}}]},
                     Nothing]},
       PlotStyle -> cd,
-      Axes -> False, Frame -> True, 
+      Axes -> False, Frame -> True,
       FrameLabel -> {"area enclosed (plaquettes)", 
                      "Polyakov loop correlator"}], 
       Table[

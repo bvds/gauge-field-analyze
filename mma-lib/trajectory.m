@@ -131,7 +131,7 @@ bulkPolyakovLoops::usage = "Aggregate Polyakov loop correlators over a number of
 Options[bulkPolyakovLoops] = {"lower" -> 1, "upper" -> 1};
 bulkPolyakovLoops[inPath_, outFile_, opts:OptionsPattern[]] :=
  Block[{t0 = SessionTime[], t1, t2, t3, t4,
-        tallyData, data, cov},
+        tallyData, cov},
   tallyData = Merge[Table[
       Block[{gaugeField},
             Get[inPath <> ToString[i] <> ".m"]; 
@@ -141,8 +141,12 @@ bulkPolyakovLoops[inPath_, outFile_, opts:OptionsPattern[]] :=
   Print["Finished aggregating data. tallyData memory:  ",
         ByteCount[tallyData], " in ", t1-t0, " s"];
   polyakovCorrelatorValues = Map[#[[2]]/#[[1]] &, tallyData, {2}];
-  data = Values[polyakovCorrelatorValues];
-  polyakovCorrelatorCovariance = Outer[Covariance, data, data, 1];
+  (* Only include pairs of Polyakov loop correlators that
+    can be in the same direction. See analysis in gauge.nb *)
+  polyakovCorrelatorCovariance =
+   Block[{data = Normal[polyakovCorrelatorValues]},
+     Outer[If[#1[[1, -1]] == #2[[1, -1]], Covariance[#1[[2]], #2[[2]]], 0]&,
+             data, data, 1]];
   (* version for one-configuration fit. *)
   cov = If[Min[Eigenvalues[polyakovCorrelatorCovariance]] > 0,
            polyakovCorrelatorCovariance,

@@ -448,21 +448,18 @@ wilsonCoulomb[w1_, w2_, l1_, l2_, eps_:1]:=
   Alternatively, one could wrap these and the function in Module[]
   to define a unique instance. *)
 Clear[c0, c1, c2, c3, c4, c5, c6,
-      coff, coffl, coffp, coffq, coff1, coff2, coff3,
+      coff, coffl, coffp, coffq, coff1, coff2, coff3, coff4, coff5, coff6,
       cl, cCoulomb, cPerimeter, a2sigma, cConstant,
       chiSquared, eigenNorm, sConstant];
-Format[a2sigma] := Row[{Style["a", Italic]^2, "\[Sigma]"}];
-Format[c0]:=Subscript["c", 0];
-Format[c1]:=Subscript["c", 1];
-Format[c2]:=Subscript["c", 2];
-Format[c3]:=Subscript["c", 3];
-Format[coff]:=Subscript["c", "off"];
-Format[cConstant[i_]]:=Subscript["c", i];
-Format[sConstant[i_]]:=Subscript["\[Theta]", i];
-Format[eigenNorm[i_]]:=Subscript["\[Omega]", i];
-Format[cCoulomb]:=Subscript["c", "q"];
-Format[cPerimeter]:=Subscript["c", "p"];
-Format[chiSquared]:=Superscript["\[Chi]", 2];
+Format[a2sigma] = Row[{Style["a", Italic]^2, "\[Sigma]"}];
+Do[Format[Symbol["c"<>ToString[i]]] = Subscript["c", i], {i, 0, 6}];
+Format[coff] = Subscript["c", "off"];
+Format[cConstant[i_]] := Subscript["c", i];
+Format[sConstant[i_]] := Subscript["\[Theta]", i];
+Format[eigenNorm[i_]] := Subscript["C", i];
+Format[cCoulomb] = Subscript["c", "q"];
+Format[cPerimeter] = Subscript["c", "p"];
+Format[chiSquared] = Superscript["\[Chi]", 2];
 
 stringModel::usage = "Fit to an exponential plus a constant term, including the universal string correction as well as Coulomb force contributions.  See Andreas Athenodorou, Barak Bringoltz, Michael Teper https://arxiv.org/abs/0709.0693; Ofer Aharony & Zohar Komargodski arXiv:1302.6257v2 [hep-th] 12 Mar 2013; Teper review article http://arxiv.org/abs/0912.3339  The Coulomb force contribution consists of a log(r) term plus a perimeter term.  For option \"stringTension\"->Automatic (default), fit string tension, else use value given.  Likewise for \"coulomb\" and \"perimeter.\"";
 Options[stringModel] = {printResult -> False, "lowerCutoff" -> 0,
@@ -478,7 +475,7 @@ stringModel[tallyData_, OptionsPattern[]] :=
          and allow for local constant value. *)
      {ff, f0, r, offAxis, ll, a2sigma, cl, cCoulomb, cPerimeter,
       c1, c2, c3, c4, c5, c6,
-      coff, coffl, coffp, coffq, coff1, coff2, coff3,
+      coff, coffl, coffp, coffq, coff1, coff2, coff3, coff4, coff5, coff6,
       potentialForm = (OptionValue["eigenstate"] == 0),
       zeroQ = Function[x, NumericQ[x] && x==0],
       nll = Length[Union[Map[Last, Keys[tallyData]]]],
@@ -511,16 +508,19 @@ stringModel[tallyData_, OptionsPattern[]] :=
     absorbed into c0 and cPerimeter.
     Numerically, its contribution is not significant for
     300 configs nc=4, 12.16.20-48, no cutoff. *)
-  If[OptionValue["order"]<4 || nll<3, c4 = 0];
-  If[OptionValue["order"]<4 || !OptionValue["linearLCorrections"], c5 = 0];
-  If[OptionValue["order"]<4 || !OptionValue["linearLCorrections"], c6 = 0];
+  If[OptionValue["order"]<3 || nll<3, c4 = 0];
+  If[OptionValue["order"]<3 || !OptionValue["linearLCorrections"], c5 = 0];
+  If[OptionValue["order"]<3 || !OptionValue["linearLCorrections"], c6 = 0];
   If[OptionValue["offAxis"]<1 || !OptionValue["offAxisTension"], coff = 0];
-  If[OptionValue["offAxis"]<2, coffp = 0];
-  If[OptionValue["offAxis"]<2, coffq = 0];
-  If[OptionValue["offAxis"]<2, coffl = 0];
-  If[OptionValue["offAxis"]<3, coff1 = 0];
-  If[OptionValue["offAxis"]<3, coff2 = 0];
-  If[OptionValue["offAxis"]<4, coff3 = 0];
+  If[OptionValue["offAxis"]<1 || !OptionValue["offAxisTension"], coffl = 0];
+  If[OptionValue["offAxis"]<1 || !OptionValue["offAxisTension"], coffq = 0];
+  If[OptionValue["offAxis"]<1 || !OptionValue["offAxisTension"], coffp = 0];
+  If[OptionValue["offAxis"]<2, coff1 = 0];
+  If[OptionValue["offAxis"]<2 || !OptionValue["offAxisTension"], coff2 = 0];
+  If[OptionValue["offAxis"]<3, coff3 = 0];
+  If[OptionValue["offAxis"]<3, coff4 = 0];
+  If[OptionValue["offAxis"]<3, coff5 = 0];
+  If[OptionValue["offAxis"]<3 || !OptionValue["offAxisTension"], coff6 = 0];
   (* Perform a simple fit to get decent starting values *)
   f0 = covariantFit2[
       If[OptionValue["covarianceMatrix"] === None,
@@ -553,40 +553,40 @@ stringModel[tallyData_, OptionsPattern[]] :=
               (* area law potential shape with Coulomb correction
                 and power law  corrections *)
               c0*Exp[-r[i]*ll*a2sigma*(1 + coff*offAxis[i]) -
-                     2*cCoulomb*(1 + coffq*offAxis[i])*ll*Log[r[i]] -
-                     2*cPerimeter*ll*(1 + coffp*offAxis[i]) -
-                     cl*r[i]*(1 + coffl*offAxis[i]) -
-                     c1*ll/r[i]*(1 + coff1*offAxis[i]) -
-                     c2*r[i]/ll*(1 + coff2*offAxis[i]) -
-                     c3*ll/r[i]^2*(1 + coff3*offAxis[i]) -
-                     c4/ll -
-                     c5/r[i] -
-                     c6*r[i]/ll^2],
+                     2*(cCoulomb + coffq*offAxis[i])*ll*Log[r[i]] -
+                     2*(cPerimeter + coffp*offAxis[i])*ll -
+                     (cl + coffl*offAxis[i])*r[i] -
+                     (* second order corrections *)
+                     (c1 + coff1*offAxis[i])*ll/r[i] -
+                     (c2 + coff2*offAxis[i])*r[i]/ll -
+                     (* third order corrections *)
+                     (c3 + coff3*offAxis[i])*ll/r[i]^2 -
+                     (c4 + coff4*offAxis[i])/ll -
+                     (c5 + coff5*offAxis[i])/r[i] -
+                     (c6 + coff6*offAxis[i])*r[i]/ll^2],
               (* Match Nambu-Goto spectrum *)
               OptionValue["NambuGoto"],
               Sum[eigenNorm[j]*Exp[-r[i]*Sqrt[Max[
                   (a2sigma*ll*(1 + coff*offAxis[i]))^2 +
-                  a2sigma*(1 + coff*offAxis[i])*casimir[j] +
+                  a2sigma*(1 + coff*offAxis[i])*casimir[j]*
+                  (1 + offConstant[0]*offAxis[i])+
                   (* Fits in Table III are a bit of a mess and
                     we can't distinguish powers of L, so we
                     make an arbitrary choice. *)
                   If[j>0 && OptionValue["order"]>0,
-                     cConstant[j]/ll^2, 0], 10^-10]]] (*+
-                  If[eigenNorm[j]<0, -100*eigenNorm[j], 0]*),
+                     cConstant[j]*(1*offConstant[j]*offAxis[i])/ll^2, 0],
+                  10^-10]]],
                   {j, 0, OptionValue["eigenstate"] - 1}],
               True,
               (* Fit spectrum, but don't make any assumption
                 about agreement with Nambu-Goto.  However,
                 assume the leading correction is 1/L^2. *)
-              Sum[eigenNorm[j]*Exp[-r[i]*ll*a2sigma*(1 + co*offAxis[i])*(
-                  If[j==0, 1, sConstant[j]] +
+              Sum[eigenNorm[j]*Exp[-r[i]*ll*(
+                  If[j==0, a2sigma*(1 + coff*offAxis[i]),
+                     sConstant[j]*(1 + offConstant[-j]*offAxis[i])] +
                   If[OptionValue["order"]>0,
                      cConstant[j]/
-                     (a2sigma*(1 + coff*offAxis[i])*ll^2), 0])] (*+
-                  If[j==1 && sConstant[j]<1, 10*(sConstant[j]-1), 0] +
-                  If[j>1 && sConstant[j]<sConstant[j-1],
-                     10*(sConstant[j]-sConstant[j-1]), 0] +
-                  If[eigenNorm[j]<0, 10*eigenNorm[j], 0] *),
+                     (a2sigma*(1 + coff*offAxis[i])*ll^2), 0])],
                   {j, 0, OptionValue["eigenstate"] - 1}]
           ],
           {i, na}],
@@ -603,14 +603,17 @@ stringModel[tallyData_, OptionsPattern[]] :=
               If[!NumericQ[c4], {c4, 0.0}, Nothing],
               If[!NumericQ[c5], {c5, 0.0}, Nothing],
               If[!NumericQ[c6], {c6, 0.0}, Nothing],
-              If[!NumericQ[coffl] && !zeroQ[cl], {coffl, 0.0}, Nothing],
-              If[!NumericQ[coffq] && !zeroQ[cCoulomb], {coffq, 0.0}, Nothing],
-              If[!NumericQ[coffp] && !zeroQ[cPerimeter], {coffp, 0.0}, Nothing],
-              If[!NumericQ[coff1] && !zeroQ[c1], {coff1, 0.0}, Nothing],
-              If[!NumericQ[coff2] && !zeroQ[c2], {coff2, 0.0}, Nothing],
-              If[!NumericQ[coff3] && !zeroQ[c3], {coff3, 0.0}, Nothing],
+              If[!NumericQ[coffl], {coffl, 0.0}, Nothing],
+              If[!NumericQ[coffq], {coffq, 0.0}, Nothing],
+              If[!NumericQ[coffp], {coffp, 0.0}, Nothing],
+              If[!NumericQ[coff1], {coff1, 0.0}, Nothing],
+              If[!NumericQ[coff2], {coff2, 0.0}, Nothing],
+              If[!NumericQ[coff3], {coff3, 0.0}, Nothing],
+              If[!NumericQ[coff4], {coff4, 0.0}, Nothing],
+              If[!NumericQ[coff5], {coff5, 0.0}, Nothing],
+              If[!NumericQ[coff6], {coff6, 0.0}, Nothing],
               If[!NumericQ[cCoulomb], {cCoulomb, 0.02}, Nothing],
-              If[nll>1 && !NumericQ[cPerimeter], {cPerimeter, 0.}, Nothing]},
+              If[!NumericQ[cPerimeter], {cPerimeter, 0.}, Nothing]},
              Join[
                  Table[{eigenNorm[j], c0/(j+1.0)/.f0["BestFitParameters"]},
                        {j, 0, OptionValue["eigenstate"] - 1}],
