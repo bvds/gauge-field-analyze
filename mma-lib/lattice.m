@@ -447,42 +447,47 @@ wilsonCoulomb[w1_, w2_, l1_, l2_, eps_:1]:=
   are defined as global variables.
   Alternatively, one could wrap these and the function in Module[]
   to define a unique instance. *)
-Clear[c0, c1, c2, c3, c4, c5, c6,
-      coff, coffl, coffp, coffq, coff1, coff2, coff3, coff4, coff5, coff6,
-      cl, cCoulomb, cPerimeter, a2sigma, cConstant,
-      chiSquared, eigenNorm, sConstant];
+Clear[choSquared, a2sigma, c0, c1, c2, c3, c4, c5,
+      coff1, coff3, coff4,
+      cCoulomb, cPerimeter,
+      eigenNorm, sConstant, lConstant, rConstant, offConstant];
+Format[chiSquared] = Superscript["\[Chi]", 2];
 Format[a2sigma] = Row[{Style["a", Italic]^2, "\[Sigma]"}];
-Do[Format[Symbol["c"<>ToString[i]]] = Subscript["c", i], {i, 0, 6}];
-Format[coff] = Subscript["c", "off"];
-Format[cConstant[i_]] := Subscript["c", i];
-Format[sConstant[i_]] := Subscript["\[Theta]", i];
-Format[eigenNorm[i_]] := Subscript["C", i];
 Format[cCoulomb] = Subscript["c", "q"];
 Format[cPerimeter] = Subscript["c", "p"];
-Format[chiSquared] = Superscript["\[Chi]", 2];
+Do[Format[Symbol["c"<>ToString[i]]] = Subscript["c", i], {i, 0, 6}];
+Format[eigenNorm[i_]] := Subscript["C", i];
+Format[sConstant[i_]] := Row[{Style["a", Italic]^2,
+                              Subscript["\[Sigma]", i]}];
+Format[lConstant[i_]] := Subscript["d", i];
+Format[rConstant[i_]] := Subscript["e", i];
+Format[rConstant[i_, j_]] := Subscript["e", Row[{i, j}]];
+Format[offConstant[i_]] := Subscript["f", i];
+Format[offConstant[i_, j_]] := Subscript["f", Row[{i, j}]];
 
 stringModel::usage = "Fit to an exponential plus a constant term, including the universal string correction as well as Coulomb force contributions.  See Andreas Athenodorou, Barak Bringoltz, Michael Teper https://arxiv.org/abs/0709.0693; Ofer Aharony & Zohar Komargodski arXiv:1302.6257v2 [hep-th] 12 Mar 2013; Teper review article http://arxiv.org/abs/0912.3339  The Coulomb force contribution consists of a log(r) term plus a perimeter term.  For option \"stringTension\"->Automatic (default), fit string tension, else use value given.  Likewise for \"coulomb\" and \"perimeter.\"";
 Options[stringModel] = {printResult -> False, "lowerCutoff" -> 0,
                         "upperCutoff" -> Infinity, "order" -> 0,
                         "eigenstate" -> 0, "NambuGoto" -> False,
-                        "offAxis" -> 0, "offAxisTension" -> False,
-                        "linearLCorrections" -> False,
+                        "offAxis" -> 0, "linearLCorrections" -> True,
                         "stringTension" -> Automatic,
                         "coulomb" -> Automatic, "perimeter" -> Automatic,
                         "covarianceMatrix" -> None};
 stringModel[tallyData_, OptionsPattern[]] :=
  Block[(* Protect against any global definitions of model parameters
          and allow for local constant value. *)
-     {ff, f0, r, offAxis, ll, a2sigma, cl, cCoulomb, cPerimeter,
-      c1, c2, c3, c4, c5, c6,
-      coff, coffl, coffp, coffq, coff1, coff2, coff3, coff4, coff5, coff6,
+     {ff, f0, r, offAxis, ll, a2sigma, cCoulomb, cPerimeter,
+      c1, c2, c3, c4, c5,
+      offConstant, rConstant, lConstant,
+      coff1, coff3, coff4,
       potentialForm = (OptionValue["eigenstate"] == 0),
       zeroQ = Function[x, NumericQ[x] && x==0],
       nll = Length[Union[Map[Last, Keys[tallyData]]]],
       llValues = Union[Map[Last, Keys[tallyData]]],
       na = Length[First[Keys[tallyData]]] - 1,
-      (* For the Nambu-Goto string picture.  The plain Polyakov
-        loop correlators will only couple to the even parity states. *)
+      (* For the Nambu-Goto string picture.  Since we average
+        over all pairs of a given separation, this will only couple
+        to the even parity states. *)
       degeneracy = Function[state, {0, 1, 2, 2}[[state + 1]]],
       casimir = Function[state, 8 Pi (degeneracy[state] - (nd-2)/24)],
       data,
@@ -500,27 +505,21 @@ stringModel[tallyData_, OptionsPattern[]] :=
      (* With only one longitudinal value, this can
        be absorbed into c0. *)
      If[nll<2, cPerimeter = 0]];
-  If[!OptionValue["linearLCorrections"], cl = 0];
-  If[potentialForm && OptionValue["order"]<1, c1 = 0];
-  If[potentialForm && OptionValue["order"]<2, c2 = 0];
-  If[potentialForm && OptionValue["order"]<3, c3 = 0];
+  If[OptionValue["order"]<2, c1 = 0];
+  If[OptionValue["order"]<2, c2 = 0];
+  If[OptionValue["order"]<3, c3 = 0];
+  If[OptionValue["order"]<3 || !OptionValue["linearLCorrections"], c4 = 0];
   (* With two longitudinal values, this can be
     absorbed into c0 and cPerimeter.
     Numerically, its contribution is not significant for
     300 configs nc=4, 12.16.20-48, no cutoff. *)
-  If[OptionValue["order"]<3 || nll<3, c4 = 0];
-  If[OptionValue["order"]<3 || !OptionValue["linearLCorrections"], c5 = 0];
-  If[OptionValue["order"]<3 || !OptionValue["linearLCorrections"], c6 = 0];
-  If[OptionValue["offAxis"]<1 || !OptionValue["offAxisTension"], coff = 0];
-  If[OptionValue["offAxis"]<1 || !OptionValue["offAxisTension"], coffl = 0];
-  If[OptionValue["offAxis"]<1 || !OptionValue["offAxisTension"], coffq = 0];
-  If[OptionValue["offAxis"]<1 || !OptionValue["offAxisTension"], coffp = 0];
+  If[OptionValue["order"]<3 || nll<3, c5 = 0];
   If[OptionValue["offAxis"]<2, coff1 = 0];
-  If[OptionValue["offAxis"]<2 || !OptionValue["offAxisTension"], coff2 = 0];
   If[OptionValue["offAxis"]<3, coff3 = 0];
-  If[OptionValue["offAxis"]<3, coff4 = 0];
-  If[OptionValue["offAxis"]<3, coff5 = 0];
-  If[OptionValue["offAxis"]<3 || !OptionValue["offAxisTension"], coff6 = 0];
+  If[OptionValue["offAxis"]<3 || !OptionValue["linearLCorrections"], coff4 = 0];
+  Do[If[OptionValue["order"]<i, rConstant[j, i] = 0];
+     If[OptionValue["offAxis"]<i, offConstant[j, i] = 0],
+     {j, 0, OptionValue["eigenstate"] - 1}, {i, 1, 2}];
   (* Perform a simple fit to get decent starting values *)
   f0 = covariantFit2[
       If[OptionValue["covarianceMatrix"] === None,
@@ -552,80 +551,78 @@ stringModel[tallyData_, OptionsPattern[]] :=
               potentialForm,
               (* area law potential shape with Coulomb correction
                 and power law  corrections *)
-              c0*Exp[-r[i]*ll*a2sigma*(1 + coff*offAxis[i]) -
-                     2*(cCoulomb + coffq*offAxis[i])*ll*Log[r[i]] -
-                     2*(cPerimeter + coffp*offAxis[i])*ll -
-                     (cl + coffl*offAxis[i])*r[i] -
+              c0*Exp[-r[i]*ll*a2sigma -
+                     2*cCoulomb*ll*Log[r[i]] -
+                     2*cPerimeter*ll -
                      (* second order corrections *)
+                     (* leading r correction to string tension *)
                      (c1 + coff1*offAxis[i])*ll/r[i] -
-                     (c2 + coff2*offAxis[i])*r[i]/ll -
+                     (* Luscher term, resummed *)
+                     c2*r[i]/ll -
                      (* third order corrections *)
+                     (* leading r correction to coulomb potential *)
                      (c3 + coff3*offAxis[i])*ll/r[i]^2 -
-                     (c4 + coff4*offAxis[i])/ll -
-                     (c5 + coff5*offAxis[i])/r[i] -
-                     (c6 + coff6*offAxis[i])*r[i]/ll^2],
-              (* Match Nambu-Goto spectrum *)
+                     (* linear correction, maybe not allowed? *)
+                     (c4 + coff4*offAxis[i])/r[i] -
+                     (* second Luscher term, resummed *)
+                     c5/ll],
+              (* Match Nambu-Goto spectrum.  Ignore the small
+                L correction, even for excited states, since we
+                have other, larger errors. *)
               OptionValue["NambuGoto"],
-              Sum[eigenNorm[j]*Exp[-r[i]*Sqrt[Max[
-                  (a2sigma*ll*(1 + coff*offAxis[i]))^2 +
-                  a2sigma*(1 + coff*offAxis[i])*casimir[j]*
-                  (1 + offConstant[0]*offAxis[i])+
-                  (* Fits in Table III are a bit of a mess and
-                    we can't distinguish powers of L, so we
-                    make an arbitrary choice. *)
-                  If[j>0 && OptionValue["order"]>0,
-                     cConstant[j]*(1*offConstant[j]*offAxis[i])/ll^2, 0],
-                  10^-10]]],
+              Sum[eigenNorm[j]*Exp[
+                  -r[i]*Sqrt[Max[(ll*a2sigma)^2 + a2sigma*casimir[j],
+                                 10^-10]] -
+                    (rConstant[j, 1] + offConstant[j, 1]*offAxis[i])*ll/r[i] -
+                    (rConstant[j, 2] + offConstant[j, 2]*offAxis[i])*ll/r[i]^2],
                   {j, 0, OptionValue["eigenstate"] - 1}],
               True,
               (* Fit spectrum, but don't make any assumption
                 about agreement with Nambu-Goto.  However,
-                assume the leading correction is 1/L^2. *)
-              Sum[eigenNorm[j]*Exp[-r[i]*ll*(
-                  If[j==0, a2sigma*(1 + coff*offAxis[i]),
-                     sConstant[j]*(1 + offConstant[-j]*offAxis[i])] +
-                  If[OptionValue["order"]>0,
-                     cConstant[j]/
-                     (a2sigma*(1 + coff*offAxis[i])*ll^2), 0])],
+                assume the leading correction is O(1/L). *)
+              Sum[eigenNorm[j]*Exp[
+                  -r[i]*ll*If[j==0, a2sigma, sConstant[j]] -
+                  lConstant[j]*r[i]/ll -
+                  (rConstant[j, 1] - offConstant[j, 1]*offAxis[i])*ll/r[i] -
+                  (rConstant[j, 2] - offConstant[j, 2]*offAxis[i])*ll/r[i]^2],
                   {j, 0, OptionValue["eigenstate"] - 1}]
           ],
           {i, na}],
       Join[
           {If[!NumericQ[a2sigma],
-              {a2sigma, a2sigma/.f0["BestFitParameters"]},  Nothing],
-           If[!NumericQ[coff], {coff, 0.0}, Nothing]},
+              {a2sigma, a2sigma/.f0["BestFitParameters"]},  Nothing]},
           If[potentialForm,
              {{c0, c0/.f0["BestFitParameters"]},
-              If[!NumericQ[cl], {cl, 0.0}, Nothing],
               If[!NumericQ[c1], {c1, 0.0}, Nothing],
               If[!NumericQ[c2], {c2, 0.0}, Nothing],
               If[!NumericQ[c3], {c3, 0.0}, Nothing],
               If[!NumericQ[c4], {c4, 0.0}, Nothing],
               If[!NumericQ[c5], {c5, 0.0}, Nothing],
-              If[!NumericQ[c6], {c6, 0.0}, Nothing],
-              If[!NumericQ[coffl], {coffl, 0.0}, Nothing],
-              If[!NumericQ[coffq], {coffq, 0.0}, Nothing],
-              If[!NumericQ[coffp], {coffp, 0.0}, Nothing],
               If[!NumericQ[coff1], {coff1, 0.0}, Nothing],
-              If[!NumericQ[coff2], {coff2, 0.0}, Nothing],
               If[!NumericQ[coff3], {coff3, 0.0}, Nothing],
               If[!NumericQ[coff4], {coff4, 0.0}, Nothing],
-              If[!NumericQ[coff5], {coff5, 0.0}, Nothing],
-              If[!NumericQ[coff6], {coff6, 0.0}, Nothing],
               If[!NumericQ[cCoulomb], {cCoulomb, 0.02}, Nothing],
               If[!NumericQ[cPerimeter], {cPerimeter, 0.}, Nothing]},
              Join[
                  Table[{eigenNorm[j], c0/(j+1.0)/.f0["BestFitParameters"]},
                        {j, 0, OptionValue["eigenstate"] - 1}],
                  If[!OptionValue["NambuGoto"],
-                    Table[{sConstant[j], j+1.0},
+                    Table[{sConstant[j], (j+1)*
+                          If[NumericQ[a2sigma],
+                             a2sigma, a2sigma/.f0["BestFitParameters"]]},
                           {j, 1, OptionValue["eigenstate"] - 1}],
                     {}],
-                 If[OptionValue["order"]>0,
-                    Table[{cConstant[j], 0.0},
-                          {j, If[OptionValue["NambuGoto"], 1, 0],
-                           OptionValue["eigenstate"] -1}],
-                    {}]
+                 Table[If[!NumericQ[lConstant[j]] && !OptionValue["NambuGoto"],
+                          {lConstant[j], 0.0}, Nothing],
+                       {j, 0, OptionValue["eigenstate"] - 1}],
+                 Flatten[Table[
+                     If[!NumericQ[rConstant[j, i]],
+                        {rConstant[j, i], 0.0}, Nothing],
+                     {j, 0, OptionValue["eigenstate"] -1}, {i, 2}], 1],
+                 Flatten[Table[
+                     If[!NumericQ[offConstant[j, i]],
+                        {offConstant[j, i], 0.0}, Nothing],
+                     {j, 0, OptionValue["eigenstate"] -1}, {i, 2}], 1]
              ]]],
       Join[Table[r[i], {i, na}], Table[offAxis[i], {i, na}], {ll}],
       Method -> "LevenbergMarquardt"];
@@ -692,15 +689,14 @@ wilsonModel[data0_, OptionsPattern[]] :=
 
 wilsonLoop::usage = "Planar Wilson loop.";
 wilsonLoop[dir1_, dir2_, coords_List, l1_, l2_, op_String] :=
-    Block[{u = IdentityMatrix[nc], x = coords},
+    Block[{u = IdentityMatrix[nc], uu = IdentityMatrix[nc],
+           x = coords, y = coords},
           Do[u = u.getLink[dir1, x]; x = shift[dir1, x], {l1}];
           Do[u = u.getLink[dir2, x]; x = shift[dir2, x], {l2}];
-          Do[x = shift[dir1, x, -1];
-             u = u.ConjugateTranspose[getLink[dir1, x]], {l1}];
-          Do[x = shift[dir2, x, -1];
-             u = u.ConjugateTranspose[getLink[dir2, x]], {l2}];
-          If[x != coords, Print["Wilson loop error"]; Abort[]];
-          stringOperator[u, op]]
+          Do[uu = uu.getLink[dir2, y]; y = shift[dir2, y], {l2}];
+          Do[uu = uu.getLink[dir1, y]; y = shift[dir1, y], {l1}];
+          If[x != y, Print["Wilson loop error"]; Abort[]];
+          stringOperator[u.ConjugateTranspose[uu], op]]
 wilsonLoopDistribution::usage = "Return the distribution of loop values (complex) for a given size Wilson loop.  Default is to show values where the imaginary part is > 0.  The result is indexed by the lattice dimensions of the plane enclosing the loop.";
 wilsonLoopDistribution[w1_, w2_, op_String:"1", all_:False] :=
  (* Opposite loop orientations would give the complex conjugate *)
@@ -717,6 +713,20 @@ wilsonLoopDistribution[w1_, w2_, op_String:"1", all_:False] :=
 	       {k, latticeVolume[]}]}],
          Nothing],
       {dir1, nd}, {dir2, nd}]], Flatten[#, 2]&]];
+wilsonLoopTallies::usage = "Return tallies of the Wilson loop values for a given size Wilson loop.  The result is indexed by the loop dimensions and the lattice dimensions of the plane enclosing the loop.";
+wilsonLoopTallies[w1_, w2_, op_String:"1"] :=
+  Merge[Flatten[Table[
+      If[w1 < latticeDimensions[[dir1]] && w2 < latticeDimensions[[dir2]] &&
+         If[w1 == w2, dir1 > dir2, dir1 != dir2],
+         Association[{{w1, w2, latticeDimensions[[dir1]],
+                       latticeDimensions[[dir2]]} ->
+           ParallelSum[
+               Block[{z = Re[wilsonLoop[dir1, dir2, latticeCoordinates[k],
+                                        w1, w2, op]]},
+                     {1, z, z^2}],
+	       {k, latticeVolume[]}]}],
+         Nothing],
+      {dir1, nd}, {dir2, nd}]], Total];
 averageWilsonLoop::usage = "Return average value for a given size Wilson loop.";
 averageWilsonLoop[args__] :=
  Map[

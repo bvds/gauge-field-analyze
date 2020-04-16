@@ -190,3 +190,54 @@ bulkPolyakovLoops[inPath_, outFile_, opts:OptionsPattern[]] :=
         "stringModelValuesState", "stringModelValuesPotential"}];
   t4 = SessionTime[];
   Print["Merged and grouped correlators, dump results ", t4-t3, " s"]];
+
+bulkWilsonLoops::usage = "Aggregate Wilson loops over a number of lattice configurations.  Skip some sizes, to save on time.";
+Options[bulkWilsonLoops] = {"lower" -> 1, "upper" -> 1,
+                            "lowerCutoff" -> 4, "skip" -> 2};
+bulkWilsonLoops[inPath_, outFile_, opts:OptionsPattern[]] :=
+ Block[{t0 = SessionTime[], t1, t2, t3,
+        tallyData, cov},
+  tallyData = Merge[Table[
+      Block[{gaugeField},
+            Get[inPath <> ToString[i] <> ".m"]; 
+            Merge[Flatten[
+                Table[wilsonLoopTallies[w1, w2],
+                      {w1, OptionValue["lowerCutoff"],
+                       Max[latticeDimensions] - 1, OptionValue["skip"]},
+                      {w2, OptionValue["lowerCutoff"], w1,
+                       OptionValue["skip"]}]],
+                  Total]],
+      {i, OptionValue["lower"], OptionValue["upper"]}], Join];
+  t1 = SessionTime[];
+  Print["Finished aggregating data. tallyData memory:  ",
+        ByteCount[tallyData], " in ", t1-t0, " s"];
+  wilsonTriangleValues = Map[#[[2]]/#[[1]] &, tallyData, {2}];
+  (* Only include pairs of Polyakov loop correlators that
+    can be in the same direction. See analysis in gauge.nb *)
+  wilsonTriangleCovariance =
+  Block[{data = Normal[wilsonTriangleValues]},
+        Outer[If[Drop[First[#1], 2] == Drop[First[#2], 2],
+                 Covariance[#1[[2]], #2[[2]]], 0]&,
+                data, data, 1]];
+  (* version for one-configuration fit. *)
+  cov = If[Min[Eigenvalues[wilsonTriangleCovariance]] > 0,
+           wilsonTriangleCovariance,
+           (* One could revert back to "None" but this is better
+             for code testing before scaling up to a longer
+             calculation. *)
+           Message[General::npdef, wilsonTriangleCovariance];
+           DiagonalMatrix[Diagonal[wilsonTriangleCovariance]]];
+  t2 = SessionTime[];
+  Print["Finished correlators in ", t2-t1, "s"];
+  wilsonTriangleMerged = Map[
+      talliesToAverageErrors[Total[#]]&, tallyData];
+  wilsonTriangleGrouped = Map[
+      talliesToAverageErrors[
+          Total[Map[{1, #, #^2} &, #]]]&,
+                            wilsonTriangleValues];
+  DeleteFile[outFile];
+  Save[outFile,
+       {"wilsonTriangleMerged", "wilsonTriangleGrouped",
+        "wilsonTriangleCovariance", "wilsonTriangleValues"}];
+  t3 = SessionTime[];
+  Print["Merged and grouped correlators, dump results ", t3-t2, " s"]];
