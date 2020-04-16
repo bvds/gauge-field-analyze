@@ -197,8 +197,10 @@ Options[bulkWilsonLoops] = {"lower" -> 1, "upper" -> 1,
 bulkWilsonLoops[inPath_, outFile_, opts:OptionsPattern[]] :=
  Block[{t0 = SessionTime[], t1, t2, t3,
         tallyData, cov},
-  tallyData = Merge[Table[
-      Block[{gaugeField},
+  (* Parallelization must be implemented at the gaugeField level so
+    that the gaugeSegments cache works properly. *)
+  tallyData = Merge[ParallelTable[
+      Block[{gaugeField, gaugeSegments = Association[]},
             Get[inPath <> ToString[i] <> ".m"]; 
             Merge[Flatten[
                 Table[wilsonLoopTallies[w1, w2],

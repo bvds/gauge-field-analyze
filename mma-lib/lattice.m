@@ -686,17 +686,40 @@ wilsonModel[data0_, OptionsPattern[]] :=
            Length[data]-Length[ff["BestFitParameters"]], " d.o.f."]];
   ff];
 
-
-wilsonLoop::usage = "Planar Wilson loop.";
-wilsonLoop[dir1_, dir2_, coords_List, l1_, l2_, op_String] :=
+getSegment[dir_, k_Integer, l_] :=
+    If[Head[gaugeSegments] === Association,
+       If[KeyExistsQ[gaugeSegments, {dir, k, l}],
+          gaugeSegments[{dir, k, l}],
+          gaugeSegments[{dir, k, l}] = calculateSegment[dir, k, l]],
+       calculateSegment[dir, k, l]];
+calculateSegment[dir_, k_Integer, l_] :=
+    Block[{x = latticeCoordinates[k], u = IdentityMatrix[nc]},
+          Do[u = u.getLink[dir, x]; x = shift[dir, x], {l}];
+          (* Inverse of latticeCoordinates *)
+          {u, latticeIndex[x]}];
+wilsonLoop::usage = "Planar Wilson loop.  Cache segments in gaugeSegments \
+if gaugeSegments is an association.";
+wilsonLoop[dir1_, dir2_, k_, l1_, l2_, op_String] :=
+    Block[{u1, u2, u3, u4, x, y},
+          {u1, x} = getSegment[dir1, k, l1];
+          {u2, x} = getSegment[dir2, x, l2];
+          {u4, y} = getSegment[dir2, k, l2];
+          {u3, y} = getSegment[dir1, y, l1];
+          If[x != y, Print["Wilson loop error"]; Abort[]];
+          stringOperator[u1.u2.ConjugateTranspose[u4.u3], op]];
+wilsonLoopOld::usage = "Direct calculation with no caching.
+  Should give the same result as wilsonLoop.";
+wilsonLoopOld[dir1_, dir2_, k_, l1_, l2_, op_String] :=
     Block[{u = IdentityMatrix[nc], uu = IdentityMatrix[nc],
-           x = coords, y = coords},
+           x = latticeCoordinates[k], y},
+          y = x;
           Do[u = u.getLink[dir1, x]; x = shift[dir1, x], {l1}];
           Do[u = u.getLink[dir2, x]; x = shift[dir2, x], {l2}];
           Do[uu = uu.getLink[dir2, y]; y = shift[dir2, y], {l2}];
           Do[uu = uu.getLink[dir1, y]; y = shift[dir1, y], {l1}];
           If[x != y, Print["Wilson loop error"]; Abort[]];
-          stringOperator[u.ConjugateTranspose[uu], op]]
+          stringOperator[u.ConjugateTranspose[uu], op]];
+
 wilsonLoopDistribution::usage = "Return the distribution of loop values (complex) for a given size Wilson loop.  Default is to show values where the imaginary part is > 0.  The result is indexed by the lattice dimensions of the plane enclosing the loop.";
 wilsonLoopDistribution[w1_, w2_, op_String:"1", all_:False] :=
  (* Opposite loop orientations would give the complex conjugate *)
@@ -708,8 +731,7 @@ wilsonLoopDistribution[w1_, w2_, op_String:"1", all_:False] :=
          Association[{{w1, w2, latticeDimensions[[dir1]],
                        latticeDimensions[[dir2]]} ->
            ParallelTable[
-               absIm[wilsonLoop[dir1, dir2, latticeCoordinates[k],
-                                w1, w2, op]],
+               absIm[wilsonLoop[dir1, dir2, k, w1, w2, op]],
 	       {k, latticeVolume[]}]}],
          Nothing],
       {dir1, nd}, {dir2, nd}]], Flatten[#, 2]&]];
@@ -720,9 +742,8 @@ wilsonLoopTallies[w1_, w2_, op_String:"1"] :=
          If[w1 == w2, dir1 > dir2, dir1 != dir2],
          Association[{{w1, w2, latticeDimensions[[dir1]],
                        latticeDimensions[[dir2]]} ->
-           ParallelSum[
-               Block[{z = Re[wilsonLoop[dir1, dir2, latticeCoordinates[k],
-                                        w1, w2, op]]},
+           Sum[
+               Block[{z = Re[wilsonLoop[dir1, dir2, k, w1, w2, op]]},
                      {1, z, z^2}],
 	       {k, latticeVolume[]}]}],
          Nothing],
