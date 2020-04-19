@@ -146,7 +146,7 @@ plotStringModelFit[tallyData_, opts:OptionsPattern[]] :=
 Options[plotWilsonModelFit] = Join[Options[Graphics3D],
                                    Options[wilsonModel],
                                    {}];
-plotWilsonModelFit[data0_, diffFlag_, opts___]:=
+plotWilsonModelFit[data0_, diffFlag_?BooleanQ, opts___]:=
 Block[{bord = 0.025, dims, ff, min, max,
  (* Switch around dimensions to minimize number of plots.
     This does not affect the model fitting. *)
@@ -159,40 +159,44 @@ Block[{bord = 0.025, dims, ff, min, max,
                   printResult -> True]; 
  If[False, Print["Fit residuals: ", ff["StandardizedResiduals"]]]; 
  If[diffFlag,
-  max = Max[Map[Block[{y=#[[2, 1]] - Apply[ff, #[[1]]]},
+    max = Max[Map[Block[{y=#[[2, 1]] - Apply[ff["Function"], #[[1]]]},
                         Max[#[[2,2]]+{y,-y}]]&, data]];
-  min = -max; 
-  GraphicsColumn[
-   Apply[Function[{l1, l2}, 
-     Block[{sdata = 
-        Select[data, (#[[1, 3]] == l1 && #[[1, 4]] == l2) &]}, 
-      Show[Graphics3D[
-        Map[Block[{fff = #[[2, 1]] - Apply[ff, #[[1]]]}, {{Thickness[
-              0.004], Green, 
-             If[Abs[fff] > #[[2, 2]], 
-              Line[{{#[[1, 1]], #[[1, 2]], 0}, {#[[1, 1]], #[[1, 2]], 
-                 If[fff > 0, fff - #[[2, 2]], fff + #[[2, 2]]]}}], 
-              Nothing]}, {Thickness[0.008], Blue, 
-             Line[{{#[[1, 1]], #[[1, 2]], 
-                fff - #[[2, 2]]}, {#[[1, 1]], #[[1, 2]], 
-                                   fff + #[[2, 2]]}}]}}] &, sdata],
-        gopts,
-        Axes -> True, 
-        AxesLabel -> {"w1", "w2", "diff"}, 
-        BoxRatios -> {1, l2/l1, 0.5}, 
-        PlotLabel -> Row[{l1, "\[Times]", l2, " lattice slice"}], 
-        PlotRange -> {min, max}], 
-       Plot3D[0, {w1, Min[Map[#[[1, 1]] &, sdata]] - bord, 
-         Max[Map[#[[1, 1]] &, sdata]] + bord}, {w2, 
-         Min[Map[#[[1, 2]] &, sdata]] - bord, 
-         Max[Map[#[[1, 2]] &, sdata]] + bord}, PlotRange -> All, 
-        RegionFunction -> (l1 != l2 || #1 >= #2 &), 
-        ClippingStyle -> None, PlotStyle -> {Opacity[0.5]}]]]], 
-         dims, {1}]],
-  min = Min[Map[(#[[2, 1]] - #[[2, 2]] 1.5) &, data]];
-  max = Max[Map[(#[[2, 1]] + #[[2, 2]] 1.5) &, data]]; 
-  GraphicsColumn[
-   Apply[Function[{l1, l2}, 
+    min = -max;
+    GraphicsColumn[
+        Apply[Function[{l1, l2}, 
+         Block[{sdata = 
+                Select[data, (#[[1, 3]] == l1 && #[[1, 4]] == l2) &]}, 
+          Show[Graphics3D[
+              Map[Block[{fff = #[[2, 1]] - Apply[ff["Function"], #[[1]]]},
+                        {{Thickness[0.004], Green, 
+                          If[Abs[fff] > #[[2, 2]], 
+                             Line[{{#[[1, 1]], #[[1, 2]], 0},
+                                   {#[[1, 1]], #[[1, 2]], 
+                                    If[fff > 0, fff - #[[2, 2]],
+                                       fff + #[[2, 2]]]}}], 
+                             Nothing]},
+                         {Thickness[0.008], Blue, 
+                          Line[{{#[[1, 1]], #[[1, 2]], 
+                                 fff - #[[2, 2]]},
+                                {#[[1, 1]], #[[1, 2]], 
+                                 fff + #[[2, 2]]}}]}}] &, sdata],
+              gopts,
+              Axes -> True, 
+              AxesLabel -> {"w1", "w2", "diff"}, 
+              BoxRatios -> {1, l2/l1, 0.5}, 
+              PlotLabel -> Row[{l1, "\[Times]", l2, " lattice slice"}], 
+              PlotRange -> {min, max}], 
+  Plot3D[0, {w1, Min[Map[#[[1, 1]] &, sdata]] - bord, 
+             Max[Map[#[[1, 1]] &, sdata]] + bord},
+         {w2, Min[Map[#[[1, 2]] &, sdata]] - bord, 
+          Max[Map[#[[1, 2]] &, sdata]] + bord}, PlotRange -> All, 
+         RegionFunction -> (l1 != l2 || #1 >= #2 &), 
+         ClippingStyle -> None, PlotStyle -> {Opacity[0.5]}]]]], 
+              dims, {1}]],
+    min = Min[Map[(#[[2, 1]] - #[[2, 2]] 1.5) &, data]];
+    max = Max[Map[(#[[2, 1]] + #[[2, 2]] 1.5) &, data]]; 
+    GraphicsColumn[
+     Apply[Function[{l1, l2}, 
      Block[{sdata = 
         Select[data, (#[[1, 3]] == l1 && #[[1, 4]] == l2) &]}, 
       Show[Graphics3D[
@@ -210,7 +214,7 @@ Block[{bord = 0.025, dims, ff, min, max,
         BoxRatios -> {1, l2/l1, 0.5}, FaceGrids -> {{0, 0, -1}}, 
         PlotLabel -> Row[{l1, "\[Times]", l2, " lattice slice"}], 
         PlotRange -> {min, max}], 
-       Plot3D[ff[w1, w2, l1, l2], {w1, 
+        Plot3D[ff["Function"][w1, w2, l1, l2], {w1, 
          Min[Map[#[[1, 1]] &, sdata]] - bord, 
          Max[Map[#[[1, 1]] &, sdata]] + bord}, {w2, 
          Min[Map[#[[1, 2]] &, sdata]] - bord, 

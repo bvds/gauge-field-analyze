@@ -571,10 +571,10 @@ stringModel[tallyData_, OptionsPattern[]] :=
                 have other, larger errors. *)
               OptionValue["NambuGoto"],
               Sum[eigenNorm[j]*Exp[
-                  -r[i]*Sqrt[Max[(ll*a2sigma)^2 + a2sigma*casimir[j],
-                                 10^-10]] -
-                    (rConstant[j, 1] + offConstant[j, 1]*offAxis[i])*ll/r[i] -
-                    (rConstant[j, 2] + offConstant[j, 2]*offAxis[i])*ll/r[i]^2],
+                  -r[i]*Sqrt[Max[
+                      (ll*a2sigma)^2 + a2sigma*casimir[j], 10^-10]] -
+                  (rConstant[j, 1] + offConstant[j, 1]*offAxis[i])*ll/r[i] -
+                  (rConstant[j, 2] + offConstant[j, 2]*offAxis[i])*ll/r[i]^2],
                   {j, 0, OptionValue["eigenstate"] - 1}],
               True,
               (* Fit spectrum, but don't make any assumption
@@ -645,36 +645,41 @@ wilsonModel[data0_, OptionsPattern[]] :=
  Block[(* Protect against any global definitions of model parameters
          and allow for local constant value. *)
      {data = Normal[data0], ff, w1, w2, l1, l2,
-      a2sigma, cCoulomb, cPerimeter},
+      a2sigma, cCoulomb, cPerimeter, c1, c2, c3, c4},
   If[OptionValue["stringTension"] =!= Automatic,
      a2sigma = OptionValue["stringTension"]];
   If[OptionValue["coulomb"] =!= Automatic,
-     cCoulomb = OptionValue["coulomb"]];
+     cCoulomb = OptionValue["coulomb"],
+     If[OptionValue["order"]<1, cCoulomb = 0]];
   If[OptionValue["perimeter"] =!= Automatic,
-     cPerimeter = OptionValue["perimeter"]];
-  ff = covariantFit1[
+     cPerimeter = OptionValue["perimeter"],
+     If[OptionValue["order"]<1, cPerimeter = 0]];
+  If[OptionValue["order"]<1, c1 = 0];
+  If[OptionValue["order"]<2, c2 = 0];
+  If[OptionValue["order"]<3, c3 = 0];
+  If[OptionValue["order"]<3, c4 = 0];
+  ff = covariantFit2[
     If[OptionValue["covarianceMatrix"] === None,
        Map[(#[[2, 2]]^2)&, data],
        OptionValue["covarianceMatrix"]],
     Map[Append[#[[1]], #[[2, 1]]] &, data], 
     c0 Exp[-w1*w2*a2sigma - cCoulomb*wilsonCoulomb[w1, w2] -
            cPerimeter*2*(w1 + w2) -
-           If[OptionValue["order"]>0, c1*(w1/w2 + w2/w1), 0] -
-           If[OptionValue["order"]>1, c2*(w1/w2^2 + w2/w1^2) +
-                                      c3*(1/w1 + 1/w2), 0]] +
+           c2*(w1/w2 + w2/w1) -
+           c3*(w1/w2^2 + w2/w1^2) -
+           c4*(1/w1 + 1/w2)] +
     (* Exterior of loop using lattice periodicity *)
     c0 Exp[-(l1*l2 - w1*w2)*a2sigma -
            cCoulomb*wilsonCoulomb[w1, w2, l1, l2] -
-           cPerimeter*2*(w1 + w2) - cConstant[-1] (l1 + l2 - w1 - w2)],
-    {{c0, 1.0}, {cConstant[-1], 0.0},
-     If[OptionValue["order"]>0, {c1, 0.0}, Nothing],
-     If[OptionValue["order"]>1, {c2, 0.0}, Nothing], 
-     If[OptionValue["order"]>1, {c3, 0.0}, Nothing], 
-     If[OptionValue["stringTension"] === Automatic, 
-        {a2sigma, 0.016}, Nothing],
-     If[OptionValue["coulomb"] === Automatic, {cCoulomb, 0.01}, Nothing],
-     If[OptionValue["perimeter"] === Automatic,
-        {cPerimeter, 0.01}, Nothing]},
+           cPerimeter*2*(w1 + w2) - c1*(l1 + l2 - w1 - w2)],
+    {{c0, 1.0},
+     If[!NumericQ[a2sigma], {a2sigma, 0.016}, Nothing],
+     If[!NumericQ[cCoulomb], {cCoulomb, 0.01}, Nothing],
+     If[!NumericQ[cPerimeter], {cPerimeter, 0.01}, Nothing],
+     If[!NumericQ[c1], {c1, 0.0}, Nothing],
+     If[!NumericQ[c2], {c2, 0.0}, Nothing],
+     If[!NumericQ[c3], {c3, 0.0}, Nothing],
+     If[!NumericQ[c4], {c4, 0.0}, Nothing]},
     {w1, w2, l1, l2},
     Method -> "LevenbergMarquardt"];
   If[OptionValue[printResult],
