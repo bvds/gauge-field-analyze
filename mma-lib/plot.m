@@ -113,14 +113,14 @@ plotStringModelFit[tallyData_, opts:OptionsPattern[]] :=
           Block[{xx = x Last[vertices]/Norm[Last[vertices]]},
                 (* Reconstruct the mirrors for this separation.
                   It would be safer to pull this from nn? *)
-           diffs = Take[Sort[Map[#-xx&, vertices],
-                             Less[Norm[#1], Norm[#2]]&], nearest];
+           diffs = Map[Drop[#, {dir0}]&,
+                           Take[SortBy[Map[#-xx&, vertices],
+                                       Norm], nearest]];
            {latticeDimensions[[dir0]]*x,
             Apply[ff["Function"],
-                  Join[
-                      Map[Norm, diffs],
-                      Map[offAxis[dir0], diffs],
-                      {latticeDimensions[[dir0]]}]]}],
+                  Append[
+                      Flatten[diffs],
+                      latticeDimensions[[dir0]]]]}],
           {x, Sqrt[nd-1]-1/2, Norm[Last[vertices]]/2+1/2},
           PlotStyle->{cd[dir0], Opacity[0.5], Thickness[0.004],
                       Dashing[0.02]}],
@@ -129,12 +129,13 @@ plotStringModelFit[tallyData_, opts:OptionsPattern[]] :=
              (* on axis *)
              ParametricPlot[
               Block[{xx = Table[If[i==dir1, x, 0], {i, nd}]},
-               {latticeDimensions[[dir0]]*x,
-               Apply[ff["Function"],
-                     Join[
-                         Take[Sort[Map[Norm[#-xx]&, vertices], Less], nearest],
-                         Table[0, {nearest}],
-                         {latticeDimensions[[dir0]]}]]}],
+                    {latticeDimensions[[dir0]]*x,
+                Apply[ff["Function"],
+                      Append[
+                          Flatten[Map[Drop[#, {dir0}]&,
+                                          Take[SortBy[Map[#-xx&, vertices],
+                                                      Norm], nearest]]],
+                          latticeDimensions[[dir0]]]]}],
               {x, 1/2, latticeDimensions[[dir1]]/2+1/2},
               PlotStyle -> {cd[dir0], Opacity[0.5], Thickness[0.004]},
               PlotRange -> All],

@@ -470,13 +470,14 @@ Options[stringModel] = {printResult -> False, "lowerCutoff" -> 0,
                         "upperCutoff" -> Infinity, "order" -> 0,
                         "eigenstate" -> 0, "NambuGoto" -> False,
                         "offAxis" -> 0, "linearLCorrections" -> True,
+                        "pointPotential2" -> True,
                         "stringTension" -> Automatic,
                         "coulomb" -> Automatic, "perimeter" -> Automatic,
                         "covarianceMatrix" -> None};
 stringModel[tallyData_, OptionsPattern[]] :=
  Block[(* Protect against any global definitions of model parameters
          and allow for local constant value. *)
-     {ff, f0, r, offAxis, ll, a2sigma, cCoulomb, cPerimeter,
+     {ff, f0, x, y, ll, a2sigma, cCoulomb, cPerimeter,
       c1, c2, c3, c4, c5,
       offConstant, rConstant, lConstant,
       coff1, coff3, coff4,
@@ -491,6 +492,7 @@ stringModel[tallyData_, OptionsPattern[]] :=
       degeneracy = Function[state, {0, 1, 2, 2}[[state + 1]]],
       casimir = Function[state, 8 Pi (degeneracy[state] - (nd-2)/24)],
       data,
+      sin2theta2 = Function[{x, y}, (2 x y/(x^2 + y^2))^2],
       filter = Map[First, Select[
           MapIndexed[{#2[[1]], #1}&, Keys[tallyData]],
           (Norm[#[[2,1]]]*#[[2,-1]] > OptionValue["lowerCutoff"] &&
@@ -536,34 +538,34 @@ stringModel[tallyData_, OptionsPattern[]] :=
       If[OptionValue["covarianceMatrix"] === None,
          Map[(#[[2, 2]]^2)&, data],
          OptionValue["covarianceMatrix"][[filter,filter]]],
-      Map[Join[Map[Norm, Drop[#[[1]], -1]],
-               (* sin(2*theta)^2 *)
-               Map[(2*#[[1]]*#[[2]]/(#[[1]]^2+#[[2]]^2))^2&, Drop[#[[1]], -1]],
-               {#[[1, -1]], #[[2, 1]]}]&, data],
+      Map[Append[Flatten[#[[1]]], #[[2, 1]]]&, data],
       (* The constrained version of NonLinearModelFit[] does not  
         use Levenberg-Marquardt and does not converge as well.
         Instead, add boundary terms to the fit function.
 
         Tried Exp[-const*r[i]] factor in Coulomb term for 12x18x18,
         but preferred sign was const<0. *)
-      Sum[
+      Sum[Block[
+          {r = Sqrt[x[i]^2 + y[i]^2],
+           offAxis = sin2theta2[x[i], y[i]]}, 
           Which[
               potentialForm,
               (* area law potential shape with Coulomb correction
                 and power law  corrections *)
-              c0*Exp[-r[i]*ll*a2sigma -
-                     2*cCoulomb*ll*Log[r[i]] -
+              c0*Exp[-r*ll*a2sigma -
+                     2*cCoulomb*ll*If[OptionValue["pointPotential2"],
+                                      pointPotential2[x[i], y[i]], Log[r]] -
                      2*cPerimeter*ll -
                      (* second order corrections *)
                      (* leading r correction to string tension *)
-                     (c1 + coff1*offAxis[i])*ll/r[i] -
+                     (c1 + coff1*offAxis)*ll/r -
                      (* Luscher term, resummed *)
-                     c2*r[i]/ll -
+                     c2*r/ll -
                      (* third order corrections *)
                      (* leading r correction to coulomb potential *)
-                     (c3 + coff3*offAxis[i])*ll/r[i]^2 -
+                     (c3 + coff3*offAxis)*ll/r^2 -
                      (* linear correction, maybe not allowed? *)
-                     (c4 + coff4*offAxis[i])/r[i] -
+                     (c4 + coff4*offAxis)/r -
                      (* second Luscher term, resummed *)
                      c5/ll],
               (* Match Nambu-Goto spectrum.  Ignore the small
@@ -571,23 +573,22 @@ stringModel[tallyData_, OptionsPattern[]] :=
                 have other, larger errors. *)
               OptionValue["NambuGoto"],
               Sum[eigenNorm[j]*Exp[
-                  -r[i]*Sqrt[Max[
+                  -r*Sqrt[Max[
                       (ll*a2sigma)^2 + a2sigma*casimir[j], 10^-10]] -
-                  (rConstant[j, 1] + offConstant[j, 1]*offAxis[i])*ll/r[i] -
-                  (rConstant[j, 2] + offConstant[j, 2]*offAxis[i])*ll/r[i]^2],
+                  (rConstant[j, 1] + offConstant[j, 1]*offAxis)*ll/r -
+                  (rConstant[j, 2] + offConstant[j, 2]*offAxis)*ll/r^2],
                   {j, 0, OptionValue["eigenstate"] - 1}],
               True,
               (* Fit spectrum, but don't make any assumption
                 about agreement with Nambu-Goto.  However,
                 assume the leading correction is O(1/L). *)
               Sum[eigenNorm[j]*Exp[
-                  -r[i]*ll*If[j==0, a2sigma, sConstant[j]] -
-                  lConstant[j]*r[i]/ll -
-                  (rConstant[j, 1] - offConstant[j, 1]*offAxis[i])*ll/r[i] -
-                  (rConstant[j, 2] - offConstant[j, 2]*offAxis[i])*ll/r[i]^2],
+                  -r*ll*If[j==0, a2sigma, sConstant[j]] -
+                  lConstant[j]*r/ll -
+                  (rConstant[j, 1] - offConstant[j, 1]*offAxis)*ll/r -
+                  (rConstant[j, 2] - offConstant[j, 2]*offAxis)*ll/r^2],
                   {j, 0, OptionValue["eigenstate"] - 1}]
-          ],
-          {i, na}],
+          ]], {i, na}],
       Join[
           {If[!NumericQ[a2sigma],
               {a2sigma, a2sigma/.f0["BestFitParameters"]},  Nothing]},
@@ -624,7 +625,7 @@ stringModel[tallyData_, OptionsPattern[]] :=
                         {offConstant[j, i], 0.0}, Nothing],
                      {j, 0, OptionValue["eigenstate"] -1}, {i, 2}], 1]
              ]]],
-      Join[Table[r[i], {i, na}], Table[offAxis[i], {i, na}], {ll}],
+      Append[Flatten[Table[{x[i], y[i]}, {i, na}]], ll],
       Method -> "LevenbergMarquardt"];
   ff["filter"] = filter;
   If[OptionValue[printResult],
