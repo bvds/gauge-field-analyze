@@ -430,17 +430,15 @@ rescaleCorrelators[tallies_] :=
         (#->tallies[#]/aFirstCase[tallies, {{0..}, __, Last[#]}])&,
         Keys[tallies]]];
 
-(* See file "coulomb.nb" *)
-selfEnergyCoulomb[w_, eps_:1] := w*(Log[w/eps] - 1);
-twoSidesCoulomb[wa_, wb_] :=
-    Block[{eta = Sqrt[wa^2 + wb^2]}, 
-          2 wb - 2*eta + 2*wa*Log[(eta + wa)/wb]];
-wilsonCoulomb[w1_, w2_, eps_:1]:=
-    2*selfEnergyCoulomb[w1, eps] + 2*selfEnergyCoulomb[w2, eps] -
-    twoSidesCoulomb[w1, w2] - twoSidesCoulomb[w2, w1];
-wilsonCoulomb[w1_, w2_, l1_, l2_, eps_:1]:=
-    2*selfEnergyCoulomb[w1, eps] + 2*selfEnergyCoulomb[w2, eps] -
-    twoSidesCoulomb[w2, l1 - w1] - twoSidesCoulomb[w1, l2 - w2];
+(* See files "poisson-equation.nb" and "coulomb.nb"
+  Second argument is length of wire, third is separation. *)
+Clear[wilsonCoulomb];
+wilsonCoulomb[False, l_, r_, eps_:1] := wilsonCoulomb[False, l, r, eps] =
+    Block[{eta = Sqrt[l^2 + r^2]},
+          2*(l*Log[l/eps] - l - r + eta - l*Log[(eta + l)/r])];
+wilsonCoulomb[True, l_?NumericQ, r_?NumericQ] := wilsonCoulomb[True, l, r] =
+2*Sum[pointPotential3[l1 - l2, 0, 0] -
+      pointPotential3[l1 - l2, r, 0], {l1, l}, {l2, l}];
 
 
 (* For these constants to be used in plots and tables, they
@@ -470,7 +468,7 @@ Options[stringModel] = {printResult -> False, "lowerCutoff" -> 0,
                         "upperCutoff" -> Infinity, "order" -> 0,
                         "eigenstate" -> 0, "NambuGoto" -> False,
                         "offAxis" -> 0, "linearLCorrections" -> True,
-                        "pointPotential2" -> True,
+                        "pointPotential" -> True,
                         "stringTension" -> Automatic,
                         "coulomb" -> Automatic, "perimeter" -> Automatic,
                         "covarianceMatrix" -> None};
@@ -553,7 +551,7 @@ stringModel[tallyData_, OptionsPattern[]] :=
               (* area law potential shape with Coulomb correction
                 and power law  corrections *)
               c0*Exp[-r*ll*a2sigma -
-                     2*cCoulomb*ll*If[OptionValue["pointPotential2"],
+                     2*cCoulomb*ll*If[OptionValue["pointPotential"],
                                       pointPotential2[x[i], y[i]], Log[r]] -
                      2*cPerimeter*ll -
                      (* second order corrections *)
@@ -639,7 +637,7 @@ stringModel[tallyData_, OptionsPattern[]] :=
 
 wilsonModel::usage = "Fit to an exponential, including Coulomb force contributions and an optional excited state.  The Coulomb force contributions consist of a complicated normal term plus a perimeter term.  For option \"stringTension\"->Automatic (default), fit string tension, else use value given.  Likewise for \"coulomb\" and \"perimeter.\"";
 Options[wilsonModel] = {printResult -> False, "order" -> 0,
-                        "stringTension" -> Automatic,
+                        "stringTension" -> Automatic, "pointPotential" -> True,
                         "coulomb" -> Automatic, "perimeter" -> Automatic,
                         "covarianceMatrix" -> None};
 wilsonModel[data0_, OptionsPattern[]] :=
@@ -664,14 +662,23 @@ wilsonModel[data0_, OptionsPattern[]] :=
        Map[(#[[2, 2]]^2)&, data],
        OptionValue["covarianceMatrix"]],
     Map[Append[#[[1]], #[[2, 1]]] &, data], 
-    c0 Exp[-w1*w2*a2sigma - cCoulomb*wilsonCoulomb[w1, w2] -
+    c0 Exp[-w1*w2*a2sigma -
+           cCoulomb*(wilsonCoulomb[OptionValue["pointPotential"], w1, w2] +
+                     wilsonCoulomb[OptionValue["pointPotential"], w2, w1]) -
            cPerimeter*2*(w1 + w2) -
            c2*(w1/w2 + w2/w1) -
            c3*(w1/w2^2 + w2/w1^2) -
            c4*(1/w1 + 1/w2)] +
-    (* Exterior of loop using lattice periodicity *)
+    (* Contribution from the exterior of the loop,
+      using lattice periodicity.
+
+      Dividing into two terms, one for each diretion,
+      gives an extremely poor fit. *)
     c0 Exp[-(l1*l2 - w1*w2)*a2sigma -
-           cCoulomb*wilsonCoulomb[w1, w2, l1, l2] -
+           cCoulomb*(wilsonCoulomb[OptionValue["pointPotential"],
+                                   w1, l2 - w2] +
+                     wilsonCoulomb[OptionValue["pointPotential"],
+                                   w2, l1 - w1]) -
            cPerimeter*2*(w1 + w2) - c1*(l1 + l2 - w1 - w2)],
     {{c0, 1.0},
      If[!NumericQ[a2sigma], {a2sigma, 0.016}, Nothing],
