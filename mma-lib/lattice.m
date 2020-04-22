@@ -637,14 +637,26 @@ stringModel[tallyData_, OptionsPattern[]] :=
 
 wilsonModel::usage = "Fit to an exponential, including Coulomb force contributions and an optional excited state.  The Coulomb force contributions consist of a complicated normal term plus a perimeter term.  For option \"stringTension\"->Automatic (default), fit string tension, else use value given.  Likewise for \"coulomb\" and \"perimeter.\"";
 Options[wilsonModel] = {printResult -> False, "order" -> 0,
+                        (* lowerCutoff limits the length of the shortest side;
+                          upperCutoff limits the lattice size minus the width
+                          of the Wilson loop. *)
+                        "lowerCutoff" -> 0, "upperCutoff" -> 0,
                         "stringTension" -> Automatic, "pointPotential" -> True,
                         "coulomb" -> Automatic, "perimeter" -> Automatic,
                         "covarianceMatrix" -> None};
 wilsonModel[data0_, OptionsPattern[]] :=
  Block[(* Protect against any global definitions of model parameters
          and allow for local constant value. *)
-     {data = Normal[data0], ff, w1, w2, l1, l2,
-      a2sigma, cCoulomb, cPerimeter, c1, c2, c3, c4},
+     {ff, w1, w2, l1, l2,
+      a2sigma, cCoulomb, cPerimeter, c1, c2, c3, c4,
+      data,
+     filter = Map[First, Select[
+          MapIndexed[{#2[[1]], #1}&, Keys[data0]],
+          (#[[2, 1]] > OptionValue["lowerCutoff"] &&
+           #[[2, 2]] > OptionValue["lowerCutoff"] &&
+           #[[2, 1]] < #[[2, 3]] - OptionValue["upperCutoff"] &&
+           #[[2, 2]] < #[[2, 4]] - OptionValue["upperCutoff"])&]]},
+     data = Normal[data0][[filter]];
   If[OptionValue["stringTension"] =!= Automatic,
      a2sigma = OptionValue["stringTension"]];
   If[OptionValue["coulomb"] =!= Automatic,
@@ -660,7 +672,7 @@ wilsonModel[data0_, OptionsPattern[]] :=
   ff = covariantFit2[
     If[OptionValue["covarianceMatrix"] === None,
        Map[(#[[2, 2]]^2)&, data],
-       OptionValue["covarianceMatrix"]],
+       OptionValue["covarianceMatrix"][[filter, filter]]],
     Map[Append[#[[1]], #[[2, 1]]] &, data], 
     c0 Exp[-w1*w2*a2sigma -
            cCoulomb*(wilsonCoulomb[OptionValue["pointPotential"], w1, w2] +
