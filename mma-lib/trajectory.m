@@ -81,7 +81,7 @@ Options[makeObservableTrajectory] = Join[
 makeObservableTrajectory[set_, label_, n_, 
                             opts:OptionsPattern[]] := 
  Block[{gaugeField, delta, gaugeField0, distance = 0,
-        lastGaugeField, coordList, dd, results,
+        lastGaugeField, coordList, dd, results, gaugeSegments,
         sopts = Apply[Sequence, FilterRules[
             {opts}, Options[singleLinkStep]]]},
   Get[OptionValue["periodic"] <> "-" <> ToString[set] <> ".m"];
@@ -90,7 +90,8 @@ makeObservableTrajectory[set_, label_, n_,
   lastGaugeField = gaugeField;
   
   results = Transpose[Table[
-      Print["Starting ", i]; 
+      Print["Starting ", i];
+      gaugeSegments = Association[];
       If[i > 0,
          If[StringMatchQ[label, "single*"],
             {gaugeField, dd} = singleLinkStep[coordList, sopts],

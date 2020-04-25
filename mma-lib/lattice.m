@@ -275,7 +275,7 @@ and have minimal length in each transverse hyper-plane ("slice").  *)
 loopThickness[] := beta Sqrt[2 Pi]/nc^2;
 
 polyakovLoopTallies["simple", op_:"1"] :=
- Block[{tallies = Association[{}]},
+ Block[{tallies = Association[]},
   Do[
    Block[{face = latticeDimensions, nf, ta,
           lt = Lookup[tallies, latticeDimensions[[dir]], {}]},
@@ -288,7 +288,7 @@ polyakovLoopTallies["simple", op_:"1"] :=
    {dir, nd}];
   tallies];
 polyakovLoopTallies["smeared", width1_, x_, op_:"1"] :=
- Block[{tallies = Association[{}]},
+ Block[{tallies = Association[]},
   Do[
    If[dir0 != dir1,
      Block[{face = latticeDimensions, skip, nf, ta,
@@ -724,14 +724,16 @@ calculateSegment[dir_, k_Integer, l_] :=
           {u, latticeIndex[x]}];
 wilsonLoop::usage = "Planar Wilson loop.  Cache segments in gaugeSegments \
 if gaugeSegments is an association.";
+wilsonLoop::error = "Wilson loop error";
 wilsonLoop[dir1_, dir2_, k_, l1_, l2_, op_String] :=
     Block[{u1, u2, u3, u4, x, y},
           {u1, x} = getSegment[dir1, k, l1];
           {u2, x} = getSegment[dir2, x, l2];
           {u4, y} = getSegment[dir2, k, l2];
           {u3, y} = getSegment[dir1, y, l1];
-          If[x != y, Print["Wilson loop error"]; Abort[]];
-          stringOperator[u1.u2.ConjugateTranspose[u4.u3], op]];
+          If[x == y,
+             stringOperator[u1.u2.ConjugateTranspose[u4.u3], op],
+             Message[wilsonLoop::error]; $Failed]];
 wilsonLoopOld::usage = "Direct calculation with no caching.
   Should give the same result as wilsonLoop.";
 wilsonLoopOld[dir1_, dir2_, k_, l1_, l2_, op_String] :=
@@ -742,8 +744,8 @@ wilsonLoopOld[dir1_, dir2_, k_, l1_, l2_, op_String] :=
           Do[u = u.getLink[dir2, x]; x = shift[dir2, x], {l2}];
           Do[uu = uu.getLink[dir2, y]; y = shift[dir2, y], {l2}];
           Do[uu = uu.getLink[dir1, y]; y = shift[dir1, y], {l1}];
-          If[x != y, Print["Wilson loop error"]; Abort[]];
-          stringOperator[u.ConjugateTranspose[uu], op]];
+          If[x == y, stringOperator[u.ConjugateTranspose[uu], op],
+             Message[wilsonLoop::error]; $Failed]];
 
 wilsonLoopDistribution::usage = "Return the distribution of loop values (complex) for a given size Wilson loop.  Default is to show values where the imaginary part is > 0.  The result is indexed by the lattice dimensions of the plane enclosing the loop.";
 wilsonLoopDistribution[w1_, w2_, op_String:"1", all_:False] :=
@@ -755,7 +757,7 @@ wilsonLoopDistribution[w1_, w2_, op_String:"1", all_:False] :=
          If[w1 == w2, dir1 > dir2, dir1 != dir2],
          Association[{{w1, w2, latticeDimensions[[dir1]],
                        latticeDimensions[[dir2]]} ->
-           ParallelTable[
+           Table[
                absIm[wilsonLoop[dir1, dir2, k, w1, w2, op]],
 	       {k, latticeVolume[]}]}],
          Nothing],
@@ -1078,7 +1080,7 @@ plaquetteCorrelationTallies[OptionsPattern[]] :=
               Block[{corr = (pa - pavg)*(pb - pavg)},
                     lt + {1, corr, corr^2}]]];
  Merge[ParallelTable[
-  Block[{tallies = Association[{}], sameDirQ,
+  Block[{tallies = Association[], sameDirQ,
          dir1a, dir1b, dir2a, dir2b, xa, xb, pa, pb, lt, dx2},
    Do[
        {dir1a, dir2a, xa, pa} = pp[[i]];
