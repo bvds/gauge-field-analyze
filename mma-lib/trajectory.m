@@ -73,27 +73,28 @@ singleLinkStep[coordList_List:Null, opts:OptionsPattern[]] :=
 
 Options[makeObservableTrajectory] = Join[
     Options[singleLinkStep], {
-        "observables" -> {"distance", "polyakovCorrelator",
+        "observables" -> {"distance", "norm", "polyakovCorrelator",
                           "wilsonDiagonal", "wilsonTriangle"},
         "skip" -> 1,
         "step" -> "../data/3-3/step-16-28", 
         "periodic" -> "../data/3-3/periodic-16-28"}]; 
 makeObservableTrajectory[set_, label_, n_, 
                             opts:OptionsPattern[]] := 
- Block[{gaugeField, delta, gaugeField0, distance = 0,
+    Block[{gaugeField, delta, gaugeField0, distance = 0,
+        diagonalQ = StringMatchQ[label, "s*"],
         lastGaugeField, coordList, dd, results, gaugeSegments,
         sopts = Apply[Sequence, FilterRules[
             {opts}, Options[singleLinkStep]]]},
   Get[OptionValue["periodic"] <> "-" <> ToString[set] <> ".m"];
-  If[StringMatchQ[label, "single*"],
+  If[diagonalQ,
      coordList = makeCoordList[]];
   lastGaugeField = gaugeField;
   
   results = Transpose[Table[
-      Print["Starting ", i];
+      (* Print["Starting ", i]; *)
       gaugeSegments = Association[];
       If[i > 0,
-         If[StringMatchQ[label, "single*"],
+         If[diagonalQ,
             {gaugeField, dd} = singleLinkStep[coordList, sopts],
             Get[StringRiffle[{OptionValue["step"], ToString[set],
                               label, ToString[i]},"-"]<>".m"];
@@ -108,6 +109,12 @@ makeObservableTrajectory[set_, label_, n_,
           {i, Which[
               observable == "distance",
               distance,
+              observable == "norm",
+              (* Except for distance, which is already calculated above,
+                the quantities are gauge invariant, so fixing a gauge
+                won't cause any harm *)
+              applyGaugeTransforms[{1, 1, 6, 1, 5, 6, 5, 6, 5, 6, 5, 6, 5}];
+              latticeNorm[],
               observable == "polyakovCorrelator",
               Map[talliesToAverageErrors,
                   polyakovCorrelatorTallies["simple","1"]],

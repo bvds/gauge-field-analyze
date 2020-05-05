@@ -462,6 +462,12 @@ Format[rConstant[i_]] := Subscript["e", i];
 Format[rConstant[i_, j_]] := Subscript["e", Row[{i, j}]];
 Format[offConstant[i_]] := Subscript["f", i];
 Format[offConstant[i_, j_]] := Subscript["f", Row[{i, j}]];
+rescaleCovarianceMatrix::usage = "This was mostly experimental; see comments in \"gauge.nb\"";
+rescaleCovarianceMatrix[cov_?MatrixQ, err_?VectorQ, label_: None] :=
+ Block[{rescale = err/Sqrt[Diagonal[cov]]}, 
+  Print["Rescale:  ", {label, Exp[ Mean[Log[rescale]]], 
+    Exp[StandardDeviation[Log[rescale]]]}]; 
+  Map[(#*rescale) &, cov*rescale]]
 
 stringModel::usage = "Fit to an exponential plus a constant term, including the universal string correction as well as Coulomb force contributions.  See Andreas Athenodorou, Barak Bringoltz, Michael Teper https://arxiv.org/abs/0709.0693; Ofer Aharony & Zohar Komargodski arXiv:1302.6257v2 [hep-th] 12 Mar 2013; Teper review article http://arxiv.org/abs/0912.3339  The Coulomb force contribution consists of a log(r) term plus a perimeter term.  For option \"stringTension\"->Automatic (default), fit string tension, else use value given.  Likewise for \"coulomb\" and \"perimeter.\"";
 Options[stringModel] = {printResult -> False, "lowerCutoff" -> 0,
@@ -469,6 +475,7 @@ Options[stringModel] = {printResult -> False, "lowerCutoff" -> 0,
                         "eigenstate" -> 0, "NambuGoto" -> False,
                         "offAxis" -> 0, "linearLCorrections" -> True,
                         "pointPotential" -> True,
+                        "rescaleCovarianceMatrix" -> False,
                         "stringTension" -> Automatic,
                         "coulomb" -> Automatic, "perimeter" -> Automatic,
                         "covarianceMatrix" -> None};
@@ -489,13 +496,19 @@ stringModel[tallyData_, OptionsPattern[]] :=
         to the even parity states. *)
       degeneracy = Function[state, {0, 1, 2, 2}[[state + 1]]],
       casimir = Function[state, 8 Pi (degeneracy[state] - (nd-2)/24)],
-      data,
+      data, cov,
       sin2theta2 = Function[{x, y}, (2 x y/(x^2 + y^2))^2],
       filter = Map[First, Select[
           MapIndexed[{#2[[1]], #1}&, Keys[tallyData]],
           (Norm[#[[2,1]]]*#[[2,-1]] > OptionValue["lowerCutoff"] &&
            Norm[#[[2,1]]]*#[[2,-1]] < OptionValue["upperCutoff"])&]]},
   data = Normal[tallyData][[filter]];
+  cov = If[OptionValue["covarianceMatrix"] === None,
+           Map[(#[[2, 2]]^2)&, data],
+           Block[{cc = OptionValue["covarianceMatrix"][[filter, filter]]},
+                 If[OptionValue["rescaleCovarianceMatrix"],
+                    rescaleCovarianceMatrix[cc, Map[#[[2,2]]&, data]],
+                    cc]]];
   If[OptionValue["stringTension"] =!= Automatic,
      a2sigma = OptionValue["stringTension"]];
   If[OptionValue["coulomb"] =!= Automatic,
@@ -522,9 +535,7 @@ stringModel[tallyData_, OptionsPattern[]] :=
      {j, 0, OptionValue["eigenstate"] - 1}, {i, 1, 2}];
   (* Perform a simple fit to get decent starting values *)
   f0 = covariantFit2[
-      If[OptionValue["covarianceMatrix"] === None,
-         Map[(#[[2, 2]]^2)&, data],
-         OptionValue["covarianceMatrix"][[filter, filter]]],
+      cov,
       Map[{Norm[#[[1, 1]]], #[[1,-1]], #[[2, 1]]}&, data],
       c0*Exp[-r*ll*a2sigma],
       {{c0, 0.05},
@@ -533,9 +544,7 @@ stringModel[tallyData_, OptionsPattern[]] :=
       {r, ll},
       Method -> "LevenbergMarquardt"];
   ff = covariantFit2[
-      If[OptionValue["covarianceMatrix"] === None,
-         Map[(#[[2, 2]]^2)&, data],
-         OptionValue["covarianceMatrix"][[filter,filter]]],
+      cov,
       Map[Append[Flatten[#[[1]]], #[[2, 1]]]&, data],
       (* The constrained version of NonLinearModelFit[] does not  
         use Levenberg-Marquardt and does not converge as well.
