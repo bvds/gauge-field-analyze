@@ -150,7 +150,12 @@ Let lattice configuration
 $\config=\left\{U_1(x_1),\ldots\right\}$
 be a particular set of link fields that cover the lattice.
 
-The associated Wilson action is
+If $\plaquette_{\mu,\nu}(x)$ is a plaquette lying in the $\mu\nu$-plane,
+\be
+\plaquette_{\mu,\nu}(x) = \Tr U_\mu(x) U_\nu(x+a \hat{\mu})
+U_\mu^\da(x+a\hat{\nu}) U_\nu^\da(x) \; ,
+\eq
+then the Wilson action is
 %
 \be
 S = \beta \sum_{x,\, \mu<\nu} \left(1-\frac{1}{N} \Re\, \plaquette_{\mu,\nu}(x)\right) \label{action}
@@ -162,18 +167,13 @@ where
 so that $S$ becomes the usual Yang-Mills action in the $a\to 0$ limit.
 In $D=3$ dimensions, the coupling $g$ has dimensions of
 $\left(\mbox{mass}\right)^{1/2}$, consistent with $\beta$ being dimensionless.
-Also, $\plaquette_{\mu,\nu}(x)$ is a plaquette lying in the $\mu\nu$-plane:
-\be
-\plaquette_{\mu,\nu}(x) = \Tr U_\mu(x) U_\nu(x+a \hat{\mu})
-U_\mu^\da(x+a\hat{\nu}) U_\nu^\da(x) \; .
-\eq
-It is sometimes convenient to use the average plaquette,
-\be
-      \plaquette_\mathrm{avg} = \frac{2}{n_L (D-1) N}
-             \sum_{x,\,\mu<\nu} \Re\,\plaquette_{\mu,\nu}(x) 
-\eq
-with normalization such that $\plaquette_\mathrm{avg}=1$
-for the bare vacuum configuration $U_\mu(x) = \mathbb{I}$.
+%It is sometimes convenient to use the average plaquette,
+%\be
+%      \plaquette_\mathrm{avg} = \frac{2}{n_L (D-1) N}
+%             \sum_{x,\,\mu<\nu} \Re\,\plaquette_{\mu,\nu}(x) 
+%\eq
+%with normalization such that $\plaquette_\mathrm{avg}=1$
+%for the bare vacuum configuration $U_\mu(x) = \mathbb{I}$.
 
 The Wilson action is invariant under $\SU(N)$ gauge transforms:
 %
@@ -187,7 +187,7 @@ The lattice has a total of $n_G = V_L\left(N^2-1\right)$ gauge symmetries.
 \section{Norms}
 
 It is useful to define a number of norms.  We define the norm
-a link field using the Frobenius norm of the logarithm,
+of a link field using the Frobenius norm of the logarithm,
 %
 \be
    \fnorm{U_\mu(x)} =
@@ -237,8 +237,8 @@ monitor the behavior of the gauge fields when moving from
 the original Euclidean lattice configuration toward
 the saddle-point.  The goal here is not to make precise
 measurements of the string tension and glueball spectra
-but to measure a wide set of observables in a more qualitative
-fashion for a single lattice configuration.
+but to probe that gauge field itself in a more qualitative
+fashion for just a single lattice configuration.
 
 As we move toward the saddle-point of a lattice configuration,
 we expect that the perturbative (quantum) fluctuations of
@@ -249,7 +249,7 @@ might behave during this process.  We will not tackle that
 issue in the present investigation, but will stick to the bare
 (unimproved) operators.
 In particular, we will use Polyakov loop correlators to measure
-string tension at various length scales and will use Wilson loops
+effective potential at various length scales and will use Wilson loops
 and Wilson loop correlators to further probe the system.
 
 \subsection{Coulomb corrections}
@@ -257,8 +257,8 @@ and Wilson loop correlators to further probe the system.
 In $D=4$ spacetime directions, there is a clear separation---both
 experimentally and in lattice calculations---between a
 short distance regime where the heavy quark potential is
-dominated by a $1/r$ Coulomb-type potential and a
-long-distance regime where interaction is dominated by the confining linear
+dominated by a $1/r$ Coulomb force potential and a
+long-distance regime having a linear confining
 potential~\cite{bali_static_2000,brambilla_effective-field_2005}.
 In $D=3$, the Coulomb potential goes as $\log(r)$ and there is no 
 clear separation; some care must be taken to distinguish it from
@@ -298,7 +298,7 @@ S_\Phi &=& 2 \int_0^L dx \int_{x+\varepsilon/2}^\infty dy
   &=& 2 L \log\left(\frac{r}{\varepsilon}\right) + O(\varepsilon)\, .
 \end{eqnarray}
 %
-Thus, we get the usual $L \log(r)$ term plus a
+Thus, we obtain the usual $L \log(r)$ term plus a
 self-energy term proportional to the length
 of the currents, $2L$.  The $\log(\varepsilon)$ divergence
 is from approximating the current density as a thin wire.
@@ -321,9 +321,9 @@ a more complicated expression
                  \sqrt{(x^\prime-x)^2+ w_2^2}}
                \nonumber\\
                & &  +\left[w_1 \leftrightarrow w_2 \right]\\
-   &=&  2 w_1 \log\left(\frac{w_1}{\varepsilon}\right)
-       + 2 \eta - 2\left(w_1+w_2\right)
-            - 2 w_1 \log\left(\frac{\eta +w_1}{w_2}\right)               
+   &=&  2 \eta - 2 w_1 -2 w_2
+               - 2 w_1 \log\left(\frac{\varepsilon\left(\eta +w_1\right)}{
+                 w_1 w_2}\right)
                \nonumber\\
    & &  +\left[w_1 \leftrightarrow w_2\right] + O(\varepsilon) \, ,\\
 \end{eqnarray}
@@ -334,9 +334,9 @@ contribution to the Wilson loop using
 %
 \begin{eqnarray}
   \mathcal{S}_{w_1\times w_2}\left(c_q, c_p\right) & = &
-     c_q 2 \left(w_1 \log\left({w_1}\right) + \eta
+     c_q 2 \left(\eta
         -  w_1 - w_2
-        -  w_1 \log\left(\frac{\eta +w_1}{w_2}\right)
+        -  w_1 \log\left(\frac{\eta +w_1}{w_1 w_2}\right)
         + \left[w_1 \leftrightarrow w_2\right]\right)
         \nonumber\\ 
  &&  + c_p  2\left(w_1+w_2\right)  \label{cwf}
@@ -497,16 +497,17 @@ equivalent to the statement that $\Tr A_\mu A^\mu$, integrated over space,
 has multiple local minima.~\cite{maas_more_2009}.
 We are interested here in Landau gauge mainly
 because it gives us, if $\Tr A_\mu A^\mu$ is small enough, the
-possibility of connecting the
+hope of connecting the
 link fields to the continuum degrees of freedom.
-However, finding this minimum can be a bit tricky.  In this
-section, we will explore some strategies for finding the minimum.
+On the lattice, this is equivalent to finding a gauge transform
+that minimizes the lattice norm $\fnorm{\config}$.  In this
+section, we will explore some strategies for finding this minimum.
 
 Let us start with local minimization.
 For some site $x$, we want to find a gauge transform $U_G$ on $x$
 that minimizes $\fnorm{U_\mu(x)}$ for the $2D$
 links connected to $x$.  Taylor expanding in the link fields,
-we find that, to lowest order in the fields, a gauge transform
+we find, to lowest order in the fields, a gauge transform
 that minimizes this norm:
 %
 \be
@@ -527,6 +528,7 @@ convergence.
 In practice, we find the fastest convergence for $\orelax \approx 1.7$;
 however, it can become unstable for slightly higher $\orelax$.
 We generally use $\orelax=1.5$ as a compromise between speed and stability.
+We will come back to this minimization later (Table~\ref{center4}).
 
 \subsection{Maximal center gauge}
 
@@ -635,19 +637,21 @@ for finding Landau gauge.
   \end{tabular}
   \end{table}
 
-We can use a procedure similar the one introduced
-in the previous section to minimize norm of the link fields
-relative to the center $\zentrum$ of the group.
-We can do this by computing the logarithms in Eqn.~(\ref{landau})
-using
+On the lattice, maximal center gauge corresponds
+to a gauge transform that minimizes
+$\left\lVert \config \right\rVert_\zentrum$. 
+A local minimum of $\left\lVert \config \right\rVert_\zentrum$
+can be found via a small modification of the ``Landau step'' discussed
+above. That is, when computing the logarithms
+in Eqn.~(\ref{landau}) one uses
 \be
 \log\left(U_\mu(x)\right) \to \log\left(z^k U_\mu(x)\right)
 \, , \;\mbox{
   where $z^k\in\zentrum$ minimizes}\; \fnorm{z^k U_\mu(x)} \;.
 \eq
 One can then apply the associated gauge transform to each site of
-the lattice as described above, a ``center step.''
-If we apply some number of ``center steps'' to a lattice
+the lattice as described above.
+If we apply some number of these ``center steps'' to a lattice
 configuration, we find quick convergence to some local
 minimum of $\left\lVert \config \right\rVert_\zentrum$ with
 link fields distributed fairly evenly across $\zentrum$.
@@ -671,7 +675,7 @@ since it preferentially minimizes the link fields
 with respect to $\mathbb{I}$ and not some other element of $\zentrum$.
 This leads us to a variation which we will call ``$\zentrum$-axial gauge''
 where we instead minimize $\left\lVert U_\mu(x) \right\rVert_\zentrum$
-on the link fields in $\phi_\mu(x)$.  In Table~\ref{center2},
+for the link fields in $\phi_\mu(x)$.  In Table~\ref{center2},
 we apply this gauge transform in each direction before applying
 some number of local minimizations.  One can see that this
 results in a substantially improved lattice norm relative to
@@ -689,7 +693,7 @@ respect to $\mathbb{I}$, substantially more links lie near
 the identity element.
 
 Can we do better? Let us include some number of ``Landau steps''
-in the procedure; see Table~\ref{center4}.  (The strategy presented
+in the procedure; see Table~\ref{center4}.  (The strategy shown
 here was the end result of a an extensive Monte Carlo study that
 included a number of other gauge fixing strategies, as well.)
 We see a substantially reduced lattice norm, relative to
