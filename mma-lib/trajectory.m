@@ -81,6 +81,7 @@ Options[makeObservableTrajectory] = Join[
 makeObservableTrajectory[set_, label_, n_, 
                             opts:OptionsPattern[]] := 
     Block[{gaugeField, delta, gaugeField0, distance = 0,
+           debug = printLevel[OptionValue[printDetails], 1],
         diagonalQ = StringMatchQ[label, "s*"],
         lastGaugeField, coordList, dd, results, gaugeSegments,
         sopts = Apply[Sequence, FilterRules[
@@ -91,7 +92,7 @@ makeObservableTrajectory[set_, label_, n_,
   lastGaugeField = gaugeField;
   
   results = Transpose[Table[
-      (* Print["Starting ", i]; *)
+      If[debug > 0, Print["Starting step ", i]];
       gaugeSegments = Association[];
       If[i > 0,
          If[diagonalQ,
@@ -106,7 +107,8 @@ makeObservableTrajectory[set_, label_, n_,
                     lastGaugeField = gaugeField]];
          distance += dd];
       If[Mod[i, OptionValue["skip"]] == 0, Table[
-          {i, Which[
+          {i, If[debug > 0, Print["  ", DateObject[], " start ", observable]];
+              Which[
               observable == "distance",
               distance,
               observable == "norm",

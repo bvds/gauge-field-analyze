@@ -228,7 +228,7 @@ and have minimal length in each transverse hyper-plane ("slice").  *)
     sliceVolume = (width + 1)^(nd - 1), aa = anchor, vec, slice, cc},
     Print["Unfinished"]; Abort[];
    (* To start with, 
-   we need to calculate the distribution of paths across any slice. *)
+     we need to calculate the distribution of paths across any slice. *)
       ww = Table[
      expAlpha^Abs[k1 - k2], {k1, width + 1}, {k2, width + 1}];
    (* Find eigenpair with positive eigenvector *)
@@ -408,7 +408,7 @@ polyakovCorrelators[dir0_, dir1_, width1_, x_, op_] :=
          tallies[ntL] = lt]]],
        {k1, kernel, nf, $KernelCount}, {k2, k1, nf}];
     tallies],
-   {kernel, 1 $KernelCount}], Total]];
+   {kernel, $KernelCount}], Total]];
 
 polyakovCorrelatorTallies["simple", op_:"1"] :=
     Merge[Table[polyakovCorrelators[dir, op], {dir, nd}],
@@ -981,16 +981,20 @@ setLaundauAxialGauge[dir1_, OptionsPattern[]] :=
 
 nStrategies = 6;
 Options[applyGaugeTransforms] = {"abelian" -> False, "maxAbelianGauge"->False,
+                                 "backwards" -> False,
                                  "loopFunction" -> (Null&)};
 applyGaugeTransforms[s_, OptionsPattern[]] :=
  (* New direction each time setAxialGauge[] is called. *)
  Block[{lastDir = nd, dir},
    dir = Function[lastDir = Mod[lastDir, nd] + 1];
    Scan[(Which[
-       # == 1, setAxialGauge[dir[], "center" -> False,
-                             "abelian"->OptionValue["abelian"]],
-       # == 2, setAxialGauge[dir[], "center" -> True,
-                             "abelian"->OptionValue["abelian"]],
+       (* go backwards *)
+       # == 1, setAxialGauge[
+           If[OptionValue["backards"], nd + 1 - dir[], dir[]],
+           "center" -> False, "abelian"->OptionValue["abelian"]],
+       # == 2, setAxialGauge[
+           If[OptionValue["backards"], nd + 1 - dir[], dir[]],
+           "center" -> True, "abelian"->OptionValue["abelian"]],
        # == 3,
        setLandauGauge["center" -> False, "damping" -> 1,
                        "maxAbelianGauge" -> OptionValue["maxAbelianGauge"]],

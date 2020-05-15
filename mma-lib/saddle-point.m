@@ -666,7 +666,7 @@ findDelta[data:{hess_, grad_, gauge_}, opts:OptionsPattern[]] :=
           " ./" <> executable, configFile, shiftFile, outFile,
           "1>shifts.log 2>shifts.err; touch done) >/dev/null 2>&1 &"
           }] != 0, Return[$Failed]];
-      Print["Starting external program."]];
+      Print[DateObject[], "Starting external program."]];
    If[action == "read" || action == "detach",
       Block[{dt = 60, tt = 0},
             While[RunProcess[{"ssh", remoteHost, "test", "-e",
@@ -674,7 +674,7 @@ findDelta[data:{hess_, grad_, gauge_}, opts:OptionsPattern[]] :=
                              "ExitCode"] != 0,
                   tt += dt;
                   Pause[dt]];
-            Print["External program finished, ", tt, " s."]];
+            Print[DateObject[], "External program finished, ", tt, " s."]];
       If[runRemote[{"scp",
                     remote <> "/" <> "shifts.log",
                     remote <> "/" <> "shifts.err",

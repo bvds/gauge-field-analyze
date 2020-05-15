@@ -56,6 +56,13 @@ SUSymmetric[n_?IntegerQ] :=
  SUSymmetric[n] =
   Block[{gen = SUGenerators[n]},
 	2 Outer[Tr[(#1.#2 + #2.#1).#3]&, gen, gen, gen, 1]];
+SUStructure::usage = "Construct the structure constants f_{a,b,c},
+caching the result.  This tensor is sparse, but we will be inefficient for now.";
+SUStructure[] := SUStructure[nc];
+SUStructure[n_?IntegerQ] :=
+ SUStructure[n] =
+  Block[{gen = SUGenerators[n]},
+	2 Im[Outer[Tr[(#1.#2 - #2.#1).#3]&, gen, gen, gen, 1]]];
 
 centerPhases[mat_] :=(* Used for some testing *)
  Block[{delta, phases = Arg[Eigenvalues[mat]]},
@@ -205,3 +212,23 @@ stringOperator[uu_, op_String]:=
       True,
       Message[stringOperator::unknown, op]; $Failed
   ]];
+
+
+multiNorm::usage = "Norm squared of a rank-2 tensor in the adjoint \
+representation projected onto various multiplets.  See Stefan Keppeler \
+and Malin Sjödahl, \"Orthogonal multiplet bases in SU(N_c) color space,\"\
+arXiv:1207.0609v2 [hep-ph] 2 Oct 2012.  This does not include the \
+other 10 multiplet or separate out the additional multiplet that occurs \
+for nc>3." 
+multiNorm["1", mat_] := Tr[mat]^2/(nc^2 - 1); 
+multiNorm["8S", mat_] := 
+ Block[{x = TensorContract[mat.SUSymmetric[], {{1, 2}}]}, 
+  Total[x^2] nc/(nc^2 - 4)];
+multiNorm["8A", mat_] := 
+  Block[{x = TensorContract[mat.SUStructure[], {{1, 2}}]}, 
+   Total[x^2]/nc];
+multiNorm["27S", mat_] := ((Tr[mat.Transpose[mat]] + Tr[mat.mat])/2 - 
+   multiNorm["8S", mat] - multiNorm[1, mat]); 
+multiNorm["10", mat_] := ((Tr[mat.Transpose[mat]] - Tr[mat.mat])/2 - 
+            multiNorm["8A", mat]);
+multiNorm[j_?IntegerQ, mat_] := multiNorm[ToString[j], mat]; 
