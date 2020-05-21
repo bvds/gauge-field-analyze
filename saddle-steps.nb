@@ -10,10 +10,10 @@
 NotebookFileLineBreakTest
 NotebookFileLineBreakTest
 NotebookDataPosition[       158,          7]
-NotebookDataLength[   1980300,      39640]
-NotebookOptionsPosition[   1731144,      36706]
-NotebookOutlinePosition[   1731505,      36722]
-CellTagsIndexPosition[   1731462,      36719]
+NotebookDataLength[   2105226,      42426]
+NotebookOptionsPosition[   1844741,      39372]
+NotebookOutlinePosition[   1845102,      39388]
+CellTagsIndexPosition[   1845059,      39385]
 WindowFrame->Normal*)
 
 (* Beginning of Notebook Content *)
@@ -6266,7 +6266,7 @@ ops, max itn 130\\n                 in 1528.71 s\\nshifts.c:  init and i/o \
 8b7e97ba375c"]
 }, Open  ]]
 }, Closed]]
-}, Open  ]],
+}, Closed]],
 
 Cell[CellGroupData[{
 
@@ -20444,7 +20444,7 @@ Cell[BoxData[
   3.798207961562623*^9},ExpressionUUID->"fd03d997-30bb-4283-92cf-\
 d19b781bf76c"]
 }, Open  ]]
-}, Open  ]],
+}, Closed]],
 
 Cell[CellGroupData[{
 
@@ -24991,7 +24991,7 @@ init and i/o 15.59 s, calculation 8245.59 s\\n\"\>",
 ae0a21f66b24"]
 }, Open  ]]
 }, Closed]]
-}, Closed]],
+}, Open  ]],
 
 Cell[CellGroupData[{
 
@@ -36674,6 +36674,8 @@ Cell[BoxData[
    3.798549478556847*^9}},ExpressionUUID->"05267e9c-4f86-4bd7-94e5-\
 ef45086543fb"],
 
+Cell[CellGroupData[{
+
 Cell[BoxData[
  InterpretationBox[
   RowBox[{
@@ -36698,7 +36700,2671 @@ Cell[BoxData[
   Editable->False]], "Print",
  CellChangeTimes->{
   3.798550230560066*^9},ExpressionUUID->"ad474713-9f90-45db-a7e8-\
-66fc9821a699"]
+66fc9821a699"],
+
+Cell[BoxData[
+ InterpretationBox[
+  RowBox[{
+   TemplateBox[{RowBox[{"\"Fri 15 May 2020 21:45:41\"", 
+       StyleBox[
+        RowBox[{"\"GMT\"", "\[InvisibleSpace]", 
+          RowBox[{"-", "7.`"}]}], FontColor -> GrayLevel[0.5]]}],
+     RowBox[{"DateObject", "[", 
+       RowBox[{
+         RowBox[{"{", 
+           
+           RowBox[{"2020", ",", "5", ",", "15", ",", "21", ",", "45", ",", 
+             "41.938012`8.375182817604424"}], "}"}], ",", "\"Instant\"", ",", 
+         "\"Gregorian\"", ",", 
+         RowBox[{"-", "7.`"}]}], "]"}]},
+    "DateObject",
+    Editable->False], 
+   "\[InvisibleSpace]", "\<\"External program finished, \"\>", 
+   "\[InvisibleSpace]", "42540", "\[InvisibleSpace]", "\<\" s.\"\>"}],
+  SequenceForm[
+   DateObject[{2020, 5, 15, 21, 45, 41.938012`8.375182817604424}, "Instant", 
+    "Gregorian", -7.], "External program finished, ", 42540, " s."],
+  Editable->False]], "Print",
+ CellChangeTimes->{
+  3.7985931419509897`*^9},ExpressionUUID->"05ba421f-1da5-44d5-8b21-\
+0a141b8e3c2c"],
+
+Cell[BoxData[
+ StyleBox["\<\"MAXLAN:     10000, Restart:         4,   NED: -       1,      \
+NEC:         1\\nMATVEC:       512,  Reorth:       512, Nloop:         1,  \
+Nlocked:         0\\nTtotal:  3.106267,    T_op:  0.864312, Torth:  1.767369, \
+  Tstart:  0.105053\\nGauge matrix extreme eigenvalues found:\\n  \
+3.401671e-01\\nMAXLAN:     35000, Restart:         7,   NED: -    4000,      \
+NEC:      4000\\nMATVEC:     96875,  Reorth:     96933, Nloop:        22,  \
+Nlocked:      3342\\nTtotal: 7.228e+04,    T_op: 2.163e+04, Torth: 3.502e+04, \
+  Tstart: 1.525e+04\\nlargeShifts: ops=96875, sumNcol=96875, \
+maxNcol=1\\nlargeShifts: 96875 matrix-vector ops, 96933 reorthogonalizations \
+in 42630.34 s\\ncutoffNullSpace:  1134 (max 1056, norm 1123) of 4000 \
+eigenpairs between [0, 3902]\\nlinearSolve:  1765 iterations, 1765 \
+reorthogonalizations in 238.77 s\\ndynamicProject:  294217 calls (294216 \
+usertol), 10235318 matrix-vector ops, max itn 53\\n                 in \
+12550.28 s\\nshifts.c:  init and i/o 28.16 s, calculation 42875.16 s\\n\"\>",
+  StripOnInput->False,
+  FontColor->RGBColor[0, 0, 1]]], "Print",
+ CellChangeTimes->{
+  3.7985931428116007`*^9},ExpressionUUID->"3352f110-6b1e-4ef8-b825-\
+c720bac5b338"],
+
+Cell[BoxData[
+ InterpretationBox[
+  RowBox[{"\<\"applyCutoff2: rescale maxNorm \"\>", "\[InvisibleSpace]", 
+   "1.7468981972994752322683590649947107499`17.008381142293175", 
+   "\[InvisibleSpace]", "\<\" to \"\>", "\[InvisibleSpace]", "1"}],
+  SequenceForm[
+  "applyCutoff2: rescale maxNorm ", 
+   1.7468981972994752322683590649947107499`17.008381142293175, " to ", 1],
+  Editable->False]], "Print",
+ CellChangeTimes->{
+  3.798593144417963*^9},ExpressionUUID->"68c1a604-6a6b-4f71-ac8e-\
+4065396d01c6"]
+}, Open  ]],
+
+Cell[BoxData[
+ TemplateBox[{
+  "DeleteFile","fdnfnd",
+   "\"Directory or file \
+\\!\\(\\*RowBox[{\\\"\\\\\\\"../data/3-4/step-16-48-15-a-1.m\\\\\\\"\\\"}]\\) \
+not found.\"",2,7,3,31790337811293778796,"Kernel 2"},
+  "MessageTemplate"]], "Message", "MSG",
+ CellChangeTimes->{
+  3.7985931458683662`*^9},ExpressionUUID->"891f5a40-9a8a-4fc3-9303-\
+fe6c92129a22"],
+
+Cell[CellGroupData[{
+
+Cell[BoxData[
+ InterpretationBox[
+  RowBox[{
+   TemplateBox[{RowBox[{"\"Fri 15 May 2020 21:56:18\"", 
+       StyleBox[
+        RowBox[{"\"GMT\"", "\[InvisibleSpace]", 
+          RowBox[{"-", "7.`"}]}], FontColor -> GrayLevel[0.5]]}],
+     RowBox[{"DateObject", "[", 
+       RowBox[{
+         RowBox[{"{", 
+           
+           RowBox[{"2020", ",", "5", ",", "15", ",", "21", ",", "56", ",", 
+             "18.753756`8.02566324547221"}], "}"}], ",", "\"Instant\"", ",", 
+         "\"Gregorian\"", ",", 
+         RowBox[{"-", "7.`"}]}], "]"}]},
+    "DateObject",
+    Editable->False], 
+   "\[InvisibleSpace]", "\<\"Starting external program.\"\>"}],
+  SequenceForm[
+   DateObject[{2020, 5, 15, 21, 56, 18.753756`8.02566324547221}, "Instant", 
+    "Gregorian", -7.], "Starting external program."],
+  Editable->False]], "Print",
+ CellChangeTimes->{
+  3.798593779422274*^9},ExpressionUUID->"bbf6cfdf-137e-4ffd-b27f-\
+041a90370d11"],
+
+Cell[BoxData[
+ InterpretationBox[
+  RowBox[{
+   TemplateBox[{RowBox[{"\"Sat 16 May 2020 07:42:00\"", 
+       StyleBox[
+        RowBox[{"\"GMT\"", "\[InvisibleSpace]", 
+          RowBox[{"-", "7.`"}]}], FontColor -> GrayLevel[0.5]]}],
+     RowBox[{"DateObject", "[", 
+       RowBox[{
+         RowBox[{"{", 
+           
+           RowBox[{"2020", ",", "5", ",", "16", ",", "7", ",", "42", ",", 
+             "0.324694`6.264049252559693"}], "}"}], ",", "\"Instant\"", ",", 
+         "\"Gregorian\"", ",", 
+         RowBox[{"-", "7.`"}]}], "]"}]},
+    "DateObject",
+    Editable->False], 
+   "\[InvisibleSpace]", "\<\"External program finished, \"\>", 
+   "\[InvisibleSpace]", "34860", "\[InvisibleSpace]", "\<\" s.\"\>"}],
+  SequenceForm[
+   DateObject[{2020, 5, 16, 7, 42, 0.324694`6.264049252559693}, "Instant", 
+    "Gregorian", -7.], "External program finished, ", 34860, " s."],
+  Editable->False]], "Print",
+ CellChangeTimes->{
+  3.798628920330512*^9},ExpressionUUID->"3e619cb6-4ea6-4379-836f-\
+d7598b0ca76a"],
+
+Cell[BoxData[
+ StyleBox["\<\"MAXLAN:     10000, Restart:         4,   NED: -       1,      \
+NEC:         1\\nMATVEC:       512,  Reorth:       512, Nloop:         1,  \
+Nlocked:         0\\nTtotal:  3.083563,    T_op:  0.858720, Torth:  1.770947, \
+  Tstart:  0.103900\\nGauge matrix extreme eigenvalues found:\\n  \
+3.037961e-01\\nMAXLAN:     35000, Restart:         7,   NED: -    4000,      \
+NEC:      4000\\nMATVEC:     83500,  Reorth:     83526, Nloop:        19,  \
+Nlocked:      2339\\nTtotal: 5.859e+04,    T_op: 2.019e+04, Torth: 2.479e+04, \
+  Tstart: 1.328e+04\\nlargeShifts: ops=83500, sumNcol=83500, \
+maxNcol=1\\nlargeShifts: 83500 matrix-vector ops, 83526 reorthogonalizations \
+in 34922.93 s\\ncutoffNullSpace:  880 (max 810, norm 870) of 4000 eigenpairs \
+between [0, 3503]\\nlinearSolve:  1454 iterations, 1454 reorthogonalizations \
+in 182.27 s\\ndynamicProject:  253438 calls (253437 usertol), 9318958 \
+matrix-vector ops, max itn 56\\n                 in 11163.02 s\\nshifts.c:  \
+init and i/o 30.45 s, calculation 35110.01 s\\n\"\>",
+  StripOnInput->False,
+  FontColor->RGBColor[0, 0, 1]]], "Print",
+ CellChangeTimes->{
+  3.798628921058765*^9},ExpressionUUID->"6a177da2-3153-4f20-8105-\
+b47c65b7ab11"],
+
+Cell[BoxData[
+ InterpretationBox[
+  RowBox[{"\<\"applyCutoff2: rescale maxNorm \"\>", "\[InvisibleSpace]", 
+   "1.59415721720117112223191550866198379204`17.351302813966086", 
+   "\[InvisibleSpace]", "\<\" to \"\>", "\[InvisibleSpace]", "1"}],
+  SequenceForm[
+  "applyCutoff2: rescale maxNorm ", 
+   1.59415721720117112223191550866198379204`17.351302813966086, " to ", 1],
+  Editable->False]], "Print",
+ CellChangeTimes->{
+  3.798628922641152*^9},ExpressionUUID->"82fa90b7-606f-431a-8737-\
+2a2d871e929f"]
+}, Open  ]],
+
+Cell[BoxData[
+ TemplateBox[{
+  "DeleteFile","fdnfnd",
+   "\"Directory or file \
+\\!\\(\\*RowBox[{\\\"\\\\\\\"../data/3-4/step-16-48-15-a-2.m\\\\\\\"\\\"}]\\) \
+not found.\"",2,7,4,31790337811293778796,"Kernel 2"},
+  "MessageTemplate"]], "Message", "MSG",
+ CellChangeTimes->{
+  3.798628924138719*^9},ExpressionUUID->"ae1030aa-8e6a-4a18-bb9b-\
+426b8a61d344"],
+
+Cell[CellGroupData[{
+
+Cell[BoxData[
+ InterpretationBox[
+  RowBox[{
+   TemplateBox[{RowBox[{"\"Sat 16 May 2020 07:52:32\"", 
+       StyleBox[
+        RowBox[{"\"GMT\"", "\[InvisibleSpace]", 
+          RowBox[{"-", "7.`"}]}], FontColor -> GrayLevel[0.5]]}],
+     RowBox[{"DateObject", "[", 
+       RowBox[{
+         RowBox[{"{", 
+           
+           RowBox[{"2020", ",", "5", ",", "16", ",", "7", ",", "52", ",", 
+             "32.001604`8.257746727217102"}], "}"}], ",", "\"Instant\"", ",", 
+         "\"Gregorian\"", ",", 
+         RowBox[{"-", "7.`"}]}], "]"}]},
+    "DateObject",
+    Editable->False], 
+   "\[InvisibleSpace]", "\<\"Starting external program.\"\>"}],
+  SequenceForm[
+   DateObject[{2020, 5, 16, 7, 52, 32.001604`8.257746727217102}, "Instant", 
+    "Gregorian", -7.], "Starting external program."],
+  Editable->False]], "Print",
+ CellChangeTimes->{
+  3.798629552251666*^9},ExpressionUUID->"3c05c867-c969-4b19-9f20-\
+c3d529729246"],
+
+Cell[BoxData[
+ InterpretationBox[
+  RowBox[{
+   TemplateBox[{RowBox[{"\"Sat 16 May 2020 16:48:05\"", 
+       StyleBox[
+        RowBox[{"\"GMT\"", "\[InvisibleSpace]", 
+          RowBox[{"-", "7.`"}]}], FontColor -> GrayLevel[0.5]]}],
+     RowBox[{"DateObject", "[", 
+       RowBox[{
+         RowBox[{"{", 
+           
+           RowBox[{"2020", ",", "5", ",", "16", ",", "16", ",", "48", ",", 
+             "5.664155`7.50571011713956"}], "}"}], ",", "\"Instant\"", ",", 
+         "\"Gregorian\"", ",", 
+         RowBox[{"-", "7.`"}]}], "]"}]},
+    "DateObject",
+    Editable->False], 
+   "\[InvisibleSpace]", "\<\"External program finished, \"\>", 
+   "\[InvisibleSpace]", "31860", "\[InvisibleSpace]", "\<\" s.\"\>"}],
+  SequenceForm[
+   DateObject[{2020, 5, 16, 16, 48, 5.664155`7.50571011713956}, "Instant", 
+    "Gregorian", -7.], "External program finished, ", 31860, " s."],
+  Editable->False]], "Print",
+ CellChangeTimes->{
+  3.79866168566714*^9},ExpressionUUID->"3d22504a-f071-42e7-8612-582e83307d27"],
+
+Cell[BoxData[
+ StyleBox["\<\"MAXLAN:     10000, Restart:         4,   NED: -       1,      \
+NEC:         1\\nMATVEC:       512,  Reorth:       512, Nloop:         1,  \
+Nlocked:         0\\nTtotal:  3.071472,    T_op:  0.841643, Torth:  1.772456, \
+  Tstart:  0.103511\\nGauge matrix extreme eigenvalues found:\\n  \
+2.702706e-01\\nMAXLAN:     35000, Restart:         7,   NED: -    4000,      \
+NEC:      4000\\nMATVEC:     78329,  Reorth:     78392, Nloop:        18,  \
+Nlocked:      1550\\nTtotal: 5.394e+04,    T_op: 1.914e+04, Torth: 2.203e+04, \
+  Tstart: 1.245e+04\\nlargeShifts: ops=78329, sumNcol=78329, \
+maxNcol=1\\nlargeShifts: 78329 matrix-vector ops, 78392 reorthogonalizations \
+in 31861.68 s\\ncutoffNullSpace:  707 (max 621, norm 700) of 4000 eigenpairs \
+between [0, 3315]\\nlinearSolve:  1578 iterations, 1578 reorthogonalizations \
+in 189.97 s\\ndynamicProject:  238210 calls (238209 usertol), 9260077 \
+matrix-vector ops, max itn 59\\n                 in 10313.67 s\\nshifts.c:  \
+init and i/o 28.41 s, calculation 32055.80 s\\n\"\>",
+  StripOnInput->False,
+  FontColor->RGBColor[0, 0, 1]]], "Print",
+ CellChangeTimes->{
+  3.7986616864135027`*^9},ExpressionUUID->"f9aaed46-de7e-4a05-ab53-\
+791419effa5b"],
+
+Cell[BoxData[
+ InterpretationBox[
+  RowBox[{"\<\"applyCutoff2: rescale maxNorm \"\>", "\[InvisibleSpace]", 
+   "1.35078689277219101344150461585895974885`17.196976557070478", 
+   "\[InvisibleSpace]", "\<\" to \"\>", "\[InvisibleSpace]", "1"}],
+  SequenceForm[
+  "applyCutoff2: rescale maxNorm ", 
+   1.35078689277219101344150461585895974885`17.196976557070478, " to ", 1],
+  Editable->False]], "Print",
+ CellChangeTimes->{
+  3.7986616879567842`*^9},ExpressionUUID->"204e69aa-37a9-43bf-bf3d-\
+1c3519ad03a6"]
+}, Open  ]],
+
+Cell[BoxData[
+ TemplateBox[{
+  "DeleteFile","fdnfnd",
+   "\"Directory or file \
+\\!\\(\\*RowBox[{\\\"\\\\\\\"../data/3-4/step-16-48-15-a-3.m\\\\\\\"\\\"}]\\) \
+not found.\"",2,7,5,31790337811293778796,"Kernel 2"},
+  "MessageTemplate"]], "Message", "MSG",
+ CellChangeTimes->{
+  3.7986616894518423`*^9},ExpressionUUID->"e090f62d-2f00-430b-94b3-\
+8e2eff756b65"],
+
+Cell[BoxData[
+ TemplateBox[{
+  "General","stop",
+   "\"Further output of \\!\\(\\*StyleBox[RowBox[{\\\"DeleteFile\\\", \
+\\\"::\\\", \\\"fdnfnd\\\"}], \\\"MessageName\\\"]\\) will be suppressed \
+during this calculation.\"",2,7,6,31790337811293778796,"Kernel 2"},
+  "MessageTemplate"]], "Message", "MSG",
+ CellChangeTimes->{
+  3.798661689487699*^9},ExpressionUUID->"c7650367-88a2-4f16-8897-\
+fed7ba9263c0"],
+
+Cell[CellGroupData[{
+
+Cell[BoxData[
+ InterpretationBox[
+  RowBox[{
+   TemplateBox[{RowBox[{"\"Sat 16 May 2020 16:59:19\"", 
+       StyleBox[
+        RowBox[{"\"GMT\"", "\[InvisibleSpace]", 
+          RowBox[{"-", "7.`"}]}], FontColor -> GrayLevel[0.5]]}],
+     RowBox[{"DateObject", "[", 
+       RowBox[{
+         RowBox[{"{", 
+           
+           RowBox[{"2020", ",", "5", ",", "16", ",", "16", ",", "59", ",", 
+             "19.329456`8.038794615578746"}], "}"}], ",", "\"Instant\"", ",", 
+         "\"Gregorian\"", ",", 
+         RowBox[{"-", "7.`"}]}], "]"}]},
+    "DateObject",
+    Editable->False], 
+   "\[InvisibleSpace]", "\<\"Starting external program.\"\>"}],
+  SequenceForm[
+   DateObject[{2020, 5, 16, 16, 59, 19.329456`8.038794615578746}, "Instant", 
+    "Gregorian", -7.], "Starting external program."],
+  Editable->False]], "Print",
+ CellChangeTimes->{
+  3.798662359342432*^9},ExpressionUUID->"f62fbb3f-53b5-44f1-966d-\
+c13cfa17aece"],
+
+Cell[BoxData[
+ InterpretationBox[
+  RowBox[{
+   TemplateBox[{RowBox[{"\"Sun 17 May 2020 01:44:50\"", 
+       StyleBox[
+        RowBox[{"\"GMT\"", "\[InvisibleSpace]", 
+          RowBox[{"-", "7.`"}]}], FontColor -> GrayLevel[0.5]]}],
+     RowBox[{"DateObject", "[", 
+       RowBox[{
+         RowBox[{"{", 
+           
+           RowBox[{"2020", ",", "5", ",", "17", ",", "1", ",", "44", ",", 
+             "50.861859`8.45896720510732"}], "}"}], ",", "\"Instant\"", ",", 
+         "\"Gregorian\"", ",", 
+         RowBox[{"-", "7.`"}]}], "]"}]},
+    "DateObject",
+    Editable->False], 
+   "\[InvisibleSpace]", "\<\"External program finished, \"\>", 
+   "\[InvisibleSpace]", "31260", "\[InvisibleSpace]", "\<\" s.\"\>"}],
+  SequenceForm[
+   DateObject[{2020, 5, 17, 1, 44, 50.861859`8.45896720510732}, "Instant", 
+    "Gregorian", -7.], "External program finished, ", 31260, " s."],
+  Editable->False]], "Print",
+ CellChangeTimes->{
+  3.798693890865634*^9},ExpressionUUID->"78671e10-c02c-4dc2-a4be-\
+6ced2372c390"],
+
+Cell[BoxData[
+ StyleBox["\<\"MAXLAN:     10000, Restart:         4,   NED: -       1,      \
+NEC:         1\\nMATVEC:       512,  Reorth:       512, Nloop:         1,  \
+Nlocked:         0\\nTtotal:  3.086680,    T_op:  0.878979, Torth:  1.751564, \
+  Tstart:  0.104264\\nGauge matrix extreme eigenvalues found:\\n  \
+2.374104e-01\\nMAXLAN:     35000, Restart:         7,   NED: -    4000,      \
+NEC:      4000\\nMATVEC:     74826,  Reorth:     75364, Nloop:        17,  \
+Nlocked:      4075\\nTtotal: 5.310e+04,    T_op: 1.948e+04, Torth: 2.141e+04, \
+  Tstart: 1.193e+04\\nlargeShifts: ops=74826, sumNcol=74826, \
+maxNcol=1\\nlargeShifts: 74826 matrix-vector ops, 75364 reorthogonalizations \
+in 31236.16 s\\ncutoffNullSpace:  548 (max 506, norm 542) of 4000 eigenpairs \
+between [0, 1706]\\nlinearSolve:  1758 iterations, 1758 reorthogonalizations \
+in 211.03 s\\ndynamicProject:  228536 calls (228535 usertol), 9423217 \
+matrix-vector ops, max itn 62\\n                 in 10504.33 s\\nshifts.c:  \
+init and i/o 28.94 s, calculation 31451.81 s\\n\"\>",
+  StripOnInput->False,
+  FontColor->RGBColor[0, 0, 1]]], "Print",
+ CellChangeTimes->{
+  3.798693891632186*^9},ExpressionUUID->"db261b76-55bd-4faf-8e1c-\
+14a1fbe9b60e"],
+
+Cell[BoxData[
+ InterpretationBox[
+  RowBox[{"\<\"applyCutoff2: rescale maxNorm \"\>", "\[InvisibleSpace]", 
+   "1.29083040789375846086330668346471767655`17.02921826543083", 
+   "\[InvisibleSpace]", "\<\" to \"\>", "\[InvisibleSpace]", "1"}],
+  SequenceForm[
+  "applyCutoff2: rescale maxNorm ", 
+   1.29083040789375846086330668346471767655`17.02921826543083, " to ", 1],
+  Editable->False]], "Print",
+ CellChangeTimes->{
+  3.798693943835557*^9},ExpressionUUID->"26d24b4e-deb2-4d10-8353-\
+9036e2c81c09"],
+
+Cell[BoxData[
+ InterpretationBox[
+  RowBox[{
+   TemplateBox[{RowBox[{"\"Sun 17 May 2020 01:56:42\"", 
+       StyleBox[
+        RowBox[{"\"GMT\"", "\[InvisibleSpace]", 
+          RowBox[{"-", "7.`"}]}], FontColor -> GrayLevel[0.5]]}],
+     RowBox[{"DateObject", "[", 
+       RowBox[{
+         RowBox[{"{", 
+           
+           RowBox[{"2020", ",", "5", ",", "17", ",", "1", ",", "56", ",", 
+             "42.692161`8.382923116266113"}], "}"}], ",", "\"Instant\"", ",", 
+         "\"Gregorian\"", ",", 
+         RowBox[{"-", "7.`"}]}], "]"}]},
+    "DateObject",
+    Editable->False], 
+   "\[InvisibleSpace]", "\<\"Starting external program.\"\>"}],
+  SequenceForm[
+   DateObject[{2020, 5, 17, 1, 56, 42.692161`8.382923116266113}, "Instant", 
+    "Gregorian", -7.], "Starting external program."],
+  Editable->False]], "Print",
+ CellChangeTimes->{
+  3.798694603411087*^9},ExpressionUUID->"ebbf9994-ed73-4ca5-bb96-\
+d4ca7515d13f"],
+
+Cell[BoxData[
+ InterpretationBox[
+  RowBox[{
+   TemplateBox[{RowBox[{"\"Sun 17 May 2020 07:27:29\"", 
+       StyleBox[
+        RowBox[{"\"GMT\"", "\[InvisibleSpace]", 
+          RowBox[{"-", "7.`"}]}], FontColor -> GrayLevel[0.5]]}],
+     RowBox[{"DateObject", "[", 
+       RowBox[{
+         RowBox[{"{", 
+           
+           RowBox[{"2020", ",", "5", ",", "17", ",", "7", ",", "27", ",", 
+             "29.151452`8.21723517258813"}], "}"}], ",", "\"Instant\"", ",", 
+         "\"Gregorian\"", ",", 
+         RowBox[{"-", "7.`"}]}], "]"}]},
+    "DateObject",
+    Editable->False], 
+   "\[InvisibleSpace]", "\<\"External program finished, \"\>", 
+   "\[InvisibleSpace]", "19680", "\[InvisibleSpace]", "\<\" s.\"\>"}],
+  SequenceForm[
+   DateObject[{2020, 5, 17, 7, 27, 29.151452`8.21723517258813}, "Instant", 
+    "Gregorian", -7.], "External program finished, ", 19680, " s."],
+  Editable->False]], "Print",
+ CellChangeTimes->{
+  3.7987144491567183`*^9},ExpressionUUID->"84484c88-3011-4141-a82b-\
+3b56cee9b745"],
+
+Cell[BoxData[
+ StyleBox["\<\"MAXLAN:     10000, Restart:         4,   NED: -       1,      \
+NEC:         1\\nMATVEC:       512,  Reorth:       512, Nloop:         1,  \
+Nlocked:         0\\nTtotal:  3.160938,    T_op:  0.861816, Torth:  1.820741, \
+  Tstart:  0.104136\\nGauge matrix extreme eigenvalues found:\\n  \
+2.091833e-01\\nMAXLAN:     35000, Restart:         7,   NED: -    2559,      \
+NEC:      2559\\nMATVEC:     64296,  Reorth:     64616, Nloop:        23,  \
+Nlocked:      1749\\nTtotal: 3.530e+04,    T_op: 1.764e+04, Torth: 1.275e+04, \
+  Tstart: 4.791e+03\\nlargeShifts: ops=64296, sumNcol=64296, \
+maxNcol=1\\nlargeShifts: 64296 matrix-vector ops, 64616 reorthogonalizations \
+in 19696.52 s\\ncutoffNullSpace:  488 (max 434, norm 479) of 2559 eigenpairs \
+between [0, 1692]\\nlinearSolve:  1026 iterations, 1026 reorthogonalizations \
+in 116.03 s\\ndynamicProject:  195264 calls (195263 usertol), 8563242 \
+matrix-vector ops, max itn 66\\n                 in 9458.29 s\\nshifts.c:  \
+init and i/o 28.41 s, calculation 19815.56 s\\n\"\>",
+  StripOnInput->False,
+  FontColor->RGBColor[0, 0, 1]]], "Print",
+ CellChangeTimes->{
+  3.7987144499215813`*^9},ExpressionUUID->"c8282560-5239-4c61-b00e-\
+c2ca72637254"],
+
+Cell[BoxData[
+ InterpretationBox[
+  RowBox[{
+   TemplateBox[{RowBox[{"\"Sun 17 May 2020 07:38:01\"", 
+       StyleBox[
+        RowBox[{"\"GMT\"", "\[InvisibleSpace]", 
+          RowBox[{"-", "7.`"}]}], FontColor -> GrayLevel[0.5]]}],
+     RowBox[{"DateObject", "[", 
+       RowBox[{
+         RowBox[{"{", 
+           
+           RowBox[{"2020", ",", "5", ",", "17", ",", "7", ",", "38", ",", 
+             "1.144561`6.811213932474811"}], "}"}], ",", "\"Instant\"", ",", 
+         "\"Gregorian\"", ",", 
+         RowBox[{"-", "7.`"}]}], "]"}]},
+    "DateObject",
+    Editable->False], 
+   "\[InvisibleSpace]", "\<\"Starting external program.\"\>"}],
+  SequenceForm[
+   DateObject[{2020, 5, 17, 7, 38, 1.144561`6.811213932474811}, "Instant", 
+    "Gregorian", -7.], "Starting external program."],
+  Editable->False]], "Print",
+ CellChangeTimes->{
+  3.798715081354989*^9},ExpressionUUID->"b1f7b349-f70f-472a-b85a-\
+6560d80866dc"],
+
+Cell[BoxData[
+ InterpretationBox[
+  RowBox[{
+   TemplateBox[{RowBox[{"\"Sun 17 May 2020 12:51:40\"", 
+       StyleBox[
+        RowBox[{"\"GMT\"", "\[InvisibleSpace]", 
+          RowBox[{"-", "7.`"}]}], FontColor -> GrayLevel[0.5]]}],
+     RowBox[{"DateObject", "[", 
+       RowBox[{
+         RowBox[{"{", 
+           
+           RowBox[{"2020", ",", "5", ",", "17", ",", "12", ",", "51", ",", 
+             "40.559789`8.360670665295675"}], "}"}], ",", "\"Instant\"", ",", 
+         "\"Gregorian\"", ",", 
+         RowBox[{"-", "7.`"}]}], "]"}]},
+    "DateObject",
+    Editable->False], 
+   "\[InvisibleSpace]", "\<\"External program finished, \"\>", 
+   "\[InvisibleSpace]", "18660", "\[InvisibleSpace]", "\<\" s.\"\>"}],
+  SequenceForm[
+   DateObject[{2020, 5, 17, 12, 51, 40.559789`8.360670665295675}, "Instant", 
+    "Gregorian", -7.], "External program finished, ", 18660, " s."],
+  Editable->False]], "Print",
+ CellChangeTimes->{
+  3.798733900566801*^9},ExpressionUUID->"043f6d29-b068-47fd-88e6-\
+c69cc04f52c1"],
+
+Cell[BoxData[
+ StyleBox["\<\"MAXLAN:     10000, Restart:         4,   NED: -       1,      \
+NEC:         1\\nMATVEC:       512,  Reorth:       512, Nloop:         1,  \
+Nlocked:         0\\nTtotal:  3.082828,    T_op:  0.837690, Torth:  1.776128, \
+  Tstart:  0.102709\\nGauge matrix extreme eigenvalues found:\\n  \
+1.798921e-01\\nMAXLAN:     35000, Restart:         7,   NED: -    2538,      \
+NEC:      2538\\nMATVEC:     59959,  Reorth:     61103, Nloop:        22,  \
+Nlocked:      2249\\nTtotal: 3.362e+04,    T_op: 1.764e+04, Torth: 1.150e+04, \
+  Tstart: 4.369e+03\\nlargeShifts: ops=59959, sumNcol=59959, \
+maxNcol=1\\nlargeShifts: 59959 matrix-vector ops, 61103 reorthogonalizations \
+in 18647.69 s\\ncutoffNullSpace:  398 (max 354, norm 393) of 2538 eigenpairs \
+between [0, 1138]\\nlinearSolve:  1080 iterations, 1080 reorthogonalizations \
+in 123.07 s\\ndynamicProject:  183185 calls (183184 usertol), 8589745 \
+matrix-vector ops, max itn 71\\n                 in 9446.46 s\\nshifts.c:  \
+init and i/o 28.27 s, calculation 18773.75 s\\n\"\>",
+  StripOnInput->False,
+  FontColor->RGBColor[0, 0, 1]]], "Print",
+ CellChangeTimes->{
+  3.7987339013286753`*^9},ExpressionUUID->"a8ba606e-29bd-438e-b6ea-\
+18eefed7b6ca"],
+
+Cell[BoxData[
+ InterpretationBox[
+  RowBox[{
+   TemplateBox[{RowBox[{"\"Sun 17 May 2020 13:04:09\"", 
+       StyleBox[
+        RowBox[{"\"GMT\"", "\[InvisibleSpace]", 
+          RowBox[{"-", "7.`"}]}], FontColor -> GrayLevel[0.5]]}],
+     RowBox[{"DateObject", "[", 
+       RowBox[{
+         RowBox[{"{", 
+           
+           RowBox[{"2020", ",", "5", ",", "17", ",", "13", ",", "4", ",", 
+             "9.897472`7.748099268509797"}], "}"}], ",", "\"Instant\"", ",", 
+         "\"Gregorian\"", ",", 
+         RowBox[{"-", "7.`"}]}], "]"}]},
+    "DateObject",
+    Editable->False], 
+   "\[InvisibleSpace]", "\<\"Starting external program.\"\>"}],
+  SequenceForm[
+   DateObject[{2020, 5, 17, 13, 4, 9.897472`7.748099268509797}, "Instant", 
+    "Gregorian", -7.], "Starting external program."],
+  Editable->False]], "Print",
+ CellChangeTimes->{
+  3.798734650613158*^9},ExpressionUUID->"f3221601-bdc8-4ac1-99a9-\
+db1191c0aa67"],
+
+Cell[BoxData[
+ InterpretationBox[
+  RowBox[{
+   TemplateBox[{RowBox[{"\"Sun 17 May 2020 16:54:02\"", 
+       StyleBox[
+        RowBox[{"\"GMT\"", "\[InvisibleSpace]", 
+          RowBox[{"-", "7.`"}]}], FontColor -> GrayLevel[0.5]]}],
+     RowBox[{"DateObject", "[", 
+       RowBox[{
+         RowBox[{"{", 
+           
+           RowBox[{"2020", ",", "5", ",", "17", ",", "16", ",", "54", ",", 
+             "2.899991`7.214971638700851"}], "}"}], ",", "\"Instant\"", ",", 
+         "\"Gregorian\"", ",", 
+         RowBox[{"-", "7.`"}]}], "]"}]},
+    "DateObject",
+    Editable->False], 
+   "\[InvisibleSpace]", "\<\"External program finished, \"\>", 
+   "\[InvisibleSpace]", "13680", "\[InvisibleSpace]", "\<\" s.\"\>"}],
+  SequenceForm[
+   DateObject[{2020, 5, 17, 16, 54, 2.899991`7.214971638700851}, "Instant", 
+    "Gregorian", -7.], "External program finished, ", 13680, " s."],
+  Editable->False]], "Print",
+ CellChangeTimes->{
+  3.79874844290704*^9},ExpressionUUID->"6e74c241-ed7d-4493-a4cd-108bad69593d"],
+
+Cell[BoxData[
+ StyleBox["\<\"MAXLAN:     10000, Restart:         4,   NED: -       1,      \
+NEC:         1\\nMATVEC:       512,  Reorth:       512, Nloop:         1,  \
+Nlocked:         0\\nTtotal:  3.081081,    T_op:  0.850349, Torth:  1.779652, \
+  Tstart:  0.104116\\nGauge matrix extreme eigenvalues found:\\n  \
+1.565784e-01\\nMAXLAN:     35000, Restart:         7,   NED: -    1707,      \
+NEC:      1707\\nMATVEC:     52862,  Reorth:     53705, Nloop:        29,  \
+Nlocked:      1643\\nTtotal: 2.557e+04,    T_op: 1.631e+04, Torth: 7.265e+03, \
+  Tstart: 1.945e+03\\nlargeShifts: ops=52862, sumNcol=52862, \
+maxNcol=1\\nlargeShifts: 52862 matrix-vector ops, 53705 reorthogonalizations \
+in 13615.11 s\\ncutoffNullSpace:  340 (max 306, norm 336) of 1707 eigenpairs \
+between [0, 868]\\nlinearSolve:  929 iterations, 929 reorthogonalizations in \
+106.49 s\\ndynamicProject:  161291 calls (161290 usertol), 8080750 \
+matrix-vector ops, max itn 75\\n                 in 8674.89 s\\nshifts.c:  \
+init and i/o 28.53 s, calculation 13723.94 s\\n\"\>",
+  StripOnInput->False,
+  FontColor->RGBColor[0, 0, 1]]], "Print",
+ CellChangeTimes->{
+  3.798748443677231*^9},ExpressionUUID->"31a1dfa6-f9a1-4d50-8608-\
+5612ce79648d"],
+
+Cell[BoxData[
+ InterpretationBox[
+  RowBox[{
+   TemplateBox[{RowBox[{"\"Sun 17 May 2020 17:07:55\"", 
+       StyleBox[
+        RowBox[{"\"GMT\"", "\[InvisibleSpace]", 
+          RowBox[{"-", "7.`"}]}], FontColor -> GrayLevel[0.5]]}],
+     RowBox[{"DateObject", "[", 
+       RowBox[{
+         RowBox[{"{", 
+           
+           RowBox[{"2020", ",", "5", ",", "17", ",", "17", ",", "7", ",", 
+             "55.197238`8.494492320884662"}], "}"}], ",", "\"Instant\"", ",", 
+         "\"Gregorian\"", ",", 
+         RowBox[{"-", "7.`"}]}], "]"}]},
+    "DateObject",
+    Editable->False], 
+   "\[InvisibleSpace]", "\<\"Starting external program.\"\>"}],
+  SequenceForm[
+   DateObject[{2020, 5, 17, 17, 7, 55.197238`8.494492320884662}, "Instant", 
+    "Gregorian", -7.], "Starting external program."],
+  Editable->False]], "Print",
+ CellChangeTimes->{
+  3.798749275441615*^9},ExpressionUUID->"89312137-fb19-4f5a-bb31-\
+8180fa133b3f"],
+
+Cell[BoxData[
+ InterpretationBox[
+  RowBox[{
+   TemplateBox[{RowBox[{"\"Sun 17 May 2020 20:24:30\"", 
+       StyleBox[
+        RowBox[{"\"GMT\"", "\[InvisibleSpace]", 
+          RowBox[{"-", "7.`"}]}], FontColor -> GrayLevel[0.5]]}],
+     RowBox[{"DateObject", "[", 
+       RowBox[{
+         RowBox[{"{", 
+           
+           RowBox[{"2020", ",", "5", ",", "17", ",", "20", ",", "24", ",", 
+             "30.753251`8.240466013828014"}], "}"}], ",", "\"Instant\"", ",", 
+         "\"Gregorian\"", ",", 
+         RowBox[{"-", "7.`"}]}], "]"}]},
+    "DateObject",
+    Editable->False], 
+   "\[InvisibleSpace]", "\<\"External program finished, \"\>", 
+   "\[InvisibleSpace]", "11700", "\[InvisibleSpace]", "\<\" s.\"\>"}],
+  SequenceForm[
+   DateObject[{2020, 5, 17, 20, 24, 30.753251`8.240466013828014}, "Instant", 
+    "Gregorian", -7.], "External program finished, ", 11700, " s."],
+  Editable->False]], "Print",
+ CellChangeTimes->{
+  3.798761070760304*^9},ExpressionUUID->"76f8de7c-6b1a-4dc4-807d-\
+99b9f3e99ecd"],
+
+Cell[BoxData[
+ StyleBox["\<\"MAXLAN:     10000, Restart:         4,   NED: -       1,      \
+NEC:         1\\nMATVEC:       512,  Reorth:       512, Nloop:         1,  \
+Nlocked:         0\\nTtotal:  3.084202,    T_op:  0.850182, Torth:  1.769385, \
+  Tstart:  0.104240\\nGauge matrix extreme eigenvalues found:\\n  \
+1.377545e-01\\nMAXLAN:     35000, Restart:         7,   NED: -    1302,      \
+NEC:      1302\\nMATVEC:     48020,  Reorth:     49543, Nloop:        35,  \
+Nlocked:      1217\\nTtotal: 2.215e+04,    T_op: 1.565e+04, Torth: 5.350e+03, \
+  Tstart: 1.122e+03\\nlargeShifts: ops=48020, sumNcol=48020, \
+maxNcol=1\\nlargeShifts: 48020 matrix-vector ops, 49543 reorthogonalizations \
+in 11605.27 s\\ncutoffNullSpace:  307 (max 272, norm 302) of 1302 eigenpairs \
+between [0, 719]\\nlinearSolve:  889 iterations, 889 reorthogonalizations in \
+104.49 s\\ndynamicProject:  147365 calls (147364 usertol), 7794240 \
+matrix-vector ops, max itn 80\\n                 in 8343.65 s\\nshifts.c:  \
+init and i/o 28.53 s, calculation 11712.05 s\\n\"\>",
+  StripOnInput->False,
+  FontColor->RGBColor[0, 0, 1]]], "Print",
+ CellChangeTimes->{
+  3.798761071535244*^9},ExpressionUUID->"ca99711b-0b58-4c96-969d-\
+4491498906df"],
+
+Cell[BoxData[
+ InterpretationBox[
+  RowBox[{
+   TemplateBox[{RowBox[{"\"Sun 17 May 2020 20:37:17\"", 
+       StyleBox[
+        RowBox[{"\"GMT\"", "\[InvisibleSpace]", 
+          RowBox[{"-", "7.`"}]}], FontColor -> GrayLevel[0.5]]}],
+     RowBox[{"DateObject", "[", 
+       RowBox[{
+         RowBox[{"{", 
+           
+           RowBox[{"2020", ",", "5", ",", "17", ",", "20", ",", "37", ",", 
+             "17.088306`7.985273996845023"}], "}"}], ",", "\"Instant\"", ",", 
+         "\"Gregorian\"", ",", 
+         RowBox[{"-", "7.`"}]}], "]"}]},
+    "DateObject",
+    Editable->False], 
+   "\[InvisibleSpace]", "\<\"Starting external program.\"\>"}],
+  SequenceForm[
+   DateObject[{2020, 5, 17, 20, 37, 17.088306`7.985273996845023}, "Instant", 
+    "Gregorian", -7.], "Starting external program."],
+  Editable->False]], "Print",
+ CellChangeTimes->{
+  3.7987618378003693`*^9},ExpressionUUID->"03fe1da2-6ec9-4bdc-b43f-\
+ee10b88bc757"],
+
+Cell[BoxData[
+ InterpretationBox[
+  RowBox[{
+   TemplateBox[{RowBox[{"\"Sun 17 May 2020 23:35:52\"", 
+       StyleBox[
+        RowBox[{"\"GMT\"", "\[InvisibleSpace]", 
+          RowBox[{"-", "7.`"}]}], FontColor -> GrayLevel[0.5]]}],
+     RowBox[{"DateObject", "[", 
+       RowBox[{
+         RowBox[{"{", 
+           
+           RowBox[{"2020", ",", "5", ",", "17", ",", "23", ",", "35", ",", 
+             "52.539399`8.473060075545682"}], "}"}], ",", "\"Instant\"", ",", 
+         "\"Gregorian\"", ",", 
+         RowBox[{"-", "7.`"}]}], "]"}]},
+    "DateObject",
+    Editable->False], 
+   "\[InvisibleSpace]", "\<\"External program finished, \"\>", 
+   "\[InvisibleSpace]", "10620", "\[InvisibleSpace]", "\<\" s.\"\>"}],
+  SequenceForm[
+   DateObject[{2020, 5, 17, 23, 35, 52.539399`8.473060075545682}, "Instant", 
+    "Gregorian", -7.], "External program finished, ", 10620, " s."],
+  Editable->False]], "Print",
+ CellChangeTimes->{
+  3.798772552546361*^9},ExpressionUUID->"80ff65fd-498f-4aec-bed7-\
+caeb36f5452f"],
+
+Cell[BoxData[
+ StyleBox["\<\"MAXLAN:     10000, Restart:         4,   NED: -       1,      \
+NEC:         1\\nMATVEC:       512,  Reorth:       512, Nloop:         1,  \
+Nlocked:         0\\nTtotal:  3.078600,    T_op:  0.866801, Torth:  1.754719, \
+  Tstart:  0.103688\\nGauge matrix extreme eigenvalues found:\\n  \
+1.227681e-01\\nMAXLAN:     35000, Restart:         7,   NED: -    1078,      \
+NEC:      1078\\nMATVEC:     43756,  Reorth:     45180, Nloop:        38,  \
+Nlocked:       620\\nTtotal: 2.027e+04,    T_op: 1.512e+04, Torth: 4.329e+03, \
+  Tstart: 7.998e+02\\nlargeShifts: ops=43756, sumNcol=43756, \
+maxNcol=1\\nlargeShifts: 43756 matrix-vector ops, 45180 reorthogonalizations \
+in 10531.08 s\\ncutoffNullSpace:  267 (max 238, norm 260) of 1078 eigenpairs \
+between [0, 633]\\nlinearSolve:  935 iterations, 935 reorthogonalizations in \
+113.76 s\\ndynamicProject:  134566 calls (134565 usertol), 7497912 \
+matrix-vector ops, max itn 84\\n                 in 8060.16 s\\nshifts.c:  \
+init and i/o 28.76 s, calculation 10647.01 s\\n\"\>",
+  StripOnInput->False,
+  FontColor->RGBColor[0, 0, 1]]], "Print",
+ CellChangeTimes->{
+  3.7987725533929358`*^9},ExpressionUUID->"1ef1d519-9f9e-4692-a46c-\
+e2438bfd49ff"],
+
+Cell[BoxData[
+ InterpretationBox[
+  RowBox[{
+   TemplateBox[{RowBox[{"\"Sun 17 May 2020 23:46:48\"", 
+       StyleBox[
+        RowBox[{"\"GMT\"", "\[InvisibleSpace]", 
+          RowBox[{"-", "7.`"}]}], FontColor -> GrayLevel[0.5]]}],
+     RowBox[{"DateObject", "[", 
+       RowBox[{
+         RowBox[{"{", 
+           
+           RowBox[{"2020", ",", "5", ",", "17", ",", "23", ",", "46", ",", 
+             "48.509454`8.438401362503365"}], "}"}], ",", "\"Instant\"", ",", 
+         "\"Gregorian\"", ",", 
+         RowBox[{"-", "7.`"}]}], "]"}]},
+    "DateObject",
+    Editable->False], 
+   "\[InvisibleSpace]", "\<\"Starting external program.\"\>"}],
+  SequenceForm[
+   DateObject[{2020, 5, 17, 23, 46, 48.509454`8.438401362503365}, "Instant", 
+    "Gregorian", -7.], "Starting external program."],
+  Editable->False]], "Print",
+ CellChangeTimes->{
+  3.798773208779354*^9},ExpressionUUID->"2b71fa12-1df8-4778-86c6-\
+23172e1d2061"],
+
+Cell[BoxData[
+ InterpretationBox[
+  RowBox[{
+   TemplateBox[{RowBox[{"\"Mon 18 May 2020 02:39:13\"", 
+       StyleBox[
+        RowBox[{"\"GMT\"", "\[InvisibleSpace]", 
+          RowBox[{"-", "7.`"}]}], FontColor -> GrayLevel[0.5]]}],
+     RowBox[{"DateObject", "[", 
+       RowBox[{
+         RowBox[{"{", 
+           
+           RowBox[{"2020", ",", "5", ",", "18", ",", "2", ",", "39", ",", 
+             "13.179081`7.872460112826321"}], "}"}], ",", "\"Instant\"", ",", 
+         "\"Gregorian\"", ",", 
+         RowBox[{"-", "7.`"}]}], "]"}]},
+    "DateObject",
+    Editable->False], 
+   "\[InvisibleSpace]", "\<\"External program finished, \"\>", 
+   "\[InvisibleSpace]", "10260", "\[InvisibleSpace]", "\<\" s.\"\>"}],
+  SequenceForm[
+   DateObject[{2020, 5, 18, 2, 39, 13.179081`7.872460112826321}, "Instant", 
+    "Gregorian", -7.], "External program finished, ", 10260, " s."],
+  Editable->False]], "Print",
+ CellChangeTimes->{
+  3.7987835531876707`*^9},ExpressionUUID->"2e6b4475-1501-45e4-afa1-\
+ed09366a7aa8"],
+
+Cell[BoxData[
+ StyleBox["\<\"MAXLAN:     10000, Restart:         4,   NED: -       1,      \
+NEC:         1\\nMATVEC:       512,  Reorth:       512, Nloop:         1,  \
+Nlocked:         0\\nTtotal:  3.072979,    T_op:  0.864951, Torth:  1.757907, \
+  Tstart:  0.104291\\nGauge matrix extreme eigenvalues found:\\n  \
+1.099405e-01\\nMAXLAN:     35000, Restart:         7,   NED: -     949,      \
+NEC:       949\\nMATVEC:     41602,  Reorth:     43461, Nloop:        41,  \
+Nlocked:       907\\nTtotal: 1.964e+04,    T_op: 1.516e+04, Torth: 3.838e+03, \
+  Tstart: 6.307e+02\\nlargeShifts: ops=41602, sumNcol=41602, \
+maxNcol=1\\nlargeShifts: 41602 matrix-vector ops, 43461 reorthogonalizations \
+in 10164.65 s\\ncutoffNullSpace:  241 (max 218, norm 230) of 949 eigenpairs \
+between [0, 604]\\nlinearSolve:  785 iterations, 785 reorthogonalizations in \
+96.14 s\\ndynamicProject:  128239 calls (128238 usertol), 7481774 \
+matrix-vector ops, max itn 89\\n                 in 8074.31 s\\nshifts.c:  \
+init and i/o 28.82 s, calculation 10262.95 s\\n\"\>",
+  StripOnInput->False,
+  FontColor->RGBColor[0, 0, 1]]], "Print",
+ CellChangeTimes->{
+  3.798783553974289*^9},ExpressionUUID->"325e6b97-38a6-4fe5-ac21-\
+c730ceb683af"],
+
+Cell[BoxData[
+ InterpretationBox[
+  RowBox[{
+   TemplateBox[{RowBox[{"\"Mon 18 May 2020 02:49:59\"", 
+       StyleBox[
+        RowBox[{"\"GMT\"", "\[InvisibleSpace]", 
+          RowBox[{"-", "7.`"}]}], FontColor -> GrayLevel[0.5]]}],
+     RowBox[{"DateObject", "[", 
+       RowBox[{
+         RowBox[{"{", 
+           
+           RowBox[{"2020", ",", "5", ",", "18", ",", "2", ",", "49", ",", 
+             "59.257753`8.525320152472739"}], "}"}], ",", "\"Instant\"", ",", 
+         "\"Gregorian\"", ",", 
+         RowBox[{"-", "7.`"}]}], "]"}]},
+    "DateObject",
+    Editable->False], 
+   "\[InvisibleSpace]", "\<\"Starting external program.\"\>"}],
+  SequenceForm[
+   DateObject[{2020, 5, 18, 2, 49, 59.257753`8.525320152472739}, "Instant", 
+    "Gregorian", -7.], "Starting external program."],
+  Editable->False]], "Print",
+ CellChangeTimes->{
+  3.79878419980925*^9},ExpressionUUID->"76ac942d-2792-4361-a158-e4fb475d7492"],
+
+Cell[BoxData[
+ InterpretationBox[
+  RowBox[{
+   TemplateBox[{RowBox[{"\"Mon 18 May 2020 05:36:18\"", 
+       StyleBox[
+        RowBox[{"\"GMT\"", "\[InvisibleSpace]", 
+          RowBox[{"-", "7.`"}]}], FontColor -> GrayLevel[0.5]]}],
+     RowBox[{"DateObject", "[", 
+       RowBox[{
+         RowBox[{"{", 
+           
+           RowBox[{"2020", ",", "5", ",", "18", ",", "5", ",", "36", ",", 
+             "18.682142`8.024001653010043"}], "}"}], ",", "\"Instant\"", ",", 
+         "\"Gregorian\"", ",", 
+         RowBox[{"-", "7.`"}]}], "]"}]},
+    "DateObject",
+    Editable->False], 
+   "\[InvisibleSpace]", "\<\"External program finished, \"\>", 
+   "\[InvisibleSpace]", "9900", "\[InvisibleSpace]", "\<\" s.\"\>"}],
+  SequenceForm[
+   DateObject[{2020, 5, 18, 5, 36, 18.682142`8.024001653010043}, "Instant", 
+    "Gregorian", -7.], "External program finished, ", 9900, " s."],
+  Editable->False]], "Print",
+ CellChangeTimes->{
+  3.798794178689063*^9},ExpressionUUID->"9d9140a6-e073-4838-947d-\
+37efd4577c26"],
+
+Cell[BoxData[
+ StyleBox["\<\"MAXLAN:     10000, Restart:         4,   NED: -       1,      \
+NEC:         1\\nMATVEC:       512,  Reorth:       512, Nloop:         1,  \
+Nlocked:         0\\nTtotal:  3.108962,    T_op:  0.846323, Torth:  1.771891, \
+  Tstart:  0.104565\\nGauge matrix extreme eigenvalues found:\\n  \
+9.944725e-02\\nMAXLAN:     35000, Restart:         7,   NED: -     906,      \
+NEC:       906\\nMATVEC:     39615,  Reorth:     41600, Nloop:        41,  \
+Nlocked:       837\\nTtotal: 1.893e+04,    T_op: 1.480e+04, Torth: 3.559e+03, \
+  Tstart: 5.636e+02\\nlargeShifts: ops=39615, sumNcol=39615, \
+maxNcol=1\\nlargeShifts: 39615 matrix-vector ops, 41600 reorthogonalizations \
+in 9802.66 s\\ncutoffNullSpace:  219 (max 200, norm 212) of 906 eigenpairs \
+between [0, 479]\\nlinearSolve:  674 iterations, 674 reorthogonalizations in \
+84.19 s\\ndynamicProject:  122182 calls (122181 usertol), 7440694 \
+matrix-vector ops, max itn 92\\n                 in 7895.62 s\\nshifts.c:  \
+init and i/o 30.21 s, calculation 9888.94 s\\n\"\>",
+  StripOnInput->False,
+  FontColor->RGBColor[0, 0, 1]]], "Print",
+ CellChangeTimes->{
+  3.798794179477725*^9},ExpressionUUID->"87132dcf-f4d7-4150-bb58-\
+c853bd3e5cec"],
+
+Cell[BoxData[
+ InterpretationBox[
+  RowBox[{
+   TemplateBox[{RowBox[{"\"Mon 18 May 2020 05:46:57\"", 
+       StyleBox[
+        RowBox[{"\"GMT\"", "\[InvisibleSpace]", 
+          RowBox[{"-", "7.`"}]}], FontColor -> GrayLevel[0.5]]}],
+     RowBox[{"DateObject", "[", 
+       RowBox[{
+         RowBox[{"{", 
+           
+           RowBox[{"2020", ",", "5", ",", "18", ",", "5", ",", "46", ",", 
+             "57.701018`8.513758448950437"}], "}"}], ",", "\"Instant\"", ",", 
+         "\"Gregorian\"", ",", 
+         RowBox[{"-", "7.`"}]}], "]"}]},
+    "DateObject",
+    Editable->False], 
+   "\[InvisibleSpace]", "\<\"Starting external program.\"\>"}],
+  SequenceForm[
+   DateObject[{2020, 5, 18, 5, 46, 57.701018`8.513758448950437}, "Instant", 
+    "Gregorian", -7.], "Starting external program."],
+  Editable->False]], "Print",
+ CellChangeTimes->{
+  3.7987948179878817`*^9},ExpressionUUID->"7d3530d6-6bac-4792-ae97-\
+41bb8b0defc0"],
+
+Cell[BoxData[
+ InterpretationBox[
+  RowBox[{
+   TemplateBox[{RowBox[{"\"Mon 18 May 2020 08:20:10\"", 
+       StyleBox[
+        RowBox[{"\"GMT\"", "\[InvisibleSpace]", 
+          RowBox[{"-", "7.`"}]}], FontColor -> GrayLevel[0.5]]}],
+     RowBox[{"DateObject", "[", 
+       RowBox[{
+         RowBox[{"{", 
+           
+           RowBox[{"2020", ",", "5", ",", "18", ",", "8", ",", "20", ",", 
+             "10.411455`7.770086412803212"}], "}"}], ",", "\"Instant\"", ",", 
+         "\"Gregorian\"", ",", 
+         RowBox[{"-", "7.`"}]}], "]"}]},
+    "DateObject",
+    Editable->False], 
+   "\[InvisibleSpace]", "\<\"External program finished, \"\>", 
+   "\[InvisibleSpace]", "9120", "\[InvisibleSpace]", "\<\" s.\"\>"}],
+  SequenceForm[
+   DateObject[{2020, 5, 18, 8, 20, 10.411455`7.770086412803212}, "Instant", 
+    "Gregorian", -7.], "External program finished, ", 9120, " s."],
+  Editable->False]], "Print",
+ CellChangeTimes->{
+  3.798804010416717*^9},ExpressionUUID->"8b7ee2f6-e45f-44e9-a543-\
+e7e1e63e51e3"],
+
+Cell[BoxData[
+ StyleBox["\<\"MAXLAN:     10000, Restart:         4,   NED: -       1,      \
+NEC:         1\\nMATVEC:       512,  Reorth:       512, Nloop:         1,  \
+Nlocked:         0\\nTtotal:  3.087925,    T_op:  0.848987, Torth:  1.777628, \
+  Tstart:  0.104329\\nGauge matrix extreme eigenvalues found:\\n  \
+9.085231e-02\\nMAXLAN:     35000, Restart:         7,   NED: -     718,      \
+NEC:       718\\nMATVEC:     36911,  Reorth:     38650, Nloop:        48,  \
+Nlocked:       434\\nTtotal: 1.755e+04,    T_op: 1.429e+04, Torth: 2.849e+03, \
+  Tstart: 4.001e+02\\nlargeShifts: ops=36911, sumNcol=36911, \
+maxNcol=1\\nlargeShifts: 36911 matrix-vector ops, 38650 reorthogonalizations \
+in 9054.57 s\\ncutoffNullSpace:  204 (max 184, norm 199) of 718 eigenpairs \
+between [0, 413]\\nlinearSolve:  707 iterations, 707 reorthogonalizations in \
+90.83 s\\ndynamicProject:  113890 calls (113889 usertol), 7215002 \
+matrix-vector ops, max itn 97\\n                 in 7635.97 s\\nshifts.c:  \
+init and i/o 28.58 s, calculation 9147.44 s\\n\"\>",
+  StripOnInput->False,
+  FontColor->RGBColor[0, 0, 1]]], "Print",
+ CellChangeTimes->{
+  3.798804011163864*^9},ExpressionUUID->"61276657-4489-4499-8435-\
+bd5c6f45957e"],
+
+Cell[BoxData[
+ InterpretationBox[
+  RowBox[{
+   TemplateBox[{RowBox[{"\"Mon 18 May 2020 08:31:56\"", 
+       StyleBox[
+        RowBox[{"\"GMT\"", "\[InvisibleSpace]", 
+          RowBox[{"-", "7.`"}]}], FontColor -> GrayLevel[0.5]]}],
+     RowBox[{"DateObject", "[", 
+       RowBox[{
+         RowBox[{"{", 
+           
+           RowBox[{"2020", ",", "5", ",", "18", ",", "8", ",", "31", ",", 
+             "56.492608`8.504566598433835"}], "}"}], ",", "\"Instant\"", ",", 
+         "\"Gregorian\"", ",", 
+         RowBox[{"-", "7.`"}]}], "]"}]},
+    "DateObject",
+    Editable->False], 
+   "\[InvisibleSpace]", "\<\"Starting external program.\"\>"}],
+  SequenceForm[
+   DateObject[{2020, 5, 18, 8, 31, 56.492608`8.504566598433835}, "Instant", 
+    "Gregorian", -7.], "Starting external program."],
+  Editable->False]], "Print",
+ CellChangeTimes->{
+  3.798804717140553*^9},ExpressionUUID->"3d763111-be27-4fae-bf95-\
+c81c89f6a6e0"],
+
+Cell[BoxData[
+ InterpretationBox[
+  RowBox[{
+   TemplateBox[{RowBox[{"\"Mon 18 May 2020 13:55:28\"", 
+       StyleBox[
+        RowBox[{"\"GMT\"", "\[InvisibleSpace]", 
+          RowBox[{"-", "7.`"}]}], FontColor -> GrayLevel[0.5]]}],
+     RowBox[{"DateObject", "[", 
+       RowBox[{
+         RowBox[{"{", 
+           
+           RowBox[{"2020", ",", "5", ",", "18", ",", "13", ",", "55", ",", 
+             "28.668751`8.209983754147636"}], "}"}], ",", "\"Instant\"", ",", 
+         "\"Gregorian\"", ",", 
+         RowBox[{"-", "7.`"}]}], "]"}]},
+    "DateObject",
+    Editable->False], 
+   "\[InvisibleSpace]", "\<\"External program finished, \"\>", 
+   "\[InvisibleSpace]", "9480", "\[InvisibleSpace]", "\<\" s.\"\>"}],
+  SequenceForm[
+   DateObject[{2020, 5, 18, 13, 55, 28.668751`8.209983754147636}, "Instant", 
+    "Gregorian", -7.], "External program finished, ", 9480, " s."],
+  Editable->False]], "Print",
+ CellChangeTimes->{
+  3.798824128675939*^9},ExpressionUUID->"3c80b071-07e0-4542-8a12-\
+8ff28dd93011"],
+
+Cell[BoxData[
+ StyleBox["\<\"MAXLAN:     10000, Restart:         4,   NED: -       1,      \
+NEC:         1\\nMATVEC:       512,  Reorth:       512, Nloop:         1,  \
+Nlocked:         0\\nTtotal:  3.157178,    T_op:  0.818579, Torth:  1.776581, \
+  Tstart:  0.104372\\nGauge matrix extreme eigenvalues found:\\n  \
+8.361697e-02\\nMAXLAN:     35000, Restart:         7,   NED: -     619,      \
+NEC:       619\\nMATVEC:     35444,  Reorth:     37881, Nloop:        53,  \
+Nlocked:       402\\nTtotal: 1.812e+04,    T_op: 1.514e+04, Torth: 2.629e+03, \
+  Tstart: 3.342e+02\\nlargeShifts: ops=35444, sumNcol=35444, \
+maxNcol=1\\nlargeShifts: 35444 matrix-vector ops, 37881 reorthogonalizations \
+in 9295.27 s\\ncutoffNullSpace:  185 (max 170, norm 178) of 619 eigenpairs \
+between [0, 396]\\nlinearSolve:  719 iterations, 719 reorthogonalizations in \
+98.98 s\\ndynamicProject:  110211 calls (110210 usertol), 7177654 \
+matrix-vector ops, max itn 101\\n                 in 8077.28 s\\nshifts.c:  \
+init and i/o 28.61 s, calculation 9396.26 s\\n\"\>",
+  StripOnInput->False,
+  FontColor->RGBColor[0, 0, 1]]], "Print",
+ CellChangeTimes->{
+  3.798824129615122*^9},ExpressionUUID->"84108cfb-9b86-42cc-a2f8-\
+fa77ad7ab343"],
+
+Cell[BoxData[
+ InterpretationBox[
+  RowBox[{
+   TemplateBox[{RowBox[{"\"Mon 18 May 2020 14:08:41\"", 
+       StyleBox[
+        RowBox[{"\"GMT\"", "\[InvisibleSpace]", 
+          RowBox[{"-", "7.`"}]}], FontColor -> GrayLevel[0.5]]}],
+     RowBox[{"DateObject", "[", 
+       RowBox[{
+         RowBox[{"{", 
+           
+           RowBox[{"2020", ",", "5", ",", "18", ",", "14", ",", "8", ",", 
+             "41.845241`8.374221051418369"}], "}"}], ",", "\"Instant\"", ",", 
+         "\"Gregorian\"", ",", 
+         RowBox[{"-", "7.`"}]}], "]"}]},
+    "DateObject",
+    Editable->False], 
+   "\[InvisibleSpace]", "\<\"Starting external program.\"\>"}],
+  SequenceForm[
+   DateObject[{2020, 5, 18, 14, 8, 41.845241`8.374221051418369}, "Instant", 
+    "Gregorian", -7.], "Starting external program."],
+  Editable->False]], "Print",
+ CellChangeTimes->{
+  3.798824922190707*^9},ExpressionUUID->"939d90d3-b2bd-4a63-8062-\
+f122cbf1e2c3"],
+
+Cell[BoxData[
+ InterpretationBox[
+  RowBox[{
+   TemplateBox[{RowBox[{"\"Mon 18 May 2020 16:35:52\"", 
+       StyleBox[
+        RowBox[{"\"GMT\"", "\[InvisibleSpace]", 
+          RowBox[{"-", "7.`"}]}], FontColor -> GrayLevel[0.5]]}],
+     RowBox[{"DateObject", "[", 
+       RowBox[{
+         RowBox[{"{", 
+           
+           RowBox[{"2020", ",", "5", ",", "18", ",", "16", ",", "35", ",", 
+             "52.367632`8.471637911059217"}], "}"}], ",", "\"Instant\"", ",", 
+         "\"Gregorian\"", ",", 
+         RowBox[{"-", "7.`"}]}], "]"}]},
+    "DateObject",
+    Editable->False], 
+   "\[InvisibleSpace]", "\<\"External program finished, \"\>", 
+   "\[InvisibleSpace]", "8760", "\[InvisibleSpace]", "\<\" s.\"\>"}],
+  SequenceForm[
+   DateObject[{2020, 5, 18, 16, 35, 52.367632`8.471637911059217}, "Instant", 
+    "Gregorian", -7.], "External program finished, ", 8760, " s."],
+  Editable->False]], "Print",
+ CellChangeTimes->{
+  3.7988337523732653`*^9},ExpressionUUID->"c2734bdc-cd58-457b-9254-\
+154cd56c2f3f"],
+
+Cell[BoxData[
+ StyleBox["\<\"MAXLAN:     10000, Restart:         4,   NED: -       1,      \
+NEC:         1\\nMATVEC:       512,  Reorth:       512, Nloop:         1,  \
+Nlocked:         0\\nTtotal:  3.083378,    T_op:  0.869499, Torth:  1.767634, \
+  Tstart:  0.104966\\nGauge matrix extreme eigenvalues found:\\n  \
+7.742469e-02\\nMAXLAN:     35000, Restart:         7,   NED: -     594,      \
+NEC:       594\\nMATVEC:     33583,  Reorth:     35851, Nloop:        53,  \
+Nlocked:       234\\nTtotal: 1.687e+04,    T_op: 1.418e+04, Torth: 2.392e+03, \
+  Tstart: 2.933e+02\\nlargeShifts: ops=33583, sumNcol=33583, \
+maxNcol=1\\nlargeShifts: 33583 matrix-vector ops, 35851 reorthogonalizations \
+in 8658.11 s\\ncutoffNullSpace:  177 (max 159, norm 171) of 594 eigenpairs \
+between [0, 397]\\nlinearSolve:  728 iterations, 728 reorthogonalizations in \
+98.63 s\\ndynamicProject:  104477 calls (104476 usertol), 7024344 \
+matrix-vector ops, max itn 103\\n                 in 7574.37 s\\nshifts.c:  \
+init and i/o 28.39 s, calculation 8758.74 s\\n\"\>",
+  StripOnInput->False,
+  FontColor->RGBColor[0, 0, 1]]], "Print",
+ CellChangeTimes->{
+  3.798833753119972*^9},ExpressionUUID->"dbbcde7e-da57-491c-8077-\
+69cd4a98a88e"],
+
+Cell[BoxData[
+ InterpretationBox[
+  RowBox[{
+   TemplateBox[{RowBox[{"\"Mon 18 May 2020 16:47:18\"", 
+       StyleBox[
+        RowBox[{"\"GMT\"", "\[InvisibleSpace]", 
+          RowBox[{"-", "7.`"}]}], FontColor -> GrayLevel[0.5]]}],
+     RowBox[{"DateObject", "[", 
+       RowBox[{
+         RowBox[{"{", 
+           
+           RowBox[{"2020", ",", "5", ",", "18", ",", "16", ",", "47", ",", 
+             "18.764994`8.025923414136336"}], "}"}], ",", "\"Instant\"", ",", 
+         "\"Gregorian\"", ",", 
+         RowBox[{"-", "7.`"}]}], "]"}]},
+    "DateObject",
+    Editable->False], 
+   "\[InvisibleSpace]", "\<\"Starting external program.\"\>"}],
+  SequenceForm[
+   DateObject[{2020, 5, 18, 16, 47, 18.764994`8.025923414136336}, "Instant", 
+    "Gregorian", -7.], "Starting external program."],
+  Editable->False]], "Print",
+ CellChangeTimes->{
+  3.798834439277934*^9},ExpressionUUID->"5b9b84cd-ef85-4904-8392-\
+d0925a29edba"],
+
+Cell[BoxData[
+ InterpretationBox[
+  RowBox[{
+   TemplateBox[{RowBox[{"\"Mon 18 May 2020 19:09:32\"", 
+       StyleBox[
+        RowBox[{"\"GMT\"", "\[InvisibleSpace]", 
+          RowBox[{"-", "7.`"}]}], FontColor -> GrayLevel[0.5]]}],
+     RowBox[{"DateObject", "[", 
+       RowBox[{
+         RowBox[{"{", 
+           
+           RowBox[{"2020", ",", "5", ",", "18", ",", "19", ",", "9", ",", 
+             "32.681883`8.266882051332336"}], "}"}], ",", "\"Instant\"", ",", 
+         "\"Gregorian\"", ",", 
+         RowBox[{"-", "7.`"}]}], "]"}]},
+    "DateObject",
+    Editable->False], 
+   "\[InvisibleSpace]", "\<\"External program finished, \"\>", 
+   "\[InvisibleSpace]", "8460", "\[InvisibleSpace]", "\<\" s.\"\>"}],
+  SequenceForm[
+   DateObject[{2020, 5, 18, 19, 9, 32.681883`8.266882051332336}, "Instant", 
+    "Gregorian", -7.], "External program finished, ", 8460, " s."],
+  Editable->False]], "Print",
+ CellChangeTimes->{
+  3.798842972685364*^9},ExpressionUUID->"2930f1ac-36c6-478b-80da-\
+bf61d129f612"],
+
+Cell[BoxData[
+ StyleBox["\<\"MAXLAN:     10000, Restart:         4,   NED: -       1,      \
+NEC:         1\\nMATVEC:       512,  Reorth:       512, Nloop:         1,  \
+Nlocked:         0\\nTtotal:  3.067218,    T_op:  0.840621, Torth:  1.764680, \
+  Tstart:  0.104216\\nGauge matrix extreme eigenvalues found:\\n  \
+7.247247e-02\\nMAXLAN:     35000, Restart:         7,   NED: -     595,      \
+NEC:       595\\nMATVEC:     32856,  Reorth:     35238, Nloop:        52,  \
+Nlocked:       278\\nTtotal: 1.639e+04,    T_op: 1.377e+04, Torth: 2.330e+03, \
+  Tstart: 2.850e+02\\nlargeShifts: ops=32856, sumNcol=32856, \
+maxNcol=1\\nlargeShifts: 32856 matrix-vector ops, 35238 reorthogonalizations \
+in 8402.53 s\\ncutoffNullSpace:  163 (max 150, norm 158) of 595 eigenpairs \
+between [0, 348]\\nlinearSolve:  603 iterations, 603 reorthogonalizations in \
+80.66 s\\ndynamicProject:  102160 calls (102159 usertol), 7045699 \
+matrix-vector ops, max itn 107\\n                 in 7332.79 s\\nshifts.c:  \
+init and i/o 28.32 s, calculation 8485.16 s\\n\"\>",
+  StripOnInput->False,
+  FontColor->RGBColor[0, 0, 1]]], "Print",
+ CellChangeTimes->{
+  3.7988429734853992`*^9},ExpressionUUID->"c0b93340-1d94-460a-a7a7-\
+c8a1a352d81d"],
+
+Cell[BoxData[
+ InterpretationBox[
+  RowBox[{
+   TemplateBox[{RowBox[{"\"Mon 18 May 2020 19:20:41\"", 
+       StyleBox[
+        RowBox[{"\"GMT\"", "\[InvisibleSpace]", 
+          RowBox[{"-", "7.`"}]}], FontColor -> GrayLevel[0.5]]}],
+     RowBox[{"DateObject", "[", 
+       RowBox[{
+         RowBox[{"{", 
+           
+           RowBox[{"2020", ",", "5", ",", "18", ",", "19", ",", "20", ",", 
+             "41.819854`8.373957490267797"}], "}"}], ",", "\"Instant\"", ",", 
+         "\"Gregorian\"", ",", 
+         RowBox[{"-", "7.`"}]}], "]"}]},
+    "DateObject",
+    Editable->False], 
+   "\[InvisibleSpace]", "\<\"Starting external program.\"\>"}],
+  SequenceForm[
+   DateObject[{2020, 5, 18, 19, 20, 41.819854`8.373957490267797}, "Instant", 
+    "Gregorian", -7.], "Starting external program."],
+  Editable->False]], "Print",
+ CellChangeTimes->{
+  3.798843642205048*^9},ExpressionUUID->"d4699a9e-91b2-4285-bda9-\
+92d3f5e5e22a"],
+
+Cell[BoxData[
+ InterpretationBox[
+  RowBox[{
+   TemplateBox[{RowBox[{"\"Mon 18 May 2020 21:47:52\"", 
+       StyleBox[
+        RowBox[{"\"GMT\"", "\[InvisibleSpace]", 
+          RowBox[{"-", "7.`"}]}], FontColor -> GrayLevel[0.5]]}],
+     RowBox[{"DateObject", "[", 
+       RowBox[{
+         RowBox[{"{", 
+           
+           RowBox[{"2020", ",", "5", ",", "18", ",", "21", ",", "47", ",", 
+             "52.057176`8.469055579762644"}], "}"}], ",", "\"Instant\"", ",", 
+         "\"Gregorian\"", ",", 
+         RowBox[{"-", "7.`"}]}], "]"}]},
+    "DateObject",
+    Editable->False], 
+   "\[InvisibleSpace]", "\<\"External program finished, \"\>", 
+   "\[InvisibleSpace]", "8760", "\[InvisibleSpace]", "\<\" s.\"\>"}],
+  SequenceForm[
+   DateObject[{2020, 5, 18, 21, 47, 52.057176`8.469055579762644}, "Instant", 
+    "Gregorian", -7.], "External program finished, ", 8760, " s."],
+  Editable->False]], "Print",
+ CellChangeTimes->{
+  3.798852472061928*^9},ExpressionUUID->"6d11d1b5-8e2e-4f15-8bd1-\
+8b73a35a1d6b"],
+
+Cell[BoxData[
+ StyleBox["\<\"MAXLAN:     10000, Restart:         4,   NED: -       1,      \
+NEC:         1\\nMATVEC:       512,  Reorth:       512, Nloop:         1,  \
+Nlocked:         0\\nTtotal:  3.120939,    T_op:  0.839883, Torth:  1.772708, \
+  Tstart:  0.104728\\nGauge matrix extreme eigenvalues found:\\n  \
+6.839287e-02\\nMAXLAN:     35000, Restart:         7,   NED: -     522,      \
+NEC:       522\\nMATVEC:     32065,  Reorth:     35292, Nloop:        57,  \
+Nlocked:       320\\nTtotal: 1.689e+04,    T_op: 1.441e+04, Torth: 2.224e+03, \
+  Tstart: 2.466e+02\\nlargeShifts: ops=32065, sumNcol=32065, \
+maxNcol=1\\nlargeShifts: 32065 matrix-vector ops, 35292 reorthogonalizations \
+in 8649.75 s\\ncutoffNullSpace:  159 (max 142, norm 154) of 522 eigenpairs \
+between [0, 305]\\nlinearSolve:  637 iterations, 637 reorthogonalizations in \
+90.99 s\\ndynamicProject:  100700 calls (100699 usertol), 7043488 \
+matrix-vector ops, max itn 110\\n                 in 7697.88 s\\nshifts.c:  \
+init and i/o 28.49 s, calculation 8742.76 s\\n\"\>",
+  StripOnInput->False,
+  FontColor->RGBColor[0, 0, 1]]], "Print",
+ CellChangeTimes->{
+  3.798852472904269*^9},ExpressionUUID->"bc8a1e1c-5f9c-4c17-b846-\
+a0a4d088253d"],
+
+Cell[BoxData[
+ InterpretationBox[
+  RowBox[{
+   TemplateBox[{RowBox[{"\"Mon 18 May 2020 21:58:51\"", 
+       StyleBox[
+        RowBox[{"\"GMT\"", "\[InvisibleSpace]", 
+          RowBox[{"-", "7.`"}]}], FontColor -> GrayLevel[0.5]]}],
+     RowBox[{"DateObject", "[", 
+       RowBox[{
+         RowBox[{"{", 
+           
+           RowBox[{"2020", ",", "5", ",", "18", ",", "21", ",", "58", ",", 
+             "51.369649`8.463281573524327"}], "}"}], ",", "\"Instant\"", ",", 
+         "\"Gregorian\"", ",", 
+         RowBox[{"-", "7.`"}]}], "]"}]},
+    "DateObject",
+    Editable->False], 
+   "\[InvisibleSpace]", "\<\"Starting external program.\"\>"}],
+  SequenceForm[
+   DateObject[{2020, 5, 18, 21, 58, 51.369649`8.463281573524327}, "Instant", 
+    "Gregorian", -7.], "Starting external program."],
+  Editable->False]], "Print",
+ CellChangeTimes->{
+  3.798853131978668*^9},ExpressionUUID->"1ba4b89e-b041-40cc-b333-\
+1e1109475f02"],
+
+Cell[BoxData[
+ InterpretationBox[
+  RowBox[{
+   TemplateBox[{RowBox[{"\"Tue 19 May 2020 00:18:02\"", 
+       StyleBox[
+        RowBox[{"\"GMT\"", "\[InvisibleSpace]", 
+          RowBox[{"-", "7.`"}]}], FontColor -> GrayLevel[0.5]]}],
+     RowBox[{"DateObject", "[", 
+       RowBox[{
+         RowBox[{"{", 
+           
+           RowBox[{"2020", ",", "5", ",", "19", ",", "0", ",", "18", ",", 
+             "2.081402`7.070930956149916"}], "}"}], ",", "\"Instant\"", ",", 
+         "\"Gregorian\"", ",", 
+         RowBox[{"-", "7.`"}]}], "]"}]},
+    "DateObject",
+    Editable->False], 
+   "\[InvisibleSpace]", "\<\"External program finished, \"\>", 
+   "\[InvisibleSpace]", "8280", "\[InvisibleSpace]", "\<\" s.\"\>"}],
+  SequenceForm[
+   DateObject[{2020, 5, 19, 0, 18, 2.081402`7.070930956149916}, "Instant", 
+    "Gregorian", -7.], "External program finished, ", 8280, " s."],
+  Editable->False]], "Print",
+ CellChangeTimes->{
+  3.798861482086808*^9},ExpressionUUID->"ebca56c3-f855-4484-a9dd-\
+733dc99be1b4"],
+
+Cell[BoxData[
+ StyleBox["\<\"MAXLAN:     10000, Restart:         4,   NED: -       1,      \
+NEC:         1\\nMATVEC:       512,  Reorth:       512, Nloop:         1,  \
+Nlocked:         0\\nTtotal:  3.086342,    T_op:  0.858016, Torth:  1.777381, \
+  Tstart:  0.103714\\nGauge matrix extreme eigenvalues found:\\n  \
+6.473834e-02\\nMAXLAN:     35000, Restart:         7,   NED: -     457,      \
+NEC:       457\\nMATVEC:     31334,  Reorth:     34733, Nloop:        63,  \
+Nlocked:       298\\nTtotal: 1.604e+04,    T_op: 1.377e+04, Torth: 2.028e+03, \
+  Tstart: 2.262e+02\\nlargeShifts: ops=31334, sumNcol=31334, \
+maxNcol=1\\nlargeShifts: 31334 matrix-vector ops, 34733 reorthogonalizations \
+in 8210.94 s\\ncutoffNullSpace:  147 (max 132, norm 143) of 457 eigenpairs \
+between [0, 282]\\nlinearSolve:  586 iterations, 586 reorthogonalizations in \
+81.70 s\\ndynamicProject:  98577 calls (98576 usertol), 7027313 matrix-vector \
+ops, max itn 110\\n                 in 7353.90 s\\nshifts.c:  init and i/o \
+28.44 s, calculation 8294.58 s\\n\"\>",
+  StripOnInput->False,
+  FontColor->RGBColor[0, 0, 1]]], "Print",
+ CellChangeTimes->{
+  3.798861482834839*^9},ExpressionUUID->"5b9ef357-9037-4d0e-b980-\
+ad82f606d83c"],
+
+Cell[BoxData[
+ InterpretationBox[
+  RowBox[{
+   TemplateBox[{RowBox[{"\"Tue 19 May 2020 00:28:58\"", 
+       StyleBox[
+        RowBox[{"\"GMT\"", "\[InvisibleSpace]", 
+          RowBox[{"-", "7.`"}]}], FontColor -> GrayLevel[0.5]]}],
+     RowBox[{"DateObject", "[", 
+       RowBox[{
+         RowBox[{"{", 
+           
+           RowBox[{"2020", ",", "5", ",", "19", ",", "0", ",", "28", ",", 
+             "58.5684`8.520238333262686"}], "}"}], ",", "\"Instant\"", ",", 
+         "\"Gregorian\"", ",", 
+         RowBox[{"-", "7.`"}]}], "]"}]},
+    "DateObject",
+    Editable->False], 
+   "\[InvisibleSpace]", "\<\"Starting external program.\"\>"}],
+  SequenceForm[
+   DateObject[{2020, 5, 19, 0, 28, 58.5684`8.520238333262686}, "Instant", 
+    "Gregorian", -7.], "Starting external program."],
+  Editable->False]], "Print",
+ CellChangeTimes->{
+  3.7988621389449797`*^9},ExpressionUUID->"432716cc-7e1a-4dad-945d-\
+5a95e8fbb1c1"],
+
+Cell[BoxData[
+ InterpretationBox[
+  RowBox[{
+   TemplateBox[{RowBox[{"\"Tue 19 May 2020 02:46:03\"", 
+       StyleBox[
+        RowBox[{"\"GMT\"", "\[InvisibleSpace]", 
+          RowBox[{"-", "7.`"}]}], FontColor -> GrayLevel[0.5]]}],
+     RowBox[{"DateObject", "[", 
+       RowBox[{
+         RowBox[{"{", 
+           
+           RowBox[{"2020", ",", "5", ",", "19", ",", "2", ",", "46", ",", 
+             "3.935933`7.347622685322047"}], "}"}], ",", "\"Instant\"", ",", 
+         "\"Gregorian\"", ",", 
+         RowBox[{"-", "7.`"}]}], "]"}]},
+    "DateObject",
+    Editable->False], 
+   "\[InvisibleSpace]", "\<\"External program finished, \"\>", 
+   "\[InvisibleSpace]", "8160", "\[InvisibleSpace]", "\<\" s.\"\>"}],
+  SequenceForm[
+   DateObject[{2020, 5, 19, 2, 46, 3.935933`7.347622685322047}, "Instant", 
+    "Gregorian", -7.], "External program finished, ", 8160, " s."],
+  Editable->False]], "Print",
+ CellChangeTimes->{
+  3.7988703639434633`*^9},ExpressionUUID->"430b0cb9-e5e8-4a58-94e9-\
+3dea1a92fa8a"],
+
+Cell[BoxData[
+ StyleBox["\<\"MAXLAN:     10000, Restart:         4,   NED: -       1,      \
+NEC:         1\\nMATVEC:       512,  Reorth:       512, Nloop:         1,  \
+Nlocked:         0\\nTtotal:  3.114968,    T_op:  0.873330, Torth:  1.759182, \
+  Tstart:  0.104180\\nGauge matrix extreme eigenvalues found:\\n  \
+6.205995e-02\\nMAXLAN:     35000, Restart:         7,   NED: -     423,      \
+NEC:       423\\nMATVEC:     30290,  Reorth:     33754, Nloop:        66,  \
+Nlocked:       240\\nTtotal: 1.591e+04,    T_op: 1.359e+04, Torth: 2.103e+03, \
+  Tstart: 2.100e+02\\nlargeShifts: ops=30290, sumNcol=30290, \
+maxNcol=1\\nlargeShifts: 30290 matrix-vector ops, 33754 reorthogonalizations \
+in 8129.13 s\\ncutoffNullSpace:  148 (max 134, norm 143) of 423 eigenpairs \
+between [0, 274]\\nlinearSolve:  459 iterations, 459 reorthogonalizations in \
+63.65 s\\ndynamicProject:  95256 calls (95255 usertol), 6887817 matrix-vector \
+ops, max itn 115\\n                 in 7267.45 s\\nshifts.c:  init and i/o \
+28.47 s, calculation 8194.71 s\\n\"\>",
+  StripOnInput->False,
+  FontColor->RGBColor[0, 0, 1]]], "Print",
+ CellChangeTimes->{
+  3.798870364697373*^9},ExpressionUUID->"d591cafc-2a87-42f9-979b-\
+cbc5ae93bade"],
+
+Cell[BoxData[
+ InterpretationBox[
+  RowBox[{
+   TemplateBox[{RowBox[{"\"Tue 19 May 2020 02:56:52\"", 
+       StyleBox[
+        RowBox[{"\"GMT\"", "\[InvisibleSpace]", 
+          RowBox[{"-", "7.`"}]}], FontColor -> GrayLevel[0.5]]}],
+     RowBox[{"DateObject", "[", 
+       RowBox[{
+         RowBox[{"{", 
+           
+           RowBox[{"2020", ",", "5", ",", "19", ",", "2", ",", "56", ",", 
+             "52.151948`8.469845509980004"}], "}"}], ",", "\"Instant\"", ",", 
+         "\"Gregorian\"", ",", 
+         RowBox[{"-", "7.`"}]}], "]"}]},
+    "DateObject",
+    Editable->False], 
+   "\[InvisibleSpace]", "\<\"Starting external program.\"\>"}],
+  SequenceForm[
+   DateObject[{2020, 5, 19, 2, 56, 52.151948`8.469845509980004}, "Instant", 
+    "Gregorian", -7.], "Starting external program."],
+  Editable->False]], "Print",
+ CellChangeTimes->{
+  3.79887101278027*^9},ExpressionUUID->"a20c7d55-bbe5-4bc6-93b9-8b0abb8934e3"],
+
+Cell[BoxData[
+ InterpretationBox[
+  RowBox[{
+   TemplateBox[{RowBox[{"\"Tue 19 May 2020 05:12:58\"", 
+       StyleBox[
+        RowBox[{"\"GMT\"", "\[InvisibleSpace]", 
+          RowBox[{"-", "7.`"}]}], FontColor -> GrayLevel[0.5]]}],
+     RowBox[{"DateObject", "[", 
+       RowBox[{
+         RowBox[{"{", 
+           
+           RowBox[{"2020", ",", "5", ",", "19", ",", "5", ",", "12", ",", 
+             "58.554395`8.52013447142694"}], "}"}], ",", "\"Instant\"", ",", 
+         "\"Gregorian\"", ",", 
+         RowBox[{"-", "7.`"}]}], "]"}]},
+    "DateObject",
+    Editable->False], 
+   "\[InvisibleSpace]", "\<\"External program finished, \"\>", 
+   "\[InvisibleSpace]", "8100", "\[InvisibleSpace]", "\<\" s.\"\>"}],
+  SequenceForm[
+   DateObject[{2020, 5, 19, 5, 12, 58.554395`8.52013447142694}, "Instant", 
+    "Gregorian", -7.], "External program finished, ", 8100, " s."],
+  Editable->False]], "Print",
+ CellChangeTimes->{
+  3.798879178561215*^9},ExpressionUUID->"3e9af9d5-3694-4078-aad8-\
+010c0a926d5c"],
+
+Cell[BoxData[
+ StyleBox["\<\"MAXLAN:     10000, Restart:         4,   NED: -       1,      \
+NEC:         1\\nMATVEC:       512,  Reorth:       512, Nloop:         1,  \
+Nlocked:         0\\nTtotal:  3.084012,    T_op:  0.850822, Torth:  1.775589, \
+  Tstart:  0.103897\\nGauge matrix extreme eigenvalues found:\\n  \
+5.962948e-02\\nMAXLAN:     35000, Restart:         7,   NED: -     411,      \
+NEC:       411\\nMATVEC:     29810,  Reorth:     33569, Nloop:        66,  \
+Nlocked:       234\\nTtotal: 1.573e+04,    T_op: 1.343e+04, Torth: 2.084e+03, \
+  Tstart: 2.086e+02\\nlargeShifts: ops=29810, sumNcol=29810, \
+maxNcol=1\\nlargeShifts: 29810 matrix-vector ops, 33569 reorthogonalizations \
+in 8038.91 s\\ncutoffNullSpace:  148 (max 126, norm 143) of 411 eigenpairs \
+between [0, 274]\\nlinearSolve:  448 iterations, 448 reorthogonalizations in \
+62.92 s\\ndynamicProject:  94089 calls (94088 usertol), 6870915 matrix-vector \
+ops, max itn 116\\n                 in 7185.17 s\\nshifts.c:  init and i/o \
+30.79 s, calculation 8103.73 s\\n\"\>",
+  StripOnInput->False,
+  FontColor->RGBColor[0, 0, 1]]], "Print",
+ CellChangeTimes->{
+  3.798879179315269*^9},ExpressionUUID->"b7cfa4bd-972f-45e8-9b88-\
+82f1ce9e5276"],
+
+Cell[BoxData[
+ InterpretationBox[
+  RowBox[{
+   TemplateBox[{RowBox[{"\"Tue 19 May 2020 05:23:37\"", 
+       StyleBox[
+        RowBox[{"\"GMT\"", "\[InvisibleSpace]", 
+          RowBox[{"-", "7.`"}]}], FontColor -> GrayLevel[0.5]]}],
+     RowBox[{"DateObject", "[", 
+       RowBox[{
+         RowBox[{"{", 
+           
+           RowBox[{"2020", ",", "5", ",", "19", ",", "5", ",", "23", ",", 
+             "37.317253`8.324484646006152"}], "}"}], ",", "\"Instant\"", ",", 
+         "\"Gregorian\"", ",", 
+         RowBox[{"-", "7.`"}]}], "]"}]},
+    "DateObject",
+    Editable->False], 
+   "\[InvisibleSpace]", "\<\"Starting external program.\"\>"}],
+  SequenceForm[
+   DateObject[{2020, 5, 19, 5, 23, 37.317253`8.324484646006152}, "Instant", 
+    "Gregorian", -7.], "Starting external program."],
+  Editable->False]], "Print",
+ CellChangeTimes->{
+  3.798879817695429*^9},ExpressionUUID->"d8f9299e-9cef-457b-8f0b-\
+cda6b3a2d757"],
+
+Cell[BoxData[
+ InterpretationBox[
+  RowBox[{
+   TemplateBox[{RowBox[{"\"Tue 19 May 2020 07:39:41\"", 
+       StyleBox[
+        RowBox[{"\"GMT\"", "\[InvisibleSpace]", 
+          RowBox[{"-", "7.`"}]}], FontColor -> GrayLevel[0.5]]}],
+     RowBox[{"DateObject", "[", 
+       RowBox[{
+         RowBox[{"{", 
+           
+           RowBox[{"2020", ",", "5", ",", "19", ",", "7", ",", "39", ",", 
+             "41.580671`8.371466471371907"}], "}"}], ",", "\"Instant\"", ",", 
+         "\"Gregorian\"", ",", 
+         RowBox[{"-", "7.`"}]}], "]"}]},
+    "DateObject",
+    Editable->False], 
+   "\[InvisibleSpace]", "\<\"External program finished, \"\>", 
+   "\[InvisibleSpace]", "8100", "\[InvisibleSpace]", "\<\" s.\"\>"}],
+  SequenceForm[
+   DateObject[{2020, 5, 19, 7, 39, 41.580671`8.371466471371907}, "Instant", 
+    "Gregorian", -7.], "External program finished, ", 8100, " s."],
+  Editable->False]], "Print",
+ CellChangeTimes->{
+  3.798887981586938*^9},ExpressionUUID->"b400ce1c-48e0-47c8-8919-\
+3b3510ffd26d"],
+
+Cell[BoxData[
+ StyleBox["\<\"MAXLAN:     10000, Restart:         4,   NED: -       1,      \
+NEC:         1\\nMATVEC:       512,  Reorth:       512, Nloop:         1,  \
+Nlocked:         0\\nTtotal:  3.092827,    T_op:  0.851657, Torth:  1.794447, \
+  Tstart:  0.103105\\nGauge matrix extreme eigenvalues found:\\n  \
+5.770860e-02\\nMAXLAN:     35000, Restart:         7,   NED: -     411,      \
+NEC:       411\\nMATVEC:     29469,  Reorth:     33405, Nloop:        66,  \
+Nlocked:       251\\nTtotal: 1.578e+04,    T_op: 1.345e+04, Torth: 2.114e+03, \
+  Tstart: 2.024e+02\\nlargeShifts: ops=29469, sumNcol=29469, \
+maxNcol=1\\nlargeShifts: 29469 matrix-vector ops, 33405 reorthogonalizations \
+in 8061.19 s\\ncutoffNullSpace:  139 (max 127, norm 134) of 411 eigenpairs \
+between [0, 273]\\nlinearSolve:  453 iterations, 453 reorthogonalizations in \
+64.63 s\\ndynamicProject:  93253 calls (93252 usertol), 6864732 matrix-vector \
+ops, max itn 119\\n                 in 7202.60 s\\nshifts.c:  init and i/o \
+28.34 s, calculation 8127.76 s\\n\"\>",
+  StripOnInput->False,
+  FontColor->RGBColor[0, 0, 1]]], "Print",
+ CellChangeTimes->{
+  3.7988879823422937`*^9},ExpressionUUID->"eae7d01d-cbbd-4dfc-88b7-\
+c4cfe528025f"],
+
+Cell[BoxData[
+ InterpretationBox[
+  RowBox[{
+   TemplateBox[{RowBox[{"\"Tue 19 May 2020 07:50:10\"", 
+       StyleBox[
+        RowBox[{"\"GMT\"", "\[InvisibleSpace]", 
+          RowBox[{"-", "7.`"}]}], FontColor -> GrayLevel[0.5]]}],
+     RowBox[{"DateObject", "[", 
+       RowBox[{
+         RowBox[{"{", 
+           
+           RowBox[{"2020", ",", "5", ",", "19", ",", "7", ",", "50", ",", 
+             "10.825438`7.787020463479518"}], "}"}], ",", "\"Instant\"", ",", 
+         "\"Gregorian\"", ",", 
+         RowBox[{"-", "7.`"}]}], "]"}]},
+    "DateObject",
+    Editable->False], 
+   "\[InvisibleSpace]", "\<\"Starting external program.\"\>"}],
+  SequenceForm[
+   DateObject[{2020, 5, 19, 7, 50, 10.825438`7.787020463479518}, "Instant", 
+    "Gregorian", -7.], "Starting external program."],
+  Editable->False]], "Print",
+ CellChangeTimes->{
+  3.798888611398026*^9},ExpressionUUID->"b06256e6-e62b-4f09-b86b-\
+a1a3cf7914a6"],
+
+Cell[BoxData[
+ InterpretationBox[
+  RowBox[{
+   TemplateBox[{RowBox[{"\"Tue 19 May 2020 10:05:16\"", 
+       StyleBox[
+        RowBox[{"\"GMT\"", "\[InvisibleSpace]", 
+          RowBox[{"-", "7.`"}]}], FontColor -> GrayLevel[0.5]]}],
+     RowBox[{"DateObject", "[", 
+       RowBox[{
+         RowBox[{"{", 
+           
+           RowBox[{"2020", ",", "5", ",", "19", ",", "10", ",", "5", ",", 
+             "16.511244`7.970354780165459"}], "}"}], ",", "\"Instant\"", ",", 
+         "\"Gregorian\"", ",", 
+         RowBox[{"-", "7.`"}]}], "]"}]},
+    "DateObject",
+    Editable->False], 
+   "\[InvisibleSpace]", "\<\"External program finished, \"\>", 
+   "\[InvisibleSpace]", "8040", "\[InvisibleSpace]", "\<\" s.\"\>"}],
+  SequenceForm[
+   DateObject[{2020, 5, 19, 10, 5, 16.511244`7.970354780165459}, "Instant", 
+    "Gregorian", -7.], "External program finished, ", 8040, " s."],
+  Editable->False]], "Print",
+ CellChangeTimes->{
+  3.798896716516817*^9},ExpressionUUID->"b183bba1-6ff4-4630-9d2b-\
+56ad1de49c23"],
+
+Cell[BoxData[
+ StyleBox["\<\"MAXLAN:     10000, Restart:         4,   NED: -       1,      \
+NEC:         1\\nMATVEC:       512,  Reorth:       512, Nloop:         1,  \
+Nlocked:         0\\nTtotal:  3.061755,    T_op:  0.857663, Torth:  1.760027, \
+  Tstart:  0.101154\\nGauge matrix extreme eigenvalues found:\\n  \
+5.599106e-02\\nMAXLAN:     35000, Restart:         7,   NED: -     409,      \
+NEC:       409\\nMATVEC:     28811,  Reorth:     32909, Nloop:        65,  \
+Nlocked:       204\\nTtotal: 1.552e+04,    T_op: 1.315e+04, Torth: 2.154e+03, \
+  Tstart: 2.005e+02\\nlargeShifts: ops=28811, sumNcol=28811, \
+maxNcol=1\\nlargeShifts: 28811 matrix-vector ops, 32909 reorthogonalizations \
+in 7947.00 s\\ncutoffNullSpace:  132 (max 116, norm 128) of 409 eigenpairs \
+between [0, 234]\\nlinearSolve:  508 iterations, 508 reorthogonalizations in \
+72.73 s\\ndynamicProject:  91551 calls (91550 usertol), 6774910 matrix-vector \
+ops, max itn 123\\n                 in 7078.53 s\\nshifts.c:  init and i/o \
+28.39 s, calculation 8021.67 s\\n\"\>",
+  StripOnInput->False,
+  FontColor->RGBColor[0, 0, 1]]], "Print",
+ CellChangeTimes->{
+  3.798896717385936*^9},ExpressionUUID->"c1c00812-9889-4378-aa7e-\
+50b3cb7e3703"],
+
+Cell[BoxData[
+ InterpretationBox[
+  RowBox[{
+   TemplateBox[{RowBox[{"\"Tue 19 May 2020 10:16:23\"", 
+       StyleBox[
+        RowBox[{"\"GMT\"", "\[InvisibleSpace]", 
+          RowBox[{"-", "7.`"}]}], FontColor -> GrayLevel[0.5]]}],
+     RowBox[{"DateObject", "[", 
+       RowBox[{
+         RowBox[{"{", 
+           
+           RowBox[{"2020", ",", "5", ",", "19", ",", "10", ",", "16", ",", 
+             "23.713202`8.127565183724355"}], "}"}], ",", "\"Instant\"", ",", 
+         "\"Gregorian\"", ",", 
+         RowBox[{"-", "7.`"}]}], "]"}]},
+    "DateObject",
+    Editable->False], 
+   "\[InvisibleSpace]", "\<\"Starting external program.\"\>"}],
+  SequenceForm[
+   DateObject[{2020, 5, 19, 10, 16, 23.713202`8.127565183724355}, "Instant", 
+    "Gregorian", -7.], "Starting external program."],
+  Editable->False]], "Print",
+ CellChangeTimes->{
+  3.798897384114525*^9},ExpressionUUID->"156d400f-97cb-4c3a-a2ee-\
+2b100f77ed82"],
+
+Cell[BoxData[
+ InterpretationBox[
+  RowBox[{
+   TemplateBox[{RowBox[{"\"Tue 19 May 2020 12:30:30\"", 
+       StyleBox[
+        RowBox[{"\"GMT\"", "\[InvisibleSpace]", 
+          RowBox[{"-", "7.`"}]}], FontColor -> GrayLevel[0.5]]}],
+     RowBox[{"DateObject", "[", 
+       RowBox[{
+         RowBox[{"{", 
+           
+           RowBox[{"2020", ",", "5", ",", "19", ",", "12", ",", "30", ",", 
+             "30.147929`8.231832464791374"}], "}"}], ",", "\"Instant\"", ",", 
+         "\"Gregorian\"", ",", 
+         RowBox[{"-", "7.`"}]}], "]"}]},
+    "DateObject",
+    Editable->False], 
+   "\[InvisibleSpace]", "\<\"External program finished, \"\>", 
+   "\[InvisibleSpace]", "7980", "\[InvisibleSpace]", "\<\" s.\"\>"}],
+  SequenceForm[
+   DateObject[{2020, 5, 19, 12, 30, 30.147929`8.231832464791374}, "Instant", 
+    "Gregorian", -7.], "External program finished, ", 7980, " s."],
+  Editable->False]], "Print",
+ CellChangeTimes->{
+  3.798905430152978*^9},ExpressionUUID->"69a9f12a-5dfb-4eab-bc6c-\
+80ac60c0d379"],
+
+Cell[BoxData[
+ StyleBox["\<\"MAXLAN:     10000, Restart:         4,   NED: -       1,      \
+NEC:         1\\nMATVEC:       512,  Reorth:       512, Nloop:         1,  \
+Nlocked:         0\\nTtotal:  3.084764,    T_op:  0.848266, Torth:  1.774152, \
+  Tstart:  0.105253\\nGauge matrix extreme eigenvalues found:\\n  \
+5.465532e-02\\nMAXLAN:     35000, Restart:         7,   NED: -     351,      \
+NEC:       351\\nMATVEC:     28563,  Reorth:     32632, Nloop:        74,  \
+Nlocked:       221\\nTtotal: 1.544e+04,    T_op: 1.320e+04, Torth: 2.043e+03, \
+  Tstart: 1.945e+02\\nlargeShifts: ops=28563, sumNcol=28563, \
+maxNcol=1\\nlargeShifts: 28563 matrix-vector ops, 32632 reorthogonalizations \
+in 7898.60 s\\ncutoffNullSpace:  117 (max 106, norm 115) of 351 eigenpairs \
+between [0, 234]\\nlinearSolve:  672 iterations, 672 reorthogonalizations in \
+98.06 s\\ndynamicProject:  91106 calls (91105 usertol), 6780724 matrix-vector \
+ops, max itn 123\\n                 in 7118.79 s\\nshifts.c:  init and i/o \
+28.34 s, calculation 7998.58 s\\n\"\>",
+  StripOnInput->False,
+  FontColor->RGBColor[0, 0, 1]]], "Print",
+ CellChangeTimes->{
+  3.7989054309475403`*^9},ExpressionUUID->"8a4e3120-cd68-4fd7-8bfb-\
+946c452624e7"],
+
+Cell[BoxData[
+ InterpretationBox[
+  RowBox[{
+   TemplateBox[{RowBox[{"\"Tue 19 May 2020 12:43:33\"", 
+       StyleBox[
+        RowBox[{"\"GMT\"", "\[InvisibleSpace]", 
+          RowBox[{"-", "7.`"}]}], FontColor -> GrayLevel[0.5]]}],
+     RowBox[{"DateObject", "[", 
+       RowBox[{
+         RowBox[{"{", 
+           
+           RowBox[{"2020", ",", "5", ",", "19", ",", "12", ",", "43", ",", 
+             "33.253817`8.274416482637177"}], "}"}], ",", "\"Instant\"", ",", 
+         "\"Gregorian\"", ",", 
+         RowBox[{"-", "7.`"}]}], "]"}]},
+    "DateObject",
+    Editable->False], 
+   "\[InvisibleSpace]", "\<\"Starting external program.\"\>"}],
+  SequenceForm[
+   DateObject[{2020, 5, 19, 12, 43, 33.253817`8.274416482637177}, "Instant", 
+    "Gregorian", -7.], "Starting external program."],
+  Editable->False]], "Print",
+ CellChangeTimes->{
+  3.798906213663224*^9},ExpressionUUID->"41b4bfdf-e4aa-4a55-b816-\
+432174be02dd"],
+
+Cell[BoxData[
+ InterpretationBox[
+  RowBox[{
+   TemplateBox[{RowBox[{"\"Tue 19 May 2020 14:55:06\"", 
+       StyleBox[
+        RowBox[{"\"GMT\"", "\[InvisibleSpace]", 
+          RowBox[{"-", "7.`"}]}], FontColor -> GrayLevel[0.5]]}],
+     RowBox[{"DateObject", "[", 
+       RowBox[{
+         RowBox[{"{", 
+           
+           RowBox[{"2020", ",", "5", ",", "19", ",", "14", ",", "55", ",", 
+             "6.011458`7.531554804711046"}], "}"}], ",", "\"Instant\"", ",", 
+         "\"Gregorian\"", ",", 
+         RowBox[{"-", "7.`"}]}], "]"}]},
+    "DateObject",
+    Editable->False], 
+   "\[InvisibleSpace]", "\<\"External program finished, \"\>", 
+   "\[InvisibleSpace]", "6420", "\[InvisibleSpace]", "\<\" s.\"\>"}],
+  SequenceForm[
+   DateObject[{2020, 5, 19, 14, 55, 6.011458`7.531554804711046}, "Instant", 
+    "Gregorian", -7.], "External program finished, ", 6420, " s."],
+  Editable->False]], "Print",
+ CellChangeTimes->{
+  3.798914106016016*^9},ExpressionUUID->"8fdb207f-0337-49fc-a34e-\
+00eddc91332b"],
+
+Cell[BoxData[
+ StyleBox["\<\"MAXLAN:     10000, Restart:         4,   NED: -       1,      \
+NEC:         1\\nMATVEC:       512,  Reorth:       512, Nloop:         1,  \
+Nlocked:         0\\nTtotal:  3.071502,    T_op:  0.853006, Torth:  1.764242, \
+  Tstart:  0.104479\\nGauge matrix extreme eigenvalues found:\\n  \
+5.328436e-02\\nMAXLAN:     35000, Restart:         7,   NED: -     351,      \
+NEC:       351\\nMATVEC:     27888,  Reorth:     31841, Nloop:        74,  \
+Nlocked:       182\\nTtotal: 1.506e+04,    T_op: 1.289e+04, Torth: 1.976e+03, \
+  Tstart: 1.835e+02\\nlargeShifts: ops=27888, sumNcol=27888, \
+maxNcol=1\\nlargeShifts: 27888 matrix-vector ops, 31841 reorthogonalizations \
+in 7712.19 s\\ncutoffNullSpace:  118 (max 107, norm 114) of 351 eigenpairs \
+between [0, 224]\\nlinearSolve:  631 iterations, 631 reorthogonalizations in \
+91.87 s\\ndynamicProject:  88883 calls (88882 usertol), 6657326 matrix-vector \
+ops, max itn 122\\n                 in 6962.97 s\\nshifts.c:  init and i/o \
+28.44 s, calculation 7806.00 s\\n\"\>",
+  StripOnInput->False,
+  FontColor->RGBColor[0, 0, 1]]], "Print",
+ CellChangeTimes->{
+  3.7989141068334837`*^9},ExpressionUUID->"9d9cfda4-fc0a-4be4-b21f-\
+d22e532f8675"],
+
+Cell[BoxData[
+ InterpretationBox[
+  RowBox[{
+   TemplateBox[{RowBox[{"\"Tue 19 May 2020 15:07:01\"", 
+       StyleBox[
+        RowBox[{"\"GMT\"", "\[InvisibleSpace]", 
+          RowBox[{"-", "7.`"}]}], FontColor -> GrayLevel[0.5]]}],
+     RowBox[{"DateObject", "[", 
+       RowBox[{
+         RowBox[{"{", 
+           
+           RowBox[{"2020", ",", "5", ",", "19", ",", "15", ",", "7", ",", 
+             "1.936895`7.039681066933828"}], "}"}], ",", "\"Instant\"", ",", 
+         "\"Gregorian\"", ",", 
+         RowBox[{"-", "7.`"}]}], "]"}]},
+    "DateObject",
+    Editable->False], 
+   "\[InvisibleSpace]", "\<\"Starting external program.\"\>"}],
+  SequenceForm[
+   DateObject[{2020, 5, 19, 15, 7, 1.936895`7.039681066933828}, "Instant", 
+    "Gregorian", -7.], "Starting external program."],
+  Editable->False]], "Print",
+ CellChangeTimes->{
+  3.798914822070766*^9},ExpressionUUID->"763165c9-7a8c-4787-af5d-\
+2a8e75e3ebd8"],
+
+Cell[BoxData[
+ InterpretationBox[
+  RowBox[{
+   TemplateBox[{RowBox[{"\"Tue 19 May 2020 17:53:16\"", 
+       StyleBox[
+        RowBox[{"\"GMT\"", "\[InvisibleSpace]", 
+          RowBox[{"-", "7.`"}]}], FontColor -> GrayLevel[0.5]]}],
+     RowBox[{"DateObject", "[", 
+       RowBox[{
+         RowBox[{"{", 
+           
+           RowBox[{"2020", ",", "5", ",", "19", ",", "17", ",", "53", ",", 
+             "16.704424`7.975406489736567"}], "}"}], ",", "\"Instant\"", ",", 
+         "\"Gregorian\"", ",", 
+         RowBox[{"-", "7.`"}]}], "]"}]},
+    "DateObject",
+    Editable->False], 
+   "\[InvisibleSpace]", "\<\"External program finished, \"\>", 
+   "\[InvisibleSpace]", "7920", "\[InvisibleSpace]", "\<\" s.\"\>"}],
+  SequenceForm[
+   DateObject[{2020, 5, 19, 17, 53, 16.704424`7.975406489736567}, "Instant", 
+    "Gregorian", -7.], "External program finished, ", 7920, " s."],
+  Editable->False]], "Print",
+ CellChangeTimes->{
+  3.798924796708547*^9},ExpressionUUID->"49a2108e-eec9-4c49-965f-\
+8610f423bb5f"],
+
+Cell[BoxData[
+ StyleBox["\<\"MAXLAN:     10000, Restart:         4,   NED: -       1,      \
+NEC:         1\\nMATVEC:       512,  Reorth:       512, Nloop:         1,  \
+Nlocked:         0\\nTtotal:  3.085107,    T_op:  0.873844, Torth:  1.762208, \
+  Tstart:  0.102552\\nGauge matrix extreme eigenvalues found:\\n  \
+5.202831e-02\\nMAXLAN:     35000, Restart:         7,   NED: -     336,      \
+NEC:       336\\nMATVEC:     27902,  Reorth:     31534, Nloop:        74,  \
+Nlocked:       206\\nTtotal: 1.531e+04,    T_op: 1.307e+04, Torth: 2.039e+03, \
+  Tstart: 1.880e+02\\nlargeShifts: ops=27902, sumNcol=27902, \
+maxNcol=1\\nlargeShifts: 27902 matrix-vector ops, 31534 reorthogonalizations \
+in 7828.82 s\\ncutoffNullSpace:  120 (max 112, norm 117) of 336 eigenpairs \
+between [0, 208]\\nlinearSolve:  441 iterations, 441 reorthogonalizations in \
+63.61 s\\ndynamicProject:  88224 calls (88223 usertol), 6666509 matrix-vector \
+ops, max itn 126\\n                 in 7030.94 s\\nshifts.c:  init and i/o \
+28.75 s, calculation 7894.30 s\\n\"\>",
+  StripOnInput->False,
+  FontColor->RGBColor[0, 0, 1]]], "Print",
+ CellChangeTimes->{
+  3.798924797517611*^9},ExpressionUUID->"a7ff34c6-c227-40a8-9b2f-\
+cfdb68c3c286"],
+
+Cell[BoxData[
+ InterpretationBox[
+  RowBox[{
+   TemplateBox[{RowBox[{"\"Tue 19 May 2020 18:04:24\"", 
+       StyleBox[
+        RowBox[{"\"GMT\"", "\[InvisibleSpace]", 
+          RowBox[{"-", "7.`"}]}], FontColor -> GrayLevel[0.5]]}],
+     RowBox[{"DateObject", "[", 
+       RowBox[{
+         RowBox[{"{", 
+           
+           RowBox[{"2020", ",", "5", ",", "19", ",", "18", ",", "4", ",", 
+             "24.275063`8.137735348300692"}], "}"}], ",", "\"Instant\"", ",", 
+         "\"Gregorian\"", ",", 
+         RowBox[{"-", "7.`"}]}], "]"}]},
+    "DateObject",
+    Editable->False], 
+   "\[InvisibleSpace]", "\<\"Starting external program.\"\>"}],
+  SequenceForm[
+   DateObject[{2020, 5, 19, 18, 4, 24.275063`8.137735348300692}, "Instant", 
+    "Gregorian", -7.], "Starting external program."],
+  Editable->False]], "Print",
+ CellChangeTimes->{
+  3.7989254645117197`*^9},ExpressionUUID->"2eed7127-04e2-491e-b81b-\
+4a6e89441c42"],
+
+Cell[BoxData[
+ InterpretationBox[
+  RowBox[{
+   TemplateBox[{RowBox[{"\"Tue 19 May 2020 20:12:28\"", 
+       StyleBox[
+        RowBox[{"\"GMT\"", "\[InvisibleSpace]", 
+          RowBox[{"-", "7.`"}]}], FontColor -> GrayLevel[0.5]]}],
+     RowBox[{"DateObject", "[", 
+       RowBox[{
+         RowBox[{"{", 
+           
+           RowBox[{"2020", ",", "5", ",", "19", ",", "20", ",", "12", ",", 
+             "28.669128`8.209989465172265"}], "}"}], ",", "\"Instant\"", ",", 
+         "\"Gregorian\"", ",", 
+         RowBox[{"-", "7.`"}]}], "]"}]},
+    "DateObject",
+    Editable->False], 
+   "\[InvisibleSpace]", "\<\"External program finished, \"\>", 
+   "\[InvisibleSpace]", "7620", "\[InvisibleSpace]", "\<\" s.\"\>"}],
+  SequenceForm[
+   DateObject[{2020, 5, 19, 20, 12, 28.669128`8.209989465172265}, "Instant", 
+    "Gregorian", -7.], "External program finished, ", 7620, " s."],
+  Editable->False]], "Print",
+ CellChangeTimes->{
+  3.7989331486729527`*^9},ExpressionUUID->"70838d4a-4569-41cd-ae48-\
+6a1e9f19685d"],
+
+Cell[BoxData[
+ StyleBox["\<\"MAXLAN:     10000, Restart:         4,   NED: -       1,      \
+NEC:         1\\nMATVEC:       512,  Reorth:       512, Nloop:         1,  \
+Nlocked:         0\\nTtotal:  3.076487,    T_op:  0.851804, Torth:  1.767755, \
+  Tstart:  0.103247\\nGauge matrix extreme eigenvalues found:\\n  \
+5.089424e-02\\nMAXLAN:     35000, Restart:         7,   NED: -     312,      \
+NEC:       312\\nMATVEC:     27540,  Reorth:     30911, Nloop:        81,  \
+Nlocked:       184\\nTtotal: 1.479e+04,    T_op: 1.272e+04, Torth: 1.879e+03, \
+  Tstart: 1.882e+02\\nlargeShifts: ops=27540, sumNcol=27540, \
+maxNcol=1\\nlargeShifts: 27540 matrix-vector ops, 30911 reorthogonalizations \
+in 7582.44 s\\ncutoffNullSpace:  112 (max 103, norm 107) of 312 eigenpairs \
+between [0, 208]\\nlinearSolve:  447 iterations, 447 reorthogonalizations in \
+63.78 s\\ndynamicProject:  86889 calls (86888 usertol), 6610543 matrix-vector \
+ops, max itn 129\\n                 in 6843.98 s\\nshifts.c:  init and i/o \
+28.40 s, calculation 7648.07 s\\n\"\>",
+  StripOnInput->False,
+  FontColor->RGBColor[0, 0, 1]]], "Print",
+ CellChangeTimes->{
+  3.798933149520956*^9},ExpressionUUID->"11062060-9075-40da-979a-\
+ade83b17e233"],
+
+Cell[BoxData[
+ InterpretationBox[
+  RowBox[{
+   TemplateBox[{RowBox[{"\"Tue 19 May 2020 20:24:01\"", 
+       StyleBox[
+        RowBox[{"\"GMT\"", "\[InvisibleSpace]", 
+          RowBox[{"-", "7.`"}]}], FontColor -> GrayLevel[0.5]]}],
+     RowBox[{"DateObject", "[", 
+       RowBox[{
+         RowBox[{"{", 
+           
+           RowBox[{"2020", ",", "5", ",", "19", ",", "20", ",", "24", ",", 
+             "1.69815`6.982551038337574"}], "}"}], ",", "\"Instant\"", ",", 
+         "\"Gregorian\"", ",", 
+         RowBox[{"-", "7.`"}]}], "]"}]},
+    "DateObject",
+    Editable->False], 
+   "\[InvisibleSpace]", "\<\"Starting external program.\"\>"}],
+  SequenceForm[
+   DateObject[{2020, 5, 19, 20, 24, 1.69815`6.982551038337574}, "Instant", 
+    "Gregorian", -7.], "Starting external program."],
+  Editable->False]], "Print",
+ CellChangeTimes->{
+  3.798933842385983*^9},ExpressionUUID->"464ab002-f606-4332-8c4b-\
+8938106f2531"],
+
+Cell[BoxData[
+ InterpretationBox[
+  RowBox[{
+   TemplateBox[{RowBox[{"\"Tue 19 May 2020 22:32:06\"", 
+       StyleBox[
+        RowBox[{"\"GMT\"", "\[InvisibleSpace]", 
+          RowBox[{"-", "7.`"}]}], FontColor -> GrayLevel[0.5]]}],
+     RowBox[{"DateObject", "[", 
+       RowBox[{
+         RowBox[{"{", 
+           
+           RowBox[{"2020", ",", "5", ",", "19", ",", "22", ",", "32", ",", 
+             "6.915008`7.592367674406052"}], "}"}], ",", "\"Instant\"", ",", 
+         "\"Gregorian\"", ",", 
+         RowBox[{"-", "7.`"}]}], "]"}]},
+    "DateObject",
+    Editable->False], 
+   "\[InvisibleSpace]", "\<\"External program finished, \"\>", 
+   "\[InvisibleSpace]", "7620", "\[InvisibleSpace]", "\<\" s.\"\>"}],
+  SequenceForm[
+   DateObject[{2020, 5, 19, 22, 32, 6.915008`7.592367674406052}, "Instant", 
+    "Gregorian", -7.], "External program finished, ", 7620, " s."],
+  Editable->False]], "Print",
+ CellChangeTimes->{
+  3.798941526922867*^9},ExpressionUUID->"e7e752d5-3340-41a2-b4f8-\
+d73794492664"],
+
+Cell[BoxData[
+ StyleBox["\<\"MAXLAN:     10000, Restart:         4,   NED: -       1,      \
+NEC:         1\\nMATVEC:       512,  Reorth:       512, Nloop:         1,  \
+Nlocked:         0\\nTtotal:  3.085275,    T_op:  0.860338, Torth:  1.771802, \
+  Tstart:  0.104214\\nGauge matrix extreme eigenvalues found:\\n  \
+4.968171e-02\\nMAXLAN:     35000, Restart:         7,   NED: -     312,      \
+NEC:       312\\nMATVEC:     27427,  Reorth:     30422, Nloop:        77,  \
+Nlocked:       196\\nTtotal: 1.468e+04,    T_op: 1.291e+04, Torth: 1.562e+03, \
+  Tstart: 1.934e+02\\nlargeShifts: ops=27427, sumNcol=27427, \
+maxNcol=1\\nlargeShifts: 27427 matrix-vector ops, 30422 reorthogonalizations \
+in 7508.33 s\\ncutoffNullSpace:  105 (max 95, norm 102) of 312 eigenpairs \
+between [0, 206]\\nlinearSolve:  607 iterations, 607 reorthogonalizations in \
+89.65 s\\ndynamicProject:  86494 calls (86493 usertol), 6630312 matrix-vector \
+ops, max itn 130\\n                 in 6910.15 s\\nshifts.c:  init and i/o \
+28.86 s, calculation 7599.85 s\\n\"\>",
+  StripOnInput->False,
+  FontColor->RGBColor[0, 0, 1]]], "Print",
+ CellChangeTimes->{
+  3.798941527717044*^9},ExpressionUUID->"2ecbf038-9738-4702-be90-\
+90b302d0c90d"],
+
+Cell[BoxData[
+ InterpretationBox[
+  RowBox[{
+   TemplateBox[{RowBox[{"\"Tue 19 May 2020 22:43:31\"", 
+       StyleBox[
+        RowBox[{"\"GMT\"", "\[InvisibleSpace]", 
+          RowBox[{"-", "7.`"}]}], FontColor -> GrayLevel[0.5]]}],
+     RowBox[{"DateObject", "[", 
+       RowBox[{
+         RowBox[{"{", 
+           
+           RowBox[{"2020", ",", "5", ",", "19", ",", "22", ",", "43", ",", 
+             "31.64279`8.252849749720669"}], "}"}], ",", "\"Instant\"", ",", 
+         "\"Gregorian\"", ",", 
+         RowBox[{"-", "7.`"}]}], "]"}]},
+    "DateObject",
+    Editable->False], 
+   "\[InvisibleSpace]", "\<\"Starting external program.\"\>"}],
+  SequenceForm[
+   DateObject[{2020, 5, 19, 22, 43, 31.64279`8.252849749720669}, "Instant", 
+    "Gregorian", -7.], "Starting external program."],
+  Editable->False]], "Print",
+ CellChangeTimes->{
+  3.798942211910413*^9},ExpressionUUID->"0643b2fa-4710-4d15-8f8d-\
+04737de1f8a9"],
+
+Cell[BoxData[
+ InterpretationBox[
+  RowBox[{
+   TemplateBox[{RowBox[{"\"Wed 20 May 2020 00:48:35\"", 
+       StyleBox[
+        RowBox[{"\"GMT\"", "\[InvisibleSpace]", 
+          RowBox[{"-", "7.`"}]}], FontColor -> GrayLevel[0.5]]}],
+     RowBox[{"DateObject", "[", 
+       RowBox[{
+         RowBox[{"{", 
+           
+           RowBox[{"2020", ",", "5", ",", "20", ",", "0", ",", "48", ",", 
+             "35.091453`8.297776330639428"}], "}"}], ",", "\"Instant\"", ",", 
+         "\"Gregorian\"", ",", 
+         RowBox[{"-", "7.`"}]}], "]"}]},
+    "DateObject",
+    Editable->False], 
+   "\[InvisibleSpace]", "\<\"External program finished, \"\>", 
+   "\[InvisibleSpace]", "7440", "\[InvisibleSpace]", "\<\" s.\"\>"}],
+  SequenceForm[
+   DateObject[{2020, 5, 20, 0, 48, 35.091453`8.297776330639428}, "Instant", 
+    "Gregorian", -7.], "External program finished, ", 7440, " s."],
+  Editable->False]], "Print",
+ CellChangeTimes->{
+  3.798949715097536*^9},ExpressionUUID->"3f9a600d-94aa-425d-b7d0-\
+6ceb093b8672"],
+
+Cell[BoxData[
+ StyleBox["\<\"MAXLAN:     10000, Restart:         4,   NED: -       1,      \
+NEC:         1\\nMATVEC:       512,  Reorth:       512, Nloop:         1,  \
+Nlocked:         0\\nTtotal:  3.074557,    T_op:  0.860507, Torth:  1.758306, \
+  Tstart:  0.105278\\nGauge matrix extreme eigenvalues found:\\n  \
+4.889370e-02\\nMAXLAN:     35000, Restart:         7,   NED: -     309,      \
+NEC:       309\\nMATVEC:     27248,  Reorth:     30090, Nloop:        80,  \
+Nlocked:       200\\nTtotal: 1.441e+04,    T_op: 1.271e+04, Torth: 1.503e+03, \
+  Tstart: 1.847e+02\\nlargeShifts: ops=27248, sumNcol=27248, \
+maxNcol=1\\nlargeShifts: 27248 matrix-vector ops, 30090 reorthogonalizations \
+in 7376.54 s\\ncutoffNullSpace:  102 (max 85, norm 100) of 309 eigenpairs \
+between [0, 212]\\nlinearSolve:  620 iterations, 620 reorthogonalizations in \
+91.23 s\\ndynamicProject:  85830 calls (85829 usertol), 6587154 matrix-vector \
+ops, max itn 131\\n                 in 6809.96 s\\nshifts.c:  init and i/o \
+28.44 s, calculation 7469.64 s\\n\"\>",
+  StripOnInput->False,
+  FontColor->RGBColor[0, 0, 1]]], "Print",
+ CellChangeTimes->{
+  3.798949715986841*^9},ExpressionUUID->"14940699-9e06-4dde-a205-\
+b92a65484ea2"],
+
+Cell[BoxData[
+ InterpretationBox[
+  RowBox[{
+   TemplateBox[{RowBox[{"\"Wed 20 May 2020 00:59:48\"", 
+       StyleBox[
+        RowBox[{"\"GMT\"", "\[InvisibleSpace]", 
+          RowBox[{"-", "7.`"}]}], FontColor -> GrayLevel[0.5]]}],
+     RowBox[{"DateObject", "[", 
+       RowBox[{
+         RowBox[{"{", 
+           
+           RowBox[{"2020", ",", "5", ",", "20", ",", "0", ",", "59", ",", 
+             "48.516192`8.43846168214759"}], "}"}], ",", "\"Instant\"", ",", 
+         "\"Gregorian\"", ",", 
+         RowBox[{"-", "7.`"}]}], "]"}]},
+    "DateObject",
+    Editable->False], 
+   "\[InvisibleSpace]", "\<\"Starting external program.\"\>"}],
+  SequenceForm[
+   DateObject[{2020, 5, 20, 0, 59, 48.516192`8.43846168214759}, "Instant", 
+    "Gregorian", -7.], "Starting external program."],
+  Editable->False]], "Print",
+ CellChangeTimes->{
+  3.798950389150943*^9},ExpressionUUID->"645981b5-3a5c-4546-8a5b-\
+135fe083bcf8"],
+
+Cell[BoxData[
+ InterpretationBox[
+  RowBox[{
+   TemplateBox[{RowBox[{"\"Wed 20 May 2020 03:02:49\"", 
+       StyleBox[
+        RowBox[{"\"GMT\"", "\[InvisibleSpace]", 
+          RowBox[{"-", "7.`"}]}], FontColor -> GrayLevel[0.5]]}],
+     RowBox[{"DateObject", "[", 
+       RowBox[{
+         RowBox[{"{", 
+           
+           RowBox[{"2020", ",", "5", ",", "20", ",", "3", ",", "2", ",", 
+             "49.095438`8.443616114690458"}], "}"}], ",", "\"Instant\"", ",", 
+         "\"Gregorian\"", ",", 
+         RowBox[{"-", "7.`"}]}], "]"}]},
+    "DateObject",
+    Editable->False], 
+   "\[InvisibleSpace]", "\<\"External program finished, \"\>", 
+   "\[InvisibleSpace]", "7320", "\[InvisibleSpace]", "\<\" s.\"\>"}],
+  SequenceForm[
+   DateObject[{2020, 5, 20, 3, 2, 49.095438`8.443616114690458}, "Instant", 
+    "Gregorian", -7.], "External program finished, ", 7320, " s."],
+  Editable->False]], "Print",
+ CellChangeTimes->{
+  3.798957769102477*^9},ExpressionUUID->"70a7dc28-ec60-4ecd-8633-\
+b4a7f8a89ec7"],
+
+Cell[BoxData[
+ StyleBox["\<\"MAXLAN:     10000, Restart:         4,   NED: -       1,      \
+NEC:         1\\nMATVEC:       512,  Reorth:       512, Nloop:         1,  \
+Nlocked:         0\\nTtotal:  3.081414,    T_op:  0.858132, Torth:  1.769684, \
+  Tstart:  0.102393\\nGauge matrix extreme eigenvalues found:\\n  \
+4.848314e-02\\nMAXLAN:     35000, Restart:         7,   NED: -     318,      \
+NEC:       318\\nMATVEC:     26579,  Reorth:     29419, Nloop:        76,  \
+Nlocked:       169\\nTtotal: 1.416e+04,    T_op: 1.247e+04, Torth: 1.495e+03, \
+  Tstart: 1.808e+02\\nlargeShifts: ops=26579, sumNcol=26579, \
+maxNcol=1\\nlargeShifts: 26579 matrix-vector ops, 29419 reorthogonalizations \
+in 7248.64 s\\ncutoffNullSpace:  102 (max 84, norm 101) of 318 eigenpairs \
+between [0, 195]\\nlinearSolve:  569 iterations, 569 reorthogonalizations in \
+83.05 s\\ndynamicProject:  83719 calls (83718 usertol), 6412669 matrix-vector \
+ops, max itn 131\\n                 in 6680.06 s\\nshifts.c:  init and i/o \
+28.78 s, calculation 7333.58 s\\n\"\>",
+  StripOnInput->False,
+  FontColor->RGBColor[0, 0, 1]]], "Print",
+ CellChangeTimes->{
+  3.798957769880013*^9},ExpressionUUID->"6bba0784-7689-4dea-b549-\
+b847830253cb"],
+
+Cell[BoxData[
+ InterpretationBox[
+  RowBox[{
+   TemplateBox[{RowBox[{"\"Wed 20 May 2020 03:13:40\"", 
+       StyleBox[
+        RowBox[{"\"GMT\"", "\[InvisibleSpace]", 
+          RowBox[{"-", "7.`"}]}], FontColor -> GrayLevel[0.5]]}],
+     RowBox[{"DateObject", "[", 
+       RowBox[{
+         RowBox[{"{", 
+           
+           RowBox[{"2020", ",", "5", ",", "20", ",", "3", ",", "13", ",", 
+             "40.858227`8.363854495200622"}], "}"}], ",", "\"Instant\"", ",", 
+         "\"Gregorian\"", ",", 
+         RowBox[{"-", "7.`"}]}], "]"}]},
+    "DateObject",
+    Editable->False], 
+   "\[InvisibleSpace]", "\<\"Starting external program.\"\>"}],
+  SequenceForm[
+   DateObject[{2020, 5, 20, 3, 13, 40.858227`8.363854495200622}, "Instant", 
+    "Gregorian", -7.], "Starting external program."],
+  Editable->False]], "Print",
+ CellChangeTimes->{
+  3.798958421153865*^9},ExpressionUUID->"8e7a0504-c4fb-4347-909c-\
+e4f250cd021d"],
+
+Cell[BoxData[
+ InterpretationBox[
+  RowBox[{
+   TemplateBox[{RowBox[{"\"Wed 20 May 2020 05:14:40\"", 
+       StyleBox[
+        RowBox[{"\"GMT\"", "\[InvisibleSpace]", 
+          RowBox[{"-", "7.`"}]}], FontColor -> GrayLevel[0.5]]}],
+     RowBox[{"DateObject", "[", 
+       RowBox[{
+         RowBox[{"{", 
+           
+           RowBox[{"2020", ",", "5", ",", "20", ",", "5", ",", "14", ",", 
+             "40.128281`8.356025534240725"}], "}"}], ",", "\"Instant\"", ",", 
+         "\"Gregorian\"", ",", 
+         RowBox[{"-", "7.`"}]}], "]"}]},
+    "DateObject",
+    Editable->False], 
+   "\[InvisibleSpace]", "\<\"External program finished, \"\>", 
+   "\[InvisibleSpace]", "7200", "\[InvisibleSpace]", "\<\" s.\"\>"}],
+  SequenceForm[
+   DateObject[{2020, 5, 20, 5, 14, 40.128281`8.356025534240725}, "Instant", 
+    "Gregorian", -7.], "External program finished, ", 7200, " s."],
+  Editable->False]], "Print",
+ CellChangeTimes->{
+  3.798965680134334*^9},ExpressionUUID->"1d11c43d-34d6-43ec-a458-\
+780a298a681e"],
+
+Cell[BoxData[
+ StyleBox["\<\"MAXLAN:     10000, Restart:         4,   NED: -       1,      \
+NEC:         1\\nMATVEC:       512,  Reorth:       512, Nloop:         1,  \
+Nlocked:         0\\nTtotal:  3.069045,    T_op:  0.854585, Torth:  1.776425, \
+  Tstart:  0.103684\\nGauge matrix extreme eigenvalues found:\\n  \
+4.784415e-02\\nMAXLAN:     35000, Restart:         7,   NED: -     292,      \
+NEC:       292\\nMATVEC:     26514,  Reorth:     29493, Nloop:        82,  \
+Nlocked:       165\\nTtotal: 1.396e+04,    T_op: 1.233e+04, Torth: 1.441e+03, \
+  Tstart: 1.822e+02\\nlargeShifts: ops=26514, sumNcol=26514, \
+maxNcol=1\\nlargeShifts: 26514 matrix-vector ops, 29493 reorthogonalizations \
+in 7143.69 s\\ncutoffNullSpace:  101 (max 83, norm 101) of 292 eigenpairs \
+between [0, 195]\\nlinearSolve:  540 iterations, 540 reorthogonalizations in \
+78.76 s\\ndynamicProject:  83605 calls (83605 usertol), 6389662 matrix-vector \
+ops, max itn 131\\n                 in 6596.18 s\\nshifts.c:  init and i/o \
+30.42 s, calculation 7224.32 s\\n\"\>",
+  StripOnInput->False,
+  FontColor->RGBColor[0, 0, 1]]], "Print",
+ CellChangeTimes->{
+  3.798965680898794*^9},ExpressionUUID->"1ab9ec21-7f3b-456b-8df4-\
+d949e5412a92"],
+
+Cell[BoxData[
+ InterpretationBox[
+  RowBox[{
+   TemplateBox[{RowBox[{"\"Wed 20 May 2020 05:25:08\"", 
+       StyleBox[
+        RowBox[{"\"GMT\"", "\[InvisibleSpace]", 
+          RowBox[{"-", "7.`"}]}], FontColor -> GrayLevel[0.5]]}],
+     RowBox[{"DateObject", "[", 
+       RowBox[{
+         RowBox[{"{", 
+           
+           RowBox[{"2020", ",", "5", ",", "20", ",", "5", ",", "25", ",", 
+             "8.400405`7.676875211733278"}], "}"}], ",", "\"Instant\"", ",", 
+         "\"Gregorian\"", ",", 
+         RowBox[{"-", "7.`"}]}], "]"}]},
+    "DateObject",
+    Editable->False], 
+   "\[InvisibleSpace]", "\<\"Starting external program.\"\>"}],
+  SequenceForm[
+   DateObject[{2020, 5, 20, 5, 25, 8.400405`7.676875211733278}, "Instant", 
+    "Gregorian", -7.], "Starting external program."],
+  Editable->False]], "Print",
+ CellChangeTimes->{
+  3.798966308927185*^9},ExpressionUUID->"0a24e36f-2907-40fb-bda7-\
+b7ba3e8bd75c"],
+
+Cell[BoxData[
+ InterpretationBox[
+  RowBox[{
+   TemplateBox[{RowBox[{"\"Wed 20 May 2020 07:28:07\"", 
+       StyleBox[
+        RowBox[{"\"GMT\"", "\[InvisibleSpace]", 
+          RowBox[{"-", "7.`"}]}], FontColor -> GrayLevel[0.5]]}],
+     RowBox[{"DateObject", "[", 
+       RowBox[{
+         RowBox[{"{", 
+           
+           RowBox[{"2020", ",", "5", ",", "20", ",", "7", ",", "28", ",", 
+             "7.23619`7.612084948819919"}], "}"}], ",", "\"Instant\"", ",", 
+         "\"Gregorian\"", ",", 
+         RowBox[{"-", "7.`"}]}], "]"}]},
+    "DateObject",
+    Editable->False], 
+   "\[InvisibleSpace]", "\<\"External program finished, \"\>", 
+   "\[InvisibleSpace]", "7320", "\[InvisibleSpace]", "\<\" s.\"\>"}],
+  SequenceForm[
+   DateObject[{2020, 5, 20, 7, 28, 7.23619`7.612084948819919}, "Instant", 
+    "Gregorian", -7.], "External program finished, ", 7320, " s."],
+  Editable->False]], "Print",
+ CellChangeTimes->{
+  3.798973687243582*^9},ExpressionUUID->"3b0fb74c-3261-4325-bcb7-\
+c1a447e72780"],
+
+Cell[BoxData[
+ StyleBox["\<\"MAXLAN:     10000, Restart:         4,   NED: -       1,      \
+NEC:         1\\nMATVEC:       512,  Reorth:       512, Nloop:         1,  \
+Nlocked:         0\\nTtotal:  3.082622,    T_op:  0.841020, Torth:  1.783032, \
+  Tstart:  0.103583\\nGauge matrix extreme eigenvalues found:\\n  \
+4.746848e-02\\nMAXLAN:     35000, Restart:         7,   NED: -     292,      \
+NEC:       292\\nMATVEC:     26553,  Reorth:     29529, Nloop:        83,  \
+Nlocked:       180\\nTtotal: 1.417e+04,    T_op: 1.253e+04, Torth: 1.451e+03, \
+  Tstart: 1.817e+02\\nlargeShifts: ops=26553, sumNcol=26553, \
+maxNcol=1\\nlargeShifts: 26553 matrix-vector ops, 29529 reorthogonalizations \
+in 7252.89 s\\ncutoffNullSpace:  94 (max 85, norm 94) of 292 eigenpairs \
+between [0, 195]\\nlinearSolve:  545 iterations, 545 reorthogonalizations in \
+79.81 s\\ndynamicProject:  83729 calls (83727 usertol), 6386449 matrix-vector \
+ops, max itn 132\\n                 in 6708.36 s\\nshifts.c:  init and i/o \
+28.78 s, calculation 7334.63 s\\n\"\>",
+  StripOnInput->False,
+  FontColor->RGBColor[0, 0, 1]]], "Print",
+ CellChangeTimes->{
+  3.798973688045004*^9},ExpressionUUID->"58593fce-4cdc-4430-bfe2-\
+5af9c28532b4"],
+
+Cell[BoxData[
+ InterpretationBox[
+  RowBox[{
+   TemplateBox[{RowBox[{"\"Wed 20 May 2020 07:38:34\"", 
+       StyleBox[
+        RowBox[{"\"GMT\"", "\[InvisibleSpace]", 
+          RowBox[{"-", "7.`"}]}], FontColor -> GrayLevel[0.5]]}],
+     RowBox[{"DateObject", "[", 
+       RowBox[{
+         RowBox[{"{", 
+           
+           RowBox[{"2020", ",", "5", ",", "20", ",", "7", ",", "38", ",", 
+             "34.023555`8.284354669416317"}], "}"}], ",", "\"Instant\"", ",", 
+         "\"Gregorian\"", ",", 
+         RowBox[{"-", "7.`"}]}], "]"}]},
+    "DateObject",
+    Editable->False], 
+   "\[InvisibleSpace]", "\<\"Starting external program.\"\>"}],
+  SequenceForm[
+   DateObject[{2020, 5, 20, 7, 38, 34.023555`8.284354669416317}, "Instant", 
+    "Gregorian", -7.], "Starting external program."],
+  Editable->False]], "Print",
+ CellChangeTimes->{
+  3.7989743143299427`*^9},ExpressionUUID->"a3f4a9a8-7be5-4943-8028-\
+776c83825528"],
+
+Cell[BoxData[
+ InterpretationBox[
+  RowBox[{
+   TemplateBox[{RowBox[{"\"Wed 20 May 2020 09:39:32\"", 
+       StyleBox[
+        RowBox[{"\"GMT\"", "\[InvisibleSpace]", 
+          RowBox[{"-", "7.`"}]}], FontColor -> GrayLevel[0.5]]}],
+     RowBox[{"DateObject", "[", 
+       RowBox[{
+         RowBox[{"{", 
+           
+           RowBox[{"2020", ",", "5", ",", "20", ",", "9", ",", "39", ",", 
+             "32.489638`8.26431985288862"}], "}"}], ",", "\"Instant\"", ",", 
+         "\"Gregorian\"", ",", 
+         RowBox[{"-", "7.`"}]}], "]"}]},
+    "DateObject",
+    Editable->False], 
+   "\[InvisibleSpace]", "\<\"External program finished, \"\>", 
+   "\[InvisibleSpace]", "7200", "\[InvisibleSpace]", "\<\" s.\"\>"}],
+  SequenceForm[
+   DateObject[{2020, 5, 20, 9, 39, 32.489638`8.26431985288862}, "Instant", 
+    "Gregorian", -7.], "External program finished, ", 7200, " s."],
+  Editable->False]], "Print",
+ CellChangeTimes->{
+  3.798981572495084*^9},ExpressionUUID->"60177dd4-0368-4432-a1ff-\
+4f42549c68ac"],
+
+Cell[BoxData[
+ StyleBox["\<\"MAXLAN:     10000, Restart:         4,   NED: -       1,      \
+NEC:         1\\nMATVEC:       512,  Reorth:       512, Nloop:         1,  \
+Nlocked:         0\\nTtotal:  3.085438,    T_op:  0.859363, Torth:  1.773086, \
+  Tstart:  0.104378\\nGauge matrix extreme eigenvalues found:\\n  \
+4.706237e-02\\nMAXLAN:     35000, Restart:         7,   NED: -     292,      \
+NEC:       292\\nMATVEC:     26283,  Reorth:     29192, Nloop:        83,  \
+Nlocked:       173\\nTtotal: 1.395e+04,    T_op: 1.234e+04, Torth: 1.428e+03, \
+  Tstart: 1.779e+02\\nlargeShifts: ops=26283, sumNcol=26283, \
+maxNcol=1\\nlargeShifts: 26283 matrix-vector ops, 29192 reorthogonalizations \
+in 7135.32 s\\ncutoffNullSpace:  97 (max 90, norm 96) of 292 eigenpairs \
+between [0, 192]\\nlinearSolve:  491 iterations, 491 reorthogonalizations in \
+72.99 s\\ndynamicProject:  82744 calls (82743 usertol), 6296184 matrix-vector \
+ops, max itn 132\\n                 in 6596.92 s\\nshifts.c:  init and i/o \
+28.66 s, calculation 7210.19 s\\n\"\>",
+  StripOnInput->False,
+  FontColor->RGBColor[0, 0, 1]]], "Print",
+ CellChangeTimes->{
+  3.7989815732630653`*^9},ExpressionUUID->"466eaabc-6112-4cdc-a362-\
+a0ceac4f89bd"],
+
+Cell[BoxData[
+ InterpretationBox[
+  RowBox[{
+   TemplateBox[{RowBox[{"\"Wed 20 May 2020 09:50:15\"", 
+       StyleBox[
+        RowBox[{"\"GMT\"", "\[InvisibleSpace]", 
+          RowBox[{"-", "7.`"}]}], FontColor -> GrayLevel[0.5]]}],
+     RowBox[{"DateObject", "[", 
+       RowBox[{
+         RowBox[{"{", 
+           
+           RowBox[{"2020", ",", "5", ",", "20", ",", "9", ",", "50", ",", 
+             "15.182964`7.933931547352007"}], "}"}], ",", "\"Instant\"", ",", 
+         "\"Gregorian\"", ",", 
+         RowBox[{"-", "7.`"}]}], "]"}]},
+    "DateObject",
+    Editable->False], 
+   "\[InvisibleSpace]", "\<\"Starting external program.\"\>"}],
+  SequenceForm[
+   DateObject[{2020, 5, 20, 9, 50, 15.182964`7.933931547352007}, "Instant", 
+    "Gregorian", -7.], "Starting external program."],
+  Editable->False]], "Print",
+ CellChangeTimes->{
+  3.798982215754644*^9},ExpressionUUID->"f63141b7-680b-4ca0-b1e6-\
+af63b554eb7f"],
+
+Cell[BoxData[
+ InterpretationBox[
+  RowBox[{
+   TemplateBox[{RowBox[{"\"Wed 20 May 2020 11:50:14\"", 
+       StyleBox[
+        RowBox[{"\"GMT\"", "\[InvisibleSpace]", 
+          RowBox[{"-", "7.`"}]}], FontColor -> GrayLevel[0.5]]}],
+     RowBox[{"DateObject", "[", 
+       RowBox[{
+         RowBox[{"{", 
+           
+           RowBox[{"2020", ",", "5", ",", "20", ",", "11", ",", "50", ",", 
+             "14.401063`7.910969535630796"}], "}"}], ",", "\"Instant\"", ",", 
+         "\"Gregorian\"", ",", 
+         RowBox[{"-", "7.`"}]}], "]"}]},
+    "DateObject",
+    Editable->False], 
+   "\[InvisibleSpace]", "\<\"External program finished, \"\>", 
+   "\[InvisibleSpace]", "7140", "\[InvisibleSpace]", "\<\" s.\"\>"}],
+  SequenceForm[
+   DateObject[{2020, 5, 20, 11, 50, 14.401063`7.910969535630796}, "Instant", 
+    "Gregorian", -7.], "External program finished, ", 7140, " s."],
+  Editable->False]], "Print",
+ CellChangeTimes->{
+  3.7989894144073973`*^9},ExpressionUUID->"cf9a04bd-ab9d-42cf-be22-\
+f0955333cef7"],
+
+Cell[BoxData[
+ StyleBox["\<\"MAXLAN:     10000, Restart:         4,   NED: -       1,      \
+NEC:         1\\nMATVEC:       512,  Reorth:       512, Nloop:         1,  \
+Nlocked:         0\\nTtotal:  3.090461,    T_op:  0.844776, Torth:  1.780961, \
+  Tstart:  0.102438\\nGauge matrix extreme eigenvalues found:\\n  \
+4.659522e-02\\nMAXLAN:     35000, Restart:         7,   NED: -     288,      \
+NEC:       288\\nMATVEC:     26176,  Reorth:     29205, Nloop:        82,  \
+Nlocked:       169\\nTtotal: 1.384e+04,    T_op: 1.222e+04, Torth: 1.434e+03, \
+  Tstart: 1.797e+02\\nlargeShifts: ops=26176, sumNcol=26176, \
+maxNcol=1\\nlargeShifts: 26176 matrix-vector ops, 29205 reorthogonalizations \
+in 7089.22 s\\ncutoffNullSpace:  95 (max 88, norm 95) of 288 eigenpairs \
+between [0, 192]\\nlinearSolve:  484 iterations, 484 reorthogonalizations in \
+70.39 s\\ndynamicProject:  82529 calls (82528 usertol), 6260425 matrix-vector \
+ops, max itn 134\\n                 in 6543.58 s\\nshifts.c:  init and i/o \
+28.63 s, calculation 7161.54 s\\n\"\>",
+  StripOnInput->False,
+  FontColor->RGBColor[0, 0, 1]]], "Print",
+ CellChangeTimes->{
+  3.798989415256516*^9},ExpressionUUID->"e5201316-e843-475f-944c-\
+2424859bf291"],
+
+Cell[BoxData[
+ InterpretationBox[
+  RowBox[{
+   TemplateBox[{RowBox[{"\"Wed 20 May 2020 12:01:06\"", 
+       StyleBox[
+        RowBox[{"\"GMT\"", "\[InvisibleSpace]", 
+          RowBox[{"-", "7.`"}]}], FontColor -> GrayLevel[0.5]]}],
+     RowBox[{"DateObject", "[", 
+       RowBox[{
+         RowBox[{"{", 
+           
+           RowBox[{"2020", ",", "5", ",", "20", ",", "12", ",", "1", ",", 
+             "6.45646`7.562569452289626"}], "}"}], ",", "\"Instant\"", ",", 
+         "\"Gregorian\"", ",", 
+         RowBox[{"-", "7.`"}]}], "]"}]},
+    "DateObject",
+    Editable->False], 
+   "\[InvisibleSpace]", "\<\"Starting external program.\"\>"}],
+  SequenceForm[
+   DateObject[{2020, 5, 20, 12, 1, 6.45646`7.562569452289626}, "Instant", 
+    "Gregorian", -7.], "Starting external program."],
+  Editable->False]], "Print",
+ CellChangeTimes->{
+  3.798990066798423*^9},ExpressionUUID->"a47af442-67c6-406f-9451-\
+87978454a5db"],
+
+Cell[BoxData[
+ InterpretationBox[
+  RowBox[{
+   TemplateBox[{RowBox[{"\"Wed 20 May 2020 14:00:04\"", 
+       StyleBox[
+        RowBox[{"\"GMT\"", "\[InvisibleSpace]", 
+          RowBox[{"-", "7.`"}]}], FontColor -> GrayLevel[0.5]]}],
+     RowBox[{"DateObject", "[", 
+       RowBox[{
+         RowBox[{"{", 
+           
+           RowBox[{"2020", ",", "5", ",", "20", ",", "14", ",", "0", ",", 
+             "4.806197`7.434376556088945"}], "}"}], ",", "\"Instant\"", ",", 
+         "\"Gregorian\"", ",", 
+         RowBox[{"-", "7.`"}]}], "]"}]},
+    "DateObject",
+    Editable->False], 
+   "\[InvisibleSpace]", "\<\"External program finished, \"\>", 
+   "\[InvisibleSpace]", "7080", "\[InvisibleSpace]", "\<\" s.\"\>"}],
+  SequenceForm[
+   DateObject[{2020, 5, 20, 14, 0, 4.806197`7.434376556088945}, "Instant", 
+    "Gregorian", -7.], "External program finished, ", 7080, " s."],
+  Editable->False]], "Print",
+ CellChangeTimes->{
+  3.79899720481244*^9},ExpressionUUID->"2a3e6981-9647-4fcc-bb39-5a5ab79f5c35"],
+
+Cell[BoxData[
+ StyleBox["\<\"MAXLAN:     10000, Restart:         4,   NED: -       1,      \
+NEC:         1\\nMATVEC:       512,  Reorth:       512, Nloop:         1,  \
+Nlocked:         0\\nTtotal:  3.073119,    T_op:  0.856645, Torth:  1.777153, \
+  Tstart:  0.103852\\nGauge matrix extreme eigenvalues found:\\n  \
+4.628157e-02\\nMAXLAN:     35000, Restart:         7,   NED: -     288,      \
+NEC:       288\\nMATVEC:     25960,  Reorth:     29004, Nloop:        82,  \
+Nlocked:       161\\nTtotal: 1.364e+04,    T_op: 1.203e+04, Torth: 1.417e+03, \
+  Tstart: 1.779e+02\\nlargeShifts: ops=25960, sumNcol=25960, \
+maxNcol=1\\nlargeShifts: 25960 matrix-vector ops, 29004 reorthogonalizations \
+in 6975.46 s\\ncutoffNullSpace:  96 (max 86, norm 96) of 288 eigenpairs \
+between [0, 190]\\nlinearSolve:  528 iterations, 528 reorthogonalizations in \
+77.80 s\\ndynamicProject:  81984 calls (81984 usertol), 6196409 matrix-vector \
+ops, max itn 134\\n                 in 6444.08 s\\nshifts.c:  init and i/o \
+28.40 s, calculation 7055.12 s\\n\"\>",
+  StripOnInput->False,
+  FontColor->RGBColor[0, 0, 1]]], "Print",
+ CellChangeTimes->{
+  3.79899720557181*^9},ExpressionUUID->"78afeccd-471c-47c0-8a89-da555eaf55eb"],
+
+Cell[BoxData[
+ InterpretationBox[
+  RowBox[{
+   TemplateBox[{RowBox[{"\"Wed 20 May 2020 14:10:50\"", 
+       StyleBox[
+        RowBox[{"\"GMT\"", "\[InvisibleSpace]", 
+          RowBox[{"-", "7.`"}]}], FontColor -> GrayLevel[0.5]]}],
+     RowBox[{"DateObject", "[", 
+       RowBox[{
+         RowBox[{"{", 
+           
+           RowBox[{"2020", ",", "5", ",", "20", ",", "14", ",", "10", ",", 
+             "50.471241`8.455618958932947"}], "}"}], ",", "\"Instant\"", ",", 
+         "\"Gregorian\"", ",", 
+         RowBox[{"-", "7.`"}]}], "]"}]},
+    "DateObject",
+    Editable->False], 
+   "\[InvisibleSpace]", "\<\"Starting external program.\"\>"}],
+  SequenceForm[
+   DateObject[{2020, 5, 20, 14, 10, 50.471241`8.455618958932947}, "Instant", 
+    "Gregorian", -7.], "Starting external program."],
+  Editable->False]], "Print",
+ CellChangeTimes->{
+  3.798997851036957*^9},ExpressionUUID->"5f91e255-368e-4f37-8d93-\
+df27ca862dc4"],
+
+Cell[BoxData[
+ InterpretationBox[
+  RowBox[{
+   TemplateBox[{RowBox[{"\"Wed 20 May 2020 16:07:48\"", 
+       StyleBox[
+        RowBox[{"\"GMT\"", "\[InvisibleSpace]", 
+          RowBox[{"-", "7.`"}]}], FontColor -> GrayLevel[0.5]]}],
+     RowBox[{"DateObject", "[", 
+       RowBox[{
+         RowBox[{"{", 
+           
+           RowBox[{"2020", ",", "5", ",", "20", ",", "16", ",", "7", ",", 
+             "48.562557`8.438876521963552"}], "}"}], ",", "\"Instant\"", ",", 
+         "\"Gregorian\"", ",", 
+         RowBox[{"-", "7.`"}]}], "]"}]},
+    "DateObject",
+    Editable->False], 
+   "\[InvisibleSpace]", "\<\"External program finished, \"\>", 
+   "\[InvisibleSpace]", "6960", "\[InvisibleSpace]", "\<\" s.\"\>"}],
+  SequenceForm[
+   DateObject[{2020, 5, 20, 16, 7, 48.562557`8.438876521963552}, "Instant", 
+    "Gregorian", -7.], "External program finished, ", 6960, " s."],
+  Editable->False]], "Print",
+ CellChangeTimes->{
+  3.799004868570825*^9},ExpressionUUID->"465a0783-c928-4a2b-8628-\
+1b6039bebc59"],
+
+Cell[BoxData[
+ StyleBox["\<\"MAXLAN:     10000, Restart:         4,   NED: -       1,      \
+NEC:         1\\nMATVEC:       512,  Reorth:       512, Nloop:         1,  \
+Nlocked:         0\\nTtotal:  3.107178,    T_op:  0.857136, Torth:  1.782738, \
+  Tstart:  0.103260\\nGauge matrix extreme eigenvalues found:\\n  \
+4.598945e-02\\nMAXLAN:     35000, Restart:         7,   NED: -     285,      \
+NEC:       285\\nMATVEC:     25892,  Reorth:     29080, Nloop:        81,  \
+Nlocked:       165\\nTtotal: 1.349e+04,    T_op: 1.189e+04, Torth: 1.422e+03, \
+  Tstart: 1.783e+02\\nlargeShifts: ops=25892, sumNcol=25892, \
+maxNcol=1\\nlargeShifts: 25892 matrix-vector ops, 29080 reorthogonalizations \
+in 6906.41 s\\ncutoffNullSpace:  90 (max 83, norm 89) of 285 eigenpairs \
+between [0, 190]\\nlinearSolve:  509 iterations, 509 reorthogonalizations in \
+74.37 s\\ndynamicProject:  81886 calls (81885 usertol), 6152767 matrix-vector \
+ops, max itn 134\\n                 in 6369.27 s\\nshifts.c:  init and i/o \
+28.71 s, calculation 6982.78 s\\n\"\>",
+  StripOnInput->False,
+  FontColor->RGBColor[0, 0, 1]]], "Print",
+ CellChangeTimes->{
+  3.799004869379325*^9},ExpressionUUID->"6d2b6eed-d597-4c99-bfb0-\
+eef8b216f5d8"],
+
+Cell[BoxData[
+ InterpretationBox[
+  RowBox[{
+   TemplateBox[{RowBox[{"\"Wed 20 May 2020 16:19:09\"", 
+       StyleBox[
+        RowBox[{"\"GMT\"", "\[InvisibleSpace]", 
+          RowBox[{"-", "7.`"}]}], FontColor -> GrayLevel[0.5]]}],
+     RowBox[{"DateObject", "[", 
+       RowBox[{
+         RowBox[{"{", 
+           
+           RowBox[{"2020", ",", "5", ",", "20", ",", "16", ",", "19", ",", 
+             "9.119416`7.712542014057898"}], "}"}], ",", "\"Instant\"", ",", 
+         "\"Gregorian\"", ",", 
+         RowBox[{"-", "7.`"}]}], "]"}]},
+    "DateObject",
+    Editable->False], 
+   "\[InvisibleSpace]", "\<\"Starting external program.\"\>"}],
+  SequenceForm[
+   DateObject[{2020, 5, 20, 16, 19, 9.119416`7.712542014057898}, "Instant", 
+    "Gregorian", -7.], "Starting external program."],
+  Editable->False]], "Print",
+ CellChangeTimes->{
+  3.799005549484837*^9},ExpressionUUID->"819ef57e-b1f7-4e1c-a400-\
+6883009226ce"],
+
+Cell[BoxData[
+ InterpretationBox[
+  RowBox[{
+   TemplateBox[{RowBox[{"\"Wed 20 May 2020 18:15:08\"", 
+       StyleBox[
+        RowBox[{"\"GMT\"", "\[InvisibleSpace]", 
+          RowBox[{"-", "7.`"}]}], FontColor -> GrayLevel[0.5]]}],
+     RowBox[{"DateObject", "[", 
+       RowBox[{
+         RowBox[{"{", 
+           
+           RowBox[{"2020", ",", "5", ",", "20", ",", "18", ",", "15", ",", 
+             "8.002149`7.655781620658668"}], "}"}], ",", "\"Instant\"", ",", 
+         "\"Gregorian\"", ",", 
+         RowBox[{"-", "7.`"}]}], "]"}]},
+    "DateObject",
+    Editable->False], 
+   "\[InvisibleSpace]", "\<\"External program finished, \"\>", 
+   "\[InvisibleSpace]", "6900", "\[InvisibleSpace]", "\<\" s.\"\>"}],
+  SequenceForm[
+   DateObject[{2020, 5, 20, 18, 15, 8.002149`7.655781620658668}, "Instant", 
+    "Gregorian", -7.], "External program finished, ", 6900, " s."],
+  Editable->False]], "Print",
+ CellChangeTimes->{
+  3.799012508006044*^9},ExpressionUUID->"33209b98-186a-45ed-9ce0-\
+308d685795e8"],
+
+Cell[BoxData[
+ StyleBox["\<\"MAXLAN:     10000, Restart:         4,   NED: -       1,      \
+NEC:         1\\nMATVEC:       512,  Reorth:       512, Nloop:         1,  \
+Nlocked:         0\\nTtotal:  3.090499,    T_op:  0.863750, Torth:  1.775310, \
+  Tstart:  0.104387\\nGauge matrix extreme eigenvalues found:\\n  \
+4.601400e-02\\nMAXLAN:     35000, Restart:         7,   NED: -     285,      \
+NEC:       285\\nMATVEC:     25581,  Reorth:     28965, Nloop:        81,  \
+Nlocked:       150\\nTtotal: 1.336e+04,    T_op: 1.177e+04, Torth: 1.411e+03, \
+  Tstart: 1.757e+02\\nlargeShifts: ops=25581, sumNcol=25581, \
+maxNcol=1\\nlargeShifts: 25581 matrix-vector ops, 28965 reorthogonalizations \
+in 6847.99 s\\ncutoffNullSpace:  100 (max 87, norm 99) of 285 eigenpairs \
+between [0, 182]\\nlinearSolve:  393 iterations, 393 reorthogonalizations in \
+57.34 s\\ndynamicProject:  80917 calls (80916 usertol), 6035172 matrix-vector \
+ops, max itn 135\\n                 in 6304.22 s\\nshifts.c:  init and i/o \
+28.56 s, calculation 6907.25 s\\n\"\>",
+  StripOnInput->False,
+  FontColor->RGBColor[0, 0, 1]]], "Print",
+ CellChangeTimes->{
+  3.799012508834908*^9},ExpressionUUID->"4d88f309-8828-4acf-9309-\
+7e388b72bf3d"]
+}, Open  ]]
 }, Open  ]]
 }, Open  ]]
 }, Open  ]]
@@ -37240,9 +39906,9 @@ Cell[295861, 6236, 345, 8, 25, "Print",ExpressionUUID->"557573ac-26b9-4762-9a67-
 Cell[296209, 6246, 1212, 19, 356, "Print",ExpressionUUID->"18cdc481-ed1f-4196-ad9c-8b7e97ba375c"]
 }, Open  ]]
 }, Closed]]
-}, Open  ]],
+}, Closed]],
 Cell[CellGroupData[{
-Cell[297482, 6272, 506, 9, 55, "Subsection",ExpressionUUID->"18704ba5-39e3-42ce-8e98-1a6b3fc54485"],
+Cell[297482, 6272, 506, 9, 39, "Subsection",ExpressionUUID->"18704ba5-39e3-42ce-8e98-1a6b3fc54485"],
 Cell[297991, 6283, 583, 11, 81, "Text",ExpressionUUID->"7aa0b4f9-0f03-45ad-9068-ff3121346355"],
 Cell[298577, 6296, 2055, 31, 81, "Text",ExpressionUUID->"ff5cb459-75a0-4a68-b360-20f83a6d2981"],
 Cell[CellGroupData[{
@@ -38351,9 +41017,9 @@ Cell[957720, 20413, 1218, 19, 356, "Print",ExpressionUUID->"499df97e-d1ea-4f30-a
 }, Open  ]],
 Cell[958953, 20435, 363, 9, 22, "Message",ExpressionUUID->"fd03d997-30bb-4283-92cf-d19b781bf76c"]
 }, Open  ]]
-}, Open  ]],
+}, Closed]],
 Cell[CellGroupData[{
-Cell[959365, 20450, 1011, 14, 55, "Subsection",ExpressionUUID->"e55158be-7419-4033-8ee5-09b6cb365a40"],
+Cell[959365, 20450, 1011, 14, 39, "Subsection",ExpressionUUID->"e55158be-7419-4033-8ee5-09b6cb365a40"],
 Cell[960379, 20466, 534, 11, 81, "Text",ExpressionUUID->"bfd968da-e692-4452-b87a-65936eaf8dd6"],
 Cell[960916, 20479, 2120, 34, 127, "Text",ExpressionUUID->"1001d409-735f-40e9-8bce-4a073b4af474"],
 Cell[CellGroupData[{
@@ -38701,9 +41367,9 @@ Cell[1171375, 24961, 345, 8, 25, "Print",ExpressionUUID->"763b6f62-9a1b-448b-b83
 Cell[1171723, 24971, 1219, 19, 356, "Print",ExpressionUUID->"6443fd6f-3b1b-40ed-900d-ae0a21f66b24"]
 }, Open  ]]
 }, Closed]]
-}, Closed]],
+}, Open  ]],
 Cell[CellGroupData[{
-Cell[1173003, 24997, 907, 13, 39, "Subsection",ExpressionUUID->"46f126fc-8644-4db1-acc3-f0e4461602b2"],
+Cell[1173003, 24997, 907, 13, 55, "Subsection",ExpressionUUID->"46f126fc-8644-4db1-acc3-f0e4461602b2"],
 Cell[1173913, 25012, 614, 14, 196, "Text",ExpressionUUID->"a6ad1cd9-7dcb-4735-9172-582b736915a6"],
 Cell[1174530, 25028, 643, 12, 127, "Text",ExpressionUUID->"f93cb797-d79d-44bc-a11e-1a121c80cc43"],
 Cell[1175176, 25042, 570, 12, 104, "Text",ExpressionUUID->"e7a44947-b9ad-473f-a555-ac94f8cf9bca"],
@@ -39637,7 +42303,127 @@ Cell[1722616, 36530, 1216, 19, 356, "Print",ExpressionUUID->"751bd84c-969f-48c9-
 }, Closed]],
 Cell[CellGroupData[{
 Cell[1723881, 36555, 6280, 119, 396, "Input",ExpressionUUID->"05267e9c-4f86-4bd7-94e5-ef45086543fb"],
-Cell[1730164, 36676, 928, 24, 34, "Print",ExpressionUUID->"ad474713-9f90-45db-a7e8-66fc9821a699"]
+Cell[CellGroupData[{
+Cell[1730186, 36678, 928, 24, 34, "Print",ExpressionUUID->"ad474713-9f90-45db-a7e8-66fc9821a699"],
+Cell[1731117, 36704, 1018, 25, 34, "Print",ExpressionUUID->"05ba421f-1da5-44d5-8b21-0a141b8e3c2c"],
+Cell[1732138, 36731, 1231, 19, 356, "Print",ExpressionUUID->"3352f110-6b1e-4ef8-b825-c720bac5b338"],
+Cell[1733372, 36752, 501, 11, 25, "Print",ExpressionUUID->"68c1a604-6a6b-4f71-ac8e-4065396d01c6"]
+}, Open  ]],
+Cell[1733888, 36766, 358, 9, 22, "Message",ExpressionUUID->"891f5a40-9a8a-4fc3-9303-fe6c92129a22"],
+Cell[CellGroupData[{
+Cell[1734271, 36779, 928, 24, 34, "Print",ExpressionUUID->"bbf6cfdf-137e-4ffd-b27f-041a90370d11"],
+Cell[1735202, 36805, 1012, 25, 34, "Print",ExpressionUUID->"3e619cb6-4ea6-4379-836f-d7598b0ca76a"],
+Cell[1736217, 36832, 1225, 19, 356, "Print",ExpressionUUID->"6a177da2-3153-4f20-8105-b47c65b7ab11"],
+Cell[1737445, 36853, 503, 11, 25, "Print",ExpressionUUID->"82fa90b7-606f-431a-8737-2a2d871e929f"]
+}, Open  ]],
+Cell[1737963, 36867, 356, 9, 22, "Message",ExpressionUUID->"ae1030aa-8e6a-4a18-bb9b-426b8a61d344"],
+Cell[CellGroupData[{
+Cell[1738344, 36880, 928, 24, 34, "Print",ExpressionUUID->"3c05c867-c969-4b19-9f20-c3d529729246"],
+Cell[1739275, 36906, 1009, 24, 34, "Print",ExpressionUUID->"3d22504a-f071-42e7-8612-582e83307d27"],
+Cell[1740287, 36932, 1227, 19, 356, "Print",ExpressionUUID->"f9aaed46-de7e-4a05-ab53-791419effa5b"],
+Cell[1741517, 36953, 505, 11, 25, "Print",ExpressionUUID->"204e69aa-37a9-43bf-bf3d-1c3519ad03a6"]
+}, Open  ]],
+Cell[1742037, 36967, 358, 9, 22, "Message",ExpressionUUID->"e090f62d-2f00-430b-94b3-8e2eff756b65"],
+Cell[1742398, 36978, 406, 9, 22, "Message",ExpressionUUID->"c7650367-88a2-4f16-8897-fed7ba9263c0"],
+Cell[CellGroupData[{
+Cell[1742829, 36991, 930, 24, 34, "Print",ExpressionUUID->"f62fbb3f-53b5-44f1-966d-c13cfa17aece"],
+Cell[1743762, 37017, 1012, 25, 34, "Print",ExpressionUUID->"78671e10-c02c-4dc2-a4be-6ced2372c390"],
+Cell[1744777, 37044, 1225, 19, 356, "Print",ExpressionUUID->"db261b76-55bd-4faf-8e1c-14a1fbe9b60e"],
+Cell[1746005, 37065, 501, 11, 25, "Print",ExpressionUUID->"26d24b4e-deb2-4d10-8353-9036e2c81c09"],
+Cell[1746509, 37078, 928, 24, 34, "Print",ExpressionUUID->"ebbf9994-ed73-4ca5-bb96-d4ca7515d13f"],
+Cell[1747440, 37104, 1014, 25, 34, "Print",ExpressionUUID->"84484c88-3011-4141-a82b-3b56cee9b745"],
+Cell[1748457, 37131, 1226, 19, 356, "Print",ExpressionUUID->"c8282560-5239-4c61-b00e-c2ca72637254"],
+Cell[1749686, 37152, 926, 24, 34, "Print",ExpressionUUID->"b1f7b349-f70f-472a-b85a-6560d80866dc"],
+Cell[1750615, 37178, 1016, 25, 34, "Print",ExpressionUUID->"043f6d29-b068-47fd-88e6-c69cc04f52c1"],
+Cell[1751634, 37205, 1226, 19, 356, "Print",ExpressionUUID->"a8ba606e-29bd-438e-b6ea-18eefed7b6ca"],
+Cell[1752863, 37226, 926, 24, 34, "Print",ExpressionUUID->"f3221601-bdc8-4ac1-99a9-db1191c0aa67"],
+Cell[1753792, 37252, 1011, 24, 34, "Print",ExpressionUUID->"6e74c241-ed7d-4493-a4cd-108bad69593d"],
+Cell[1754806, 37278, 1221, 19, 356, "Print",ExpressionUUID->"31a1dfa6-f9a1-4d50-8608-5612ce79648d"],
+Cell[1756030, 37299, 928, 24, 34, "Print",ExpressionUUID->"89312137-fb19-4f5a-bb31-8180fa133b3f"],
+Cell[1756961, 37325, 1016, 25, 34, "Print",ExpressionUUID->"76f8de7c-6b1a-4dc4-807d-99b9f3e99ecd"],
+Cell[1757980, 37352, 1221, 19, 356, "Print",ExpressionUUID->"ca99711b-0b58-4c96-969d-4491498906df"],
+Cell[1759204, 37373, 932, 24, 34, "Print",ExpressionUUID->"03fe1da2-6ec9-4bdc-b43f-ee10b88bc757"],
+Cell[1760139, 37399, 1016, 25, 34, "Print",ExpressionUUID->"80ff65fd-498f-4aec-bed7-caeb36f5452f"],
+Cell[1761158, 37426, 1223, 19, 356, "Print",ExpressionUUID->"1ef1d519-9f9e-4692-a46c-e2438bfd49ff"],
+Cell[1762384, 37447, 930, 24, 34, "Print",ExpressionUUID->"2b71fa12-1df8-4778-86c6-23172e1d2061"],
+Cell[1763317, 37473, 1016, 25, 34, "Print",ExpressionUUID->"2e6b4475-1501-45e4-afa1-ed09366a7aa8"],
+Cell[1764336, 37500, 1219, 19, 356, "Print",ExpressionUUID->"325e6b97-38a6-4fe5-ac21-c730ceb683af"],
+Cell[1765558, 37521, 925, 23, 34, "Print",ExpressionUUID->"76ac942d-2792-4361-a158-e4fb475d7492"],
+Cell[1766486, 37546, 1012, 25, 34, "Print",ExpressionUUID->"9d9140a6-e073-4838-947d-37efd4577c26"],
+Cell[1767501, 37573, 1217, 19, 356, "Print",ExpressionUUID->"87132dcf-f4d7-4150-bb58-c853bd3e5cec"],
+Cell[1768721, 37594, 930, 24, 34, "Print",ExpressionUUID->"7d3530d6-6bac-4792-ae97-41bb8b0defc0"],
+Cell[1769654, 37620, 1012, 25, 34, "Print",ExpressionUUID->"8b7ee2f6-e45f-44e9-a543-e7e1e63e51e3"],
+Cell[1770669, 37647, 1217, 19, 356, "Print",ExpressionUUID->"61276657-4489-4499-8435-bd5c6f45957e"],
+Cell[1771889, 37668, 928, 24, 34, "Print",ExpressionUUID->"3d763111-be27-4fae-bf95-c81c89f6a6e0"],
+Cell[1772820, 37694, 1014, 25, 34, "Print",ExpressionUUID->"3c80b071-07e0-4542-8a12-8ff28dd93011"],
+Cell[1773837, 37721, 1218, 19, 356, "Print",ExpressionUUID->"84108cfb-9b86-42cc-a2f8-fa77ad7ab343"],
+Cell[1775058, 37742, 928, 24, 34, "Print",ExpressionUUID->"939d90d3-b2bd-4a63-8062-f122cbf1e2c3"],
+Cell[1775989, 37768, 1016, 25, 34, "Print",ExpressionUUID->"c2734bdc-cd58-457b-9254-154cd56c2f3f"],
+Cell[1777008, 37795, 1218, 19, 356, "Print",ExpressionUUID->"dbbcde7e-da57-491c-8077-69cd4a98a88e"],
+Cell[1778229, 37816, 930, 24, 34, "Print",ExpressionUUID->"5b9b84cd-ef85-4904-8392-d0925a29edba"],
+Cell[1779162, 37842, 1012, 25, 34, "Print",ExpressionUUID->"2930f1ac-36c6-478b-80da-bf61d129f612"],
+Cell[1780177, 37869, 1220, 19, 356, "Print",ExpressionUUID->"c0b93340-1d94-460a-a7a7-c8a1a352d81d"],
+Cell[1781400, 37890, 930, 24, 34, "Print",ExpressionUUID->"d4699a9e-91b2-4285-bda9-92d3f5e5e22a"],
+Cell[1782333, 37916, 1014, 25, 34, "Print",ExpressionUUID->"6d11d1b5-8e2e-4f15-8bd1-8b73a35a1d6b"],
+Cell[1783350, 37943, 1218, 19, 356, "Print",ExpressionUUID->"bc8a1e1c-5f9c-4c17-b846-a0a4d088253d"],
+Cell[1784571, 37964, 930, 24, 34, "Print",ExpressionUUID->"1ba4b89e-b041-40cc-b333-1e1109475f02"],
+Cell[1785504, 37990, 1010, 25, 34, "Print",ExpressionUUID->"ebca56c3-f855-4484-a9dd-733dc99be1b4"],
+Cell[1786517, 38017, 1216, 19, 356, "Print",ExpressionUUID->"5b9ef357-9037-4d0e-b980-ad82f606d83c"],
+Cell[1787736, 38038, 926, 24, 34, "Print",ExpressionUUID->"432716cc-7e1a-4dad-945d-5a95e8fbb1c1"],
+Cell[1788665, 38064, 1012, 25, 34, "Print",ExpressionUUID->"430b0cb9-e5e8-4a58-94e9-3dea1a92fa8a"],
+Cell[1789680, 38091, 1216, 19, 356, "Print",ExpressionUUID->"d591cafc-2a87-42f9-979b-cbc5ae93bade"],
+Cell[1790899, 38112, 925, 23, 34, "Print",ExpressionUUID->"a20c7d55-bbe5-4bc6-93b9-8b0abb8934e3"],
+Cell[1791827, 38137, 1010, 25, 34, "Print",ExpressionUUID->"3e9af9d5-3694-4078-aad8-010c0a926d5c"],
+Cell[1792840, 38164, 1216, 19, 356, "Print",ExpressionUUID->"b7cfa4bd-972f-45e8-9b88-82f1ce9e5276"],
+Cell[1794059, 38185, 928, 24, 34, "Print",ExpressionUUID->"d8f9299e-9cef-457b-8f0b-cda6b3a2d757"],
+Cell[1794990, 38211, 1012, 25, 34, "Print",ExpressionUUID->"b400ce1c-48e0-47c8-8919-3b3510ffd26d"],
+Cell[1796005, 38238, 1218, 19, 356, "Print",ExpressionUUID->"eae7d01d-cbbd-4dfc-88b7-c4cfe528025f"],
+Cell[1797226, 38259, 928, 24, 34, "Print",ExpressionUUID->"b06256e6-e62b-4f09-b86b-a1a3cf7914a6"],
+Cell[1798157, 38285, 1012, 25, 34, "Print",ExpressionUUID->"b183bba1-6ff4-4630-9d2b-56ad1de49c23"],
+Cell[1799172, 38312, 1216, 19, 356, "Print",ExpressionUUID->"c1c00812-9889-4378-aa7e-50b3cb7e3703"],
+Cell[1800391, 38333, 930, 24, 34, "Print",ExpressionUUID->"156d400f-97cb-4c3a-a2ee-2b100f77ed82"],
+Cell[1801324, 38359, 1014, 25, 34, "Print",ExpressionUUID->"69a9f12a-5dfb-4eab-bc6c-80ac60c0d379"],
+Cell[1802341, 38386, 1218, 19, 356, "Print",ExpressionUUID->"8a4e3120-cd68-4fd7-8bfb-946c452624e7"],
+Cell[1803562, 38407, 930, 24, 34, "Print",ExpressionUUID->"41b4bfdf-e4aa-4a55-b816-432174be02dd"],
+Cell[1804495, 38433, 1012, 25, 34, "Print",ExpressionUUID->"8fdb207f-0337-49fc-a34e-00eddc91332b"],
+Cell[1805510, 38460, 1218, 19, 356, "Print",ExpressionUUID->"9d9cfda4-fc0a-4be4-b21f-d22e532f8675"],
+Cell[1806731, 38481, 926, 24, 34, "Print",ExpressionUUID->"763165c9-7a8c-4787-af5d-2a8e75e3ebd8"],
+Cell[1807660, 38507, 1014, 25, 34, "Print",ExpressionUUID->"49a2108e-eec9-4c49-965f-8610f423bb5f"],
+Cell[1808677, 38534, 1216, 19, 356, "Print",ExpressionUUID->"a7ff34c6-c227-40a8-9b2f-cfdb68c3c286"],
+Cell[1809896, 38555, 930, 24, 34, "Print",ExpressionUUID->"2eed7127-04e2-491e-b81b-4a6e89441c42"],
+Cell[1810829, 38581, 1016, 25, 34, "Print",ExpressionUUID->"70838d4a-4569-41cd-ae48-6a1e9f19685d"],
+Cell[1811848, 38608, 1216, 19, 356, "Print",ExpressionUUID->"11062060-9075-40da-979a-ade83b17e233"],
+Cell[1813067, 38629, 926, 24, 34, "Print",ExpressionUUID->"464ab002-f606-4332-8c4b-8938106f2531"],
+Cell[1813996, 38655, 1012, 25, 34, "Print",ExpressionUUID->"e7e752d5-3340-41a2-b4f8-d73794492664"],
+Cell[1815011, 38682, 1215, 19, 356, "Print",ExpressionUUID->"2ecbf038-9738-4702-be90-90b302d0c90d"],
+Cell[1816229, 38703, 928, 24, 34, "Print",ExpressionUUID->"0643b2fa-4710-4d15-8f8d-04737de1f8a9"],
+Cell[1817160, 38729, 1012, 25, 34, "Print",ExpressionUUID->"3f9a600d-94aa-425d-b7d0-6ceb093b8672"],
+Cell[1818175, 38756, 1215, 19, 356, "Print",ExpressionUUID->"14940699-9e06-4dde-a205-b92a65484ea2"],
+Cell[1819393, 38777, 926, 24, 34, "Print",ExpressionUUID->"645981b5-3a5c-4546-8a5b-135fe083bcf8"],
+Cell[1820322, 38803, 1010, 25, 34, "Print",ExpressionUUID->"70a7dc28-ec60-4ecd-8633-b4a7f8a89ec7"],
+Cell[1821335, 38830, 1215, 19, 356, "Print",ExpressionUUID->"6bba0784-7689-4dea-b549-b847830253cb"],
+Cell[1822553, 38851, 928, 24, 34, "Print",ExpressionUUID->"8e7a0504-c4fb-4347-909c-e4f250cd021d"],
+Cell[1823484, 38877, 1012, 25, 34, "Print",ExpressionUUID->"1d11c43d-34d6-43ec-a458-780a298a681e"],
+Cell[1824499, 38904, 1215, 19, 356, "Print",ExpressionUUID->"1ab9ec21-7f3b-456b-8df4-d949e5412a92"],
+Cell[1825717, 38925, 926, 24, 34, "Print",ExpressionUUID->"0a24e36f-2907-40fb-bda7-b7ba3e8bd75c"],
+Cell[1826646, 38951, 1008, 25, 34, "Print",ExpressionUUID->"3b0fb74c-3261-4325-bcb7-c1a447e72780"],
+Cell[1827657, 38978, 1213, 19, 356, "Print",ExpressionUUID->"58593fce-4cdc-4430-bfe2-5af9c28532b4"],
+Cell[1828873, 38999, 930, 24, 34, "Print",ExpressionUUID->"a3f4a9a8-7be5-4943-8028-776c83825528"],
+Cell[1829806, 39025, 1010, 25, 34, "Print",ExpressionUUID->"60177dd4-0368-4432-a1ff-4f42549c68ac"],
+Cell[1830819, 39052, 1215, 19, 356, "Print",ExpressionUUID->"466eaabc-6112-4cdc-a362-a0ceac4f89bd"],
+Cell[1832037, 39073, 928, 24, 34, "Print",ExpressionUUID->"f63141b7-680b-4ca0-b1e6-af63b554eb7f"],
+Cell[1832968, 39099, 1016, 25, 34, "Print",ExpressionUUID->"cf9a04bd-ab9d-42cf-be22-f0955333cef7"],
+Cell[1833987, 39126, 1213, 19, 356, "Print",ExpressionUUID->"e5201316-e843-475f-944c-2424859bf291"],
+Cell[1835203, 39147, 924, 24, 34, "Print",ExpressionUUID->"a47af442-67c6-406f-9451-87978454a5db"],
+Cell[1836130, 39173, 1007, 24, 34, "Print",ExpressionUUID->"2a3e6981-9647-4fcc-bb39-5a5ab79f5c35"],
+Cell[1837140, 39199, 1210, 18, 356, "Print",ExpressionUUID->"78afeccd-471c-47c0-8a89-da555eaf55eb"],
+Cell[1838353, 39219, 930, 24, 34, "Print",ExpressionUUID->"5f91e255-368e-4f37-8d93-df27ca862dc4"],
+Cell[1839286, 39245, 1012, 25, 34, "Print",ExpressionUUID->"465a0783-c928-4a2b-8628-1b6039bebc59"],
+Cell[1840301, 39272, 1213, 19, 356, "Print",ExpressionUUID->"6d2b6eed-d597-4c99-bfb0-eef8b216f5d8"],
+Cell[1841517, 39293, 928, 24, 34, "Print",ExpressionUUID->"819ef57e-b1f7-4e1c-a400-6883009226ce"],
+Cell[1842448, 39319, 1012, 25, 34, "Print",ExpressionUUID->"33209b98-186a-45ed-9ce0-308d685795e8"],
+Cell[1843463, 39346, 1214, 19, 356, "Print",ExpressionUUID->"4d88f309-8828-4acf-9309-7e388b72bf3d"]
+}, Open  ]]
 }, Open  ]]
 }, Open  ]]
 }, Open  ]]
