@@ -894,6 +894,9 @@ setLandauGauge[OptionsPattern[]] :=
      of updated links, then update gaugeField and statistics after
      the parallel computation is completed.
      Use checkerboard to avoid conflicts in link updates. *)
+   (* This instance of ParallelTable responsible for errors
+     when calculating observables along trajectories.
+     First attempt:  don't specify Method *)
    Do[Scan[update, ParallelTable[
        Block[{coords = latticeCoordinates[i], sum, gauge,
               normSum = 0.0},
@@ -921,7 +924,7 @@ setLandauGauge[OptionsPattern[]] :=
                              ConjugateTranspose[gauge], 0}},
                     {dir, nd}],
                 Nothing]],
-       {i, latticeVolume[]}, Method->"CoarsestGrained"], {3}], {cb, 0, 1}];
+       {i, latticeVolume[]} (*, Method->"CoarsestGrained"*)], {3}], {cb, 0, 1}];
    (* The 2-norm of the initial links,
      averaging over the number of links. *)
    Sqrt[normSum/(latticeVolume[]*nd)]];
@@ -990,10 +993,10 @@ applyGaugeTransforms[s_, OptionsPattern[]] :=
    Scan[(Which[
        (* go backwards *)
        # == 1, setAxialGauge[
-           If[OptionValue["backards"], nd + 1 - dir[], dir[]],
+           If[OptionValue["backwards"], nd + 1 - dir[], dir[]],
            "center" -> False, "abelian"->OptionValue["abelian"]],
        # == 2, setAxialGauge[
-           If[OptionValue["backards"], nd + 1 - dir[], dir[]],
+           If[OptionValue["backwards"], nd + 1 - dir[], dir[]],
            "center" -> True, "abelian"->OptionValue["abelian"]],
        # == 3,
        setLandauGauge["center" -> False, "damping" -> 1,

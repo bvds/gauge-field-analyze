@@ -136,23 +136,27 @@ Module[
           {bestPhases, vectors, bestCenter}]];
 SUPower::usage = "Take some power of an SU(N) matrix with the property that U^z, as a function of z is a smooth map onto the group manifold.  The analogous Mathematica function MatrixPower[] uses a different convention for the branch taken in the complex plane.";
 Options[SUPower] = Options[getPhases];
-SUPower[mat_, power_, opts:OptionsPattern[]] :=
+SUPower[mat_?MatrixQ, power_, opts:OptionsPattern[]] :=
  Block[{vectors, phases, result, center},
   {phases, vectors, center} = getPhases[mat, True, opts];
-  result = Transpose[vectors].DiagonalMatrix[
-      Exp[I*phases*power]].Conjugate[vectors];
+  result = Transpose[vectors].(
+      (* equivalent to Diagonal[Exp[I phases]].Conjugate[vectors] *)
+      Exp[I*phases*power]*Conjugate[vectors]);
   If[OptionValue["debug"] && Not[SUMatrixQ[result, OptionValue[Tolerance]]],
      Print["matrix power not SU"]];
   result];
 SULog::usage = "Take the logaritm of an SU(N) matrix, choosing the root such that the resulting matrix is traceless and has eigenvalues that obey Abs[lamda_i-lambda_j] <= 2 Pi.  The analogous Mathematica function MatrixLog[] uses a different convention for the branch taken in the complex plane.";
 Options[SULog] = Options[getPhases];
-SULog[mat_, opts:OptionsPattern[]] :=
+SULog[mat_?MatrixQ, opts:OptionsPattern[]] :=
  Block[{phases, vectors, center},
-   {phases, vectors, center} = getPhases[mat, True, opts];
-   Transpose[vectors].DiagonalMatrix[I phases].Conjugate[vectors]];
+  {phases, vectors, center} = getPhases[mat, True, opts];
+  (* equivalent to Diagonal[I phases].Conjugate[vectors] *)
+  Transpose[vectors].(
+      (* equivalent to Diagonal[I phases].Conjugate[vectors] *)
+      I phases * Conjugate[vectors])];
 SUNorm::usage = "Distance of group element from the identity (or the nearest element of the center) using the tangent space. Returns the norm and the associated element of the center, labeled by associated element of Z_N.";
 Options[SUNorm] = Options[getPhases];
-SUNorm[mat_, opts:OptionsPattern[]] :=
+SUNorm[mat_?MatrixQ, opts:OptionsPattern[]] :=
  Block[{phases, center},
    {phases, center} = getPhases[mat, False, opts];
    {Norm[phases], center}];
@@ -220,6 +224,7 @@ and Malin Sjödahl, \"Orthogonal multiplet bases in SU(N_c) color space,\"\
 arXiv:1207.0609v2 [hep-ph] 2 Oct 2012.  This does not include the \
 other 10 multiplet or separate out the additional multiplet that occurs \
 for nc>3." 
+multiNorm["singlet", mat_] := Tr[mat]; 
 multiNorm["1", mat_] := Tr[mat]^2/(nc^2 - 1); 
 multiNorm["8S", mat_] := 
  Block[{x = TensorContract[mat.SUSymmetric[], {{1, 2}}]}, 
@@ -232,3 +237,21 @@ multiNorm["27S", mat_] := ((Tr[mat.Transpose[mat]] + Tr[mat.mat])/2 -
 multiNorm["10", mat_] := ((Tr[mat.Transpose[mat]] - Tr[mat.mat])/2 - 
             multiNorm["8A", mat]);
 multiNorm[j_?IntegerQ, mat_] := multiNorm[ToString[j], mat]; 
+
+
+maxSURotation::usage = "Find a color rotation that maximizes the \
+magnitude squared of the diagonal part of the logarithm of the given \
+list of link fields."; 
+maxSURotationF[uu_, vars_, weights_, nc_] := 
+ Block[{vv = MatrixExp[I vars.SUGenerators[nc]]}, 
+  Total[Map[
+      Total[weights*Im[Diagonal[SULog[ConjugateTranspose[vv].#.vv]]]^2]&, 
+           uu]]]/;VectorQ[vars, NumericQ]; 
+maxSURotation[uu_] := 
+  Block[{bb, nc = Length[First[uu]], result, vars, weights},
+  weights = Table[1 - i/(100 nc), {i, nc}];
+  vars = Array[bb, {nc^2 - 1}]; 
+  result = FindMaximum[maxSURotationF[uu, vars, weights, nc], 
+                       Map[{#, 0.0} &, vars]];
+  If[False, Print["  result ", result]];
+  MatrixExp[I (vars/.result[[2]]).SUGenerators[nc]]];
