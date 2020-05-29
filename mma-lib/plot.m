@@ -253,8 +253,9 @@ plotDist[data_, op_:"1", all_:False, opts:OptionsPattern[]] := (
          {Hue[0.5, .3], 
           Cylinder[{{0, 0, 0.05}, {0, 0, -0.1}}, 1]}}]}])/;op != "phases";
 
-Options[plotPhases] := If[nc==2, Options[Histogram],
-                          Options[Histogram3D]];
+Options[plotPhases] := Join[{"centerLabels" -> True, "bins" -> {Pi/20}},
+                            If[nc==2, Options[Histogram],
+                               Options[Histogram3D]]];
 plotPhases[data_, all_:False, opts:OptionsPattern[]] :=
     Block[{xyEdge = 0.2, dy = Sqrt[Length[data]]/100, z, \[Lambda], basis,
            reflect = If[#1, -Abs[#2], #2]&,
@@ -266,7 +267,7 @@ plotPhases[data_, all_:False, opts:OptionsPattern[]] :=
     Which[
         nc == 2,
         Histogram[Map[First, data],
-                  opts,
+                  Apply[Sequence, FilterRules[{opts}, Options[Histogram]]],
                   PlotRange-> {{-Pi, Pi}, {0, All}},
                   Axes -> False, Frame -> True,
                   FrameLabel -> {Subscript[\[Lambda], 1], "count"}
@@ -280,7 +281,7 @@ plotPhases[data_, all_:False, opts:OptionsPattern[]] :=
             ticks2 = Table[{x, x, 0.03}, {x, -2 Pi, 2 Pi, Pi/nc}]},
           Show[Histogram3D[
               Map[{#[[1]], #[[2]]} &, data], {Pi/30},
-              opts,
+              Apply[Sequence, FilterRules[{opts}, Options[Histogram3D]]],
               PlotRange -> {{0-xyEdge, 4 Pi/3+xyEdge},
                             {-2 Pi/3-xyEdge, 2 Pi/3+xyEdge}, {0, All}}, 
               BoxRatios -> {1, 1, 1/3},
@@ -327,8 +328,9 @@ plotPhases[data_, all_:False, opts:OptionsPattern[]] :=
                       If[Mod[x, Min[Pi, Abs[min2]]] == 0, {x, x, 0.03},
                          {x, "", 0.015}], {x, min2, max2, Pi/nc}];
                   Show[Histogram3D[
-                      dd, {Pi/20},
-                      opts,
+                      dd, OptionValue["bins"],
+                      Apply[Sequence,
+                            FilterRules[{opts}, Options[Histogram3D]]],
                       PlotRange -> {{0, max1+xyEdge},
                                     {min2-xyEdge,
                                      If[oo == 0 && !all, 0, max2+xyEdge]},
@@ -348,11 +350,14 @@ plotPhases[data_, all_:False, opts:OptionsPattern[]] :=
                                        None},
                                       None],
                       AspectRatio -> 1/GoldenRatio], 
-                   Graphics3D[{
-                       {If[oo == 0 && !all, Nothing,
-                           Text["z"^perm[[2]], {v1.b1, v1.b2, 0}, {1.5, -2}]],
+                    Graphics3D[{
+                       (* May need to turn off explicitly if plot range
+                         is modified *)
+                       If[OptionValue["centerLabels"],
+                          {If[oo == 0 && !all, Nothing,
+                              Text["z"^perm[[2]], {v1.b1, v1.b2, 0}, {1.5, -2}]],
                            Text["z"^perm[[3]], {v2.b1, v2.b2, 0}, {0.5, -2}],
-                        Text["z"^perm[[1]], {0, 0, 0}, {1.5, -1}]},
+                           Text["z"^perm[[1]], {0, 0, 0}, {1.5, -1}]}, Nothing],
                        {Blue, Thickness[0.005],
                         If[oo==0 && !all,
                            Line[{{(v1+v2).b1/2, (v1+v2).b2/2, dy},
@@ -481,60 +486,76 @@ plotPhaseFunction[f_, all_:False, opts:OptionsPattern[]] :=
            Plot gauge field configuration
  *)
 
-plotLink[u_, maxSize_] := 
- Block[{a = Chop[-I SULog[u, "center" -> True]], 
-   norm = SUNorm[u, "center" -> True]}, 
-  Append[plotA[a, maxSize], 
-         If[norm[[2]] != 0, Text[norm[[2]], {1/2, 0}, {0, 0}], Nothing]]]; 
-plotA[a_, maxSize_] := {{GrayLevel[0.8],
-  Block[{z = Min[1, Sqrt[2]*Norm[Flatten[a]]/maxSize]/4}, 
-    Polygon[{{0, 0}, {1/2, z}, {1, 0}, {1/2, -z}}]]}, 
-  Table[Block[{size = 
-      Min[1, Sqrt[Sqrt[2] nc Abs[a[[i, j]]]/maxSize]]/(4 nc), 
-     x = 1/4 + (i - 1/2)/(2 nc), 
-     y = 1/4 - (j - 1/2)/(2 nc)}, {Hue[(Arg[a[[i, j]]] + 
-         Pi)/(2 Pi)],(*Print[N[{x,y,size}]];*)
+getMaxField2[lgf_, stdev_:2] :=
+    Map[Min[Max[#], Mean[#] + stdev*StandardDeviation[#]]&,
+           {Flatten[Map[Norm[#, "Frobenius"]&, lgf, {2}]],
+            Abs[Flatten[lgf]]}];
+plotA[a_, center_, maxSize_List] := 
+    Append[plotA[a, 0, maxSize], 
+           Text[center, {1/2, 0}, {0, 0}]]/;center!=0; 
+plotA[a_, 0, {maxSizeF_, maxSize1_}] := {{GrayLevel[0.8],
+ Block[{z = Min[1, Norm[a, "Frobenius"]/maxSizeF]/4},
+  Polygon[{{0, 0}, {1/2, z}, {1, 0}, {1/2, -z}}]]}, 
+  Table[Block[{size = Min[1, Sqrt[Abs[a[[i, j]]]/maxSize1]]/(4 nc),
+               x = 1/4 + (i - 1/2)/(2 nc), 
+               y = 1/4 - (j - 1/2)/(2 nc)},
+    If[nc Abs[a[[i, j]]] >= maxSize, big2++, small2++];
+    {Hue[(Arg[a[[i, j]]] +  Pi)/(2 Pi)],(*Print[N[{x,y,size}]];*)
      Rectangle[{x - size, y - size}, {x + size, y + size}]}],
-        {i, nc}, {j, nc}]};
+       {i, nc}, {j, nc}]};
 
-plotLinksPlane[dir1_, dir2_, anchor_, range_, size_, groupFlag_] := 
-  Block[{coords = anchor, 
-         plotIt = If[groupFlag, plotLink, plotA]}, 
-   Graphics[Flatten[Table[coords[[dir1]] = x1;
-      coords[[dir2]] = 
-       x2; {If[x1 > 0 && x2 > 0, Point[{x1, x2}], Nothing], 
+plotLinksPlane[lgf_, centers_, dir1_, dir2_, anchor_, range_, size_] := 
+    Graphics[{
+        Block[{coords = anchor, k,
+               value = If[#1 === None, 0, Part[##]]&},
+   Flatten[Table[
+      coords[[dir1]] = x1;
+      coords[[dir2]] = x2;
+      k = linearSiteIndex[wrapIt[coords]];
+      {If[x1 > 0 && x2 > 0, Point[{x1, x2}], Nothing], 
        Translate[
-        plotIt[getLink[dir1, wrapIt[coords]], range], {x1, x2}], 
+           plotA[lgf[[dir1, k]], value[centers, dir1, k], range],
+           {x1, x2}], 
        Translate[
-        Rotate[plotIt[getLink[dir2, wrapIt[coords]], range], 
-         Pi/2, {0, 0}], {x1, x2}]}, {x1, 0, 
-       latticeDimensions[[dir1]]}, {x2, 0, 
-       latticeDimensions[[dir2]]}], 2], 
-    PlotRange -> {{1/2, latticeDimensions[[dir1]] + 1/2}, {1/2, 
-       latticeDimensions[[dir2]] + 1/2}}, ImageSize -> size]]/;dir1!=dir2;
-plotLinksSides[dir0_, dir1_, dir2_, anchor_, range_, size_, 
-   groupFlag_] := 
-  Block[{coords = anchor, 
-         plotIt = If[groupFlag, plotLink, plotA]}, 
-   Graphics[Flatten[Table[coords[[dir1]] = x1;
-      coords[[dir2]] = x2; {Point[{x1, x2}], 
+           Rotate[plotA[lgf[[dir2, k]], value[centers, dir2, k], range], 
+                  Pi/2, {0, 0}], {x1, x2}]},
+      {x1, 0, latticeDimensions[[dir1]]},
+      {x2, 0, latticeDimensions[[dir2]]}], 2]],
+            {PointSize[Large], Point[anchor[[{dir1, dir2}]]]}},
+          PlotRange -> {{1/2, latticeDimensions[[dir1]] + 1/2},
+                        {1/2, latticeDimensions[[dir2]] + 1/2}},
+          ImageSize -> size]/;dir1!=dir2;
+
+plotLinksSides[lgf_, centers_, dir0_, dir1_, dir2_, anchor_, range_, size_] := 
+ Block[{coords = anchor, k, value = If[#1 === None, 0, Part[##]]&}, 
+  Graphics[Flatten[Table[
+      coords[[dir1]] = x1;
+      coords[[dir2]] = x2;
+      k = linearSiteIndex[coords];
+      {Point[{x1, x2}], 
        Translate[
-        Rotate[plotIt[getLink[dir0, coords], range], 
-         Pi/4, {0, 0}], {x1, x2}]}, {x1, 
-       latticeDimensions[[dir1]]}, {x2, latticeDimensions[[dir2]]}], 
+           Rotate[plotA[lgf[[dir0, k]], value[centers, dir0, k], range], 
+                  Pi/4, {0, 0}], {x1, x2}]},
+      {x1, latticeDimensions[[dir1]]}, {x2, latticeDimensions[[dir2]]}], 
      2], PlotRange -> {{1/2, latticeDimensions[[dir1]] + 1/2}, {1/2, 
    latticeDimensions[[dir2]] + 1/2}}, ImageSize -> size]]/;
   dir1!=dir2&&dir0!=dir1&&dir0!=dir2;
-Options[plotLinks] = {anchor :> Table[1, {nd}], PlotRange :> 1, 
-   ImageSize -> All, groupFlag -> True};
-plotLinks[dir0_, dir1_, dir2_, OptionsPattern[]] := 
-    Block[{coords = OptionValue[anchor]}, 
-   ListAnimate[Flatten[Table[coords[[dir0]] = x0;
-      {plotLinksPlane[dir1, dir2, coords, OptionValue[PlotRange], 
-        OptionValue[ImageSize], OptionValue[groupFlag]], 
-       plotLinksSides[dir0, dir1, dir2, coords, 
-        OptionValue[PlotRange], OptionValue[ImageSize], 
-        OptionValue[groupFlag]]}, {x0, latticeDimensions[[dir0]]}], 
-     1], AnimationRate -> 0.2, AnimationRunning -> False, 
-               Deployed -> True]];
 
+Options[plotLinks] = {anchor :> Table[1, {nd}], "stDev" -> 2,
+   ImageSize -> All, "centerFlag" -> True};
+plotLinks[dir0_, dir1_, dir2_, OptionsPattern[]] := 
+ Block[{coords = OptionValue[anchor], max,
+        lgf = Map[Chop[-I*SULog[#, "center"-> OptionValue["centerFlag"]]]&,
+                      gaugeField, {2}],
+        centers = Map[SUNorm[#, "center" -> OptionValue["centerFlag"]][[2]]&,
+                            gaugeField, {2}]},
+  max = getMaxField2[lgf, OptionValue["stDev"]];
+  ListAnimate[Flatten[ParallelTable[
+       coords[[dir0]] = x0;
+       {plotLinksPlane[lgf, centers, dir1, dir2, coords,
+                       max, OptionValue[ImageSize]], 
+        plotLinksSides[lgf, centers, dir0, dir1, dir2, coords, 
+                       max, OptionValue[ImageSize]]},
+       {x0, latticeDimensions[[dir0]]}], 1],
+               AnimationRate -> 0.2, AnimationRunning -> False, 
+               Deployed -> True]];

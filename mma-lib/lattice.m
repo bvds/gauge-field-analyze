@@ -39,6 +39,10 @@ shift[dir_, coordIn_List, size_:1] :=
 	cc[[dir]] = 1 + Mod[cc[[dir]] + size - 1, latticeDimensions[[dir]]];
 	cc];
 
+wrapIt[coords_] := wrapIt[coords, latticeDimensions];
+wrapIt[coords_List, dims_] :=
+    MapThread[(1 + Mod[#1 - 1, #2])&, {coords, dims}];
+
 plaquette[dir1_, dir2_, coords_List] := Tr[
     getLink[dir1, coords].
     getLink[dir2, shift[dir1, coords]].
@@ -1048,9 +1052,6 @@ stapleTest[] :=
      Tr[sumStaples[dir, latticeCoordinates[k]].getLink[dir,
 	latticeCoordinates[k]]], {k, latticeVolume[]},
      {dir, nd}]*2/(latticeVolume[]*nd*(nd - 1)*nc*4)];
-
-wrapIt[coords_List] :=
-    MapThread[(1 + Mod[#1 - 1, #2])&, {coords, latticeDimensions}];
 
 lineLinks[dir_, anchor_List] :=
   Block[{coords = anchor},

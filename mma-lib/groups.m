@@ -50,19 +50,19 @@ SUGenerators[n_?IntegerQ] :=
      k1 == i, (1 - i)/Sqrt[2 i (i - 1)], True, 0], {i, 2, n}, {k1,
 	n}, {k2, n}]];
 SUSymmetric::usage = "Construct the symmetric coefficients d_{a,b,c},
-caching the result.  This tensor is sparse, but we will be inefficient for now.";
+caching the result.  This tensor is sparse.";
 SUSymmetric[] := SUSymmetric[nc];
 SUSymmetric[n_?IntegerQ] :=
  SUSymmetric[n] =
   Block[{gen = SUGenerators[n]},
-	2 Outer[Tr[(#1.#2 + #2.#1).#3]&, gen, gen, gen, 1]];
+	2 SparseArray[Outer[Tr[(#1.#2 + #2.#1).#3]&, gen, gen, gen, 1]]];
 SUStructure::usage = "Construct the structure constants f_{a,b,c},
-caching the result.  This tensor is sparse, but we will be inefficient for now.";
+caching the result.  This tensor is sparse.";
 SUStructure[] := SUStructure[nc];
 SUStructure[n_?IntegerQ] :=
  SUStructure[n] =
   Block[{gen = SUGenerators[n]},
-	2 Im[Outer[Tr[(#1.#2 - #2.#1).#3]&, gen, gen, gen, 1]]];
+	2 SparseArray[Im[Outer[Tr[(#1.#2 - #2.#1).#3]&, gen, gen, gen, 1]]]];
 
 centerPhases[mat_] :=(* Used for some testing *)
  Block[{delta, phases = Arg[Eigenvalues[mat]]},
