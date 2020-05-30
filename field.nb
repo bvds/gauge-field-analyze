@@ -3,8 +3,8 @@ Notebook[{
 Cell[CellGroupData[{
 Cell["Fields in Landau gauge", "Title",
  CellChangeTimes->{{3.7995869774198523`*^9, 
-  3.799587007562594*^9}},ExpressionUUID->"ea21de0e-97bf-4dcb-832f-\
-0873704b249f"],
+  3.799587007562594*^9}},ExpressionUUID->"70ed3b8f-2353-4389-b61f-\
+7dc2ac8fdf50"],
 
 Cell["\<\
 Look at the fields themselves, especially for saddle-point configurations.  \
@@ -12,14 +12,14 @@ In this case the norm of the link fields is small and it gives us the hope of \
 connecting them to the continuum fields. \
 \>", "Text",
  CellChangeTimes->{{3.799587021295973*^9, 
-  3.799587164733938*^9}},ExpressionUUID->"6d562eec-e0a8-4903-bfcc-\
-5f5dba0aac91"]
+  3.799587164733938*^9}},ExpressionUUID->"b2d242cf-5b71-4532-a05c-\
+66d91216da90"]
 }, Open  ]],
 
 Cell[CellGroupData[{
 
 Cell["Library", \
-"Title",ExpressionUUID->"0062bf3d-f615-420a-897d-4b5596d87d1a"],
+"Title",ExpressionUUID->"34abd02b-ba3e-4aee-9a81-48acc7df2018"],
 
 Cell[BoxData[
  RowBox[{
@@ -30,28 +30,28 @@ Cell[BoxData[
     RowBox[{"SelectedNotebook", "[", "]"}], ",", 
     RowBox[{"PrintPrecision", "\[Rule]", "10"}]}], "]"}]}]], "Input",
  InitializationCell->
-  True,ExpressionUUID->"ed784701-5dd8-45d2-be4b-c63d46e889c4"],
+  True,ExpressionUUID->"5a5bd849-bd0f-4621-bc4c-c0587e570646"],
 
 Cell["\<\
 Disable current notebook FileOutlineCache and TrackCellChangeTimes (set \
 CellChangeTimes -> {}).  See: \
 https://stackoverflow.com/questions/2816628/version-control-of-mathematica-\
 notebooks \
-\>", "Text",ExpressionUUID->"8cd7046e-670e-49d6-ab16-0c022f465dc0"],
+\>", "Text",ExpressionUUID->"1542a4e8-6510-4114-a499-9d8993e6b453"],
 
 Cell["\<\
 For parallelization, I had to go to menu Evaluation->Parallel Kernel \
 Configuration and set the number manually.  Automatic launching of additional \
 kernels is broken?  Note that the parallelization is based on the leading \
 dimension of the table.\
-\>", "Text",ExpressionUUID->"95e5600a-30fc-4fa5-b423-cd788224dc2a"],
+\>", "Text",ExpressionUUID->"392dad26-78ce-4287-bf5a-ff981039b35a"],
 
 Cell[BoxData[
  RowBox[{
   RowBox[{"<<", "\"\<mma-lib/groups.m\>\""}], ";", 
   RowBox[{"Needs", "[", "\"\<ErrorBarPlots`\>\"", "]"}]}]], "Input",
  InitializationCell->
-  True,ExpressionUUID->"a50a2b9d-0bae-4c18-9176-a0de295dabe2"],
+  True,ExpressionUUID->"8436c9c4-8cf8-4039-8a6b-5cc926914ddf"],
 
 Cell[BoxData[
  RowBox[{
@@ -59,14 +59,14 @@ Cell[BoxData[
   RowBox[{"<<", "\"\<mma-lib/lattice.m\>\""}], ";", 
   RowBox[{"<<", "\"\<mma-lib/field.m\>\""}], ";"}]], "Input",
  InitializationCell->
-  True,ExpressionUUID->"851978d4-f4a6-4511-bf4a-fe089cfdc8af"],
+  True,ExpressionUUID->"de5a3dca-70cc-4d77-9613-0ce32d457c24"],
 
 Cell[BoxData[
  RowBox[{
   RowBox[{"<<", "\"\<mma-lib/teper-results.m\>\""}], ";", 
   RowBox[{"<<", "\"\<mma-lib/plot.m\>\""}], ";"}]], "Input",
  InitializationCell->
-  True,ExpressionUUID->"62d76086-b66e-4180-9633-f1efe2ae312a"],
+  True,ExpressionUUID->"baab5c35-5150-4856-839c-4847969f9aeb"],
 
 Cell[BoxData[{
  RowBox[{
@@ -94,21 +94,48 @@ Cell[BoxData[{
       "of", " ", "1.5", " ", "or", " ", "2", " ", "for", " ", "large", " ", 
      RowBox[{"figures", "."}]}]}], " ", "*)"}], ";"}]}], "Input",
  InitializationCell->
-  True,ExpressionUUID->"6bcd56c9-21b2-476c-a5a1-5a36d8375b0d"]
+  True,ExpressionUUID->"6d49e314-feb5-463e-8875-59ac13984cfe"]
 }, Open  ]],
 
 Cell[CellGroupData[{
 
-Cell["Input", "Title",ExpressionUUID->"b3e93197-3bb5-4d8e-b949-49dc83bc6db4"],
+Cell["Input", "Title",ExpressionUUID->"3243e328-ab65-4a4c-b1ac-c9da6913161c"],
 
 Cell["\<\
 Input a gauge configuration near the saddle point and go to Landau gauge :\
-\>", "Text",ExpressionUUID->"127cf853-51ba-42bd-b36f-45225f9fb668"],
+\>", "Text",ExpressionUUID->"b3a3cbfd-deb6-4c55-9997-d077838219b8"],
+
+Cell["\<\
+calculating both f_abc and d_abc:
+3-3/5^3 took 15.5 seconds
+3-3/6^3 took 49 s
+3-3/12.16.20 took 737 seconds = 2 hours
+3-3/20^3 25714s  = 7.14 hours
+just f_abc
+3-3/5^3 took ??? seconds
+3-3/6^3 took 35 s
+3-3/8^3 took 177 s
+3-3/12.16.20 took 737 seconds = 2 hours
+3-3/20^3 25714s  = 7.14 hours\
+\>", "Text",ExpressionUUID->"08f24d06-62c3-4240-85cd-948b99e43f4d"],
+
+Cell[CellGroupData[{
+
+Cell[BoxData[
+ RowBox[{"177.", " ", 
+  RowBox[{
+   RowBox[{"(", 
+    RowBox[{"6", "/", "8"}], ")"}], "^", 
+   "5"}]}]], "Input",ExpressionUUID->"096c5815-1d39-4774-a0cb-43751ccb21a4"],
+
+Cell[BoxData["42.0029296875`"], \
+"Output",ExpressionUUID->"fe0ad53f-ff0e-4b0f-92b7-7430b235ef25"]
+}, Open  ]],
 
 Cell[CellGroupData[{
 
 Cell["Create Random lattice ", \
-"Section",ExpressionUUID->"496e7794-6a8d-4f0e-ae63-9fd9efa008a5"],
+"Section",ExpressionUUID->"e7c4e4c2-867a-4cd5-b39f-ad257c2e4a79"],
 
 Cell[CellGroupData[{
 
@@ -152,25 +179,426 @@ Cell[BoxData[{
    RowBox[{
    "averagePlaquette", "[", 
     "]"}]}]}]}], \
-"Input",ExpressionUUID->"733a67eb-4d4c-4408-8882-79e71c2ca7dd"],
+"Input",ExpressionUUID->"ff34ffaf-e9a1-49d2-bdaf-291bf166e437"],
 
-Cell[BoxData[
- RowBox[{"-", 
-  "0.009786625393955202`"}]], \
-"Output",ExpressionUUID->"15ce1bb7-3ddc-41d2-b187-fc2ef93e4fd7"]
-}, Open  ]],
-
-Cell[BoxData[
- RowBox[{
-  RowBox[{"fieldCorrelators", "=", 
-   RowBox[{"makeFieldCorrelators", "[", "]"}]}], 
-  ";"}]], "Input",ExpressionUUID->"7c8f3823-e261-41c2-bd67-f5386140890b"]
+Cell[BoxData["0.014910093559873244`"], \
+"Output",ExpressionUUID->"6cecf370-f8d7-4eaa-b355-2f477b5243d3"]
 }, Open  ]],
 
 Cell[CellGroupData[{
 
-Cell["3-3/12.16.20-28-5", \
-"Section",ExpressionUUID->"7d5bcc4c-1dad-4daa-b098-c471193bcd20"],
+Cell["Calculate", \
+"Subsection",ExpressionUUID->"e417d66b-6b5e-49df-8544-04a86e9cdad1"],
+
+Cell["Get timing info.", \
+"Text",ExpressionUUID->"71b4b27d-7efe-47b8-bc20-18ef6c1c727a"],
+
+Cell[CellGroupData[{
+
+Cell[BoxData[
+ RowBox[{
+  RowBox[{"fieldCorr2", "=", 
+   RowBox[{"linkCorrelators", "[", 
+    RowBox[{"2", ",", 
+     RowBox[{"\"\<distFlag\>\"", "\[Rule]", "False"}]}], "]"}]}], 
+  ";"}]], "Input",ExpressionUUID->"b75f27fd-1595-4550-933b-f0472a8533d4"],
+
+Cell[CellGroupData[{
+
+Cell[BoxData[
+ InterpretationBox[
+  RowBox[{"\<\"ops: \"\>", "\[InvisibleSpace]", 
+   RowBox[{"{", 
+    RowBox[{"\<\"2l\"\>", ",", "\<\"2t1\"\>", ",", "\<\"2t2\"\>"}], "}"}]}],
+  SequenceForm["ops: ", {"2l", "2t1", "2t2"}],
+  Editable->
+   False]], "Print",ExpressionUUID->"1ff73642-1311-49b2-b134-10cf4465238a"],
+
+Cell[BoxData[
+ InterpretationBox[
+  RowBox[{"\<\"Timing:  \"\>", "\[InvisibleSpace]", 
+   RowBox[{"{", 
+    RowBox[{
+    "0.141183`5.300297403820636", ",", "0", ",", 
+     "0.0648280000000000017`1.468959013048205", ",", "0"}], "}"}]}],
+  SequenceForm[
+  "Timing:  ", {
+   0.141183`5.300297403820636, 0, 0.0648280000000000017`1.468959013048205, 0}],
+  Editable->False]], "Print",
+ ShowCellLabel->True,ExpressionUUID->"db3a94d1-c24b-4287-82ee-496b971957b4"],
+
+Cell[BoxData[
+ InterpretationBox[
+  RowBox[{"\<\"Timing:  \"\>", "\[InvisibleSpace]", 
+   RowBox[{"{", 
+    RowBox[{
+    "0.153149`5.335629163219443", ",", "0", ",", 
+     "0.0710879999999999985`1.4990655222636737", ",", "0"}], "}"}]}],
+  SequenceForm[
+  "Timing:  ", {
+   0.153149`5.335629163219443, 0, 0.0710879999999999985`1.4990655222636737, 
+    0}],
+  Editable->False]], "Print",
+ ShowCellLabel->True,ExpressionUUID->"3de60304-dc40-46c9-bd21-b31d0293e912"],
+
+Cell[BoxData[
+ InterpretationBox[
+  RowBox[{"\<\"Timing:  \"\>", "\[InvisibleSpace]", 
+   RowBox[{"{", 
+    RowBox[{
+    "0.248259`5.545419999529067", ",", "0", ",", 
+     "0.1153530000000000017`1.699592811614777", ",", "0"}], "}"}]}],
+  SequenceForm[
+  "Timing:  ", {
+   0.248259`5.545419999529067, 0, 0.1153530000000000017`1.699592811614777, 0}],
+  Editable->False]], "Print",
+ ShowCellLabel->True,ExpressionUUID->"c35a1774-e251-4733-9e4b-3c88951d112c"],
+
+Cell[BoxData[
+ InterpretationBox[
+  RowBox[{"\<\"Timing:  \"\>", "\[InvisibleSpace]", 
+   RowBox[{"{", 
+    RowBox[{
+    "0.254153`5.555610238275423", ",", "0", ",", 
+     "0.1174530000000000002`1.6979348783878414", ",", "0"}], "}"}]}],
+  SequenceForm[
+  "Timing:  ", {
+   0.254153`5.555610238275423, 0, 0.1174530000000000002`1.6979348783878414, 
+    0}],
+  Editable->False]], "Print",
+ ShowCellLabel->True,ExpressionUUID->"ee2563fa-a418-4271-8a2b-dcd18aa987fa"],
+
+Cell[BoxData[
+ InterpretationBox[
+  RowBox[{"\<\"Timing:  \"\>", "\[InvisibleSpace]", 
+   RowBox[{"{", 
+    RowBox[{
+    "0.262804`5.570146968935518", ",", "0", ",", 
+     "0.1214139999999999992`1.6939539509559534", ",", "0"}], "}"}]}],
+  SequenceForm[
+  "Timing:  ", {
+   0.262804`5.570146968935518, 0, 0.1214139999999999992`1.6939539509559534, 
+    0}],
+  Editable->False]], "Print",
+ ShowCellLabel->True,ExpressionUUID->"25f746e1-2582-429f-ae42-c5dc3926ed84"],
+
+Cell[BoxData[
+ InterpretationBox[
+  RowBox[{"\<\"Timing:  \"\>", "\[InvisibleSpace]", 
+   RowBox[{"{", 
+    RowBox[{
+    "0.263987`5.572097538462139", ",", "0", ",", 
+     "0.1224150000000000004`1.7066153254670555", ",", "0"}], "}"}]}],
+  SequenceForm[
+  "Timing:  ", {
+   0.263987`5.572097538462139, 0, 0.1224150000000000004`1.7066153254670555, 
+    0}],
+  Editable->False]], "Print",
+ ShowCellLabel->True,ExpressionUUID->"115e1fa6-a068-46b3-8609-fe98f62a8451"],
+
+Cell[BoxData[
+ InterpretationBox[
+  RowBox[{"\<\"Time: \"\>", "\[InvisibleSpace]", 
+   "0.322577`5.659148396442348"}],
+  SequenceForm["Time: ", 0.322577`5.659148396442348],
+  Editable->
+   False]], "Print",ExpressionUUID->"78b0c011-0cc9-4e76-8ea8-72b6a2710c73"]
+}, Open  ]]
+}, Open  ]],
+
+Cell[CellGroupData[{
+
+Cell[BoxData[
+ RowBox[{
+  RowBox[{"fieldCorr3a", "=", 
+   RowBox[{"linkCorrelators", "[", 
+    RowBox[{"3", ",", 
+     RowBox[{"\"\<distFlag\>\"", "\[Rule]", "False"}], ",", 
+     RowBox[{"\"\<symmetric\>\"", "\[Rule]", "False"}], ",", 
+     RowBox[{"\"\<timing\>\"", "\[Rule]", "True"}]}], "]"}]}], 
+  ";"}]], "Input",ExpressionUUID->"44f77821-5e42-4d1a-b183-5f6e7bdd7f28"],
+
+Cell[CellGroupData[{
+
+Cell[BoxData[
+ InterpretationBox[
+  RowBox[{"\<\"ops: \"\>", "\[InvisibleSpace]", 
+   RowBox[{"{", 
+    RowBox[{"\<\"3pt1\"\>", ",", "\<\"3pt2\"\>", ",", "\<\"3m1a\"\>", 
+     ",", "\<\"3m1b\"\>", ",", "\<\"3m2\"\>", ",", "\<\"3m3\"\>", 
+     ",", "\<\"3m4\"\>", ",", "\<\"3m5\"\>", ",", "\<\"3m6\"\>", 
+     ",", "\<\"3m7\"\>", ",", "\<\"3m8\"\>", ",", "\<\"3m9\"\>", 
+     ",", "\<\"3m10\"\>"}], "}"}]}],
+  SequenceForm[
+  "ops: ", {
+   "3pt1", "3pt2", "3m1a", "3m1b", "3m2", "3m3", "3m4", "3m5", "3m6", "3m7", 
+    "3m8", "3m9", "3m10"}],
+  Editable->
+   False]], "Print",ExpressionUUID->"d3565179-a9f7-4de7-8403-001c6b484482"],
+
+Cell[BoxData[
+ InterpretationBox[
+  RowBox[{"\<\"Timing:  \"\>", "\[InvisibleSpace]", 
+   RowBox[{"{", 
+    RowBox[{
+    "29.459101`7.619734487226029", ",", "9.927371999995552`", ",", 
+     "12.447565000000314`", ",", "5.459847000004112`"}], "}"}]}],
+  SequenceForm[
+  "Timing:  ", {
+   29.459101`7.619734487226029, 9.927371999995552, 12.447565000000314`, 
+    5.459847000004112}],
+  Editable->False]], "Print",
+ ShowCellLabel->True,ExpressionUUID->"5fcd7175-cfcf-4266-979a-37b787387667"],
+
+Cell[BoxData[
+ InterpretationBox[
+  RowBox[{"\<\"Timing:  \"\>", "\[InvisibleSpace]", 
+   RowBox[{"{", 
+    RowBox[{
+    "32.193619`7.658284797859821", ",", "10.955935999996576`", ",", 
+     "13.491382999999862`", ",", "5.99043800000358`"}], "}"}]}],
+  SequenceForm[
+  "Timing:  ", {
+   32.193619`7.658284797859821, 10.955935999996576`, 13.491382999999862`, 
+    5.99043800000358}],
+  Editable->False]], "Print",
+ ShowCellLabel->True,ExpressionUUID->"a46689e0-6d0c-42ff-b3c2-4733bc378b9f"],
+
+Cell[BoxData[
+ InterpretationBox[
+  RowBox[{"\<\"Timing:  \"\>", "\[InvisibleSpace]", 
+   RowBox[{"{", 
+    RowBox[{
+    "33.781954`7.679199764052022", ",", "11.470355999999228`", ",", 
+     "14.119759999997791`", ",", "6.360915000003003`"}], "}"}]}],
+  SequenceForm[
+  "Timing:  ", {
+   33.781954`7.679199764052022, 11.470355999999228`, 14.119759999997791`, 
+    6.360915000003003}],
+  Editable->False]], "Print",
+ ShowCellLabel->True,ExpressionUUID->"64395e38-78c3-487b-8ded-4d4b601236bd"],
+
+Cell[BoxData[
+ InterpretationBox[
+  RowBox[{"\<\"Timing:  \"\>", "\[InvisibleSpace]", 
+   RowBox[{"{", 
+    RowBox[{
+    "37.175463`7.720771383959218", ",", "12.672049000000554`", ",", 
+     "15.439163999995486`", ",", "7.026698000004022`"}], "}"}]}],
+  SequenceForm[
+  "Timing:  ", {
+   37.175463`7.720771383959218, 12.672049000000554`, 15.439163999995486`, 
+    7.026698000004022}],
+  Editable->False]], "Print",
+ ShowCellLabel->True,ExpressionUUID->"2b19de96-fa9b-4584-b6a3-f344195b4cec"],
+
+Cell[BoxData[
+ InterpretationBox[
+  RowBox[{"\<\"Timing:  \"\>", "\[InvisibleSpace]", 
+   RowBox[{"{", 
+    RowBox[{
+    "38.375483`7.734568852451821", ",", "13.018981000005326`", ",", 
+     "16.070444999991356`", ",", "7.254241000003331`"}], "}"}]}],
+  SequenceForm[
+  "Timing:  ", {
+   38.375483`7.734568852451821, 13.018981000005326`, 16.070444999991356`, 
+    7.254241000003331}],
+  Editable->False]], "Print",
+ ShowCellLabel->True,ExpressionUUID->"a66e77a2-681b-41e1-8bbc-2b0b2a950572"],
+
+Cell[BoxData[
+ InterpretationBox[
+  RowBox[{"\<\"Timing:  \"\>", "\[InvisibleSpace]", 
+   RowBox[{"{", 
+    RowBox[{
+    "38.5878`7.736965016748141", ",", "13.175676000005387`", ",", 
+     "16.09039499999181`", ",", "7.243245000002854`"}], "}"}]}],
+  SequenceForm[
+  "Timing:  ", {
+   38.5878`7.736965016748141, 13.175676000005387`, 16.09039499999181, 
+    7.243245000002854}],
+  Editable->False]], "Print",
+ ShowCellLabel->True,ExpressionUUID->"d04c1183-5f0d-4b8a-ae88-0d4ce060a01e"],
+
+Cell[BoxData[
+ InterpretationBox[
+  RowBox[{"\<\"Total time: \"\>", "\[InvisibleSpace]", 
+   "38.78311`7.739157629848612"}],
+  SequenceForm["Total time: ", 38.78311`7.739157629848612],
+  Editable->
+   False]], "Print",ExpressionUUID->"3ead813f-32b0-4b67-8957-f062e39d9e4e"]
+}, Open  ]]
+}, Open  ]],
+
+Cell[CellGroupData[{
+
+Cell[BoxData[
+ RowBox[{
+  RowBox[{"fieldCorr3a", "=", 
+   RowBox[{"linkCorrelators", "[", 
+    RowBox[{"3", ",", 
+     RowBox[{"\"\<distFlag\>\"", "\[Rule]", "False"}], ",", 
+     RowBox[{"\"\<symmetric\>\"", "\[Rule]", "False"}]}], "]"}]}], 
+  ";"}]], "Input",ExpressionUUID->"94673aa9-90e1-4f1e-905c-a6117782adbc"],
+
+Cell[CellGroupData[{
+
+Cell[BoxData[
+ InterpretationBox[
+  RowBox[{"\<\"ops: \"\>", "\[InvisibleSpace]", 
+   RowBox[{"{", 
+    RowBox[{"\<\"3pt1\"\>", ",", "\<\"3pt2\"\>", ",", "\<\"3m1a\"\>", 
+     ",", "\<\"3m1b\"\>", ",", "\<\"3m2\"\>", ",", "\<\"3m3\"\>", 
+     ",", "\<\"3m4\"\>", ",", "\<\"3m5\"\>", ",", "\<\"3m6\"\>", 
+     ",", "\<\"3m7\"\>", ",", "\<\"3m8\"\>", ",", "\<\"3m9\"\>", 
+     ",", "\<\"3m10\"\>"}], "}"}]}],
+  SequenceForm[
+  "ops: ", {
+   "3pt1", "3pt2", "3m1a", "3m1b", "3m2", "3m3", "3m4", "3m5", "3m6", "3m7", 
+    "3m8", "3m9", "3m10"}],
+  Editable->
+   False]], "Print",ExpressionUUID->"6fedc99b-827f-4ef2-87c6-58a6244e09f3"],
+
+Cell[BoxData[
+ InterpretationBox[
+  RowBox[{"\<\"Total time: \"\>", "\[InvisibleSpace]", 
+   "33.18318`7.6714330006859734"}],
+  SequenceForm["Total time: ", 33.18318`7.6714330006859734],
+  Editable->
+   False]], "Print",ExpressionUUID->"86296a81-e891-499b-8d12-7cc8c81e9134"]
+}, Open  ]]
+}, Open  ]],
+
+Cell[CellGroupData[{
+
+Cell[BoxData[
+ RowBox[{
+  RowBox[{"fieldCorr3s", "=", 
+   RowBox[{"linkCorrelators", "[", 
+    RowBox[{"3", ",", 
+     RowBox[{"\"\<distFlag\>\"", "\[Rule]", "False"}], ",", 
+     RowBox[{"\"\<symmetric\>\"", "\[Rule]", "True"}], ",", 
+     RowBox[{"\"\<timing\>\"", "\[Rule]", "True"}]}], "]"}]}], 
+  ";"}]], "Input",ExpressionUUID->"5efd2b25-9c3b-4b06-bc65-5a7a9d19743d"],
+
+Cell[CellGroupData[{
+
+Cell[BoxData[
+ InterpretationBox[
+  RowBox[{"\<\"ops: \"\>", "\[InvisibleSpace]", 
+   RowBox[{"{", 
+    RowBox[{"\<\"3pt1\"\>", ",", "\<\"3pt2\"\>", ",", "\<\"3m1a\"\>", 
+     ",", "\<\"3m1b\"\>", ",", "\<\"3m2\"\>", ",", "\<\"3m3\"\>", 
+     ",", "\<\"3m4\"\>", ",", "\<\"3m5\"\>", ",", "\<\"3m6\"\>", 
+     ",", "\<\"3m7\"\>", ",", "\<\"3m8\"\>", ",", "\<\"3m9\"\>", 
+     ",", "\<\"3m10\"\>"}], "}"}]}],
+  SequenceForm[
+  "ops: ", {
+   "3pt1", "3pt2", "3m1a", "3m1b", "3m2", "3m3", "3m4", "3m5", "3m6", "3m7", 
+    "3m8", "3m9", "3m10"}],
+  Editable->
+   False]], "Print",ExpressionUUID->"a4b8d403-73c0-44a9-8f3a-a0e51e6d2c25"],
+
+Cell[BoxData[
+ InterpretationBox[
+  RowBox[{"\<\"Timing:  \"\>", "\[InvisibleSpace]", 
+   RowBox[{"{", 
+    RowBox[{
+    "28.222021`7.601103108516108", ",", "9.513167999998581`", ",", 
+     "11.875656999999295`", ",", "5.280614000002138`"}], "}"}]}],
+  SequenceForm[
+  "Timing:  ", {
+   28.222021`7.601103108516108, 9.513167999998581, 11.875656999999295`, 
+    5.280614000002138}],
+  Editable->False]], "Print",
+ ShowCellLabel->True,ExpressionUUID->"df3d5257-b1b3-4f56-a6bf-088e99e99799"],
+
+Cell[BoxData[
+ InterpretationBox[
+  RowBox[{"\<\"Timing:  \"\>", "\[InvisibleSpace]", 
+   RowBox[{"{", 
+    RowBox[{
+    "32.923804`7.66802500544047", ",", "11.164112000000111`", ",", 
+     "13.80817799999776`", ",", "6.146291000002145`"}], "}"}]}],
+  SequenceForm[
+  "Timing:  ", {
+   32.923804`7.66802500544047, 11.164112000000111`, 13.80817799999776, 
+    6.146291000002145}],
+  Editable->False]], "Print",
+ ShowCellLabel->True,ExpressionUUID->"625d6d4a-f8fe-4906-bf91-a7fee2366937"],
+
+Cell[BoxData[
+ InterpretationBox[
+  RowBox[{"\<\"Timing:  \"\>", "\[InvisibleSpace]", 
+   RowBox[{"{", 
+    RowBox[{
+    "34.496222`7.688286531908252", ",", "11.777115000000403`", ",", 
+     "14.341688999998196`", ",", "6.4764240000014475`"}], "}"}]}],
+  SequenceForm[
+  "Timing:  ", {
+   34.496222`7.688286531908252, 11.777115000000403`, 14.341688999998196`, 
+    6.4764240000014475`}],
+  Editable->False]], "Print",
+ ShowCellLabel->True,ExpressionUUID->"1b77a8e6-cffc-4bfa-9f0a-7be8187a31d7"],
+
+Cell[BoxData[
+ InterpretationBox[
+  RowBox[{"\<\"Timing:  \"\>", "\[InvisibleSpace]", 
+   RowBox[{"{", 
+    RowBox[{
+    "36.427939`7.7119495984934145", ",", "12.474324000002486`", ",", 
+     "15.112612999994836`", ",", "6.849328000002718`"}], "}"}]}],
+  SequenceForm[
+  "Timing:  ", {
+   36.427939`7.7119495984934145, 12.474324000002486`, 15.112612999994836`, 
+    6.849328000002718}],
+  Editable->False]], "Print",
+ ShowCellLabel->True,ExpressionUUID->"17c106bb-efcf-4f9a-abfe-b2f066d33725"],
+
+Cell[BoxData[
+ InterpretationBox[
+  RowBox[{"\<\"Timing:  \"\>", "\[InvisibleSpace]", 
+   RowBox[{"{", 
+    RowBox[{
+    "38.366756`7.734470077956592", ",", "13.167540000005165`", ",", 
+     "15.802140999993561`", ",", "7.287006000001329`"}], "}"}]}],
+  SequenceForm[
+  "Timing:  ", {
+   38.366756`7.734470077956592, 13.167540000005165`, 15.802140999993561`, 
+    7.287006000001329}],
+  Editable->False]], "Print",
+ ShowCellLabel->True,ExpressionUUID->"f6df57ab-0f24-4fa8-b624-f6d5760540dc"],
+
+Cell[BoxData[
+ InterpretationBox[
+  RowBox[{"\<\"Timing:  \"\>", "\[InvisibleSpace]", 
+   RowBox[{"{", 
+    RowBox[{
+    "39.58333`7.748027324837066", ",", "13.562705000005867`", ",", 
+     "16.37552599999204`", ",", "7.473743000002127`"}], "}"}]}],
+  SequenceForm[
+  "Timing:  ", {
+   39.58333`7.748027324837066, 13.562705000005867`, 16.37552599999204, 
+    7.473743000002127}],
+  Editable->False]], "Print",
+ ShowCellLabel->True,ExpressionUUID->"84bff288-0616-4b63-be24-0551e2778cbc"],
+
+Cell[BoxData[
+ InterpretationBox[
+  RowBox[{"\<\"Total time: \"\>", "\[InvisibleSpace]", 
+   "39.640543`7.748654592693883"}],
+  SequenceForm["Total time: ", 39.640543`7.748654592693883],
+  Editable->
+   False]], "Print",ExpressionUUID->"1436aa32-853b-46fc-89ac-f849a7384fc8"]
+}, Open  ]]
+}, Open  ]]
+}, Closed]]
+}, Open  ]],
+
+Cell[CellGroupData[{
+
+Cell["3-3/12.16.20-28-5-a-20", \
+"Section",ExpressionUUID->"f477ac29-ef21-4752-8533-85352453fe27"],
 
 Cell[CellGroupData[{
 
@@ -203,7 +631,7 @@ Cell[BoxData[
      
      RowBox[{"latticeNorm", "[", "]"}], ",", 
      RowBox[{"averagePlaquette", "[", "]"}]}], "}"}], "]"}], 
-  ";"}]], "Input",ExpressionUUID->"d6ea6112-f1ef-443c-a1a8-2d108219deb2"],
+  ";"}]], "Input",ExpressionUUID->"c0995228-027c-4138-b612-096edc0316ae"],
 
 Cell[CellGroupData[{
 
@@ -212,7 +640,7 @@ Cell[BoxData[
   RowBox[{
   "0.9025352451865776`", ",", "3.080806747953309`", ",", 
    "2.379606189926599`"}], 
-  "}"}]], "Print",ExpressionUUID->"40571965-d095-450c-944a-900af3f30ad9"],
+  "}"}]], "Print",ExpressionUUID->"690dfd56-3b28-4594-9fd7-a54e519c008b"],
 
 Cell[BoxData[
  RowBox[{"{", 
@@ -220,7 +648,7 @@ Cell[BoxData[
   "3.080823273305907`", ",", "2.3799125714784672`", ",", 
    "0.3098894548803575`", ",", "0.3098894548803575`", ",", 
    "0.9977679944615324`"}], 
-  "}"}]], "Print",ExpressionUUID->"d788c896-62fd-4ba6-bb6e-f5a39d5462d5"]
+  "}"}]], "Print",ExpressionUUID->"0ebcf692-1e4b-4059-81d8-155e5fc2545d"]
 }, Open  ]]
 }, Open  ]],
 
@@ -230,14 +658,14 @@ Cell[BoxData[
  RowBox[{
   RowBox[{
   "<<", "\"\<../data/3-3/field-correlators-12.16.20-28-5-a-20.m\>\""}], 
-  ";"}]], "Input",ExpressionUUID->"e1d2b1b2-703f-4110-81ca-d2cf48cfd970"],
+  ";"}]], "Input",ExpressionUUID->"7690f5f8-2a54-4313-98de-fbd4c5a505cd"],
 
 Cell[BoxData[
  RowBox[{"{", 
   RowBox[{
   "0.9025352451865776`", ",", "3.080806747953309`", ",", 
    "2.379606189926599`"}], 
-  "}"}]], "Print",ExpressionUUID->"b044a21b-6f27-4ae4-85f0-da0098f18a46"],
+  "}"}]], "Print",ExpressionUUID->"35b199c3-c10e-4d91-b272-d821dc11755b"],
 
 Cell[BoxData[
  RowBox[{"{", 
@@ -245,340 +673,111 @@ Cell[BoxData[
   "3.080823273305907`", ",", "2.3799125714784672`", ",", 
    "0.33272905696513017`", ",", "0.33272905696513017`", ",", 
    "0.9977679944615324`"}], 
-  "}"}]], "Output",ExpressionUUID->"f82cca2f-ff77-4dd1-a71e-db3133a0aa8b"]
+  "}"}]], "Output",ExpressionUUID->"4fc596e8-8949-44f3-88fe-56ea98a28ca5"]
 }, Open  ]],
-
-Cell["The original field, Landau gauge.", \
-"Text",ExpressionUUID->"20589630-4641-444d-bc0e-c066c4e4b8ac"],
-
-Cell[BoxData[
- RowBox[{
-  RowBox[{"<<", "\"\<../data/3-3/field-correlators-12.16.20-28-5.m\>\""}], 
-  ";"}]], "Input",ExpressionUUID->"b4abf811-877f-4173-ab4b-7306068998e5"],
 
 Cell[CellGroupData[{
 
 Cell["Calculate", \
-"Subsection",ExpressionUUID->"a2c6cf00-0774-4c9c-918b-09af4a782902"],
+"Subsection",ExpressionUUID->"94c9d744-afce-44c6-b87b-8ab13f011eb4"],
 
 Cell[CellGroupData[{
 
 Cell[BoxData[
  RowBox[{
-  RowBox[{"Print", "[", 
-   RowBox[{"{", 
-    RowBox[{
-     RowBox[{"averagePlaquette", "[", "]"}], ",", 
-     RowBox[{"latticeNorm", "[", "]"}], ",", 
-     RowBox[{"latticeNorm", "[", 
-      RowBox[{"\"\<center\>\"", "\[Rule]", "True"}], "]"}]}], "}"}], "]"}], 
-  ";", 
-  RowBox[{"Print", "[", 
-   RowBox[{"{", 
-    RowBox[{
-     RowBox[{"latticeNorm", "[", "]"}], ",", 
-     RowBox[{"latticeNorm", "[", 
-      RowBox[{"\"\<center\>\"", "\[Rule]", "True"}], "]"}], ",", 
-     RowBox[{"applyGaugeTransforms", "[", 
-      RowBox[{
-       RowBox[{"{", 
-        RowBox[{
-        "1", ",", "1", ",", "6", ",", "1", ",", "5", ",", "6", ",", "5", ",", 
-         "6", ",", "5", ",", "6"}], "}"}], ",", 
-       RowBox[{"\"\<maxAbelianGauge\>\"", "\[Rule]", "False"}]}], "]"}], ",", 
-     
-     RowBox[{"latticeNorm", "[", "]"}], ",", 
-     RowBox[{"averagePlaquette", "[", "]"}]}], "}"}], "]"}], ";", 
-  RowBox[{"fieldCorrelators", "=", 
-   RowBox[{"makeLinkCorrelators", "[", "]"}]}], 
-  ";"}]], "Input",ExpressionUUID->"108d7f1a-4b94-425c-b40a-84906639682a"],
+  RowBox[{"fieldCorr2", "=", 
+   RowBox[{"linkCorrelators", "[", 
+    RowBox[{"2", ",", 
+     RowBox[{"\"\<distFlag\>\"", "\[Rule]", "False"}]}], "]"}]}], 
+  ";"}]], "Input",ExpressionUUID->"5d5bbc28-2109-4275-9835-1e3730fc3f26"],
 
 Cell[CellGroupData[{
 
 Cell[BoxData[
- RowBox[{"{", 
-  RowBox[{
-  "0.9025352451865776`", ",", "3.080806747953309`", ",", 
-   "2.379606189926599`"}], 
-  "}"}]], "Print",ExpressionUUID->"95969d56-bcb7-439d-8699-90f8abb3c203"],
-
-Cell[BoxData[
- RowBox[{"{", 
-  RowBox[{
-  "3.080806747953309`", ",", "2.379606189926599`", ",", "0.5152696429029457`",
-    ",", "0.5152696429029457`", ",", "0.9025352451041209`"}], 
-  "}"}]], "Print",ExpressionUUID->"81413dea-3bae-4507-adc6-ea0839ef4113"],
-
-Cell[BoxData[
- RowBox[{"{", 
-  RowBox[{"3", ",", "3840", ",", "8"}], 
-  "}"}]], "Print",ExpressionUUID->"b9f17124-31d1-4c31-ab6b-7f7893600da1"],
-
-Cell[BoxData[
- TagBox[GridBox[{
-    {
-     TagBox[
-      TemplateBox[{
-       "\[ThinSpace]","\" \"",InterpretationBox[
-        "\"0.1111\"", 0.111118123613555192`3.416751282316814, AutoDelete -> 
-         True],"\"\[PlusMinus]\"",InterpretationBox[
-        "\"0.0043\"", 0.0042563135808388721`2., AutoDelete -> True]},
-       "RowWithSeparators"],
-      NumberForm[#, ExponentFunction -> (Null& )]& ], 
-     TagBox[
-      TemplateBox[{
-       "\[ThinSpace]","\" \"",InterpretationBox[
-        "\"0.0797\"", 0.0796654965125072889`3.3014281143948527, AutoDelete -> 
-         True],"\"\[PlusMinus]\"",InterpretationBox[
-        "\"0.0040\"", 0.0039796250217579449`2., AutoDelete -> True]},
-       "RowWithSeparators"],
-      NumberForm[#, ExponentFunction -> (Null& )]& ], 
-     TagBox[
-      TemplateBox[{
-       "\[ThinSpace]","\" \"",InterpretationBox[
-        "\"-0.0042\"", -0.0042145919733595416`1.9911829337395364, AutoDelete -> 
-         True],"\"\[PlusMinus]\"",InterpretationBox[
-        "\"0.0043\"", 0.0043010312891504469`2., AutoDelete -> True]},
-       "RowWithSeparators"],
-      NumberForm[#, ExponentFunction -> (Null& )]& ]},
-    {
-     TagBox[
-      TemplateBox[{
-       "\[ThinSpace]","\" \"",InterpretationBox[
-        "\"0.0608\"", 0.0607857576958019813`3.1788597530540175, AutoDelete -> 
-         True],"\"\[PlusMinus]\"",InterpretationBox[
-        "\"0.0040\"", 0.004026633306499613`2., AutoDelete -> True]},
-       "RowWithSeparators"],
-      NumberForm[#, ExponentFunction -> (Null& )]& ], 
-     TagBox[
-      TemplateBox[{
-       "\[ThinSpace]","\" \"",InterpretationBox[
-        "\"-0.1115\"", -0.1114915190615568957`3.4475869782636948, AutoDelete -> 
-         True],"\"\[PlusMinus]\"",InterpretationBox[
-        "\"0.0040\"", 0.0039779090973143614`2., AutoDelete -> True]},
-       "RowWithSeparators"],
-      NumberForm[#, ExponentFunction -> (Null& )]& ], 
-     TagBox[
-      TemplateBox[{
-       "\[ThinSpace]","\" \"",InterpretationBox[
-        "\"-0.0698\"", -0.0697755701184350485`3.2117597018341106, AutoDelete -> 
-         True],"\"\[PlusMinus]\"",InterpretationBox[
-        "\"0.0043\"", 0.0042849296083872857`2., AutoDelete -> True]},
-       "RowWithSeparators"],
-      NumberForm[#, ExponentFunction -> (Null& )]& ]},
-    {
-     TagBox[
-      TemplateBox[{
-       "\[ThinSpace]","\" \"",InterpretationBox[
-        "\"-0.0090\"", -0.0090241855500076684`2.3212197140906374, AutoDelete -> 
-         True],"\"\[PlusMinus]\"",InterpretationBox[
-        "\"0.0043\"", 0.0043071331963247545`2., AutoDelete -> True]},
-       "RowWithSeparators"],
-      NumberForm[#, ExponentFunction -> (Null& )]& ], 
-     TagBox[
-      TemplateBox[{
-       "\[ThinSpace]","\" \"",InterpretationBox[
-        "\"-0.0033\"", -0.0032955419949243529`1.953419173754883, AutoDelete -> 
-         True],"\"\[PlusMinus]\"",InterpretationBox[
-        "\"0.0037\"", 0.0036686617899221795`2., AutoDelete -> True]},
-       "RowWithSeparators"],
-      NumberForm[#, ExponentFunction -> (Null& )]& ], 
-     TagBox[
-      TemplateBox[{
-       "\[ThinSpace]","\" \"",InterpretationBox[
-        "\"-0.0085\"", -0.0085441258896435182`2.3683514883057204, AutoDelete -> 
-         True],"\"\[PlusMinus]\"",InterpretationBox[
-        "\"0.0037\"", 0.0036586102801465232`2., AutoDelete -> True]},
-       "RowWithSeparators"],
-      NumberForm[#, ExponentFunction -> (Null& )]& ]},
-    {
-     TagBox[
-      TemplateBox[{
-       "\[ThinSpace]","\" \"",InterpretationBox[
-        "\"-0.0304\"", -0.0304128176839963578`2.8908029191204436, AutoDelete -> 
-         True],"\"\[PlusMinus]\"",InterpretationBox[
-        "\"0.0039\"", 0.0039106931383794943`2., AutoDelete -> True]},
-       "RowWithSeparators"],
-      NumberForm[#, ExponentFunction -> (Null& )]& ], 
-     TagBox[
-      TemplateBox[{
-       "\[ThinSpace]","\" \"",InterpretationBox[
-        "\"-0.0297\"", -0.0296562392463919876`2.8705743669903527, AutoDelete -> 
-         True],"\"\[PlusMinus]\"",InterpretationBox[
-        "\"0.0040\"", 0.0039952292964438177`2., AutoDelete -> True]},
-       "RowWithSeparators"],
-      NumberForm[#, ExponentFunction -> (Null& )]& ], 
-     TagBox[
-      TemplateBox[{
-       "\[ThinSpace]","\" \"",InterpretationBox[
-        "\"0.0065\"", 0.0065173174029651386`2.194362015959784, AutoDelete -> 
-         True],"\"\[PlusMinus]\"",InterpretationBox[
-        "\"0.0042\"", 0.0041658809648258913`2., AutoDelete -> True]},
-       "RowWithSeparators"],
-      NumberForm[#, ExponentFunction -> (Null& )]& ]},
-    {
-     TagBox[
-      TemplateBox[{
-       "\[ThinSpace]","\" \"",InterpretationBox[
-        "\"-0.0362\"", -0.03623407827996937`2.9544953270121304, AutoDelete -> 
-         True],"\"\[PlusMinus]\"",InterpretationBox[
-        "\"0.0040\"", 0.0040236657033647051`2., AutoDelete -> True]},
-       "RowWithSeparators"],
-      NumberForm[#, ExponentFunction -> (Null& )]& ], 
-     TagBox[
-      TemplateBox[{
-       "\[ThinSpace]","\" \"",InterpretationBox[
-        "\"-0.0065\"", -0.0064527636628206224`2.224068347334659, AutoDelete -> 
-         True],"\"\[PlusMinus]\"",InterpretationBox[
-        "\"0.0039\"", 0.0038519213567297624`2., AutoDelete -> True]},
-       "RowWithSeparators"],
-      NumberForm[#, ExponentFunction -> (Null& )]& ], 
-     TagBox[
-      TemplateBox[{
-       "\[ThinSpace]","\" \"",InterpretationBox[
-        "\"-0.1454\"", -0.1453860140011656588`3.549584389621183, AutoDelete -> 
-         True],"\"\[PlusMinus]\"",InterpretationBox[
-        "\"0.0041\"", 0.0041014577314755288`2., AutoDelete -> True]},
-       "RowWithSeparators"],
-      NumberForm[#, ExponentFunction -> (Null& )]& ]},
-    {
-     TagBox[
-      TemplateBox[{
-       "\[ThinSpace]","\" \"",InterpretationBox[
-        "\"0.0135\"", 0.0134867087618735677`2.4959214893589974, AutoDelete -> 
-         True],"\"\[PlusMinus]\"",InterpretationBox[
-        "\"0.0043\"", 0.0043051123522353761`2., AutoDelete -> True]},
-       "RowWithSeparators"],
-      NumberForm[#, ExponentFunction -> (Null& )]& ], 
-     TagBox[
-      TemplateBox[{
-       "\[ThinSpace]","\" \"",InterpretationBox[
-        "\"0.0616\"", 0.0616048593741849587`3.1865199884422375, AutoDelete -> 
-         True],"\"\[PlusMinus]\"",InterpretationBox[
-        "\"0.0040\"", 0.0040095439851827504`2., AutoDelete -> True]},
-       "RowWithSeparators"],
-      NumberForm[#, ExponentFunction -> (Null& )]& ], 
-     TagBox[
-      TemplateBox[{
-       "\[ThinSpace]","\" \"",InterpretationBox[
-        "\"0.0901\"", 0.0900854413838196866`3.345348616457564, AutoDelete -> 
-         True],"\"\[PlusMinus]\"",InterpretationBox[
-        "\"0.0041\"", 0.0040672980107140672`2., AutoDelete -> True]},
-       "RowWithSeparators"],
-      NumberForm[#, ExponentFunction -> (Null& )]& ]},
-    {
-     TagBox[
-      TemplateBox[{
-       "\[ThinSpace]","\" \"",InterpretationBox[
-        "\"-0.0385\"", -0.0385228547625497339`2.9863784551115033, AutoDelete -> 
-         True],"\"\[PlusMinus]\"",InterpretationBox[
-        "\"0.0040\"", 0.0039750263164338596`2., AutoDelete -> True]},
-       "RowWithSeparators"],
-      NumberForm[#, ExponentFunction -> (Null& )]& ], 
-     TagBox[
-      TemplateBox[{
-       "\[ThinSpace]","\" \"",InterpretationBox[
-        "\"-0.1080\"", -0.107984396051435505`3.4396778406193547, AutoDelete -> 
-         True],"\"\[PlusMinus]\"",InterpretationBox[
-        "\"0.0039\"", 0.0039235858807491319`2., AutoDelete -> True]},
-       "RowWithSeparators"],
-      NumberForm[#, ExponentFunction -> (Null& )]& ], 
-     TagBox[
-      TemplateBox[{
-       "\[ThinSpace]","\" \"",InterpretationBox[
-        "\"0.0505\"", 0.0505311265742397001`3.0906586281790616, AutoDelete -> 
-         True],"\"\[PlusMinus]\"",InterpretationBox[
-        "\"0.0041\"", 0.0041010999385320528`2., AutoDelete -> True]},
-       "RowWithSeparators"],
-      NumberForm[#, ExponentFunction -> (Null& )]& ]},
-    {
-     TagBox[
-      TemplateBox[{
-       "\[ThinSpace]","\" \"",InterpretationBox[
-        "\"0.0757\"", 0.0756935115988356527`3.2920010624921057, AutoDelete -> 
-         True],"\"\[PlusMinus]\"",InterpretationBox[
-        "\"0.0039\"", 0.0038641821600401286`2., AutoDelete -> True]},
-       "RowWithSeparators"],
-      NumberForm[#, ExponentFunction -> (Null& )]& ], 
-     TagBox[
-      TemplateBox[{
-       "\[ThinSpace]","\" \"",InterpretationBox[
-        "\"0.0256\"", 0.0255674703459783555`2.8356661817806885, AutoDelete -> 
-         True],"\"\[PlusMinus]\"",InterpretationBox[
-        "\"0.0037\"", 0.0037326870422993677`2., AutoDelete -> True]},
-       "RowWithSeparators"],
-      NumberForm[#, ExponentFunction -> (Null& )]& ], 
-     TagBox[
-      TemplateBox[{
-       "\[ThinSpace]","\" \"",InterpretationBox[
-        "\"-0.0779\"", -0.0779444508110047757`3.303621006345056, AutoDelete -> 
-         True],"\"\[PlusMinus]\"",InterpretationBox[
-        "\"0.0039\"", 0.003874040842938084`2., AutoDelete -> True]},
-       "RowWithSeparators"],
-      NumberForm[#, ExponentFunction -> (Null& )]& ]}
-   },
-   GridBoxAlignment->{
-    "Columns" -> {{Left}}, "ColumnsIndexed" -> {}, "Rows" -> {{Baseline}}, 
-     "RowsIndexed" -> {}},
-   GridBoxSpacings->{"Columns" -> {
-       Offset[0.27999999999999997`], {
-        Offset[2.0999999999999996`]}, 
-       Offset[0.27999999999999997`]}, "ColumnsIndexed" -> {}, "Rows" -> {
-       Offset[0.2], {
-        Offset[0.4]}, 
-       Offset[0.2]}, "RowsIndexed" -> {}}],
-  Function[BoxForm`e$, 
-   TableForm[
-   BoxForm`e$]]]], \
-"Print",ExpressionUUID->"fb5a4aac-84df-47a3-9b91-146be0e2abd6"],
+ InterpretationBox[
+  RowBox[{"\<\"ops: \"\>", "\[InvisibleSpace]", 
+   RowBox[{"{", 
+    RowBox[{"\<\"2l\"\>", ",", "\<\"2t1\"\>", ",", "\<\"2t2\"\>"}], "}"}]}],
+  SequenceForm["ops: ", {"2l", "2t1", "2t2"}],
+  Editable->
+   False]], "Print",ExpressionUUID->"85ecd0ef-35ba-4a05-8e41-b8a4bc779e6a"],
 
 Cell[BoxData[
  InterpretationBox[
-  RowBox[{"\<\"Time: \"\>", "\[InvisibleSpace]", 
-   "4287.370047`9.782705967331538"}],
-  SequenceForm["Time: ", 4287.370047`9.782705967331538],
+  RowBox[{"\<\"Total time: \"\>", "\[InvisibleSpace]", 
+   "25.439782`7.556028383243798"}],
+  SequenceForm["Total time: ", 25.439782`7.556028383243798],
   Editable->
-   False]], "Print",ExpressionUUID->"11f18729-e960-411b-8fcf-38425d0f0d13"]
+   False]], "Print",ExpressionUUID->"c40787e8-198f-4332-b1b0-d3c612e19ff0"]
 }, Open  ]]
 }, Open  ]],
 
 Cell[CellGroupData[{
 
 Cell[BoxData[
- RowBox[{"Block", "[", 
-  RowBox[{
-   RowBox[{"{", 
-    RowBox[{
-    "f", "=", "\"\<../data/3-3/field-correlators-12.16.20-28-5.m\>\""}], 
-    "}"}], ",", 
-   RowBox[{
-    RowBox[{"DeleteFile", "[", "f", "]"}], ";", 
-    RowBox[{"Save", "[", 
-     RowBox[{"f", ",", "fieldCorrelators"}], "]"}]}]}], 
-  "]"}]], "Input",ExpressionUUID->"35c94759-485c-443b-a920-97258923e2e6"],
+ RowBox[{
+  RowBox[{"fieldCorr3a", "=", 
+   RowBox[{"linkCorrelators", "[", 
+    RowBox[{"3", ",", 
+     RowBox[{"\"\<distFlag\>\"", "\[Rule]", "False"}], ",", 
+     RowBox[{"\"\<symmetric\>\"", "\[Rule]", "False"}]}], "]"}]}], 
+  ";"}]], "Input",ExpressionUUID->"d91f4b7a-2cb1-455b-8e16-2a99a7905eca"],
 
 Cell[BoxData[
- TemplateBox[{
-  "DeleteFile","fdnfnd",
-   "\"Directory or file \
-\\!\\(\\*RowBox[{\\\"\\\\\\\"../data/3-3/field-correlators-12.16.20-28-5.m\\\\\
-\\\"\\\"}]\\) not found.\"",2,239,55,31791914212606856540,"Local"},
-  "MessageTemplate"]], "Message", \
-"MSG",ExpressionUUID->"b4e5e5b4-323e-49db-80b7-242950fe854c"]
+ InterpretationBox[
+  RowBox[{"\<\"ops: \"\>", "\[InvisibleSpace]", 
+   RowBox[{"{", 
+    RowBox[{"\<\"3pt1\"\>", ",", "\<\"3pt2\"\>", ",", "\<\"3m1a\"\>", 
+     ",", "\<\"3m1b\"\>", ",", "\<\"3m2\"\>", ",", "\<\"3m3\"\>", 
+     ",", "\<\"3m4\"\>", ",", "\<\"3m5\"\>", ",", "\<\"3m6\"\>", 
+     ",", "\<\"3m7\"\>", ",", "\<\"3m8\"\>", ",", "\<\"3m9\"\>", 
+     ",", "\<\"3m10\"\>"}], "}"}]}],
+  SequenceForm[
+  "ops: ", {
+   "3pt1", "3pt2", "3m1a", "3m1b", "3m2", "3m3", "3m4", "3m5", "3m6", "3m7", 
+    "3m8", "3m9", "3m10"}],
+  Editable->
+   False]], "Print",ExpressionUUID->"89a9a07b-6da8-4c1d-83e6-ab4e3970c9cb"]
 }, Open  ]],
 
 Cell[BoxData[
  RowBox[{
-  RowBox[{"Print", "[", 
+  RowBox[{"fieldCorr3s", "=", 
+   RowBox[{"linkCorrelators", "[", 
+    RowBox[{"3", ",", 
+     RowBox[{"\"\<distFlag\>\"", "\[Rule]", "False"}], ",", 
+     RowBox[{"\"\<symmetric\>\"", "\[Rule]", "True"}]}], "]"}]}], 
+  ";"}]], "Input",ExpressionUUID->"79c6f2e4-c451-4141-915b-f61af92a64e8"],
+
+Cell[BoxData[
+ RowBox[{"Block", "[", 
+  RowBox[{
    RowBox[{"{", 
     RowBox[{
-     RowBox[{"averagePlaquette", "[", "]"}], ",", 
-     RowBox[{"latticeNorm", "[", "]"}], ",", 
-     RowBox[{"latticeNorm", "[", 
-      RowBox[{"\"\<center\>\"", "\[Rule]", "True"}], "]"}]}], "}"}], "]"}], 
-  ";", 
-  RowBox[{"<<", "\"\<../data/3-3/step-12.16.20-28-5-a-20.m\>\""}], ";", 
-  RowBox[{"gaugeField", "=", "gaugeField0"}], ";", 
+    "f", "=", "\"\<../data/3-3/field-correlators-12.16.20-28-5-a-20.m\>\""}], 
+    "}"}], ",", 
+   RowBox[{
+    RowBox[{"DeleteFile", "[", "f", "]"}], ";", 
+    RowBox[{"Save", "[", 
+     RowBox[{"f", ",", 
+      RowBox[{"{", 
+       RowBox[{"fieldCorr2", ",", "fieldCorr3a", ",", "fieldCorr3s"}], 
+       "}"}]}], "]"}]}]}], 
+  "]"}]], "Input",ExpressionUUID->"f9ec9170-1f82-4531-8b12-5efb286aab31"]
+}, Open  ]]
+}, Open  ]],
+
+Cell[CellGroupData[{
+
+Cell["3-3/12.16.20-28-5", \
+"Section",ExpressionUUID->"42837fa4-8ace-4d92-b32e-d6c000186aac"],
+
+Cell["Calculate for original lattice, in Landau gauge", \
+"Text",ExpressionUUID->"97a38b2c-03ba-4249-a23f-bb3e3d84ffb0"],
+
+Cell[BoxData[
+ RowBox[{
+  RowBox[{"<<", "\"\<../data/3-3/periodic-12.16.20-28-5.m\>\""}], ";", 
   RowBox[{"Print", "[", 
    RowBox[{"{", 
     RowBox[{
@@ -595,31 +794,120 @@ Cell[BoxData[
      
      RowBox[{"latticeNorm", "[", "]"}], ",", 
      RowBox[{"averagePlaquette", "[", "]"}]}], "}"}], "]"}], 
-  ";"}]], "Input",ExpressionUUID->"280edb20-e7bf-46ca-9591-4eff07166d9f"],
+  ";"}]], "Input",ExpressionUUID->"203e5ad4-a893-4a86-bd8c-025b8611ef1e"],
 
-Cell["\<\
-About 67 minutes.\[LineSeparator]This could be optimized by looping through \
-only the lower diagonal for k2 and dir2. \
-\>", "Text",ExpressionUUID->"f066835e-6bd0-4200-9ffd-6c34b25c109f"],
+Cell["The original field, Landau gauge.", \
+"Text",ExpressionUUID->"7d645ca4-2129-4b9b-bffe-5eca9fe7008a"],
 
 Cell[BoxData[
  RowBox[{
-  RowBox[{"fieldCorrelators", "=", 
-   RowBox[{"makeFieldCorrelators", "[", "]"}]}], 
-  ";"}]], "Input",ExpressionUUID->"a1adced3-81cd-45a8-b606-992223991d70"],
+  RowBox[{"<<", "\"\<../data/3-3/field-correlators-12.16.20-28-5.m\>\""}], 
+  ";"}]], "Input",ExpressionUUID->"b1968fd0-fe49-4b62-86ca-6b4eebab796e"],
+
+Cell[CellGroupData[{
+
+Cell["Calculate", \
+"Subsection",ExpressionUUID->"964b1031-487e-451f-885d-59e9060e6eaa"],
+
+Cell[CellGroupData[{
+
+Cell[BoxData[
+ RowBox[{
+  RowBox[{"fieldCorr2", "=", 
+   RowBox[{"linkCorrelators", "[", 
+    RowBox[{"2", ",", 
+     RowBox[{"\"\<distFlag\>\"", "\[Rule]", "False"}]}], "]"}]}], 
+  ";"}]], "Input",ExpressionUUID->"0dc7c133-f39c-4d29-9c6b-932ea0e9cbab"],
+
+Cell[CellGroupData[{
+
+Cell[BoxData[
+ InterpretationBox[
+  RowBox[{"\<\"ops: \"\>", "\[InvisibleSpace]", 
+   RowBox[{"{", 
+    RowBox[{"\<\"2l\"\>", ",", "\<\"2t1\"\>", ",", "\<\"2t2\"\>"}], "}"}]}],
+  SequenceForm["ops: ", {"2l", "2t1", "2t2"}],
+  Editable->
+   False]], "Print",ExpressionUUID->"5195f855-3732-4d16-ac52-b8c21fcfe24f"],
+
+Cell[BoxData[
+ InterpretationBox[
+  RowBox[{"\<\"Time: \"\>", "\[InvisibleSpace]", 
+   "0.170887`5.383224023437408"}],
+  SequenceForm["Time: ", 0.170887`5.383224023437408],
+  Editable->
+   False]], "Print",ExpressionUUID->"07d5e5de-3165-4754-93e1-e8915811726f"]
+}, Open  ]]
+}, Open  ]],
+
+Cell[CellGroupData[{
+
+Cell[BoxData[
+ RowBox[{
+  RowBox[{"fieldCorr3a", "=", 
+   RowBox[{"linkCorrelators", "[", 
+    RowBox[{"3", ",", 
+     RowBox[{"\"\<distFlag\>\"", "\[Rule]", "False"}], ",", 
+     RowBox[{"\"\<symmetric\>\"", "\[Rule]", "False"}]}], "]"}]}], 
+  ";"}]], "Input",ExpressionUUID->"e20a96b9-c776-404f-a6f2-2e1bf2ebf9b8"],
+
+Cell[CellGroupData[{
+
+Cell[BoxData[
+ InterpretationBox[
+  RowBox[{"\<\"ops: \"\>", "\[InvisibleSpace]", 
+   RowBox[{"{", 
+    RowBox[{"\<\"3pt1\"\>", ",", "\<\"3pt2\"\>", ",", "\<\"3m1a\"\>", 
+     ",", "\<\"3m1b\"\>", ",", "\<\"3m2\"\>", ",", "\<\"3m3\"\>", 
+     ",", "\<\"3m4\"\>", ",", "\<\"3m5\"\>", ",", "\<\"3m6\"\>", 
+     ",", "\<\"3m7\"\>", ",", "\<\"3m8\"\>", ",", "\<\"3m9\"\>", 
+     ",", "\<\"3m10\"\>"}], "}"}]}],
+  SequenceForm[
+  "ops: ", {
+   "3pt1", "3pt2", "3m1a", "3m1b", "3m2", "3m3", "3m4", "3m5", "3m6", "3m7", 
+    "3m8", "3m9", "3m10"}],
+  Editable->
+   False]], "Print",ExpressionUUID->"ce3f251b-c8ae-4c24-95fd-27a89996cf60"],
+
+Cell[BoxData[
+ RowBox[{"{", 
+  RowBox[{"3", ",", "3840", ",", "8"}], 
+  "}"}]], "Print",ExpressionUUID->"d29f76ec-f849-4569-86d4-9dccf9f23e9c"],
+
+Cell[BoxData[
+ InterpretationBox[
+  RowBox[{"\<\"Time: \"\>", "\[InvisibleSpace]", 
+   "7377.373395`10.018416763028773"}],
+  SequenceForm["Time: ", 7377.373395`10.018416763028773],
+  Editable->
+   False]], "Print",ExpressionUUID->"0195bd8c-cc90-402e-a721-aa7fce31d67d"]
+}, Open  ]]
+}, Open  ]],
+
+Cell[BoxData[
+ RowBox[{
+  RowBox[{"fieldCorr3s", "=", 
+   RowBox[{"linkCorrelators", "[", 
+    RowBox[{"3", ",", 
+     RowBox[{"\"\<distFlag\>\"", "\[Rule]", "False"}], ",", 
+     RowBox[{"\"\<symmetric\>\"", "\[Rule]", "True"}]}], "]"}]}], 
+  ";"}]], "Input",ExpressionUUID->"90c41178-3982-43eb-aa16-cf2c0b5e167b"],
 
 Cell[BoxData[
  RowBox[{"Block", "[", 
   RowBox[{
    RowBox[{"{", 
     RowBox[{
-    "f", "=", "\"\<../data/3-3/field-correlators-12.16.20-28-5-a-20.m\>\""}], 
+    "f", "=", "\"\<../data/3-3/field-correlators-12.16.20-28-5.m\>\""}], 
     "}"}], ",", 
    RowBox[{
     RowBox[{"DeleteFile", "[", "f", "]"}], ";", 
     RowBox[{"Save", "[", 
-     RowBox[{"f", ",", "fieldCorrelators"}], "]"}]}]}], 
-  "]"}]], "Input",ExpressionUUID->"452020f0-6d83-4ffd-9006-f6a9fa37a509"]
+     RowBox[{"f", ",", 
+      RowBox[{"{", 
+       RowBox[{"fieldCorr2", ",", "fieldCorr3a", ",", "fieldCorr3s"}], 
+       "}"}]}], "]"}]}]}], 
+  "]"}]], "Input",ExpressionUUID->"4631e482-0ac5-4ceb-8427-9caaa3b540ea"]
 }, Open  ]]
 }, Open  ]],
 
@@ -627,7 +915,7 @@ Cell[CellGroupData[{
 
 Cell[BoxData[Cell["3-3/14.18.22-28-5-a-20", "Subsection",ExpressionUUID->
   "fc8f0908-cd94-44ab-a900-6f6bc1dd4cf8"]], \
-"Section",ExpressionUUID->"02376d2d-2faa-4834-ba35-729efba076d0"],
+"Section",ExpressionUUID->"3e1fe4e6-cc3e-40a0-b20b-62dc2b63b05b"],
 
 Cell[CellGroupData[{
 
@@ -636,14 +924,14 @@ Cell[BoxData[
   RowBox[{"<<", "\"\<../data/3-3/periodic-14.18.22-28-5.m\>\""}], ";", 
   RowBox[{
   "<<", "\"\<../data/3-3/field-correlators-14.18.22-28-5-a-20.m\>\""}], 
-  ";"}]], "Input",ExpressionUUID->"a77683cd-7a17-4fa3-8f29-5c6bfe174da8"],
+  ";"}]], "Input",ExpressionUUID->"2d86108d-0726-4951-8d22-3a3b3eaf3512"],
 
 Cell[BoxData[
  RowBox[{"{", 
   RowBox[{
   "0.9022645527167358`", ",", "3.069943766561033`", ",", 
    "2.3800223550308903`"}], 
-  "}"}]], "Print",ExpressionUUID->"735529eb-3d0e-45a8-a491-f268ea7caea3"],
+  "}"}]], "Print",ExpressionUUID->"18bd848a-2fe6-4d3f-a9e2-1f5853c9197d"],
 
 Cell[BoxData[
  RowBox[{"{", 
@@ -651,13 +939,13 @@ Cell[BoxData[
   "0.3601791856480268`", ",", "0.3601791856480268`", ",", 
    "0.2888002497405508`", ",", "0.2888002497405508`", ",", 
    "0.9979012224644636`"}], 
-  "}"}]], "Output",ExpressionUUID->"4e973f00-2d0d-48fb-86a0-b80932937251"]
+  "}"}]], "Output",ExpressionUUID->"ca79349b-b36c-4196-9d76-044852f4c67b"]
 }, Open  ]],
 
 Cell[CellGroupData[{
 
 Cell["Calculate", \
-"Subsubsection",ExpressionUUID->"f7eb2c09-7bdf-42e1-95e9-1a1dfa0af985"],
+"Subsubsection",ExpressionUUID->"3b62994e-fa1e-423d-984b-2d35b55c4a44"],
 
 Cell[BoxData[
  RowBox[{
@@ -689,7 +977,7 @@ Cell[BoxData[
      RowBox[{"averagePlaquette", "[", "]"}]}], "}"}], "]"}], ";", 
   RowBox[{"fieldCorrelators", "=", 
    RowBox[{"makeLinkCorrelators", "[", "]"}]}], 
-  ";"}]], "Input",ExpressionUUID->"3a31aa78-a945-4500-9a5a-0fa5eceb03bf"],
+  ";"}]], "Input",ExpressionUUID->"7d0be238-1ea8-4272-b4ac-5b53bcdf0f7a"],
 
 Cell[BoxData[
  RowBox[{"Block", "[", 
@@ -702,14 +990,14 @@ Cell[BoxData[
     RowBox[{"DeleteFile", "[", "f", "]"}], ";", 
     RowBox[{"Save", "[", 
      RowBox[{"f", ",", "fieldCorrelators"}], "]"}]}]}], 
-  "]"}]], "Input",ExpressionUUID->"006804d9-3ece-4485-b904-4eefa7f05508"]
+  "]"}]], "Input",ExpressionUUID->"3e9ccf1f-b32f-45d6-9721-983588bc8a68"]
 }, Open  ]]
 }, Open  ]],
 
 Cell[CellGroupData[{
 
 Cell["3-3/20-28-15-a-20", \
-"Section",ExpressionUUID->"63589dc6-a97e-43d4-9376-ce0c91ef60e1"],
+"Section",ExpressionUUID->"36a50921-b54f-4c92-8245-d3344c4341ec"],
 
 Cell[CellGroupData[{
 
@@ -742,7 +1030,7 @@ Cell[BoxData[
      
      RowBox[{"latticeNorm", "[", "]"}], ",", 
      RowBox[{"averagePlaquette", "[", "]"}]}], "}"}], "]"}], 
-  ";"}]], "Input",ExpressionUUID->"419cdc74-389e-4c61-a954-0a95de20b1be"],
+  ";"}]], "Input",ExpressionUUID->"59cd529f-560a-41af-8629-5e00286f52d5"],
 
 Cell[CellGroupData[{
 
@@ -751,7 +1039,7 @@ Cell[BoxData[
   RowBox[{
   "0.9026164729132498`", ",", "3.0744629733649647`", ",", 
    "2.3769610801945897`"}], 
-  "}"}]], "Print",ExpressionUUID->"2188d0bf-6bcb-483f-bfef-6e20456134f7"],
+  "}"}]], "Print",ExpressionUUID->"24d0a72e-4c9f-437e-8137-46a96705df0e"],
 
 Cell[BoxData[
  RowBox[{"{", 
@@ -759,172 +1047,128 @@ Cell[BoxData[
   "0.28829338593105225`", ",", "0.28829338593105225`", ",", 
    "0.27962009711674896`", ",", "0.27962009711674896`", ",", 
    "0.9977788227312665`"}], 
-  "}"}]], "Print",ExpressionUUID->"6a93e83a-fe54-4322-9faa-7a8c8c41f628"]
-}, Open  ]]
+  "}"}]], "Print",ExpressionUUID->"bcd27910-5afe-467a-9770-8a1bac215b0f"]
 }, Open  ]]
 }, Open  ]],
 
-Cell[CellGroupData[{
-
-Cell[BoxData[Cell["3-4/12.16.20-48-5-a-20", "Subsection",ExpressionUUID->
-  "13c55262-4ed2-4cef-9c56-c6771cadcfc3"]], "Section",
- FontWeight->"Plain",ExpressionUUID->"e793e437-6533-49e1-9a7f-2686907f58e2"],
-
 Cell[BoxData[
  RowBox[{
-  RowBox[{"<<", "\"\<../data/3-4/periodic-12.16.20-48-5.m\>\""}], 
-  ";"}]], "Input",ExpressionUUID->"7c669e9e-f532-4b1a-8989-31566251df19"],
-
-Cell[BoxData[
- RowBox[{
-  RowBox[{
-  "<<", "\"\<../data/3-4/field-correlators-12.16.20-48-5-a-20.m\>\""}], 
-  ";"}]], "Input",ExpressionUUID->"c483980e-d6b3-401d-aecb-6bb8dba17015"],
-
-Cell["\<\
-Axial gauge staring from dir=nd going to 1.\[LineSeparator]This demonstrates \
-that the large noisy data points seen at large separation for \
-\[OpenCurlyDoubleQuote]8S\[CloseCurlyDoubleQuote] are due to incomplete \
-minimization when finding Landau gauge.\
-\>", "Text",ExpressionUUID->"187f141e-355c-4487-9509-34a4e42af392"],
-
-Cell[BoxData[
- RowBox[{
-  RowBox[{
-  "<<", "\"\<../data/3-4/field-correlators-12.16.20-48-5-a-20-backwards.m\>\"\
-"}], ";"}]], "Input",ExpressionUUID->"4e6e95ec-c190-4e15-906d-9350de31a7ad"],
-
-Cell["Further verification (do it three times) :", \
-"Text",ExpressionUUID->"f4f6cc30-4405-4015-9154-f912a24867bc"],
-
-Cell[BoxData[
- RowBox[{
-  RowBox[{
-  "<<", "\"\<../data/3-4/field-correlators-12.16.20-48-5-a-20-thrice.m\>\""}],
-   ";"}]], "Input",ExpressionUUID->"a8389a99-6a31-4b21-baa2-064066885b2b"],
+  RowBox[{"<<", "\"\<../data/3-3/field-correlators-20-28-15-a-20.m\>\""}], 
+  ";"}]], "Input",ExpressionUUID->"2e6f08a8-0e9e-4bd2-8d75-e7de93c6c9e8"],
 
 Cell[CellGroupData[{
 
 Cell["Calculate", \
-"Subsubsection",ExpressionUUID->"ff12583f-1555-4fb5-a08d-4d6dffa7a463"],
-
-Cell["\<\
-Set flag \[OpenCurlyDoubleQuote]backwards\[CloseCurlyDoubleQuote] to reverse \
-the order of directions for Axial gauge setting.\
-\>", "Text",ExpressionUUID->"8cce2390-6436-4f2a-9f69-88fbb806d320"],
-
-Cell[BoxData[
- RowBox[{
-  RowBox[{"Print", "[", 
-   RowBox[{"{", 
-    RowBox[{
-     RowBox[{"averagePlaquette", "[", "]"}], ",", 
-     RowBox[{"latticeNorm", "[", "]"}], ",", 
-     RowBox[{"latticeNorm", "[", 
-      RowBox[{"\"\<center\>\"", "\[Rule]", "True"}], "]"}]}], "}"}], "]"}], 
-  ";", 
-  RowBox[{"<<", "\"\<../data/3-4/step-12.16.20-48-5-a-20.m\>\""}], ";", 
-  RowBox[{"gaugeField", "=", "gaugeField0"}], ";", 
-  RowBox[{"Print", "[", 
-   RowBox[{"{", 
-    RowBox[{
-     RowBox[{"latticeNorm", "[", "]"}], ",", 
-     RowBox[{"latticeNorm", "[", 
-      RowBox[{"\"\<center\>\"", "\[Rule]", "True"}], "]"}], ",", 
-     RowBox[{"applyGaugeTransforms", "[", 
-      RowBox[{
-       RowBox[{"{", 
-        RowBox[{
-        "1", ",", "1", ",", "6", ",", "1", ",", "5", ",", "6", ",", "5", ",", 
-         "6", ",", "5", ",", "6"}], "}"}], ",", 
-       RowBox[{"\"\<backwards\>\"", "\[Rule]", "False"}], ",", 
-       RowBox[{"\"\<maxAbelianGauge\>\"", "\[Rule]", "False"}]}], "]"}], ",", 
-     
-     RowBox[{"latticeNorm", "[", "]"}], ",", 
-     RowBox[{"averagePlaquette", "[", "]"}]}], "}"}], "]"}], 
-  ";"}]], "Input",ExpressionUUID->"78e93a67-21f8-48a3-8a3d-cf711428af0e"],
+"Subsection",ExpressionUUID->"1f3057bd-3f2b-47a4-8855-730468c74334"],
 
 Cell[CellGroupData[{
 
 Cell[BoxData[
  RowBox[{
-  RowBox[{"fieldCorrelators", "=", 
-   RowBox[{"makeLinkCorrelators", "[", "]"}]}], 
-  ";"}]], "Input",ExpressionUUID->"537b5f3f-6064-46ed-bef8-89c211c6d9f3"],
+  RowBox[{"fieldCorr2", "=", 
+   RowBox[{"linkCorrelators", "[", 
+    RowBox[{"2", ",", 
+     RowBox[{"\"\<distFlag\>\"", "\[Rule]", "False"}]}], "]"}]}], 
+  ";"}]], "Input",ExpressionUUID->"a5b5c210-5c12-45e4-a38c-1d258ab88614"],
 
 Cell[CellGroupData[{
+
+Cell[BoxData[
+ InterpretationBox[
+  RowBox[{"\<\"ops: \"\>", "\[InvisibleSpace]", 
+   RowBox[{"{", 
+    RowBox[{"\<\"2l\"\>", ",", "\<\"2t1\"\>", ",", "\<\"2t2\"\>"}], "}"}]}],
+  SequenceForm["ops: ", {"2l", "2t1", "2t2"}],
+  Editable->
+   False]], "Print",ExpressionUUID->"a6534d14-a8be-4e4d-af08-74adbde70724"],
+
+Cell[BoxData[
+ InterpretationBox[
+  RowBox[{"\<\"Time: \"\>", "\[InvisibleSpace]", 
+   "0.170887`5.383224023437408"}],
+  SequenceForm["Time: ", 0.170887`5.383224023437408],
+  Editable->
+   False]], "Print",ExpressionUUID->"b1999151-e73c-4d23-95f5-6069ca10a69f"]
+}, Open  ]]
+}, Open  ]],
+
+Cell[CellGroupData[{
+
+Cell[BoxData[
+ RowBox[{
+  RowBox[{"fieldCorr3a", "=", 
+   RowBox[{"linkCorrelators", "[", 
+    RowBox[{"3", ",", 
+     RowBox[{"\"\<distFlag\>\"", "\[Rule]", "False"}], ",", 
+     RowBox[{"\"\<symmetric\>\"", "\[Rule]", "False"}]}], "]"}]}], 
+  ";"}]], "Input",ExpressionUUID->"16d27ae1-5017-4860-8c65-1491b838e5be"],
+
+Cell[CellGroupData[{
+
+Cell[BoxData[
+ InterpretationBox[
+  RowBox[{"\<\"ops: \"\>", "\[InvisibleSpace]", 
+   RowBox[{"{", 
+    RowBox[{"\<\"3pt1\"\>", ",", "\<\"3pt2\"\>", ",", "\<\"3m1a\"\>", 
+     ",", "\<\"3m1b\"\>", ",", "\<\"3m2\"\>", ",", "\<\"3m3\"\>", 
+     ",", "\<\"3m4\"\>", ",", "\<\"3m5\"\>", ",", "\<\"3m6\"\>", 
+     ",", "\<\"3m7\"\>", ",", "\<\"3m8\"\>", ",", "\<\"3m9\"\>", 
+     ",", "\<\"3m10\"\>"}], "}"}]}],
+  SequenceForm[
+  "ops: ", {
+   "3pt1", "3pt2", "3m1a", "3m1b", "3m2", "3m3", "3m4", "3m5", "3m6", "3m7", 
+    "3m8", "3m9", "3m10"}],
+  Editable->
+   False]], "Print",ExpressionUUID->"cbd6baf5-8677-47f9-8b67-e2d3d6f0c0ad"],
 
 Cell[BoxData[
  RowBox[{"{", 
   RowBox[{"3", ",", "3840", ",", "8"}], 
-  "}"}]], "Print",ExpressionUUID->"b2a90fdc-359c-47c5-97d8-1b7a51aacfbc"],
+  "}"}]], "Print",ExpressionUUID->"7c6c88a5-e2ce-4932-a939-d2daeca53484"],
 
 Cell[BoxData[
  InterpretationBox[
   RowBox[{"\<\"Time: \"\>", "\[InvisibleSpace]", 
-   "3713.617856`9.720312209144943"}],
-  SequenceForm["Time: ", 3713.617856`9.720312209144943],
+   "7377.373395`10.018416763028773"}],
+  SequenceForm["Time: ", 7377.373395`10.018416763028773],
   Editable->
-   False]], "Print",ExpressionUUID->"98129093-44e2-4d9e-b2e9-b9911faee7cc"]
+   False]], "Print",ExpressionUUID->"440fc95a-4414-46b8-9cf4-d88d98401cc3"]
+}, Open  ]]
+}, Open  ]],
+
+Cell[BoxData[
+ RowBox[{
+  RowBox[{"fieldCorr3s", "=", "Null"}], 
+  ";"}]], "Input",ExpressionUUID->"e37ecf15-b407-4fb7-a4d8-ff1901f26521"],
+
+Cell[BoxData[
+ RowBox[{"Block", "[", 
+  RowBox[{
+   RowBox[{"{", 
+    RowBox[{
+    "f", "=", "\"\<../data/3-3/field-correlators-20-28-15-a-20.m\>\""}], 
+    "}"}], ",", 
+   RowBox[{
+    RowBox[{"DeleteFile", "[", "f", "]"}], ";", 
+    RowBox[{"Save", "[", 
+     RowBox[{"f", ",", 
+      RowBox[{"{", 
+       RowBox[{"fieldCorr2", ",", "fieldCorr3a", ",", "fieldCorr3s"}], 
+       "}"}]}], "]"}]}]}], 
+  "]"}]], "Input",ExpressionUUID->"d20011b1-2611-44f0-b237-743fb9ee67b9"]
 }, Open  ]]
 }, Open  ]],
 
 Cell[CellGroupData[{
 
-Cell[BoxData[
- RowBox[{"Block", "[", 
-  RowBox[{
-   RowBox[{"{", 
-    RowBox[{
-    "f", "=", "\"\<../data/3-4/field-correlators-12.16.20-48-5-a-20.m\>\""}], 
-    "}"}], ",", 
-   RowBox[{
-    RowBox[{"DeleteFile", "[", "f", "]"}], ";", 
-    RowBox[{"Save", "[", 
-     RowBox[{"f", ",", "fieldCorrelators"}], "]"}]}]}], 
-  "]"}]], "Input",ExpressionUUID->"a8d9faa3-5ef7-47dd-96a0-58cf0c1b07cb"],
-
-Cell[BoxData[
- TemplateBox[{
-  "DeleteFile","fdnfnd",
-   "\"Directory or file \
-\\!\\(\\*RowBox[{\\\"\\\\\\\"../data/3-4/field-correlators-12.16.20-48-5-a-20.\
-m\\\\\\\"\\\"}]\\) not found.\"",2,97,12,31791914212606856540,"Local"},
-  "MessageTemplate"]], "Message", \
-"MSG",ExpressionUUID->"3f076654-e6d4-4f24-89eb-521fae707ee4"]
-}, Open  ]],
-
-Cell[CellGroupData[{
-
-Cell[BoxData[
- RowBox[{"Block", "[", 
-  RowBox[{
-   RowBox[{"{", 
-    RowBox[{
-    "f", "=", 
-     "\"\<../data/3-4/field-correlators-12.16.20-48-5-a-20-backwards.m\>\""}],
-     "}"}], ",", 
-   RowBox[{
-    RowBox[{"DeleteFile", "[", "f", "]"}], ";", 
-    RowBox[{"Save", "[", 
-     RowBox[{"f", ",", "fieldCorrelators"}], "]"}]}]}], 
-  "]"}]], "Input",ExpressionUUID->"e4df9b3e-2863-4168-a67e-425508e18d26"],
-
-Cell[BoxData[
- TemplateBox[{
-  "DeleteFile","fdnfnd",
-   "\"Directory or file \
-\\!\\(\\*RowBox[{\\\"\\\\\\\"../data/3-4/field-correlators-12.16.20-48-5-a-20-\
-backwards.m\\\\\\\"\\\"}]\\) not found.\"",2,132,29,31791914212606856540,
-   "Local"},
-  "MessageTemplate"]], "Message", \
-"MSG",ExpressionUUID->"988cc125-d16e-40f4-b000-8db6f03ae807"]
-}, Open  ]],
+Cell["3-4/16-48-15-a-20 (verify choice)", \
+"Section",ExpressionUUID->"f214507e-9164-423e-89e9-32ecf698d7d3"],
 
 Cell[CellGroupData[{
 
 Cell[BoxData[
  RowBox[{
+  RowBox[{"<<", "\"\<../data/3-4/periodic-16-48-15.m\>\""}], ";", 
   RowBox[{"Print", "[", 
    RowBox[{"{", 
     RowBox[{
@@ -933,7 +1177,7 @@ Cell[BoxData[
      RowBox[{"latticeNorm", "[", 
       RowBox[{"\"\<center\>\"", "\[Rule]", "True"}], "]"}]}], "}"}], "]"}], 
   ";", 
-  RowBox[{"<<", "\"\<../data/3-4/step-12.16.20-48-5-a-20.m\>\""}], ";", 
+  RowBox[{"<<", "\"\<../data/3-4/step-16-48-15-a-20.m\>\""}], ";", 
   RowBox[{"gaugeField", "=", "gaugeField0"}], ";", 
   RowBox[{"Print", "[", 
    RowBox[{"{", 
@@ -950,481 +1194,133 @@ Cell[BoxData[
        RowBox[{"\"\<maxAbelianGauge\>\"", "\[Rule]", "False"}]}], "]"}], ",", 
      
      RowBox[{"latticeNorm", "[", "]"}], ",", 
-     RowBox[{"applyGaugeTransforms", "[", 
-      RowBox[{
-       RowBox[{"{", 
-        RowBox[{
-        "1", ",", "1", ",", "6", ",", "1", ",", "5", ",", "6", ",", "5", ",", 
-         "6", ",", "5", ",", "6"}], "}"}], ",", 
-       RowBox[{"\"\<maxAbelianGauge\>\"", "\[Rule]", "False"}]}], "]"}], ",", 
-     
-     RowBox[{"latticeNorm", "[", "]"}], ",", 
-     RowBox[{"applyGaugeTransforms", "[", 
-      RowBox[{
-       RowBox[{"{", 
-        RowBox[{
-        "1", ",", "1", ",", "6", ",", "1", ",", "5", ",", "6", ",", "5", ",", 
-         "6", ",", "5", ",", "6"}], "}"}], ",", 
-       RowBox[{"\"\<maxAbelianGauge\>\"", "\[Rule]", "False"}]}], "]"}], ",", 
-     
-     RowBox[{"latticeNorm", "[", "]"}], ",", 
-     RowBox[{"averagePlaquette", "[", "]"}]}], "}"}], "]"}], ";", 
-  RowBox[{"fieldCorrelators", "=", 
-   RowBox[{"makeFieldCorrelators", "[", "]"}]}], 
-  ";"}]], "Input",ExpressionUUID->"3183ea48-6413-404d-bae3-ea4e5c229196"],
+     RowBox[{"averagePlaquette", "[", "]"}]}], "}"}], "]"}], 
+  ";"}]], "Input",ExpressionUUID->"aacacf7e-a7a3-4816-8750-e0977432b94f"],
 
 Cell[CellGroupData[{
 
 Cell[BoxData[
  RowBox[{"{", 
   RowBox[{
-  "0.8926468451525155`", ",", "3.6136387502770697`", ",", 
-   "2.9646814049569628`"}], 
-  "}"}]], "Print",ExpressionUUID->"585a466c-de12-44cf-be65-8a6b4da2758f"],
+  "0.9026164729132498`", ",", "3.0744629733649647`", ",", 
+   "2.3769610801945897`"}], 
+  "}"}]], "Print",ExpressionUUID->"19d8d722-d628-4e66-ab8a-5f25d854541e"],
 
 Cell[BoxData[
  RowBox[{"{", 
   RowBox[{
-  "0.4191333541385247`", ",", "0.4191333541385247`", ",", 
-   "0.3672417308428891`", ",", "0.3672417308428891`", ",", 
-   "0.36778116902676583`", ",", "0.36778116902676583`", ",", 
-   "0.3677957784262728`", ",", "0.3677957784262728`", ",", 
-   "0.9975031436204407`"}], 
-  "}"}]], "Print",ExpressionUUID->"4c090046-f2d2-4c7c-afe8-1e121fd0da32"],
+  "0.28829338593105225`", ",", "0.28829338593105225`", ",", 
+   "0.27962009711674896`", ",", "0.27962009711674896`", ",", 
+   "0.9977788227312665`"}], 
+  "}"}]], "Print",ExpressionUUID->"5a60201b-88a2-4709-9a59-003457ab8de2"]
+}, Open  ]]
+}, Open  ]],
 
 Cell[BoxData[
- RowBox[{"{", 
-  RowBox[{"3", ",", "3840", ",", "15"}], 
-  "}"}]], "Print",ExpressionUUID->"dbf55b0b-a87d-4af7-b3ea-5fe909d70b29"],
+ RowBox[{
+  RowBox[{"<<", "\"\<../data/3-4/field-correlators-16-48-15-a-20.m\>\""}], 
+  ";"}]], "Input",ExpressionUUID->"bff71b79-3fbe-49db-a23a-d63ecd44086a"],
+
+Cell[CellGroupData[{
+
+Cell["Calculate", \
+"Subsection",ExpressionUUID->"a1035830-edf5-4127-ad1e-278dee399e73"],
+
+Cell[CellGroupData[{
 
 Cell[BoxData[
- TagBox[GridBox[{
-    {
-     TagBox[
-      TemplateBox[{
-       "\[ThinSpace]","\" \"",InterpretationBox[
-        "\"0.0313\"", 0.031302770518511179`3.311861188037982, AutoDelete -> 
-         True],"\"\[PlusMinus]\"",InterpretationBox[
-        "\"0.0015\"", 0.0015265871041946232`2., AutoDelete -> True]},
-       "RowWithSeparators"],
-      NumberForm[#, ExponentFunction -> (Null& )]& ], 
-     TagBox[
-      TemplateBox[{
-       "\[ThinSpace]","\" \"",InterpretationBox[
-        "\"0.0189\"", 0.0189203307378477369`3.0460667729716833, AutoDelete -> 
-         True],"\"\[PlusMinus]\"",InterpretationBox[
-        "\"0.0017\"", 0.0017016175294712306`2., AutoDelete -> True]},
-       "RowWithSeparators"],
-      NumberForm[#, ExponentFunction -> (Null& )]& ], 
-     TagBox[
-      TemplateBox[{
-       "\[ThinSpace]","\" \"",InterpretationBox[
-        "\"-0.1578\"", -0.1578171314481609244`3.927104535756181, AutoDelete -> 
-         True],"\"\[PlusMinus]\"",InterpretationBox[
-        "\"0.0019\"", 0.0018665928994791698`2., AutoDelete -> True]},
-       "RowWithSeparators"],
-      NumberForm[#, ExponentFunction -> (Null& )]& ]},
-    {
-     TagBox[
-      TemplateBox[{
-       "\[ThinSpace]","\" \"",InterpretationBox[
-        "\"-0.0327\"", -0.0326809985885000223`3.2105109015882896, AutoDelete -> 
-         True],"\"\[PlusMinus]\"",InterpretationBox[
-        "\"0.0020\"", 0.0020127248870481047`2., AutoDelete -> True]},
-       "RowWithSeparators"],
-      NumberForm[#, ExponentFunction -> (Null& )]& ], 
-     TagBox[
-      TemplateBox[{
-       "\[ThinSpace]","\" \"",InterpretationBox[
-        "\"0.0004\"", 0.0003838850715944205`1.3557022686868558, AutoDelete -> 
-         True],"\"\[PlusMinus]\"",InterpretationBox[
-        "\"0.0017\"", 0.0016923841723996882`2., AutoDelete -> True]},
-       "RowWithSeparators"],
-      NumberForm[#, ExponentFunction -> (Null& )]& ], 
-     TagBox[
-      TemplateBox[{
-       "\[ThinSpace]","\" \"",InterpretationBox[
-        "\"-0.0519\"", -0.0518712760646377891`3.3417613679066327, AutoDelete -> 
-         True],"\"\[PlusMinus]\"",InterpretationBox[
-        "\"0.0024\"", 0.0023613782791877809`2., AutoDelete -> True]},
-       "RowWithSeparators"],
-      NumberForm[#, ExponentFunction -> (Null& )]& ]},
-    {
-     TagBox[
-      TemplateBox[{
-       "\[ThinSpace]","\" \"",InterpretationBox[
-        "\"-0.0601\"", -0.0601416715305152089`3.633422128946498, AutoDelete -> 
-         True],"\"\[PlusMinus]\"",InterpretationBox[
-        "\"0.0014\"", 0.0013987927266471175`2., AutoDelete -> True]},
-       "RowWithSeparators"],
-      NumberForm[#, ExponentFunction -> (Null& )]& ], 
-     TagBox[
-      TemplateBox[{
-       "\[ThinSpace]","\" \"",InterpretationBox[
-        "\"0.1046\"", 0.1046019212355979583`3.7807436876783145, AutoDelete -> 
-         True],"\"\[PlusMinus]\"",InterpretationBox[
-        "\"0.0017\"", 0.0017329896687347946`2., AutoDelete -> True]},
-       "RowWithSeparators"],
-      NumberForm[#, ExponentFunction -> (Null& )]& ], 
-     TagBox[
-      TemplateBox[{
-       "\[ThinSpace]","\" \"",InterpretationBox[
-        "\"0.0516\"", 0.0515941463450726168`3.501086275928209, AutoDelete -> 
-         True],"\"\[PlusMinus]\"",InterpretationBox[
-        "\"0.0016\"", 0.0016274743602033915`2., AutoDelete -> True]},
-       "RowWithSeparators"],
-      NumberForm[#, ExponentFunction -> (Null& )]& ]},
-    {
-     TagBox[
-      TemplateBox[{
-       "\[ThinSpace]","\" \"",InterpretationBox[
-        "\"0.0432\"", 0.0431947499549755892`3.360378831667565, AutoDelete -> 
-         True],"\"\[PlusMinus]\"",InterpretationBox[
-        "\"0.0019\"", 0.0018838752160140434`2., AutoDelete -> True]},
-       "RowWithSeparators"],
-      NumberForm[#, ExponentFunction -> (Null& )]& ], 
-     TagBox[
-      TemplateBox[{
-       "\[ThinSpace]","\" \"",InterpretationBox[
-        "\"0.0180\"", 0.0179894695156417664`2.890065696647088, AutoDelete -> 
-         True],"\"\[PlusMinus]\"",InterpretationBox[
-        "\"0.0023\"", 0.0023171420583669869`2., AutoDelete -> True]},
-       "RowWithSeparators"],
-      NumberForm[#, ExponentFunction -> (Null& )]& ], 
-     TagBox[
-      TemplateBox[{
-       "\[ThinSpace]","\" \"",InterpretationBox[
-        "\"0.0598\"", 0.059840529165838742`3.473255126455524, AutoDelete -> 
-         True],"\"\[PlusMinus]\"",InterpretationBox[
-        "\"0.0020\"", 0.0020125204349784446`2., AutoDelete -> True]},
-       "RowWithSeparators"],
-      NumberForm[#, ExponentFunction -> (Null& )]& ]},
-    {
-     TagBox[
-      TemplateBox[{
-       "\[ThinSpace]","\" \"",InterpretationBox[
-        "\"0.0689\"", 0.068870581116160956`3.509340483829516, AutoDelete -> 
-         True],"\"\[PlusMinus]\"",InterpretationBox[
-        "\"0.0021\"", 0.0021315389041741658`2., AutoDelete -> True]},
-       "RowWithSeparators"],
-      NumberForm[#, ExponentFunction -> (Null& )]& ], 
-     TagBox[
-      TemplateBox[{
-       "\[ThinSpace]","\" \"",InterpretationBox[
-        "\"0.0972\"", 0.097241539613236741`3.685438917676688, AutoDelete -> 
-         True],"\"\[PlusMinus]\"",InterpretationBox[
-        "\"0.0020\"", 0.0020063787001674835`2., AutoDelete -> True]},
-       "RowWithSeparators"],
-      NumberForm[#, ExponentFunction -> (Null& )]& ], 
-     TagBox[
-      TemplateBox[{
-       "\[ThinSpace]","\" \"",InterpretationBox[
-        "\"0.0737\"", 0.0736515510836752846`3.614670301550979, AutoDelete -> 
-         True],"\"\[PlusMinus]\"",InterpretationBox[
-        "\"0.0018\"", 0.0017885932847223182`2., AutoDelete -> True]},
-       "RowWithSeparators"],
-      NumberForm[#, ExponentFunction -> (Null& )]& ]},
-    {
-     TagBox[
-      TemplateBox[{
-       "\[ThinSpace]","\" \"",InterpretationBox[
-        "\"0.0050\"", 0.0050200084156153532`2.405011261728966, AutoDelete -> 
-         True],"\"\[PlusMinus]\"",InterpretationBox[
-        "\"0.0020\"", 0.0019755734613181222`2., AutoDelete -> True]},
-       "RowWithSeparators"],
-      NumberForm[#, ExponentFunction -> (Null& )]& ], 
-     TagBox[
-      TemplateBox[{
-       "\[ThinSpace]","\" \"",InterpretationBox[
-        "\"-0.0207\"", -0.0207407372379481633`3.000340319519208, AutoDelete -> 
-         True],"\"\[PlusMinus]\"",InterpretationBox[
-        "\"0.0021\"", 0.0020724490858641475`2., AutoDelete -> True]},
-       "RowWithSeparators"],
-      NumberForm[#, ExponentFunction -> (Null& )]& ], 
-     TagBox[
-      TemplateBox[{
-       "\[ThinSpace]","\" \"",InterpretationBox[
-        "\"0.0109\"", 0.0108532786545924246`2.701730182355857, AutoDelete -> 
-         True],"\"\[PlusMinus]\"",InterpretationBox[
-        "\"0.0022\"", 0.0021569037781225945`2., AutoDelete -> True]},
-       "RowWithSeparators"],
-      NumberForm[#, ExponentFunction -> (Null& )]& ]},
-    {
-     TagBox[
-      TemplateBox[{
-       "\[ThinSpace]","\" \"",InterpretationBox[
-        "\"-0.0829\"", -0.0829155374633034348`3.6692337833235866, AutoDelete -> 
-         True],"\"\[PlusMinus]\"",InterpretationBox[
-        "\"0.0018\"", 0.0017758330602445807`2., AutoDelete -> True]},
-       "RowWithSeparators"],
-      NumberForm[#, ExponentFunction -> (Null& )]& ], 
-     TagBox[
-      TemplateBox[{
-       "\[ThinSpace]","\" \"",InterpretationBox[
-        "\"-0.0306\"", -0.0305979710480286174`3.3104108610429637, AutoDelete -> 
-         True],"\"\[PlusMinus]\"",InterpretationBox[
-        "\"0.0015\"", 0.0014972067220790947`2., AutoDelete -> True]},
-       "RowWithSeparators"],
-      NumberForm[#, ExponentFunction -> (Null& )]& ], 
-     TagBox[
-      TemplateBox[{
-       "\[ThinSpace]","\" \"",InterpretationBox[
-        "\"-0.0519\"", -0.0518708122386855458`3.5146475756087345, AutoDelete -> 
-         True],"\"\[PlusMinus]\"",InterpretationBox[
-        "\"0.0016\"", 0.0015858988091553867`2., AutoDelete -> True]},
-       "RowWithSeparators"],
-      NumberForm[#, ExponentFunction -> (Null& )]& ]},
-    {
-     TagBox[
-      TemplateBox[{
-       "\[ThinSpace]","\" \"",InterpretationBox[
-        "\"0.0910\"", 0.0909812111560586445`3.6080009179423502, AutoDelete -> 
-         True],"\"\[PlusMinus]\"",InterpretationBox[
-        "\"0.0022\"", 0.0022436277143735193`2., AutoDelete -> True]},
-       "RowWithSeparators"],
-      NumberForm[#, ExponentFunction -> (Null& )]& ], 
-     TagBox[
-      TemplateBox[{
-       "\[ThinSpace]","\" \"",InterpretationBox[
-        "\"0.0996\"", 0.0996126720887553913`3.6227298587483134, AutoDelete -> 
-         True],"\"\[PlusMinus]\"",InterpretationBox[
-        "\"0.0024\"", 0.0023745686586796118`2., AutoDelete -> True]},
-       "RowWithSeparators"],
-      NumberForm[#, ExponentFunction -> (Null& )]& ], 
-     TagBox[
-      TemplateBox[{
-       "\[ThinSpace]","\" \"",InterpretationBox[
-        "\"0.0005\"", 0.0005436618136828756`1.3906928870633188, AutoDelete -> 
-         True],"\"\[PlusMinus]\"",InterpretationBox[
-        "\"0.0022\"", 0.0022112403088789469`2., AutoDelete -> True]},
-       "RowWithSeparators"],
-      NumberForm[#, ExponentFunction -> (Null& )]& ]},
-    {
-     TagBox[
-      TemplateBox[{
-       "\[ThinSpace]","\" \"",InterpretationBox[
-        "\"0.1033\"", 0.1033481489917239399`3.7387466083338365, AutoDelete -> 
-         True],"\"\[PlusMinus]\"",InterpretationBox[
-        "\"0.0019\"", 0.001886062561200504`2., AutoDelete -> True]},
-       "RowWithSeparators"],
-      NumberForm[#, ExponentFunction -> (Null& )]& ], 
-     TagBox[
-      TemplateBox[{
-       "\[ThinSpace]","\" \"",InterpretationBox[
-        "\"-0.0097\"", -0.0096547922012826075`2.739050414580229, AutoDelete -> 
-         True],"\"\[PlusMinus]\"",InterpretationBox[
-        "\"0.0018\"", 0.0017607289961871866`2., AutoDelete -> True]},
-       "RowWithSeparators"],
-      NumberForm[#, ExponentFunction -> (Null& )]& ], 
-     TagBox[
-      TemplateBox[{
-       "\[ThinSpace]","\" \"",InterpretationBox[
-        "\"0.0120\"", 0.0120046338003981859`2.8547090982250825, AutoDelete -> 
-         True],"\"\[PlusMinus]\"",InterpretationBox[
-        "\"0.0017\"", 0.001677412280788233`2., AutoDelete -> True]},
-       "RowWithSeparators"],
-      NumberForm[#, ExponentFunction -> (Null& )]& ]},
-    {
-     TagBox[
-      TemplateBox[{
-       "\[ThinSpace]","\" \"",InterpretationBox[
-        "\"-0.0041\"", -0.004117444152224552`2.3100658415313147, AutoDelete -> 
-         True],"\"\[PlusMinus]\"",InterpretationBox[
-        "\"0.0020\"", 0.0020163312251546034`2., AutoDelete -> True]},
-       "RowWithSeparators"],
-      NumberForm[#, ExponentFunction -> (Null& )]& ], 
-     TagBox[
-      TemplateBox[{
-       "\[ThinSpace]","\" \"",InterpretationBox[
-        "\"0.0675\"", 0.0674573497308597059`3.6276618015276907, AutoDelete -> 
-         True],"\"\[PlusMinus]\"",InterpretationBox[
-        "\"0.0016\"", 0.0015898914472009804`2., AutoDelete -> True]},
-       "RowWithSeparators"],
-      NumberForm[#, ExponentFunction -> (Null& )]& ], 
-     TagBox[
-      TemplateBox[{
-       "\[ThinSpace]","\" \"",InterpretationBox[
-        "\"0.0059\"", 0.0058934382115577808`2.464560109974999, AutoDelete -> 
-         True],"\"\[PlusMinus]\"",InterpretationBox[
-        "\"0.0020\"", 0.0020221279154332109`2., AutoDelete -> True]},
-       "RowWithSeparators"],
-      NumberForm[#, ExponentFunction -> (Null& )]& ]},
-    {
-     TagBox[
-      TemplateBox[{
-       "\[ThinSpace]","\" \"",InterpretationBox[
-        "\"-0.0841\"", -0.0840999418863781628`3.647599629096151, AutoDelete -> 
-         True],"\"\[PlusMinus]\"",InterpretationBox[
-        "\"0.0019\"", 0.0018931981290331245`2., AutoDelete -> True]},
-       "RowWithSeparators"],
-      NumberForm[#, ExponentFunction -> (Null& )]& ], 
-     TagBox[
-      TemplateBox[{
-       "\[ThinSpace]","\" \"",InterpretationBox[
-        "\"0.0117\"", 0.0116511957601953525`2.850569693479479, AutoDelete -> 
-         True],"\"\[PlusMinus]\"",InterpretationBox[
-        "\"0.0016\"", 0.0016436176857557592`2., AutoDelete -> True]},
-       "RowWithSeparators"],
-      NumberForm[#, ExponentFunction -> (Null& )]& ], 
-     TagBox[
-      TemplateBox[{
-       "\[ThinSpace]","\" \"",InterpretationBox[
-        "\"-0.0306\"", -0.0306137183723403684`3.160558148248606, AutoDelete -> 
-         True],"\"\[PlusMinus]\"",InterpretationBox[
-        "\"0.0021\"", 0.0021152316413706935`2., AutoDelete -> True]},
-       "RowWithSeparators"],
-      NumberForm[#, ExponentFunction -> (Null& )]& ]},
-    {
-     TagBox[
-      TemplateBox[{
-       "\[ThinSpace]","\" \"",InterpretationBox[
-        "\"-0.0203\"", -0.0203348463881256811`2.9651398812037897, AutoDelete -> 
-         True],"\"\[PlusMinus]\"",InterpretationBox[
-        "\"0.0022\"", 0.002203438912893904`2., AutoDelete -> True]},
-       "RowWithSeparators"],
-      NumberForm[#, ExponentFunction -> (Null& )]& ], 
-     TagBox[
-      TemplateBox[{
-       "\[ThinSpace]","\" \"",InterpretationBox[
-        "\"-0.0581\"", -0.0581469196416556297`3.4716977355688416, AutoDelete -> 
-         True],"\"\[PlusMinus]\"",InterpretationBox[
-        "\"0.0020\"", 0.001962587268319417`2., AutoDelete -> True]},
-       "RowWithSeparators"],
-      NumberForm[#, ExponentFunction -> (Null& )]& ], 
-     TagBox[
-      TemplateBox[{
-       "\[ThinSpace]","\" \"",InterpretationBox[
-        "\"-0.0200\"", -0.0200401924366000531`2.9571694716154413, AutoDelete -> 
-         True],"\"\[PlusMinus]\"",InterpretationBox[
-        "\"0.0022\"", 0.0022117315642630753`2., AutoDelete -> True]},
-       "RowWithSeparators"],
-      NumberForm[#, ExponentFunction -> (Null& )]& ]},
-    {
-     TagBox[
-      TemplateBox[{
-       "\[ThinSpace]","\" \"",InterpretationBox[
-        "\"0.0101\"", 0.0101412534176074029`2.708710637663003, AutoDelete -> 
-         True],"\"\[PlusMinus]\"",InterpretationBox[
-        "\"0.0020\"", 0.0019832661417346202`2., AutoDelete -> True]},
-       "RowWithSeparators"],
-      NumberForm[#, ExponentFunction -> (Null& )]& ], 
-     TagBox[
-      TemplateBox[{
-       "\[ThinSpace]","\" \"",InterpretationBox[
-        "\"0.0294\"", 0.0293724840891770173`3.217562141586615, AutoDelete -> 
-         True],"\"\[PlusMinus]\"",InterpretationBox[
-        "\"0.0018\"", 0.0017798300527399156`2., AutoDelete -> True]},
-       "RowWithSeparators"],
-      NumberForm[#, ExponentFunction -> (Null& )]& ], 
-     TagBox[
-      TemplateBox[{
-       "\[ThinSpace]","\" \"",InterpretationBox[
-        "\"0.0693\"", 0.0692972139700109568`3.6028722381001326, AutoDelete -> 
-         True],"\"\[PlusMinus]\"",InterpretationBox[
-        "\"0.0017\"", 0.0017291932694480535`2., AutoDelete -> True]},
-       "RowWithSeparators"],
-      NumberForm[#, ExponentFunction -> (Null& )]& ]},
-    {
-     TagBox[
-      TemplateBox[{
-       "\[ThinSpace]","\" \"",InterpretationBox[
-        "\"0.0054\"", 0.0054337600023273329`2.518031004722052, AutoDelete -> 
-         True],"\"\[PlusMinus]\"",InterpretationBox[
-        "\"0.0016\"", 0.0016484259698117544`2., AutoDelete -> True]},
-       "RowWithSeparators"],
-      NumberForm[#, ExponentFunction -> (Null& )]& ], 
-     TagBox[
-      TemplateBox[{
-       "\[ThinSpace]","\" \"",InterpretationBox[
-        "\"-0.0189\"", -0.018896037215459717`2.96099135973707, AutoDelete -> 
-         True],"\"\[PlusMinus]\"",InterpretationBox[
-        "\"0.0021\"", 0.0020671851470333144`2., AutoDelete -> True]},
-       "RowWithSeparators"],
-      NumberForm[#, ExponentFunction -> (Null& )]& ], 
-     TagBox[
-      TemplateBox[{
-       "\[ThinSpace]","\" \"",InterpretationBox[
-        "\"0.1602\"", 0.1601563549004471898`3.8496769151222927, AutoDelete -> 
-         True],"\"\[PlusMinus]\"",InterpretationBox[
-        "\"0.0023\"", 0.0022639522396988012`2., AutoDelete -> True]},
-       "RowWithSeparators"],
-      NumberForm[#, ExponentFunction -> (Null& )]& ]},
-    {
-     TagBox[
-      TemplateBox[{
-       "\[ThinSpace]","\" \"",InterpretationBox[
-        "\"-0.0271\"", -0.0270896787236073397`3.1458365489604496, AutoDelete -> 
-         True],"\"\[PlusMinus]\"",InterpretationBox[
-        "\"0.0019\"", 0.0019362761919083265`2., AutoDelete -> True]},
-       "RowWithSeparators"],
-      NumberForm[#, ExponentFunction -> (Null& )]& ], 
-     TagBox[
-      TemplateBox[{
-       "\[ThinSpace]","\" \"",InterpretationBox[
-        "\"-0.0087\"", -0.0086674921932940012`2.640972636298076, AutoDelete -> 
-         True],"\"\[PlusMinus]\"",InterpretationBox[
-        "\"0.0020\"", 0.0019811658024066589`2., AutoDelete -> True]},
-       "RowWithSeparators"],
-      NumberForm[#, ExponentFunction -> (Null& )]& ], 
-     TagBox[
-      TemplateBox[{
-       "\[ThinSpace]","\" \"",InterpretationBox[
-        "\"-0.0087\"", -0.0086721436332469603`2.595534066023574, AutoDelete -> 
-         True],"\"\[PlusMinus]\"",InterpretationBox[
-        "\"0.0022\"", 0.002200859893408842`2., AutoDelete -> True]},
-       "RowWithSeparators"],
-      NumberForm[#, ExponentFunction -> (Null& )]& ]}
-   },
-   GridBoxAlignment->{
-    "Columns" -> {{Left}}, "ColumnsIndexed" -> {}, "Rows" -> {{Baseline}}, 
-     "RowsIndexed" -> {}},
-   GridBoxSpacings->{"Columns" -> {
-       Offset[0.27999999999999997`], {
-        Offset[2.0999999999999996`]}, 
-       Offset[0.27999999999999997`]}, "ColumnsIndexed" -> {}, "Rows" -> {
-       Offset[0.2], {
-        Offset[0.4]}, 
-       Offset[0.2]}, "RowsIndexed" -> {}}],
-  Function[BoxForm`e$, 
-   TableForm[
-   BoxForm`e$]]]], \
-"Print",ExpressionUUID->"27447c5b-ec27-41a8-b0ee-366fdbb1b436"],
+ RowBox[{
+  RowBox[{"fieldCorr2", "=", 
+   RowBox[{"linkCorrelators", "[", 
+    RowBox[{"2", ",", 
+     RowBox[{"\"\<distFlag\>\"", "\[Rule]", "False"}]}], "]"}]}], 
+  ";"}]], "Input",ExpressionUUID->"5e53775b-408b-4ad5-a2d5-ddbdafff4d46"],
+
+Cell[CellGroupData[{
+
+Cell[BoxData[
+ InterpretationBox[
+  RowBox[{"\<\"ops: \"\>", "\[InvisibleSpace]", 
+   RowBox[{"{", 
+    RowBox[{"\<\"2l\"\>", ",", "\<\"2t1\"\>", ",", "\<\"2t2\"\>"}], "}"}]}],
+  SequenceForm["ops: ", {"2l", "2t1", "2t2"}],
+  Editable->
+   False]], "Print",ExpressionUUID->"b55a4148-b909-4e30-8b15-98050bbf6a7e"],
 
 Cell[BoxData[
  InterpretationBox[
   RowBox[{"\<\"Time: \"\>", "\[InvisibleSpace]", 
-   "7011.105624`9.996301507744457"}],
-  SequenceForm["Time: ", 7011.105624`9.996301507744457],
+   "0.170887`5.383224023437408"}],
+  SequenceForm["Time: ", 0.170887`5.383224023437408],
   Editable->
-   False]], "Print",ExpressionUUID->"1ea892cb-3325-4144-9318-be56a0d34708"]
+   False]], "Print",ExpressionUUID->"2ca9d18f-0dfb-411d-9c1d-02586b944dba"]
 }, Open  ]]
 }, Open  ]],
 
 Cell[CellGroupData[{
 
 Cell[BoxData[
+ RowBox[{
+  RowBox[{"fieldCorr3a", "=", 
+   RowBox[{"linkCorrelators", "[", 
+    RowBox[{"3", ",", 
+     RowBox[{"\"\<distFlag\>\"", "\[Rule]", "False"}], ",", 
+     RowBox[{"\"\<symmetric\>\"", "\[Rule]", "False"}]}], "]"}]}], 
+  ";"}]], "Input",ExpressionUUID->"c676f5c4-4786-4502-b3b3-7b73e5337c0d"],
+
+Cell[CellGroupData[{
+
+Cell[BoxData[
+ InterpretationBox[
+  RowBox[{"\<\"ops: \"\>", "\[InvisibleSpace]", 
+   RowBox[{"{", 
+    RowBox[{"\<\"3pt1\"\>", ",", "\<\"3pt2\"\>", ",", "\<\"3m1a\"\>", 
+     ",", "\<\"3m1b\"\>", ",", "\<\"3m2\"\>", ",", "\<\"3m3\"\>", 
+     ",", "\<\"3m4\"\>", ",", "\<\"3m5\"\>", ",", "\<\"3m6\"\>", 
+     ",", "\<\"3m7\"\>", ",", "\<\"3m8\"\>", ",", "\<\"3m9\"\>", 
+     ",", "\<\"3m10\"\>"}], "}"}]}],
+  SequenceForm[
+  "ops: ", {
+   "3pt1", "3pt2", "3m1a", "3m1b", "3m2", "3m3", "3m4", "3m5", "3m6", "3m7", 
+    "3m8", "3m9", "3m10"}],
+  Editable->
+   False]], "Print",ExpressionUUID->"339dad03-e59c-49fe-ad32-5a7e7cc95e99"],
+
+Cell[BoxData[
+ RowBox[{"{", 
+  RowBox[{"3", ",", "3840", ",", "8"}], 
+  "}"}]], "Print",ExpressionUUID->"4d9596c8-15fd-4bf4-b06d-187c3b432bb6"],
+
+Cell[BoxData[
+ InterpretationBox[
+  RowBox[{"\<\"Time: \"\>", "\[InvisibleSpace]", 
+   "7377.373395`10.018416763028773"}],
+  SequenceForm["Time: ", 7377.373395`10.018416763028773],
+  Editable->
+   False]], "Print",ExpressionUUID->"42d290a7-fc15-4bcb-92a4-8ebae5b0630e"]
+}, Open  ]]
+}, Open  ]],
+
+Cell[BoxData[
+ RowBox[{
+  RowBox[{"fieldCorr3s", "=", "Null"}], 
+  ";"}]], "Input",ExpressionUUID->"61b7d0aa-a30f-4670-92b3-8a2b50ae265e"],
+
+Cell[BoxData[
  RowBox[{"Block", "[", 
   RowBox[{
    RowBox[{"{", 
     RowBox[{
-    "f", "=", 
-     "\"\<../data/3-4/field-correlators-12.16.20-48-5-a-20-thrice.m\>\""}], 
+    "f", "=", "\"\<../data/3-4/field-correlators-16-48-15-a-20.m\>\""}], 
     "}"}], ",", 
    RowBox[{
     RowBox[{"DeleteFile", "[", "f", "]"}], ";", 
     RowBox[{"Save", "[", 
-     RowBox[{"f", ",", "fieldCorrelators"}], "]"}]}]}], 
-  "]"}]], "Input",ExpressionUUID->"a91c2140-75ce-4baa-af9a-20632e2a174a"],
-
-Cell[BoxData[
- TemplateBox[{
-  "DeleteFile","fdnfnd",
-   "\"Directory or file \
-\\!\\(\\*RowBox[{\\\"\\\\\\\"../data/3-4/field-correlators-12.16.20-48-5-a-20-\
-thrice.m\\\\\\\"\\\"}]\\) not found.\"",2,236,54,31791914212606856540,"Local"},
-  "MessageTemplate"]], "Message", \
-"MSG",ExpressionUUID->"144ab156-256c-497c-afea-6961c57cbcd8"]
-}, Open  ]]
+     RowBox[{"f", ",", 
+      RowBox[{"{", 
+       RowBox[{"fieldCorr2", ",", "fieldCorr3a", ",", "fieldCorr3s"}], 
+       "}"}]}], "]"}]}]}], 
+  "]"}]], "Input",ExpressionUUID->"d599ea97-7173-4804-8b8c-327ca86cdd04"]
 }, Open  ]]
 }, Closed]]
 }, Open  ]],
@@ -1432,26 +1328,26 @@ thrice.m\\\\\\\"\\\"}]\\) not found.\"",2,236,54,31791914212606856540,"Local"},
 Cell[CellGroupData[{
 
 Cell["Analysis", \
-"Title",ExpressionUUID->"5930f3b3-4040-43c9-a696-aca819cea7a7"],
+"Title",ExpressionUUID->"40fc8713-6d38-4714-a06e-91355f7af4f2"],
 
 Cell[CellGroupData[{
 
 Cell["Plot the fields themselves", \
-"Section",ExpressionUUID->"1ffddd92-970d-449a-b5d5-55f5cb3fbc2d"],
+"Section",ExpressionUUID->"8dc2311c-c0f8-428c-8bd9-0f6d0c8abc18"],
 
 Cell["Animation of links, going through the entire lattice.", \
-"Text",ExpressionUUID->"5f2ff7cd-be0d-429b-b388-3c5d7d7582ab"],
+"Text",ExpressionUUID->"fadec7da-71fd-45e0-90fc-0a65366b3b6b"],
 
 Cell[BoxData[
  RowBox[{"plotLinks", "[", 
   RowBox[{"1", ",", "2", ",", "3", ",", 
    RowBox[{"ImageSize", "\[Rule]", "500"}]}], 
-  "]"}]], "Input",ExpressionUUID->"12662d4f-0f30-49e8-812c-04599d9e363f"],
+  "]"}]], "Input",ExpressionUUID->"3147ea4b-0936-4cd4-842a-056634c29db1"],
 
 Cell["\<\
 Plot all components of the field at a single site, with buttons to choose \
 gauge and navigate lattice.\
-\>", "Text",ExpressionUUID->"8e3e0aea-2e8a-4cbc-9bbf-911c9b3e5fc5"],
+\>", "Text",ExpressionUUID->"54d238d8-3d27-4ae4-a85f-d84295d39a31"],
 
 Cell[BoxData[
  RowBox[{"DynamicModule", "[", 
@@ -1742,12 +1638,12 @@ Cell[BoxData[
              RowBox[{"{", 
               RowBox[{"1", ",", "1", ",", "1"}], "}"}]}]}], "]"}]}], "]"}], 
         "]"}]}], "}"}], "]"}]}]}], 
-  "]"}]], "Input",ExpressionUUID->"2a8e6977-e4cc-4f30-afe0-dca724025cf7"],
+  "]"}]], "Input",ExpressionUUID->"e7a8eec4-54a9-4bc7-b3b8-721980c57921"],
 
 Cell["\<\
 Plot links on a planar slice of the lattice, with buttons to navigate the \
 lattice and choose gauge.\
-\>", "Text",ExpressionUUID->"0a66ccdd-ece3-4124-92b2-927ff45f6031"],
+\>", "Text",ExpressionUUID->"d82340d0-155e-4b86-b2f7-edcffb86dd44"],
 
 Cell[BoxData[
  RowBox[{"DynamicModule", "[", 
@@ -1925,16 +1821,16 @@ Cell[BoxData[
          RowBox[{
          "lgf", ",", "None", ",", "dir1", ",", "dir2", ",", "x", ",", "maxx", 
           ",", "size"}], "]"}], "]"}]}], "}"}], "]"}]}]}], 
-  "]"}]], "Input",ExpressionUUID->"72d2060d-13a2-4d70-8773-942a723087f7"]
+  "]"}]], "Input",ExpressionUUID->"3d506efa-dabd-49e2-8db1-1dc5135c46e6"]
 }, Closed]],
 
 Cell[CellGroupData[{
 
 Cell["Field distributions at a single site", \
-"Section",ExpressionUUID->"0a07d8cf-ed12-4e3e-a44c-704725559a89"],
+"Section",ExpressionUUID->"48935e57-ad6a-4df8-92bc-26b20deb4cd6"],
 
 Cell["Find the distribution of link phases", \
-"Text",ExpressionUUID->"33aec205-5674-4493-a3b7-50fa688c35e6"],
+"Text",ExpressionUUID->"0b69998b-1a92-463b-90fc-bf4679cc4f10"],
 
 Cell[CellGroupData[{
 
@@ -1968,20 +1864,20 @@ Cell[BoxData[
   RowBox[{"Map", "[", 
    RowBox[{"Mean", ",", 
     RowBox[{"Transpose", "[", "distl", "]"}]}], 
-   "]"}]}]], "Input",ExpressionUUID->"67c60b4b-b916-46ed-b064-e3490bfeb64a"],
+   "]"}]}]], "Input",ExpressionUUID->"a0125904-78ad-4eb2-b5b0-1c37332b1c9a"],
 
 Cell[BoxData[
  RowBox[{"{", 
   RowBox[{"0.18408279110825598`", ",", 
    RowBox[{"-", "0.0038169331317982444`"}], ",", 
    RowBox[{"-", "0.18026585797645778`"}]}], 
-  "}"}]], "Output",ExpressionUUID->"26febf1d-ff7b-4eee-90c9-d2ec24691e25"]
+  "}"}]], "Output",ExpressionUUID->"e8364c64-50ec-4a3e-a7ca-a83bcc392d34"]
 }, Open  ]],
 
 Cell["\<\
 Blow up value so shape can be seen. (There seems to be a bug where image can\
 \[CloseCurlyQuote]t be resized in the notebook interface.)\
-\>", "Text",ExpressionUUID->"5f77c29d-75f8-4682-890a-1363ebaf7073"],
+\>", "Text",ExpressionUUID->"d9b732ba-16ba-4d1a-8ccb-531b2ca84ce5"],
 
 Cell[CellGroupData[{
 
@@ -2012,7 +1908,7 @@ Cell[BoxData[
      RowBox[{"\"\<centerLabels\>\"", "\[Rule]", "False"}], ",", 
      RowBox[{"Ticks", "\[Rule]", "Automatic"}], ",", 
      RowBox[{"ImageSize", "\[Rule]", "400"}]}], "]"}]}], 
-  "]"}]], "Input",ExpressionUUID->"39f50232-079e-40c5-8245-1c5d69d33768"],
+  "]"}]], "Input",ExpressionUUID->"b5f1a3de-b305-457e-bcce-952c46d02493"],
 
 Cell[CellGroupData[{
 
@@ -2037,7 +1933,7 @@ Cell[BoxData[
    0.07034577673898915}, {-0.0038169331317982557`, 
    0.044816443879846735`}, {-0.18026585797645744`, 0.06952715689775445}}],
   Editable->
-   False]], "Print",ExpressionUUID->"b67ae38c-59c8-40f8-80a5-9c5a7bef57c1"],
+   False]], "Print",ExpressionUUID->"591c2260-710f-4bd2-a799-33bb1a166b65"],
 
 Cell[BoxData[
  RowBox[{"{", 
@@ -2079,12 +1975,12 @@ Cell[BoxData[
        FractionBox["2", "3"], ",", 
        RowBox[{"-", 
         FractionBox["1", "3"]}]}], "}"}]}], "}"}]}], 
-  "}"}]], "Print",ExpressionUUID->"5c993bb6-5c0e-427a-ae8f-a55b19267158"]
+  "}"}]], "Print",ExpressionUUID->"3f7ce0ad-a089-410b-bd37-17880802ded5"]
 }, Open  ]]
 }, Open  ]],
 
 Cell["Similarly, plot a histogram of the norm of the link field.", \
-"Text",ExpressionUUID->"9aa8c38d-9259-4318-a735-da18bb5ebe9f"],
+"Text",ExpressionUUID->"cbc16dc9-98dd-4e81-848a-8743db8c9a3a"],
 
 Cell[BoxData[
  RowBox[{"Histogram", "[", 
@@ -2109,11 +2005,11 @@ Cell[BoxData[
      RowBox[{"True", ",", "journalStyle", ",", 
       RowBox[{"{", 
        RowBox[{"FontSize", "\[Rule]", "14"}], "}"}]}], "]"}]}]}], 
-  "]"}]], "Input",ExpressionUUID->"4e6d2a74-645d-4d63-8704-f9f95e1109a7"],
+  "]"}]], "Input",ExpressionUUID->"1e6bfaf3-cf0f-400e-b430-29479d4e2939"],
 
 Cell["\<\
 Distribution of the correlation of pairs of distinct links at a site.\
-\>", "Text",ExpressionUUID->"7af8c1dc-7100-451e-b024-89a4a537b703"],
+\>", "Text",ExpressionUUID->"5eac5976-d534-4940-a148-ef573fbbf961"],
 
 Cell[BoxData[
  RowBox[{
@@ -2160,7 +2056,7 @@ Cell[BoxData[
           RowBox[{"k", ",", 
            RowBox[{"latticeVolume", "[", "]"}]}], "}"}]}], "]"}], ",", "2"}], 
       "]"}]}], "]"}]}], 
-  ";"}]], "Input",ExpressionUUID->"da6eb6b6-9686-4f70-8725-9d8bc2c05cee"],
+  ";"}]], "Input",ExpressionUUID->"d7017509-acf5-4f61-9807-59b780b0ffc9"],
 
 Cell[BoxData[
  RowBox[{"Histogram", "[", 
@@ -2184,13 +2080,13 @@ Cell[BoxData[
      RowBox[{"True", ",", "journalStyle", ",", 
       RowBox[{"{", 
        RowBox[{"FontSize", "\[Rule]", "14"}], "}"}]}], "]"}]}]}], 
-  "]"}]], "Input",ExpressionUUID->"f86fad31-cf7e-43cf-b2f1-4140861bde11"],
+  "]"}]], "Input",ExpressionUUID->"dbf8b3b8-5945-46cc-9527-fb18b8870868"],
 
 Cell["\<\
 Distribution of the correlation of  all three links at a site.  The f_abc \
 distribution is considerably wider.  Both the d_abc and f_abc distributions \
 are peaked near zero.\
-\>", "Text",ExpressionUUID->"a081a130-f525-4464-90ae-c76fa31d5116"],
+\>", "Text",ExpressionUUID->"40627f66-54cc-4ca1-8a53-f331a4c73dc1"],
 
 Cell[CellGroupData[{
 
@@ -2271,7 +2167,7 @@ Cell[BoxData[
            RowBox[{"Length", "[", "#", "]"}], "]"}]}]}], "]"}], ",", 
        RowBox[{"StandardDeviation", "[", "#", "]"}]}], "}"}], "&"}], ",", 
     "distThree"}], 
-   "]"}]}]], "Input",ExpressionUUID->"f2b8e08f-29ae-4b9f-9cc0-73776d394a55"],
+   "]"}]}]], "Input",ExpressionUUID->"e297dd22-37bc-41a9-a12f-db869ca5acad"],
 
 Cell[BoxData[
  RowBox[{"{", 
@@ -2296,7 +2192,7 @@ Cell[BoxData[
        TemplateBox[{"10", 
          RowBox[{"-", "4"}]}, "Superscript", SyntaxForm -> SuperscriptBox]},
       "RowWithSeparators"], ",", "0.007268375998207513`"}], "}"}]}], 
-  "}"}]], "Output",ExpressionUUID->"f688971b-9ca1-4382-ad0b-60a950cbea6f"]
+  "}"}]], "Output",ExpressionUUID->"d79ab1b2-b9e7-4f5d-9fc1-48b6c946ce1f"]
 }, Open  ]],
 
 Cell[BoxData[
@@ -2322,267 +2218,13 @@ Cell[BoxData[
      RowBox[{"True", ",", "journalStyle", ",", 
       RowBox[{"{", 
        RowBox[{"FontSize", "\[Rule]", "14"}], "}"}]}], "]"}]}]}], 
-  "]"}]], "Input",ExpressionUUID->"9e01b262-c066-4c2d-9d4d-a6175df37b5a"]
-}, Open  ]],
+  "]"}]], "Input",ExpressionUUID->"75f7b047-e6d4-4cda-a65f-5e3a97207aba"]
+}, Closed]],
 
 Cell[CellGroupData[{
 
 Cell["2-point correlators", \
-"Section",ExpressionUUID->"de7e23a4-6947-4395-8446-b162c137ecc6"],
-
-Cell[CellGroupData[{
-
-Cell[BoxData[
- RowBox[{
-  RowBox[{"corr2a", "=", 
-   RowBox[{"linkCorrelators", "[", 
-    RowBox[{"2", ",", 
-     RowBox[{"\"\<distFlag\>\"", "\[Rule]", "False"}]}], "]"}]}], 
-  ";"}]], "Input",ExpressionUUID->"09a02dd6-7ddd-4eef-9470-e739412d5a22"],
-
-Cell[CellGroupData[{
-
-Cell[BoxData[
- InterpretationBox[
-  RowBox[{"\<\"ops: \"\>", "\[InvisibleSpace]", 
-   RowBox[{"{", 
-    RowBox[{"\<\"2l\"\>", ",", "\<\"2t1\"\>", ",", "\<\"2t2\"\>"}], "}"}]}],
-  SequenceForm["ops: ", {"2l", "2t1", "2t2"}],
-  Editable->
-   False]], "Print",ExpressionUUID->"73d09fe4-42be-44e5-abe5-bd30f28282f9"],
-
-Cell[BoxData[
- RowBox[{"{", 
-  RowBox[{"3", ",", "8000", ",", "8"}], 
-  "}"}]], "Print",ExpressionUUID->"28c3b404-b9cd-48cf-bd96-ef811c4798cc"],
-
-Cell[BoxData[
- TagBox[GridBox[{
-    {
-     TagBox[
-      TemplateBox[{
-       "\[ThinSpace]","\" \"",InterpretationBox[
-        "\"0.0647\"", 0.0647498230024913801`3.577225461821951, AutoDelete -> 
-         True],"\"\[PlusMinus]\"",InterpretationBox[
-        "\"0.0017\"", 0.0017140091016490213`2., AutoDelete -> True]},
-       "RowWithSeparators"],
-      NumberForm[#, ExponentFunction -> (Null& )]& ], 
-     TagBox[
-      TemplateBox[{
-       "\[ThinSpace]","\" \"",InterpretationBox[
-        "\"0.0257\"", 0.0256510962636778382`3.2521842468625026, AutoDelete -> 
-         True],"\"\[PlusMinus]\"",InterpretationBox[
-        "\"0.0014\"", 0.0014352305947689268`2., AutoDelete -> True]},
-       "RowWithSeparators"],
-      NumberForm[#, ExponentFunction -> (Null& )]& ], 
-     TagBox[
-      TemplateBox[{
-       "\[ThinSpace]","\" \"",InterpretationBox[
-        "\"-0.0100\"", -0.0100250554303118987`2.9245329846646464, AutoDelete -> 
-         True],"\"\[PlusMinus]\"",InterpretationBox[
-        "\"0.0012\"", 0.0011927620092654194`2., AutoDelete -> True]},
-       "RowWithSeparators"],
-      NumberForm[#, ExponentFunction -> (Null& )]& ]},
-    {
-     TagBox[
-      TemplateBox[{
-       "\[ThinSpace]","\" \"",InterpretationBox[
-        "\"-0.0787\"", -0.0787306135445242361`3.6884021522223946, AutoDelete -> 
-         True],"\"\[PlusMinus]\"",InterpretationBox[
-        "\"0.0016\"", 0.0016133978864146048`2., AutoDelete -> True]},
-       "RowWithSeparators"],
-      NumberForm[#, ExponentFunction -> (Null& )]& ], 
-     TagBox[
-      TemplateBox[{
-       "\[ThinSpace]","\" \"",InterpretationBox[
-        "\"0.0355\"", 0.0355493550110057566`3.442263967271433, AutoDelete -> 
-         True],"\"\[PlusMinus]\"",InterpretationBox[
-        "\"0.0013\"", 0.0012840080846863923`2., AutoDelete -> True]},
-       "RowWithSeparators"],
-      NumberForm[#, ExponentFunction -> (Null& )]& ], 
-     TagBox[
-      TemplateBox[{
-       "\[ThinSpace]","\" \"",InterpretationBox[
-        "\"0.0261\"", 0.0261114984884573929`3.4138759260274565, AutoDelete -> 
-         True],"\"\[PlusMinus]\"",InterpretationBox[
-        "\"0.0010\"", 0.0010068293562322504`2., AutoDelete -> True]},
-       "RowWithSeparators"],
-      NumberForm[#, ExponentFunction -> (Null& )]& ]},
-    {
-     TagBox[
-      TemplateBox[{
-       "\[ThinSpace]","\" \"",InterpretationBox[
-        "\"0.0434\"", 0.0433649844273448909`3.399156305554622, AutoDelete -> 
-         True],"\"\[PlusMinus]\"",InterpretationBox[
-        "\"0.0017\"", 0.00172974820745121`2., AutoDelete -> True]},
-       "RowWithSeparators"],
-      NumberForm[#, ExponentFunction -> (Null& )]& ], 
-     TagBox[
-      TemplateBox[{
-       "\[ThinSpace]","\" \"",InterpretationBox[
-        "\"0.0380\"", 0.0379910326523175274`3.405602712499018, AutoDelete -> 
-         True],"\"\[PlusMinus]\"",InterpretationBox[
-        "\"0.0015\"", 0.0014930638689425063`2., AutoDelete -> True]},
-       "RowWithSeparators"],
-      NumberForm[#, ExponentFunction -> (Null& )]& ], 
-     TagBox[
-      TemplateBox[{
-       "\[ThinSpace]","\" \"",InterpretationBox[
-        "\"0.0220\"", 0.0220044925307079642`3.279260545427338, AutoDelete -> 
-         True],"\"\[PlusMinus]\"",InterpretationBox[
-        "\"0.0012\"", 0.0011567801079233819`2., AutoDelete -> True]},
-       "RowWithSeparators"],
-      NumberForm[#, ExponentFunction -> (Null& )]& ]},
-    {
-     TagBox[
-      TemplateBox[{
-       "\[ThinSpace]","\" \"",InterpretationBox[
-        "\"0.0325\"", 0.032521832880935235`3.3197947981381644, AutoDelete -> 
-         True],"\"\[PlusMinus]\"",InterpretationBox[
-        "\"0.0016\"", 0.0015573284431304032`2., AutoDelete -> True]},
-       "RowWithSeparators"],
-      NumberForm[#, ExponentFunction -> (Null& )]& ], 
-     TagBox[
-      TemplateBox[{
-       "\[ThinSpace]","\" \"",InterpretationBox[
-        "\"-0.0280\"", -0.0280054845372997956`3.3168374368452693, AutoDelete -> 
-         True],"\"\[PlusMinus]\"",InterpretationBox[
-        "\"0.0014\"", 0.0013502234744086549`2., AutoDelete -> True]},
-       "RowWithSeparators"],
-      NumberForm[#, ExponentFunction -> (Null& )]& ], 
-     TagBox[
-      TemplateBox[{
-       "\[ThinSpace]","\" \"",InterpretationBox[
-        "\"-0.0184\"", -0.018380169375883347`3.22258980304776, AutoDelete -> 
-         True],"\"\[PlusMinus]\"",InterpretationBox[
-        "\"0.0011\"", 0.001100929999575025`2., AutoDelete -> True]},
-       "RowWithSeparators"],
-      NumberForm[#, ExponentFunction -> (Null& )]& ]},
-    {
-     TagBox[
-      TemplateBox[{
-       "\[ThinSpace]","\" \"",InterpretationBox[
-        "\"-0.1433\"", -0.1433298628893550641`4.05009792487648, AutoDelete -> 
-         True],"\"\[PlusMinus]\"",InterpretationBox[
-        "\"0.0013\"", 0.0012771407450029428`2., AutoDelete -> True]},
-       "RowWithSeparators"],
-      NumberForm[#, ExponentFunction -> (Null& )]& ], 
-     TagBox[
-      TemplateBox[{
-       "\[ThinSpace]","\" \"",InterpretationBox[
-        "\"0.1204\"", 0.1204114533142469773`3.8948548662048865, AutoDelete -> 
-         True],"\"\[PlusMinus]\"",InterpretationBox[
-        "\"0.0015\"", 0.0015339561041281431`2., AutoDelete -> True]},
-       "RowWithSeparators"],
-      NumberForm[#, ExponentFunction -> (Null& )]& ], 
-     TagBox[
-      TemplateBox[{
-       "\[ThinSpace]","\" \"",InterpretationBox[
-        "\"0.11262\"", 0.1126210107619550205`4.100065460060657, AutoDelete -> 
-         True],"\"\[PlusMinus]\"",InterpretationBox[
-        "\"0.00089\"", 0.0008944456591204985`2., AutoDelete -> True]},
-       "RowWithSeparators"],
-      NumberForm[#, ExponentFunction -> (Null& )]& ]},
-    {
-     TagBox[
-      TemplateBox[{
-       "\[ThinSpace]","\" \"",InterpretationBox[
-        "\"-0.1017\"", -0.1017313342211105531`3.849329390488108, AutoDelete -> 
-         True],"\"\[PlusMinus]\"",InterpretationBox[
-        "\"0.0014\"", 0.001439213916854842`2., AutoDelete -> True]},
-       "RowWithSeparators"],
-      NumberForm[#, ExponentFunction -> (Null& )]& ], 
-     TagBox[
-      TemplateBox[{
-       "\[ThinSpace]","\" \"",InterpretationBox[
-        "\"-0.0288\"", -0.0287974483884805531`3.2947379192636994, AutoDelete -> 
-         True],"\"\[PlusMinus]\"",InterpretationBox[
-        "\"0.0015\"", 0.0014608852000004135`2., AutoDelete -> True]},
-       "RowWithSeparators"],
-      NumberForm[#, ExponentFunction -> (Null& )]& ], 
-     TagBox[
-      TemplateBox[{
-       "\[ThinSpace]","\" \"",InterpretationBox[
-        "\"-0.0217\"", -0.0216868643595265753`3.308060916795396, AutoDelete -> 
-         True],"\"\[PlusMinus]\"",InterpretationBox[
-        "\"0.0011\"", 0.0010669298024009364`2., AutoDelete -> True]},
-       "RowWithSeparators"],
-      NumberForm[#, ExponentFunction -> (Null& )]& ]},
-    {
-     TagBox[
-      TemplateBox[{
-       "\[ThinSpace]","\" \"",InterpretationBox[
-        "\"0.1011\"", 0.1010766053708376244`3.877253947003778, AutoDelete -> 
-         True],"\"\[PlusMinus]\"",InterpretationBox[
-        "\"0.0013\"", 0.0013409009573071928`2., AutoDelete -> True]},
-       "RowWithSeparators"],
-      NumberForm[#, ExponentFunction -> (Null& )]& ], 
-     TagBox[
-      TemplateBox[{
-       "\[ThinSpace]","\" \"",InterpretationBox[
-        "\"0.0667\"", 0.0666988037844974679`3.6709728649286824, AutoDelete -> 
-         True],"\"\[PlusMinus]\"",InterpretationBox[
-        "\"0.0014\"", 0.0014228043364461166`2., AutoDelete -> True]},
-       "RowWithSeparators"],
-      NumberForm[#, ExponentFunction -> (Null& )]& ], 
-     TagBox[
-      TemplateBox[{
-       "\[ThinSpace]","\" \"",InterpretationBox[
-        "\"0.0101\"", 0.0100760226716660132`2.9986483591991333, AutoDelete -> 
-         True],"\"\[PlusMinus]\"",InterpretationBox[
-        "\"0.0010\"", 0.001010743080409276`2., AutoDelete -> True]},
-       "RowWithSeparators"],
-      NumberForm[#, ExponentFunction -> (Null& )]& ]},
-    {
-     TagBox[
-      TemplateBox[{
-       "\[ThinSpace]","\" \"",InterpretationBox[
-        "\"-0.0948\"", -0.0948355328471558318`3.7192122687050158, AutoDelete -> 
-         True],"\"\[PlusMinus]\"",InterpretationBox[
-        "\"0.0018\"", 0.0018103344667823808`2., AutoDelete -> True]},
-       "RowWithSeparators"],
-      NumberForm[#, ExponentFunction -> (Null& )]& ], 
-     TagBox[
-      TemplateBox[{
-       "\[ThinSpace]","\" \"",InterpretationBox[
-        "\"-0.0487\"", -0.0487105633070339591`3.4818506922031753, AutoDelete -> 
-         True],"\"\[PlusMinus]\"",InterpretationBox[
-        "\"0.0016\"", 0.0016060995474971862`2., AutoDelete -> True]},
-       "RowWithSeparators"],
-      NumberForm[#, ExponentFunction -> (Null& )]& ], 
-     TagBox[
-      TemplateBox[{
-       "\[ThinSpace]","\" \"",InterpretationBox[
-        "\"0.0045\"", 0.0044883629270454674`2.644546106763159, AutoDelete -> 
-         True],"\"\[PlusMinus]\"",InterpretationBox[
-        "\"0.0010\"", 0.0010175174355547927`2., AutoDelete -> True]},
-       "RowWithSeparators"],
-      NumberForm[#, ExponentFunction -> (Null& )]& ]}
-   },
-   GridBoxAlignment->{
-    "Columns" -> {{Left}}, "ColumnsIndexed" -> {}, "Rows" -> {{Baseline}}, 
-     "RowsIndexed" -> {}},
-   GridBoxSpacings->{"Columns" -> {
-       Offset[0.27999999999999997`], {
-        Offset[2.0999999999999996`]}, 
-       Offset[0.27999999999999997`]}, "ColumnsIndexed" -> {}, "Rows" -> {
-       Offset[0.2], {
-        Offset[0.4]}, 
-       Offset[0.2]}, "RowsIndexed" -> {}}],
-  Function[BoxForm`e$, 
-   TableForm[
-   BoxForm`e$]]]], \
-"Print",ExpressionUUID->"762ec26b-6be5-4574-9987-38f44973fe82"],
-
-Cell[BoxData[
- InterpretationBox[
-  RowBox[{"\<\"Time: \"\>", "\[InvisibleSpace]", 
-   "89.326837`8.101496954033195"}],
-  SequenceForm["Time: ", 89.326837`8.101496954033195],
-  Editable->
-   False]], "Print",ExpressionUUID->"6a694601-1b6f-4cc5-9ee9-188cf395fa2b"]
-}, Open  ]]
-}, Open  ]],
+"Section",ExpressionUUID->"9093f0a7-75f8-4581-9d35-a9c9554c7d70"],
 
 Cell[BoxData[
  RowBox[{"GraphicsColumn", "[", 
@@ -2614,23 +2256,23 @@ Cell[BoxData[
         RowBox[{"#", "[", 
          RowBox[{"[", "1", "]"}], "]"}]}]}], "]"}], "&"}], ",", 
     "\[IndentingNewLine]", 
-    RowBox[{"Normal", "[", "corr2a", "]"}]}], "]"}], 
-  "]"}]], "Input",ExpressionUUID->"dde06ab7-db77-46ef-aaec-83ed39b62fd6"],
+    RowBox[{"Normal", "[", "fieldCorr2", "]"}]}], "]"}], 
+  "]"}]], "Input",ExpressionUUID->"d7e9dba4-c52e-42ca-b186-bb69a80700d0"],
 
 Cell["\<\
 Plot distribution of products.  Need to compare this to the same taking some \
 root of a random lattice.\
-\>", "Text",ExpressionUUID->"0e31d823-bb65-4e8f-bd72-5b8787eb7f89"],
+\>", "Text",ExpressionUUID->"231c1f98-be22-4a2f-a6f7-f174dbd0f85d"],
 
 Cell[CellGroupData[{
 
 Cell[BoxData[
  RowBox[{
-  RowBox[{"corr2d", "=", 
+  RowBox[{"fieldCorr2d", "=", 
    RowBox[{"linkCorrelators", "[", 
     RowBox[{"2", ",", 
      RowBox[{"\"\<distFlag\>\"", "\[Rule]", "True"}]}], "]"}]}], 
-  ";"}]], "Input",ExpressionUUID->"c0a73d78-664c-4a27-915c-045e3f336575"],
+  ";"}]], "Input",ExpressionUUID->"8c4f7fff-d126-48b5-9aeb-6c1326306d87"],
 
 Cell[CellGroupData[{
 
@@ -2641,12 +2283,12 @@ Cell[BoxData[
     RowBox[{"\<\"2l\"\>", ",", "\<\"2t1\"\>", ",", "\<\"2t2\"\>"}], "}"}]}],
   SequenceForm["ops: ", {"2l", "2t1", "2t2"}],
   Editable->
-   False]], "Print",ExpressionUUID->"dca28b61-6481-4d71-bc6e-dff1b0c2dc37"],
+   False]], "Print",ExpressionUUID->"e95be903-3bf0-4afa-b04b-727db32bd0d5"],
 
 Cell[BoxData[
  RowBox[{"{", 
-  RowBox[{"3", ",", "8000", ",", "8"}], 
-  "}"}]], "Print",ExpressionUUID->"15d7e5f7-ba0d-45bd-91b5-383326be9542"],
+  RowBox[{"3", ",", "216", ",", "8"}], 
+  "}"}]], "Print",ExpressionUUID->"2cdad0e4-8eb0-4979-b9b7-4b8f29df18aa"],
 
 Cell[BoxData[
  TagBox[GridBox[{
@@ -2654,200 +2296,197 @@ Cell[BoxData[
      TagBox[
       TemplateBox[{
        "\[ThinSpace]","\" \"",InterpretationBox[
-        "\"0.0647\"", 0.0647498230024913801`3.577225461821951, AutoDelete -> 
+        "\"0.071\"", 0.070861363765766211`1.8522521166695696, AutoDelete -> 
          True],"\"\[PlusMinus]\"",InterpretationBox[
-        "\"0.0017\"", 0.0017140091016490213`2., AutoDelete -> True]},
+        "\"0.10\"", 0.0995766220681273406`2., AutoDelete -> True]},
        "RowWithSeparators"],
       NumberForm[#, ExponentFunction -> (Null& )]& ], 
      TagBox[
       TemplateBox[{
        "\[ThinSpace]","\" \"",InterpretationBox[
-        "\"0.0257\"", 0.0256510962636778382`3.2521842468625026, AutoDelete -> 
+        "\"0.13\"", 0.1286968046752210437`2.061920645045696, AutoDelete -> 
          True],"\"\[PlusMinus]\"",InterpretationBox[
-        "\"0.0014\"", 0.0014352305947689268`2., AutoDelete -> True]},
+        "\"0.11\"", 0.1115956122440517617`2., AutoDelete -> True]},
        "RowWithSeparators"],
       NumberForm[#, ExponentFunction -> (Null& )]& ], 
      TagBox[
       TemplateBox[{
        "\[ThinSpace]","\" \"",InterpretationBox[
-        "\"-0.0100\"", -0.0100250554303118987`2.9245329846646464, AutoDelete -> 
-         True],"\"\[PlusMinus]\"",InterpretationBox[
-        "\"0.0012\"", 0.0011927620092654194`2., AutoDelete -> True]},
+        "\"0\"", 0, Editable -> False],"\"\[PlusMinus]\"",InterpretationBox[
+        "\"0.11\"", 0.1072746270190041012`2., AutoDelete -> True]},
        "RowWithSeparators"],
       NumberForm[#, ExponentFunction -> (Null& )]& ]},
     {
      TagBox[
       TemplateBox[{
        "\[ThinSpace]","\" \"",InterpretationBox[
-        "\"-0.0787\"", -0.0787306135445242361`3.6884021522223946, AutoDelete -> 
+        "\"-0.18\"", -0.176267087844350745`2.215957790669775, AutoDelete -> 
          True],"\"\[PlusMinus]\"",InterpretationBox[
-        "\"0.0016\"", 0.0016133978864146048`2., AutoDelete -> True]},
+        "\"0.11\"", 0.1072046044624120481`2., AutoDelete -> True]},
        "RowWithSeparators"],
       NumberForm[#, ExponentFunction -> (Null& )]& ], 
      TagBox[
       TemplateBox[{
        "\[ThinSpace]","\" \"",InterpretationBox[
-        "\"0.0355\"", 0.0355493550110057566`3.442263967271433, AutoDelete -> 
+        "\"0.013\"", 0.0128058547692345773`1.1145943579025426, AutoDelete -> 
          True],"\"\[PlusMinus]\"",InterpretationBox[
-        "\"0.0013\"", 0.0012840080846863923`2., AutoDelete -> True]},
+        "\"0.098\"", 0.0983590248237819348`2., AutoDelete -> True]},
        "RowWithSeparators"],
       NumberForm[#, ExponentFunction -> (Null& )]& ], 
      TagBox[
       TemplateBox[{
        "\[ThinSpace]","\" \"",InterpretationBox[
-        "\"0.0261\"", 0.0261114984884573929`3.4138759260274565, AutoDelete -> 
+        "\"-0.05\"", -0.0454349913448710632`1.6461576368935085, AutoDelete -> 
          True],"\"\[PlusMinus]\"",InterpretationBox[
-        "\"0.0010\"", 0.0010068293562322504`2., AutoDelete -> True]},
+        "\"0.10\"", 0.1026201896108944744`2., AutoDelete -> True]},
        "RowWithSeparators"],
       NumberForm[#, ExponentFunction -> (Null& )]& ]},
     {
      TagBox[
       TemplateBox[{
        "\[ThinSpace]","\" \"",InterpretationBox[
-        "\"0.0434\"", 0.0433649844273448909`3.399156305554622, AutoDelete -> 
+        "\"0.123\"", 0.1229837646215851676`2.107390626091139, AutoDelete -> 
          True],"\"\[PlusMinus]\"",InterpretationBox[
-        "\"0.0017\"", 0.00172974820745121`2., AutoDelete -> True]},
+        "\"0.096\"", 0.0960411069246236287`2., AutoDelete -> True]},
        "RowWithSeparators"],
       NumberForm[#, ExponentFunction -> (Null& )]& ], 
      TagBox[
       TemplateBox[{
        "\[ThinSpace]","\" \"",InterpretationBox[
-        "\"0.0380\"", 0.0379910326523175274`3.405602712499018, AutoDelete -> 
+        "\"0.03\"", 0.0296665175549097257`1.4410963273020203, AutoDelete -> 
          True],"\"\[PlusMinus]\"",InterpretationBox[
-        "\"0.0015\"", 0.0014930638689425063`2., AutoDelete -> True]},
+        "\"0.11\"", 0.1074410494544856681`2., AutoDelete -> True]},
        "RowWithSeparators"],
       NumberForm[#, ExponentFunction -> (Null& )]& ], 
      TagBox[
       TemplateBox[{
        "\[ThinSpace]","\" \"",InterpretationBox[
-        "\"0.0220\"", 0.0220044925307079642`3.279260545427338, AutoDelete -> 
+        "\"0.06\"", 0.0586348319717893141`1.7541057087482403, AutoDelete -> 
          True],"\"\[PlusMinus]\"",InterpretationBox[
-        "\"0.0012\"", 0.0011567801079233819`2., AutoDelete -> True]},
+        "\"0.10\"", 0.1032880257043692768`2., AutoDelete -> True]},
        "RowWithSeparators"],
       NumberForm[#, ExponentFunction -> (Null& )]& ]},
     {
      TagBox[
       TemplateBox[{
        "\[ThinSpace]","\" \"",InterpretationBox[
-        "\"0.0325\"", 0.032521832880935235`3.3197947981381644, AutoDelete -> 
+        "\"-0.04\"", -0.0414612806820813876`1.6069166158372055, AutoDelete -> 
          True],"\"\[PlusMinus]\"",InterpretationBox[
-        "\"0.0016\"", 0.0015573284431304032`2., AutoDelete -> True]},
+        "\"0.10\"", 0.1025005266680093369`2., AutoDelete -> True]},
        "RowWithSeparators"],
       NumberForm[#, ExponentFunction -> (Null& )]& ], 
      TagBox[
       TemplateBox[{
        "\[ThinSpace]","\" \"",InterpretationBox[
-        "\"-0.0280\"", -0.0280054845372997956`3.3168374368452693, AutoDelete -> 
+        "\"0.143\"", 0.14275942661643376`2.162906436536397, AutoDelete -> 
          True],"\"\[PlusMinus]\"",InterpretationBox[
-        "\"0.0014\"", 0.0013502234744086549`2., AutoDelete -> True]},
+        "\"0.098\"", 0.0981066301462578533`2., AutoDelete -> True]},
        "RowWithSeparators"],
       NumberForm[#, ExponentFunction -> (Null& )]& ], 
      TagBox[
       TemplateBox[{
        "\[ThinSpace]","\" \"",InterpretationBox[
-        "\"-0.0184\"", -0.018380169375883347`3.22258980304776, AutoDelete -> 
+        "\"0.08\"", 0.0801715066954976074`1.9030033595575087, AutoDelete -> 
          True],"\"\[PlusMinus]\"",InterpretationBox[
-        "\"0.0011\"", 0.001100929999575025`2., AutoDelete -> True]},
+        "\"0.10\"", 0.1002343748294577536`2., AutoDelete -> True]},
        "RowWithSeparators"],
       NumberForm[#, ExponentFunction -> (Null& )]& ]},
     {
      TagBox[
       TemplateBox[{
        "\[ThinSpace]","\" \"",InterpretationBox[
-        "\"-0.1433\"", -0.1433298628893550641`4.05009792487648, AutoDelete -> 
+        "\"-0.11\"", -0.1074128543663755847`2.0018610713627134, AutoDelete -> 
          True],"\"\[PlusMinus]\"",InterpretationBox[
-        "\"0.0013\"", 0.0012771407450029428`2., AutoDelete -> True]},
+        "\"0.11\"", 0.10695354556307822`2., AutoDelete -> True]},
        "RowWithSeparators"],
       NumberForm[#, ExponentFunction -> (Null& )]& ], 
      TagBox[
       TemplateBox[{
        "\[ThinSpace]","\" \"",InterpretationBox[
-        "\"0.1204\"", 0.1204114533142469773`3.8948548662048865, AutoDelete -> 
+        "\"0.02\"", 0.023471425883775484`1.3609786201901086, AutoDelete -> 
          True],"\"\[PlusMinus]\"",InterpretationBox[
-        "\"0.0015\"", 0.0015339561041281431`2., AutoDelete -> True]},
+        "\"0.10\"", 0.1022258789838573073`2., AutoDelete -> True]},
        "RowWithSeparators"],
       NumberForm[#, ExponentFunction -> (Null& )]& ], 
      TagBox[
       TemplateBox[{
        "\[ThinSpace]","\" \"",InterpretationBox[
-        "\"0.11262\"", 0.1126210107619550205`4.100065460060657, AutoDelete -> 
+        "\"-0.06\"", -0.0592750758424574267`1.7498416035217248, AutoDelete -> 
          True],"\"\[PlusMinus]\"",InterpretationBox[
-        "\"0.00089\"", 0.0008944456591204985`2., AutoDelete -> True]},
+        "\"0.11\"", 0.1054460983320906486`2., AutoDelete -> True]},
        "RowWithSeparators"],
       NumberForm[#, ExponentFunction -> (Null& )]& ]},
     {
      TagBox[
       TemplateBox[{
        "\[ThinSpace]","\" \"",InterpretationBox[
-        "\"-0.1017\"", -0.1017313342211105531`3.849329390488108, AutoDelete -> 
+        "\"0.08\"", 0.0751621887862800875`1.8370956332225825, AutoDelete -> 
          True],"\"\[PlusMinus]\"",InterpretationBox[
-        "\"0.0014\"", 0.001439213916854842`2., AutoDelete -> True]},
+        "\"0.11\"", 0.1093714035531454104`2., AutoDelete -> True]},
        "RowWithSeparators"],
       NumberForm[#, ExponentFunction -> (Null& )]& ], 
      TagBox[
       TemplateBox[{
        "\[ThinSpace]","\" \"",InterpretationBox[
-        "\"-0.0288\"", -0.0287974483884805531`3.2947379192636994, AutoDelete -> 
+        "\"0.06\"", 0.0573895372138881407`1.737600925961494, AutoDelete -> 
          True],"\"\[PlusMinus]\"",InterpretationBox[
-        "\"0.0015\"", 0.0014608852000004135`2., AutoDelete -> True]},
+        "\"0.11\"", 0.1050102752090656399`2., AutoDelete -> True]},
        "RowWithSeparators"],
       NumberForm[#, ExponentFunction -> (Null& )]& ], 
      TagBox[
       TemplateBox[{
        "\[ThinSpace]","\" \"",InterpretationBox[
-        "\"-0.0217\"", -0.0216868643595265753`3.308060916795396, AutoDelete -> 
+        "\"-0.15\"", -0.1534701072469896455`2.1712362447023663, AutoDelete -> 
          True],"\"\[PlusMinus]\"",InterpretationBox[
-        "\"0.0011\"", 0.0010669298024009364`2., AutoDelete -> True]},
+        "\"0.10\"", 0.1034635919859578368`2., AutoDelete -> True]},
        "RowWithSeparators"],
       NumberForm[#, ExponentFunction -> (Null& )]& ]},
     {
      TagBox[
       TemplateBox[{
        "\[ThinSpace]","\" \"",InterpretationBox[
-        "\"0.1011\"", 0.1010766053708376244`3.877253947003778, AutoDelete -> 
+        "\"0.39\"", 0.3859636550044011627`2.547508494876015, AutoDelete -> 
          True],"\"\[PlusMinus]\"",InterpretationBox[
-        "\"0.0013\"", 0.0013409009573071928`2., AutoDelete -> True]},
+        "\"0.11\"", 0.1094051876997843009`2., AutoDelete -> True]},
        "RowWithSeparators"],
       NumberForm[#, ExponentFunction -> (Null& )]& ], 
      TagBox[
       TemplateBox[{
        "\[ThinSpace]","\" \"",InterpretationBox[
-        "\"0.0667\"", 0.0666988037844974679`3.6709728649286824, AutoDelete -> 
-         True],"\"\[PlusMinus]\"",InterpretationBox[
-        "\"0.0014\"", 0.0014228043364461166`2., AutoDelete -> True]},
+        "\"0\"", 0, Editable -> False],"\"\[PlusMinus]\"",InterpretationBox[
+        "\"0.11\"", 0.1062677752054606711`2., AutoDelete -> True]},
        "RowWithSeparators"],
       NumberForm[#, ExponentFunction -> (Null& )]& ], 
      TagBox[
       TemplateBox[{
        "\[ThinSpace]","\" \"",InterpretationBox[
-        "\"0.0101\"", 0.0100760226716660132`2.9986483591991333, AutoDelete -> 
+        "\"-0.1\"", -0.0983858061333903605`1.971444052276024, AutoDelete -> 
          True],"\"\[PlusMinus]\"",InterpretationBox[
-        "\"0.0010\"", 0.001010743080409276`2., AutoDelete -> True]},
+        "\"0.11\"", 0.1050723380317419159`2., AutoDelete -> True]},
        "RowWithSeparators"],
       NumberForm[#, ExponentFunction -> (Null& )]& ]},
     {
      TagBox[
       TemplateBox[{
        "\[ThinSpace]","\" \"",InterpretationBox[
-        "\"-0.0948\"", -0.0948355328471558318`3.7192122687050158, AutoDelete -> 
+        "\"-0.064\"", -0.0636705354186497124`1.8133328249069014, AutoDelete -> 
          True],"\"\[PlusMinus]\"",InterpretationBox[
-        "\"0.0018\"", 0.0018103344667823808`2., AutoDelete -> True]},
+        "\"0.098\"", 0.0978601049186991617`2., AutoDelete -> True]},
        "RowWithSeparators"],
       NumberForm[#, ExponentFunction -> (Null& )]& ], 
      TagBox[
       TemplateBox[{
        "\[ThinSpace]","\" \"",InterpretationBox[
-        "\"-0.0487\"", -0.0487105633070339591`3.4818506922031753, AutoDelete -> 
+        "\"-0.07\"", -0.0667175641230774857`1.8093534105290028, AutoDelete -> 
          True],"\"\[PlusMinus]\"",InterpretationBox[
-        "\"0.0016\"", 0.0016060995474971862`2., AutoDelete -> True]},
+        "\"0.10\"", 0.1034872320627744507`2., AutoDelete -> True]},
        "RowWithSeparators"],
       NumberForm[#, ExponentFunction -> (Null& )]& ], 
      TagBox[
       TemplateBox[{
        "\[ThinSpace]","\" \"",InterpretationBox[
-        "\"0.0045\"", 0.0044883629270454674`2.644546106763159, AutoDelete -> 
-         True],"\"\[PlusMinus]\"",InterpretationBox[
-        "\"0.0010\"", 0.0010175174355547927`2., AutoDelete -> True]},
+        "\"0\"", 0, Editable -> False],"\"\[PlusMinus]\"",InterpretationBox[
+        "\"0.10\"", 0.1011603821685559262`2., AutoDelete -> True]},
        "RowWithSeparators"],
       NumberForm[#, ExponentFunction -> (Null& )]& ]}
    },
@@ -2864,15 +2503,15 @@ Cell[BoxData[
   Function[BoxForm`e$, 
    TableForm[
    BoxForm`e$]]]], \
-"Print",ExpressionUUID->"65cfbd2d-aa96-4f57-800c-c79dec4bcd20"],
+"Print",ExpressionUUID->"6a7b22b7-500e-4217-b0be-c7742d83faa7"],
 
 Cell[BoxData[
  InterpretationBox[
   RowBox[{"\<\"Time: \"\>", "\[InvisibleSpace]", 
-   "93.223729`8.120041468792135"}],
-  SequenceForm["Time: ", 93.223729`8.120041468792135],
+   "0.227515`5.5075250326821665"}],
+  SequenceForm["Time: ", 0.227515`5.5075250326821665],
   Editable->
-   False]], "Print",ExpressionUUID->"87839012-a4a0-463f-a668-818bed34a49c"]
+   False]], "Print",ExpressionUUID->"2454c7b0-ac68-4a65-9464-21573f5c845d"]
 }, Open  ]]
 }, Open  ]],
 
@@ -2987,321 +2626,42 @@ Cell[BoxData[
             RowBox[{"{", 
              RowBox[{"\"\<Ambient\>\"", ",", "LightGray"}], "}"}]}]}], 
           "]"}]}], "]"}], ",", 
-       RowBox[{"Normal", "[", "corr2d", "]"}]}], "]"}], "]"}]}]}], 
-  "]"}]], "Input",ExpressionUUID->"8336035f-6ed5-4150-b4a6-c8ba1f731bd4"]
-}, Open  ]],
+       RowBox[{"Normal", "[", "fieldCorr2d", "]"}]}], "]"}], "]"}]}]}], 
+  "]"}]], "Input",ExpressionUUID->"c0269d8d-eabe-4128-9220-b326768d6b64"]
+}, Closed]],
 
 Cell[CellGroupData[{
 
 Cell["Three point correlators", \
-"Section",ExpressionUUID->"c9a69452-3eb2-4dab-bf6c-2a35dd94ba02"],
-
-Cell["\<\
-3-3/5^3 took 6.2 seconds
-3-3/6^3 took 21.5 s
-3-3/12.16.20 took 4296 seconds
-3-3/20^3 should take 5.2 hours\
-\>", "Text",ExpressionUUID->"de220410-ee04-4919-9dd9-d34cf1b09275"],
-
-Cell[CellGroupData[{
-
-Cell[BoxData[
- RowBox[{
-  RowBox[{"corr3a", "=", 
-   RowBox[{"linkCorrelators", "[", 
-    RowBox[{"3", ",", 
-     RowBox[{"\"\<distFlag\>\"", "\[Rule]", "False"}]}], "]"}]}], 
-  ";"}]], "Input",ExpressionUUID->"9d894ff0-39f3-4dea-84af-bcf2d15726c6"],
-
-Cell[CellGroupData[{
-
-Cell[BoxData[
- InterpretationBox[
-  RowBox[{"\<\"ops: \"\>", "\[InvisibleSpace]", 
-   RowBox[{"{", 
-    RowBox[{"\<\"3pt1\"\>", ",", "\<\"3pt2\"\>", ",", "\<\"3m1a\"\>", 
-     ",", "\<\"3m1b\"\>", ",", "\<\"3m2\"\>", ",", "\<\"3m3\"\>", 
-     ",", "\<\"3m4\"\>", ",", "\<\"3m5\"\>", ",", "\<\"3m6\"\>", 
-     ",", "\<\"3m7\"\>", ",", "\<\"3m8\"\>", ",", "\<\"3m9\"\>", 
-     ",", "\<\"3m10\"\>"}], "}"}]}],
-  SequenceForm[
-  "ops: ", {
-   "3pt1", "3pt2", "3m1a", "3m1b", "3m2", "3m3", "3m4", "3m5", "3m6", "3m7", 
-    "3m8", "3m9", "3m10"}],
-  Editable->
-   False]], "Print",ExpressionUUID->"67798585-5c07-4462-ba3a-fd1c52907859"],
-
-Cell[BoxData[
- RowBox[{"{", 
-  RowBox[{"3", ",", "216", ",", "8"}], 
-  "}"}]], "Print",ExpressionUUID->"8265db63-f1ff-4269-a84f-b5271b49c952"],
-
-Cell[BoxData[
- TagBox[GridBox[{
-    {
-     TagBox[
-      TemplateBox[{
-       "\[ThinSpace]","\" \"",InterpretationBox[
-        "\"-0.03\"", -0.0280107620569927489`1.432212212774954, AutoDelete -> 
-         True],"\"\[PlusMinus]\"",InterpretationBox[
-        "\"0.10\"", 0.1035410849890400081`2., AutoDelete -> True]},
-       "RowWithSeparators"],
-      NumberForm[#, ExponentFunction -> (Null& )]& ], 
-     TagBox[
-      TemplateBox[{
-       "\[ThinSpace]","\" \"",InterpretationBox[
-        "\"0\"", 0, Editable -> False],"\"\[PlusMinus]\"",InterpretationBox[
-        "\"0.10\"", 0.1028060026422334683`2., AutoDelete -> True]},
-       "RowWithSeparators"],
-      NumberForm[#, ExponentFunction -> (Null& )]& ], 
-     TagBox[
-      TemplateBox[{
-       "\[ThinSpace]","\" \"",InterpretationBox[
-        "\"-0.21\"", -0.213248093878622702`2.319433700202342, AutoDelete -> 
-         True],"\"\[PlusMinus]\"",InterpretationBox[
-        "\"0.10\"", 0.1022001322306216459`2., AutoDelete -> True]},
-       "RowWithSeparators"],
-      NumberForm[#, ExponentFunction -> (Null& )]& ]},
-    {
-     TagBox[
-      TemplateBox[{
-       "\[ThinSpace]","\" \"",InterpretationBox[
-        "\"0\"", 0, Editable -> False],"\"\[PlusMinus]\"",InterpretationBox[
-        "\"0.11\"", 0.1061721531181110956`2., AutoDelete -> True]},
-       "RowWithSeparators"],
-      NumberForm[#, ExponentFunction -> (Null& )]& ], 
-     TagBox[
-      TemplateBox[{
-       "\[ThinSpace]","\" \"",InterpretationBox[
-        "\"-0.10\"", -0.1034039923279377049`1.9752141897076243, AutoDelete -> 
-         True],"\"\[PlusMinus]\"",InterpretationBox[
-        "\"0.11\"", 0.109477057761813476`2., AutoDelete -> True]},
-       "RowWithSeparators"],
-      NumberForm[#, ExponentFunction -> (Null& )]& ], 
-     TagBox[
-      TemplateBox[{
-       "\[ThinSpace]","\" \"",InterpretationBox[
-        "\"-0.05\"", -0.0505295888929217438`1.6659894271458033, AutoDelete -> 
-         True],"\"\[PlusMinus]\"",InterpretationBox[
-        "\"0.11\"", 0.1090325922853447177`2., AutoDelete -> True]},
-       "RowWithSeparators"],
-      NumberForm[#, ExponentFunction -> (Null& )]& ]},
-    {
-     TagBox[
-      TemplateBox[{
-       "\[ThinSpace]","\" \"",InterpretationBox[
-        "\"-0.086\"", -0.08604617299433516`1.9427349879611369, AutoDelete -> 
-         True],"\"\[PlusMinus]\"",InterpretationBox[
-        "\"0.098\"", 0.0981740192431782288`2., AutoDelete -> True]},
-       "RowWithSeparators"],
-      NumberForm[#, ExponentFunction -> (Null& )]& ], 
-     TagBox[
-      TemplateBox[{
-       "\[ThinSpace]","\" \"",InterpretationBox[
-        "\"0.12\"", 0.1220070212312761443`2.054815990923367, AutoDelete -> 
-         True],"\"\[PlusMinus]\"",InterpretationBox[
-        "\"0.11\"", 0.1075397031054744212`2., AutoDelete -> True]},
-       "RowWithSeparators"],
-      NumberForm[#, ExponentFunction -> (Null& )]& ], 
-     TagBox[
-      TemplateBox[{
-       "\[ThinSpace]","\" \"",InterpretationBox[
-        "\"-0.13\"", -0.1275765408296785086`2.0737760992994736, AutoDelete -> 
-         True],"\"\[PlusMinus]\"",InterpretationBox[
-        "\"0.11\"", 0.1076452133883006035`2., AutoDelete -> True]},
-       "RowWithSeparators"],
-      NumberForm[#, ExponentFunction -> (Null& )]& ]},
-    {
-     TagBox[
-      TemplateBox[{
-       "\[ThinSpace]","\" \"",InterpretationBox[
-        "\"0.03\"", 0.0323181332965933737`1.4955897123474846, AutoDelete -> 
-         True],"\"\[PlusMinus]\"",InterpretationBox[
-        "\"0.10\"", 0.1032420348106283248`2., AutoDelete -> True]},
-       "RowWithSeparators"],
-      NumberForm[#, ExponentFunction -> (Null& )]& ], 
-     TagBox[
-      TemplateBox[{
-       "\[ThinSpace]","\" \"",InterpretationBox[
-        "\"-0.10\"", -0.1007889221030520421`1.9912763885182079, AutoDelete -> 
-         True],"\"\[PlusMinus]\"",InterpretationBox[
-        "\"0.10\"", 0.1028339249253554244`2., AutoDelete -> True]},
-       "RowWithSeparators"],
-      NumberForm[#, ExponentFunction -> (Null& )]& ], 
-     TagBox[
-      TemplateBox[{
-       "\[ThinSpace]","\" \"",InterpretationBox[
-        "\"0.02\"", 0.0247883605447532483`1.3816433610071366, AutoDelete -> 
-         True],"\"\[PlusMinus]\"",InterpretationBox[
-        "\"0.10\"", 0.1029448068956514556`2., AutoDelete -> True]},
-       "RowWithSeparators"],
-      NumberForm[#, ExponentFunction -> (Null& )]& ]},
-    {
-     TagBox[
-      TemplateBox[{
-       "\[ThinSpace]","\" \"",InterpretationBox[
-        "\"-0.04\"", -0.0434208607391065524`1.6133904342201757, AutoDelete -> 
-         True],"\"\[PlusMinus]\"",InterpretationBox[
-        "\"0.11\"", 0.1057567251591831209`2., AutoDelete -> True]},
-       "RowWithSeparators"],
-      NumberForm[#, ExponentFunction -> (Null& )]& ], 
-     TagBox[
-      TemplateBox[{
-       "\[ThinSpace]","\" \"",InterpretationBox[
-        "\"-0.13\"", -0.1256733935772122723`2.0907307154787054, AutoDelete -> 
-         True],"\"\[PlusMinus]\"",InterpretationBox[
-        "\"0.10\"", 0.1019794410057505707`2., AutoDelete -> True]},
-       "RowWithSeparators"],
-      NumberForm[#, ExponentFunction -> (Null& )]& ], 
-     TagBox[
-      TemplateBox[{
-       "\[ThinSpace]","\" \"",InterpretationBox[
-        "\"0.08\"", 0.080837225496621673`1.8648289239345108, AutoDelete -> 
-         True],"\"\[PlusMinus]\"",InterpretationBox[
-        "\"0.11\"", 0.1103525759382274901`2., AutoDelete -> True]},
-       "RowWithSeparators"],
-      NumberForm[#, ExponentFunction -> (Null& )]& ]},
-    {
-     TagBox[
-      TemplateBox[{
-       "\[ThinSpace]","\" \"",InterpretationBox[
-        "\"0.02\"", 0.0175931431292291537`1.200182496344356, AutoDelete -> 
-         True],"\"\[PlusMinus]\"",InterpretationBox[
-        "\"0.11\"", 0.1109585926176667042`2., AutoDelete -> True]},
-       "RowWithSeparators"],
-      NumberForm[#, ExponentFunction -> (Null& )]& ], 
-     TagBox[
-      TemplateBox[{
-       "\[ThinSpace]","\" \"",InterpretationBox[
-        "\"0.03\"", 0.0282449060181574202`1.4029828344960673, AutoDelete -> 
-         True],"\"\[PlusMinus]\"",InterpretationBox[
-        "\"0.11\"", 0.1116753441498933713`2., AutoDelete -> True]},
-       "RowWithSeparators"],
-      NumberForm[#, ExponentFunction -> (Null& )]& ], 
-     TagBox[
-      TemplateBox[{
-       "\[ThinSpace]","\" \"",InterpretationBox[
-        "\"0.08\"", 0.0835043707575605226`1.8853105896320559, AutoDelete -> 
-         True],"\"\[PlusMinus]\"",InterpretationBox[
-        "\"0.11\"", 0.1087423259526565794`2., AutoDelete -> True]},
-       "RowWithSeparators"],
-      NumberForm[#, ExponentFunction -> (Null& )]& ]},
-    {
-     TagBox[
-      TemplateBox[{
-       "\[ThinSpace]","\" \"",InterpretationBox[
-        "\"-0.02\"", -0.0234702917273184944`1.340022914968772, AutoDelete -> 
-         True],"\"\[PlusMinus]\"",InterpretationBox[
-        "\"0.11\"", 0.1072742712206378041`2., AutoDelete -> True]},
-       "RowWithSeparators"],
-      NumberForm[#, ExponentFunction -> (Null& )]& ], 
-     TagBox[
-      TemplateBox[{
-       "\[ThinSpace]","\" \"",InterpretationBox[
-        "\"-0.26\"", -0.2607506415037509906`2.4063717711497157, AutoDelete -> 
-         True],"\"\[PlusMinus]\"",InterpretationBox[
-        "\"0.10\"", 0.1022948133867220138`2., AutoDelete -> True]},
-       "RowWithSeparators"],
-      NumberForm[#, ExponentFunction -> (Null& )]& ], 
-     TagBox[
-      TemplateBox[{
-       "\[ThinSpace]","\" \"",InterpretationBox[
-        "\"0.088\"", 0.0878202905986133903`1.9459830234068543, AutoDelete -> 
-         True],"\"\[PlusMinus]\"",InterpretationBox[
-        "\"0.099\"", 0.0994516164660310537`2., AutoDelete -> True]},
-       "RowWithSeparators"],
-      NumberForm[#, ExponentFunction -> (Null& )]& ]},
-    {
-     TagBox[
-      TemplateBox[{
-       "\[ThinSpace]","\" \"",InterpretationBox[
-        "\"-0.10\"", -0.0999828674469988576`2.008753875667671, AutoDelete -> 
-         True],"\"\[PlusMinus]\"",InterpretationBox[
-        "\"0.098\"", 0.0979877334699051361`2., AutoDelete -> True]},
-       "RowWithSeparators"],
-      NumberForm[#, ExponentFunction -> (Null& )]& ], 
-     TagBox[
-      TemplateBox[{
-       "\[ThinSpace]","\" \"",InterpretationBox[
-        "\"-0.08\"", -0.0841419870340180398`1.8932045362095609, AutoDelete -> 
-         True],"\"\[PlusMinus]\"",InterpretationBox[
-        "\"0.11\"", 0.1075989981288296288`2., AutoDelete -> True]},
-       "RowWithSeparators"],
-      NumberForm[#, ExponentFunction -> (Null& )]& ], 
-     TagBox[
-      TemplateBox[{
-       "\[ThinSpace]","\" \"",InterpretationBox[
-        "\"-0.25\"", -0.2485248451128302949`2.3571005310098228, AutoDelete -> 
-         True],"\"\[PlusMinus]\"",InterpretationBox[
-        "\"0.11\"", 0.1092117285086550704`2., AutoDelete -> True]},
-       "RowWithSeparators"],
-      NumberForm[#, ExponentFunction -> (Null& )]& ]}
-   },
-   GridBoxAlignment->{
-    "Columns" -> {{Left}}, "ColumnsIndexed" -> {}, "Rows" -> {{Baseline}}, 
-     "RowsIndexed" -> {}},
-   GridBoxSpacings->{"Columns" -> {
-       Offset[0.27999999999999997`], {
-        Offset[2.0999999999999996`]}, 
-       Offset[0.27999999999999997`]}, "ColumnsIndexed" -> {}, "Rows" -> {
-       Offset[0.2], {
-        Offset[0.4]}, 
-       Offset[0.2]}, "RowsIndexed" -> {}}],
-  Function[BoxForm`e$, 
-   TableForm[
-   BoxForm`e$]]]], \
-"Print",ExpressionUUID->"32a7b6ba-d73f-49e4-848a-2c41b3386b07"],
-
-Cell[BoxData[
- InterpretationBox[
-  RowBox[{"\<\"Time: \"\>", "\[InvisibleSpace]", 
-   "21.547197`7.483905780142746"}],
-  SequenceForm["Time: ", 21.547197`7.483905780142746],
-  Editable->
-   False]], "Print",ExpressionUUID->"ce087ff2-9d63-48fc-9f5d-49fb4a2fd310"]
-}, Open  ]]
-}, Open  ]],
-
-Cell[BoxData[
- RowBox[{
-  RowBox[{"corr3ahold", "=", "corr3a"}], 
-  ";"}]], "Input",ExpressionUUID->"dfcccd20-8ae2-4b8d-975a-3b5da2593040"],
-
-Cell[BoxData[
- RowBox[{
-  RowBox[{"corr3a", "=", "corr3ahold"}], 
-  ";"}]], "Input",ExpressionUUID->"c9559a9f-cd7f-483d-b999-60a686a899a4"],
-
-Cell[BoxData[
- RowBox[{"Map", "[", 
-  RowBox[{"Chop", ",", "corr3a", ",", 
-   RowBox[{"{", "2", "}"}]}], 
-  "]"}]], "Input",ExpressionUUID->"c4242db6-f45f-42c6-aa9d-5e603478af9c"],
+"Section",ExpressionUUID->"a59c9d57-924b-4dd6-8174-f7b859cfefc3"],
 
 Cell[BoxData[
  RowBox[{"Block", "[", 
   RowBox[{
-   RowBox[{"{", "}"}], ",", 
-   RowBox[{"GraphicsGrid", "[", 
+   RowBox[{"{", 
+    RowBox[{
+     RowBox[{"symmetric", "=", "False"}], ",", 
+     RowBox[{"df", "=", "1"}], ",", 
+     RowBox[{"info", "=", 
+      RowBox[{"linkCorrPlot3", "[", "]"}]}]}], "}"}], ",", 
+   RowBox[{"GraphicsColumn", "[", 
     RowBox[{
      RowBox[{"Map", "[", 
       RowBox[{
        RowBox[{"Function", "[", 
         RowBox[{"opd", ",", 
-         RowBox[{"Table", "[", 
+         RowBox[{"Graphics3D", "[", 
           RowBox[{
-           RowBox[{"Graphics3D", "[", 
+           RowBox[{"{", 
             RowBox[{
-             RowBox[{"{", 
+             RowBox[{"Opacity", "[", "1", "]"}], ",", 
+             RowBox[{"Map", "[", 
               RowBox[{
-               RowBox[{"Opacity", "[", "1", "]"}], ",", 
-               RowBox[{"Map", "[", 
-                RowBox[{
-                 RowBox[{"Function", "[", 
-                  RowBox[{"pp", ",", 
-                   RowBox[{"Block", "[", 
-                    RowBox[{
-                    RowBox[{"{", 
+               RowBox[{"Function", "[", 
+                RowBox[{"pp", ",", 
+                 RowBox[{"Block", "[", 
+                  RowBox[{
+                   RowBox[{"{", 
                     RowBox[{
                     RowBox[{"x", "=", 
                     RowBox[{"pp", "[", 
@@ -3310,8 +2670,14 @@ Cell[BoxData[
                     RowBox[{"y", "=", 
                     RowBox[{"pp", "[", 
                     RowBox[{"[", 
-                    RowBox[{"1", ",", "2"}], "]"}], "]"}]}]}], "}"}], ",", 
-                    RowBox[{"If", "[", 
+                    RowBox[{"1", ",", "2"}], "]"}], "]"}]}], ",", 
+                    RowBox[{"sign", "=", 
+                    RowBox[{
+                    RowBox[{"info", "[", 
+                    RowBox[{"opd", "[", 
+                    RowBox[{"[", "1", "]"}], "]"}], "]"}], "[", 
+                    RowBox[{"[", "2", "]"}], "]"}]}]}], "}"}], ",", 
+                   RowBox[{"If", "[", 
                     RowBox[{
                     RowBox[{"True", " ", "||", 
                     RowBox[{
@@ -3328,49 +2694,75 @@ Cell[BoxData[
                     RowBox[{"x", ",", "y", ",", "0"}], "}"}], ",", 
                     RowBox[{"{", 
                     RowBox[{"x", ",", "y", ",", 
+                    RowBox[{"sign", "*", 
                     RowBox[{"pp", "[", 
                     RowBox[{"[", 
-                    RowBox[{"2", ",", "df"}], "]"}], "]"}]}], "}"}]}], "}"}], 
-                    "]"}], ",", 
+                    RowBox[{"2", ",", "df"}], "]"}], "]"}]}]}], "}"}]}], 
+                    "}"}], "]"}], ",", 
                     RowBox[{"Point", "[", 
                     RowBox[{"{", 
                     RowBox[{"x", ",", "y", ",", 
+                    RowBox[{"sign", "*", 
                     RowBox[{"pp", "[", 
                     RowBox[{"[", 
-                    RowBox[{"2", ",", "df"}], "]"}], "]"}]}], "}"}], "]"}]}], 
-                    "}"}], ",", "Nothing"}], "]"}]}], "]"}]}], "]"}], ",", 
-                 RowBox[{"Normal", "[", 
-                  RowBox[{"opd", "[", 
-                   RowBox[{"[", "2", "]"}], "]"}], "]"}]}], "]"}]}], "}"}], 
-             ",", 
-             RowBox[{"BoxRatios", "\[Rule]", 
-              RowBox[{"{", 
-               RowBox[{"1", ",", "1", ",", "0.35"}], "}"}]}], ",", 
-             RowBox[{"FaceGrids", "\[Rule]", 
-              RowBox[{"{", 
-               RowBox[{"{", 
-                RowBox[{"0", ",", "0", ",", 
-                 RowBox[{"-", "1"}]}], "}"}], "}"}]}], ",", 
-             RowBox[{"Axes", "\[Rule]", "True"}], ",", 
-             RowBox[{"AxesLabel", "\[Rule]", 
+                    RowBox[{"2", ",", "df"}], "]"}], "]"}]}]}], "}"}], 
+                    "]"}]}], "}"}], ",", "Nothing"}], "]"}]}], "]"}]}], "]"}],
+                ",", 
+               RowBox[{"Normal", "[", 
+                RowBox[{"opd", "[", 
+                 RowBox[{"[", "2", "]"}], "]"}], "]"}]}], "]"}]}], "}"}], ",", 
+           RowBox[{"BoxRatios", "\[Rule]", 
+            RowBox[{"{", 
+             RowBox[{"1", ",", 
+              RowBox[{
+               RowBox[{"info", "[", 
+                RowBox[{"opd", "[", 
+                 RowBox[{"[", "1", "]"}], "]"}], "]"}], "[", 
+               RowBox[{"[", "1", "]"}], "]"}], ",", "0.35"}], "}"}]}], ",", 
+           RowBox[{"FaceGrids", "\[Rule]", 
+            RowBox[{"{", 
+             RowBox[{"{", 
+              RowBox[{"0", ",", "0", ",", 
+               RowBox[{"-", "1"}]}], "}"}], "}"}]}], ",", 
+           RowBox[{"Axes", "\[Rule]", "True"}], ",", 
+           RowBox[{"AxesLabel", "\[Rule]", 
+            RowBox[{
+             RowBox[{"info", "[", 
+              RowBox[{"opd", "[", 
+               RowBox[{"[", "1", "]"}], "]"}], "]"}], "[", 
+             RowBox[{"[", "3", "]"}], "]"}]}], ",", 
+           RowBox[{"PlotLabel", "\[Rule]", 
+            RowBox[{"Row", "[", 
+             RowBox[{
               RowBox[{"{", 
                RowBox[{
-               "\"\<product\>\"", ",", "\"\<separation\>\"", ",", 
-                "\"\<count\>\""}], "}"}]}], ",", 
-             RowBox[{"PlotLabel", "\[Rule]", 
-              RowBox[{"opd", "[", 
-               RowBox[{"[", "1", "]"}], "]"}]}], ",", 
-             RowBox[{"PlotRange", "\[Rule]", "All"}]}], "]"}], ",", 
-           RowBox[{"{", 
-            RowBox[{"df", ",", "2"}], "}"}]}], "]"}]}], "]"}], ",", 
-       RowBox[{"Normal", "[", "corr3a", "]"}]}], "]"}], ",", 
-     RowBox[{"ImageSize", "\[Rule]", "300"}]}], "]"}]}], 
-  "]"}]], "Input",ExpressionUUID->"704ed7ff-4851-4823-bb65-abb465d8cdef"]
+                RowBox[{"opd", "[", 
+                 RowBox[{"[", "1", "]"}], "]"}], ",", 
+                RowBox[{"If", "[", 
+                 RowBox[{
+                 "symmetric", ",", "\"\<symmetric\>\"", ",", 
+                  "\"\<antisymmetric\>\""}], "]"}]}], "}"}], ",", 
+              "\"\< \>\""}], "]"}]}], ",", 
+           RowBox[{"PlotRange", "\[Rule]", 
+            RowBox[{"{", 
+             RowBox[{"All", ",", "All", ",", 
+              RowBox[{"If", "[", 
+               RowBox[{"True", ",", "All", ",", 
+                RowBox[{"{", 
+                 RowBox[{
+                  RowBox[{"-", "0.01"}], ",", "0.01"}], "}"}]}], "]"}]}], 
+             "}"}]}]}], "]"}]}], "]"}], ",", 
+       RowBox[{"Normal", "[", 
+        RowBox[{"If", "[", 
+         RowBox[{"symmetric", ",", "fieldCorr3s", ",", "fieldCorr3a"}], "]"}],
+         "]"}]}], "]"}], ",", 
+     RowBox[{"ImageSize", "\[Rule]", "500"}]}], "]"}]}], 
+  "]"}]], "Input",ExpressionUUID->"9fd68514-567f-4223-81c0-8e3b38020252"]
 }, Open  ]]
 }, Open  ]]
 },
-WindowSize->{930, 697},
-WindowMargins->{{62, Automatic}, {0, Automatic}},
+WindowSize->{900, 705},
+WindowMargins->{{31, Automatic}, {6, Automatic}},
 PrivateNotebookOptions->{"FileOutlineCache"->False},
 CellChangeTimes->None,
 TrackCellChangeTimes->False,
