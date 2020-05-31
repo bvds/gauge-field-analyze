@@ -1,5 +1,5 @@
 opsList2 = {"2l", "2t1", "2t2"};
-opsList3 = {"3pt1", "3pt2", "3m1a", "3m1b", "3m2", 
+opsList3 = {"3pl","3pt1", "3pt2", "3m1a", "3m1b", "3m2", 
             "3m3", "3m4", "3m5", "3m6", "3m7", "3m8", "3m9", "3m10"};
 componentMultiplet3[dir1_, dir2_, d1_, d3_, d2_] :=
  Block[{
@@ -25,12 +25,13 @@ componentMultiplet3[dir1_, dir2_, d1_, d3_, d2_] :=
 
 linkCorrPlot3::usage = "Helper for plot routines, returning:  aspect ratio, sign of the data, and axis labels.";
 linkCorrPlot3[] :=
- Block[{label1 = "#\[CapitalDelta]",
-        labelp = "#\[CapitalDelta]", label2 = "r",
+ Block[{label1 = "\[CapitalDelta]",
+        labelp = "\[CapitalDelta]", label2 = "r",
         label3 = "cov", labelm = "-cov"},
   Association[{
+      "3pl" -> {1/2, 1, {label1, labelp, label3}},
       "3pt1" -> {1, 1, {label1, labelp, label3}},
-      "3pt2" -> {1/2, -1, {label1, labelp, label4}},
+      "3pt2" -> {1/2, 1, {label1, labelp, label4}},
       "3m1a" -> {Sqrt[1 + (#[[-2]]/#[[-1]])^2]&[latticeDimensions],
                  1, {label1, label2, label3}},
       "3m1b" -> {1, 1, {label1, label2, label3}},
@@ -110,7 +111,7 @@ linkCorrelators[n_, OptionsPattern[]] :=
                tt0 = SessionTime[], tt1, tmid = 0.0, tmidupdate = 0.0,
                tupdate = 0.0, tcm = 0.0}, 
        Do[Block[{x1 = latticeCoordinates[k1], x2, x22, xmiddle, x3,
-                 w1, w2, w3, w1t, w2t, w3t, dx, face, f1, mid, flip},
+                 w1, w11, w2, w22, w3, dx, face, f1, mid, flip},
         w1 = alf[[dir1, linearSiteIndex[x1]]];
         face = latticeDimensions;
         face[[dir1]] = 1;
@@ -130,50 +131,54 @@ linkCorrelators[n_, OptionsPattern[]] :=
            Do[
                If[dir1 != dir2,
                   Block[{dir3 = cross[dir1, dir2]},
-                  w1t = alf[[dir2, linearSiteIndex[x1]]];
-                  w2t = alf[[dir3, linearSiteIndex[x2]]];
-                  {w1t, w2t} *= Signature[{dir1, dir2, dir3}];
+                  w11 = alf[[dir2, linearSiteIndex[x1]]];
+                  w22 = alf[[dir3, linearSiteIndex[x2]]];
+                  {w11, w22} *= Signature[{dir1, dir2, dir3}];
                   addTimeNull[tupdate,
-                              update2[tallies, "2t2", {i}, w1t, w2t]]]],
+                              update2[tallies, "2t2", {i}, w11, w22]]]],
                {dir2, nd}];
            If[n==3,
               Do[
+                  (* Don't overwrite global value on reflection. *)
+                  w11 = w1;
+                  w22 = w2;
                   (*middle point*)
                   x3 = wrapIt[x1 + vector[dir1, j]];
                   w3 = alf[[dir1, linearSiteIndex[x3]]];
                   (*Reflection in dir1 direction*)
-                  If[j < i - j, {w2, w3, w1} = -{w1, w3, w2}];
+                  If[j > i - j, {w22, w3, w11} = -{w11, w3, w22}];
                   addTimeNull[tupdate,
-                              update3[tallies, "3pl", {i, Max[j, i - j]},
-                                      w1, w3, w2]],
+                              update3[tallies, "3pl", {i, Min[j, i - j]},
+                                      w11, w3, w22]],
                   {j, 0, i}];
               Do[If[dir2 != dir1, 
-                    w1t = (alf[[dir2, linearSiteIndex[x1]]] + 
-                          alf[[dir2, linearSiteIndex[shift[dir2, x1]]]])/2;
-                    x22 = wrapIt[x1 + vector[dir1, If[flip, 1 - i, i]]];
-                    w2t = alf[[dir2, linearSiteIndex[x22]]];
-                    x3 = wrapIt[x1 + vector[dir1, If[flip, 1 - j, j]]];
-                    w3t = alf[[dir2, linearSiteIndex[x3]]];
-                    If[flip, w1t = -w1t];
+                    w11 = (alf[[dir1, linearSiteIndex[x1]]] + 
+                          alf[[dir1, linearSiteIndex[shift[dir2, x1]]]])/2;
+                    x22 = wrapIt[x1 + vector[dir1, If[flip, -i, i + 1]]];
+                    w22 = alf[[dir2, linearSiteIndex[x22]]];
+                    x3 = wrapIt[x1 + vector[dir1, If[flip, -j, j + 1]]];
+                    w3 = alf[[dir2, linearSiteIndex[x3]]];
+                    If[flip, w11 = -w11];
                     addTimeNull[tupdate,
-                                update3[tallies, "3pt1", {i - 1/2, j - 1/2},
-                                        w1t, w3t, w2t]]],
-                 {j, i}, {dir2, nd}, {flip, {False, True}}];
+                                update3[tallies, "3pt1", {i + 1/2, j + 1/2},
+                                        w11, w3, w22]]],
+                 {j, 0, i}, {dir2, nd}, {flip, {False, True}}];
               Do[If[dir2 != dir1,
-                    w1t = alf[[dir2, linearSiteIndex[x1]]];
-                    w2t = alf[[dir2, linearSiteIndex[x2]]];
+                    w11 = alf[[dir2, linearSiteIndex[x1]]];
+                    x22 = wrapIt[x1 + vector[dir1, i + 1]];
+                    w22 = alf[[dir2, linearSiteIndex[x22]]];
                     x3 = wrapIt[x1 + vector[dir1, j]];
                     w3 = (alf[[dir1, linearSiteIndex[x3]]] + 
                           alf[[dir1, linearSiteIndex[shift[dir2, x3]]]])/2;
                     (*Flip in dir1 direction*)
-                    If[j + 1/2 < i - j - 1/2,
-                       {w1t, w3, w2t} = {w2t, -w3, w1t}];
+                    If[j + 1/2 > i - j + 1/2,
+                       {w11, w3, w22} = {w22, -w3, w11}];
                     addTimeNull[
                         tupdate,
                         update3[tallies, "3pt2",
-                                {i, Min[j + 1/2, i - j - 1/2]},
-                                w1t, w3, w2t]]],
-                 {j, 0, i - 1}, {dir2, nd}];
+                                {i + 1, Min[j + 1/2, i - j + 1/2]},
+                                w11, w3, w22]]],
+                 {j, 0, i}, {dir2, nd}];
               face = latticeDimensions;
               face[[dir1]] = 1;
               dy = vector[dir1, x1[[dir1]] - 1 + Floor[i/2]];
@@ -190,24 +195,26 @@ linkCorrelators[n_, OptionsPattern[]] :=
                  {f3, latticeVolume[face]}];
               (* Ignore the "middle of the link" versus site. *)
               tt1 = SessionTime[];
-              Do[If[dir1 != dir2,
-                    w1t = alf[[d1, linearSiteIndex[x1]]];
-                    w2t = alf[[d2, linearSiteIndex[x2]]];
+              Do[If[dir1 != dir2 &&
+                    (* Only do j==0 once for longitudinal d3 *)
+                    Not[j==0 && d3==dir1 && Mod[dir2 - dir1, 3] == 1],
+                    w11 = alf[[d1, linearSiteIndex[x1]]];
+                    w22 = alf[[d2, linearSiteIndex[x2]]];
                     x3 = wrapIt[x1 + vector[dir1, Floor[i/2]] +
                                 vector[dir2, j]];
-                    w3t = alf[[d3, linearSiteIndex[x3]]];
+                    w3 = alf[[d3, linearSiteIndex[x3]]];
                     If[j < 0,
-                       {w1t, w3t, w2t} *=
+                       {w11, w3, w22} *=
                        Map[If[# == dir2, -1, 1] &, {d1, d3, d2}]];
                     addTimeNull[
                         tcm,
                         {mid, flip} = componentMultiplet3[
                             dir1, dir2, d1, d3, d2]];
                     If[flip =!= Null,
-                       {w2t, w3t, w1t} = {w1t, w3t, w2t}*flip];
+                       {w22, w3, w11} = {w11, w3, w22}*flip];
                     addTimeNull[
                         tmidupdate,
-                        update3[tallies, mid, {i, Abs[j]}, w1t, w3t, w2t]]],
+                        update3[tallies, mid, {i, Abs[j]}, w11, w3, w22]]],
                  {dir2, nd},
                  {j, -Floor[latticeDimensions[[dir2]]/2], 
                   latticeDimensions[[dir2]]/2},
@@ -228,6 +235,9 @@ linkCorrelators[n_, OptionsPattern[]] :=
       {kernel, $KernelCount}],
     Merge[#, If[distFlag, Flatten, Total]]&];
    Print["Total time: ", SessionTime[] - t0];
+   If[False,
+      Print["3m1a for (2,0) ", result["3m1a"][{2,0}]];
+      Print["3m1b for (2,0) ", result["3m1b"][{2,0}]]];
    Map[
        If[
            distFlag,
