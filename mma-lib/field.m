@@ -59,7 +59,9 @@ linkCorrelators[n_, OptionsPattern[]] :=
                 If[n==2, opsList2, opsListAuto3],
                 True,
                 OptionValue["operators"]],
-    alf = Map[2*Im[Map[Tr, SUGenerators[].SULog[#]]] &, gaugeField, {2}], 
+    (* Subtract average value separately in each direction *)
+    alf = Map[Block[{x=Mean[#]}, Map[(#-x)&, #]]&,
+              Map[2*Im[Map[Tr, SUGenerators[].SULog[#]]] &, gaugeField, {2}]], 
     t0 = SessionTime[], t1, result,
     half = IdentityMatrix[nd]/2, 
     vector = Function[{dir, len}, Table[If[i == dir, len, 0], {i, nd}]],
@@ -83,27 +85,23 @@ linkCorrelators[n_, OptionsPattern[]] :=
           Block[{lt = Lookup[tallies[op], Key[key],
                              If[distFlag,
                                 {},
-                                Join[{0, 0.0, 0.0},
-                                     Array[0.0&, {2, Length[w1]}]]]],
+                                {0, 0.0, 0.0}]],
                 w12 = w1.w2},
                 If[distFlag,
                    lt = {lt, w12},
-                   lt += {1, w12, w12^2, w1, w2}];
+                   lt += {1, w12, w12^2}];
                 tallies[op][key] = lt]], {HoldFirst}];
    update3 = Function[
        {tallies, op, key, w1, w2, w3}, 
        If[KeyExistsQ[tallies, op], 
-          Block[{f321, f32, f1, lt = Lookup[
+          (* Right multiplication is faster for SparseArray. *)
+          Block[{f321 = ((fabc.w3).w2).w1, lt = Lookup[
               tallies[op], Key[key],
               If[distFlag, {},
-                 Join[{0, 0.0, 0.0}, Array[0.0&, {6, Length[w1]}]]]]},
+                 {0, 0.0, 0.0}]]},
                 If[distFlag,
-                   lt = {lt, ((fabc.w3).w2).w1},
-                   (* Right multiplication is faster for SparseArray.
-                     Use the cyclic property of dabc or fabc. *)
-                   lt += {1, f321=(f32=(fabc.w3).w2).w1, f321^2,
-                          w1, w2, w3,
-                          f32, (f1=fabc.w1).w3, tensorSign*f1.w2}];
+                   lt = {lt, f321},
+                   lt += {1, f321, f321^2}];
                 tallies[op][key] = lt]], {HoldFirst}];
    Print["ops: ", ops];
    If[False, Print[TableForm[
@@ -257,12 +255,8 @@ linkCorrelators[n_, OptionsPattern[]] :=
        If[
            distFlag,
            Identity,
-           {If[n == 2,
-               (#[[2]] - #[[4]].#[[5]]/#[[1]])/(#[[1]] - 1),
-               (#[[2]] + 2 ((fabc.#[[6]]).#[[5]]).#[[4]]/#[[1]]^2
-                - Sum[#[[3 + i]].#[[6 + i]], {i, 3}]/#[[1]])/(#[[1]] - 1)],
             (* Use sample standard deviation (with Bessel's correction). *)
-            #[[2]]/#[[1]], Sqrt[(#[[3]] - #[[2]]^2/#[[1]])/
+            {#[[2]]/#[[1]], Sqrt[(#[[3]] - #[[2]]^2/#[[1]])/
                                 (#[[1]]*(#[[1]]-1))]}&],
        result, {2}]]/;n==2||n==3;
 
@@ -276,23 +270,26 @@ trace[a_, b_] := Block[{x = Flatten[a].Flatten[Transpose[b]]},
                           Abort[]];
                        Re[x]];
 trace[a__] := Tr[Dot[a]]/;Length[{a}]!=2;
-opsList4 = {"t1", "m1", "t2", "m2", "t3"};
+opsList4 = {"t1", "m1", "l", "t2", "m2", "t3"};
 (* See arXiv:1207.0609v2 [hep-ph] 2 Oct 2012 for color multiplets. *)
-colorList4 = {"1", "adjointS", "adjointA", "10S", "27", "0"};
+colorList4[] := colorList4[nc];
+colorList4[nc_] := {"1", "adjointS", "adjointA", "10S", "27",
+                    If[nc > 3, "0", Nothing]};
 linkCorrelators[4, OptionsPattern[]] :=
  Block[{
     distFlag = OptionValue["distFlag"],
     ops = Which[OptionValue["operators"] === All,
-                Flatten[Outer[List, opsList4, colorList4], 1],
+                Flatten[Outer[List, opsList4, colorList4[]], 1],
                 OptionValue["operators"] === Automatic,
-                Flatten[Outer[List, opsList4, colorList4], 1],
+                Flatten[Outer[List, opsList4, colorList4[]], 1],
                 True,
                 OptionValue["operators"]],
-    flf = Map[(-I SULog[#])&, gaugeField, {2}], 
+    (* Subtract average value separately in each direction *)
+    flf = Map[Block[{x=Mean[#]}, Map[(#-x)&, #]]&,
+              Map[(-I SULog[#])&, gaugeField, {2}]], 
     t0 = SessionTime[], t1, result,
     vector = Function[{dir, len}, Table[If[i == dir, len, 0], {i, nd}]],
     cross = Function[{k1, k2}, If[k1 != k2, 6 - k1 - k2, $Failed]],
-    addHC = Function[x, x + ConjugateTranspose[x]],
     displace = Function[dx, 
        Mod[dx + latticeDimensions/2, latticeDimensions] -
        latticeDimensions/2],
@@ -306,74 +303,41 @@ linkCorrelators[4, OptionsPattern[]] :=
     update},
    update = Function[
        {tallies, op, key, wa, wb, wc, wd},
-       Block[{tab, tcd, tac, tbd, tad, tbc, p, d, name},
+       Block[{tab, tcd, tac, tbd, tad, tbc, p},
         tab = trace[wa, wb];
         tcd = trace[wc, wd];
         p["1"] = 4*tab*tcd/(nc^2 -1);
-        d["1"] = 4*{wb*tcd, wa*tcd, wd*tab, wc*tab}/(nc^2 -1);
         p["adjointS"] = 2*(2*Re[trace[wa, wb, wc, wd]] +
                            2*Re[trace[wb, wa, wc, wd]] - 4*tab*tcd/nc)*
                         nc/(nc^2 - 4);
-        d["adjointS"] = 2*{addHC[wb.wc.wd] + addHC[wc.wd.wb] - 4*wb*tcd/nc,
-                           addHC[wc.wd.wa] + addHC[wa.wc.wd] - 4*wa*tcd/nc,
-                           addHC[wd.wa.wb] + addHC[wd.wb.wa] - 4*wd*tab/nc,
-                           addHC[wa.wb.wc] + addHC[wb.wa.wc] - 4*wc*tab/nc}*
-                        nc/(nc^2 - 4);
         p["adjointA"] = 2*(2*Re[trace[wa, wb, wc, wd]] -
                            2*Re[trace[wb, wa, wc, wd]])/nc;
-        d["adjointA"] = 2*{addHC[wb.wc.wd] - addHC[wc.wd.wb],
-                           addHC[wc.wd.wa] - addHC[wa.wc.wd],
-                           addHC[wd.wa.wb] - addHC[wd.wb.wa],
-                           addHC[wa.wb.wc] - addHC[wb.wa.wc]}/nc;
         tac = trace[wa, wc];
         tbd = trace[wb, wd];
         tad = trace[wa, wd];
         tbc = trace[wb, wc];
         If[KeyExistsQ[tallies, {op, "10S"}],
-           p["10S"] = 2*(tac*tbd - tad*tbc) - p["adjointA"];
-           d["10S"] = 2*{wc*tbd - wd*tbc, wd*tac - wc*tad,
-                         wa*tbd - wb*tad, wb*tac - wa*tbc} - d["adjointA"]];
+           p["10S"] = 2*(tac*tbd - tad*tbc) - p["adjointA"]];
         If[KeyExistsQ[tallies, {op, "27"}],
            p["27"] = tac*tbd + tad*tbc +
                       2*Re[trace[wa, wc, wb, wd]] -
-                     p["adjointS"]*(nc-2)/(2 nc) - p["1"]*(nc-1)/(2 nc);
-           d["27"] = {wc*tbd + wd*tbc + addHC[wc.wb.wd],
-                      wd*tac + wc*tad + addHC[wd.wa.wc],
-                      wa*tbd + wb*tad + addHC[wb.wd.wa],
-                      wb*tac + wa*tbc + addHC[wa.wc.wb]} -
-                     d["adjointS"]*(nc-2)/(2 nc) - d["1"]*(nc-1)/(2 nc)];
+                      p["adjointS"]*(nc-2)/(2 nc) - p["1"]*(nc-1)/(2 nc)];
         If[KeyExistsQ[tallies, {op, "0"}],
            p["0"] = tac*tbd + tad*tbc -
                      2*Re[trace[wa, wc, wb, wd]] -
-                    p["adjointS"]*(nc+2)/(2 nc) - p["1"]*(nc+1)/(2 nc);
-           d["0"] = {wc*tbd + wd*tbc - addHC[wc.wb.wd],
-                     wd*tac + wc*tad - addHC[wd.wa.wc],
-                     wa*tbd + wb*tad - addHC[wb.wd.wa],
-                     wb*tac + wa*tbc - addHC[wa.wc.wb]} -
-                    d["adjointS"]*(nc+2)/(2 nc) - d["1"]*(nc+1)/(2 nc)];
+                     p["adjointS"]*(nc+2)/(2 nc) - p["1"]*(nc+1)/(2 nc)];
         Do[
             If[KeyExistsQ[tallies, {op, colorm}],
                Block[{lt = Lookup[
                    tallies[{op, colorm}], Key[key],
-                   If[distFlag,
-                      {},
-                      Join[{0, 0.0, 0.0},
-                           Array[0.0&, {8, Length[wa], Length[wa]}]]]]},
+                   If[distFlag, {}, {0, 0.0, 0.0}]]},
                      If[Im[p[colorm]] != 0,
                         Print[{p[colorm], {op, key}}]];
-                     Block[
-                         {z = Join[{wa, wb, wc, wd}, d[colorm]]},
-                         Do[
-                             If[Norm[z[[i]] - ConjugateTranspose[z[[i]]]] > 10^-12,
-                                Print["d not hermitian",
-                                      {colorm, i, z[[i]]}]],
-                             {i, Length[z]}]];
                      If[distFlag,
                         lt = {lt, p[colorm]},
-                        lt += Join[{1, p[colorm], p[colorm]^2, wa, wb, wc, wd},
-                                   d[colorm]]];
+                        lt += {1, p[colorm], p[colorm]^2}];
                      tallies[{op, colorm}][key] = lt]],
-            {colorm, colorList4}]], {HoldFirst}];
+            {colorm, colorList4[]}]], {HoldFirst}];
    Print["ops: ", ops];
    If[False, Print[TableForm[
        Transpose[
@@ -446,12 +410,7 @@ linkCorrelators[4, OptionsPattern[]] :=
        If[
            distFlag,
            Identity,
-           (* Drop terms with more than one average value. *)
-           {(#[[2]] -
-             Sum[trace[#[[3 + i]], #[[7 + i]]],
-                 {i, 4}]/#[[1]])/(#[[1]] - 1),
             (* Use sample standard deviation (with Bessel's correction). *)
-            If[Im[#[[2]]] != 0, Print["bad ", #]];
-            #[[2]]/#[[1]], Sqrt[(#[[3]] - #[[2]]^2/#[[1]])/
+            {#[[2]]/#[[1]], Sqrt[(#[[3]] - #[[2]]^2/#[[1]])/
                                 (#[[1]]*(#[[1]]-1))]}&],
        result, {2}]];
