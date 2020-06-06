@@ -32,7 +32,7 @@ To get configuration options:
 
 In particular, note the `--with-qdp` option.  To build:
 
-    ./congfigure [options]
+    ./configure [options]
     make
 
 ### Run
