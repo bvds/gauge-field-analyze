@@ -306,46 +306,50 @@ linkCorrelators[4, OptionsPattern[]] :=
     update},
    update = Function[
        {tallies, op, key, wa, wb, wc, wd},
-       Block[{tab, tcd, tac, tbd, tad, tbc, sym, wab, wcd,
-              p, d, name},
+       Block[{tab, tcd, tac, tbd, tad, tbc, p, d, name},
         tab = trace[wa, wb];
         tcd = trace[wc, wd];
-        p["1"] = tab*tcd/(nc^2 -1);
-        d["1"] = {wb*tcd, wa*tcd, wd*tab, wc*tab}/(nc^2 -1);
-        Do[
-            wab = wa.wb + sym*wb.wa;
-            wcd = wc.wd + sym*wd.wc;
-            name = If[sym > 0, "adjointS", "adjointA"];
-            p[name] = trace[wab, wcd]*nc/(nc^2 - 2 - 2 sym);
-            d[name] = {wb.wcd + sym*wcd.wb, wcd.wa + sym*wa.wcd,
-                         wd.wab + sym*wab.wd, wab.wc + sym*wc.wab}*
-                      nc/(nc^2 - 2 + 2 sym),
-            {sym, {-1, 1}}];
+        p["1"] = 4*tab*tcd/(nc^2 -1);
+        d["1"] = 4*{wb*tcd, wa*tcd, wd*tab, wc*tab}/(nc^2 -1);
+        p["adjointS"] = 2*(2*Re[trace[wa, wb, wc, wd]] +
+                           2*Re[trace[wb, wa, wc, wd]] - 4*tab*tcd/nc)*
+                        nc/(nc^2 - 4);
+        d["adjointS"] = 2*{addHC[wb.wc.wd] + addHC[wc.wd.wb] - 4*wb*tcd/nc,
+                           addHC[wc.wd.wa] + addHC[wa.wc.wd] - 4*wa*tcd/nc,
+                           addHC[wd.wa.wb] + addHC[wd.wb.wa] - 4*wd*tab/nc,
+                           addHC[wa.wb.wc] + addHC[wb.wa.wc] - 4*wc*tab/nc}*
+                        nc/(nc^2 - 4);
+        p["adjointA"] = 2*(2*Re[trace[wa, wb, wc, wd]] -
+                           2*Re[trace[wb, wa, wc, wd]])/nc;
+        d["adjointA"] = 2*{addHC[wb.wc.wd] - addHC[wc.wd.wb],
+                           addHC[wc.wd.wa] - addHC[wa.wc.wd],
+                           addHC[wd.wa.wb] - addHC[wd.wb.wa],
+                           addHC[wa.wb.wc] - addHC[wb.wa.wc]}/nc;
         tac = trace[wa, wc];
         tbd = trace[wb, wd];
         tad = trace[wa, wd];
         tbc = trace[wb, wc];
         If[KeyExistsQ[tallies, {op, "10S"}],
-           p["10S"] = (tac*tbd - tad*tbc)/2 - p["adjointA"];
-           d["10S"] = {wc*tbd - wd*tbc, wd*tac - wc*tad,
-                       wa*tbd - wb*tad, wb*tac - wa*tbc}/2 - d["adjointA"]];
+           p["10S"] = 2*(tac*tbd - tad*tbc) - p["adjointA"];
+           d["10S"] = 2*{wc*tbd - wd*tbc, wd*tac - wc*tad,
+                         wa*tbd - wb*tad, wb*tac - wa*tbc} - d["adjointA"]];
         If[KeyExistsQ[tallies, {op, "27"}],
-           p["27"] = (tac*tbd + tad*tbc +
-                      2*Re[trace[wa, wc, wb, wd]])/4 -
-                     p["adjointA"]*(nc+2)/(2 nc) - p["1"]*(nc+1)/(2 nc);
+           p["27"] = tac*tbd + tad*tbc +
+                      2*Re[trace[wa, wc, wb, wd]] -
+                     p["adjointS"]*(nc-2)/(2 nc) - p["1"]*(nc-1)/(2 nc);
            d["27"] = {wc*tbd + wd*tbc + addHC[wc.wb.wd],
                       wd*tac + wc*tad + addHC[wd.wa.wc],
                       wa*tbd + wb*tad + addHC[wb.wd.wa],
-                      wb*tac + wa*tbc + addHC[wa.wc.wb]}/4 -
-                     d["adjointS"]*(nc+2)/(2 nc) - d["1"]*(nc+1)/(2 nc)];
+                      wb*tac + wa*tbc + addHC[wa.wc.wb]} -
+                     d["adjointS"]*(nc-2)/(2 nc) - d["1"]*(nc-1)/(2 nc)];
         If[KeyExistsQ[tallies, {op, "0"}],
-           p["0"] = (tac*tbd + tad*tbc -
-                     2*Re[trace[wa, wc, wb, wd]])/4 -
+           p["0"] = tac*tbd + tad*tbc -
+                     2*Re[trace[wa, wc, wb, wd]] -
                     p["adjointS"]*(nc+2)/(2 nc) - p["1"]*(nc+1)/(2 nc);
            d["0"] = {wc*tbd + wd*tbc - addHC[wc.wb.wd],
                      wd*tac + wc*tad - addHC[wd.wa.wc],
                      wa*tbd + wb*tad - addHC[wb.wd.wa],
-                     wb*tac + wa*tbc - addHC[wa.wc.wb]}/4 -
+                     wb*tac + wa*tbc - addHC[wa.wc.wb]} -
                     d["adjointS"]*(nc+2)/(2 nc) - d["1"]*(nc+1)/(2 nc)];
         Do[
             If[KeyExistsQ[tallies, {op, colorm}],
