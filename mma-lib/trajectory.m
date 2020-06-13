@@ -53,11 +53,6 @@ linkSaddlePoint[dir_, coords_, opts:OptionsPattern[]] :=
   If[debug > 0, SUMatrixQ[uu, Tolerance -> 10^-7]];
   {uu, First[SUNorm[uu.ConjugateTranspose[u0]]]}];
 
-makeCoordList[] := Block[
-    {result = Array[Null&, latticeVolume[]]},
-    Do[Block[{coord = latticeCoordinates[k]},
-             result[[linearSiteIndex[coord]]] = coord],
-       {k, latticeVolume[]}]; result];
 singleLinkStep::usage = "Apply one-link saddle point step to all links, returning the updated links and the size of the step.";
 Options[singleLinkStep] = Options[linkSaddlePoint];
 singleLinkStep[coordList_List:Null, opts:OptionsPattern[]] :=
@@ -92,19 +87,26 @@ makeObservableTrajectory[set_, label_, n_,
   lastGaugeField = gaugeField;
   
   results = Transpose[Table[
+      Catch[
       If[debug > 0, Print["Starting step ", i]];
       gaugeSegments = Association[];
       If[i > 0,
          If[diagonalQ,
             {gaugeField, dd} = singleLinkStep[coordList, sopts],
-            Get[StringRiffle[{OptionValue["step"], ToString[set],
-                              label, ToString[i]},"-"]<>".m"];
+            Check[
+                Get[StringRiffle[{OptionValue["step"], ToString[set],
+                                  label, ToString[i]},"-"]<>".m"],
+                Print["Skipping ", i, ":  file missing."];
+                Throw[Nothing, Get::noopen],
+                {Get::noopen}];
             gaugeField = gaugeField0;
             dd = If[True,
-                    (* These are equivalent *)
-                    Norm[delta]/Sqrt[2*nd*latticeVolume[]],
-                    latticeDistance[gaugeField, lastGaugeField];
-                    lastGaugeField = gaugeField]];
+                    (* These are equivalent.
+                      However, delta is not defined for the
+                      diagonal-only steps. *)
+                    latticeDistance[gaugeField, lastGaugeField],
+                    Norm[delta]/Sqrt[2*nd*latticeVolume[]]]];
+         lastGaugeField = gaugeField;
          distance += dd];
       If[Mod[i, OptionValue["skip"]] == 0, Table[
           {i, If[debug > 0, Print["  ", DateObject[], " start ", observable]];
@@ -132,6 +134,7 @@ makeObservableTrajectory[set_, label_, n_,
               True,
               Abort[]
               ]}, {observable, OptionValue["observables"]}], Nothing],
+      Get::noopen],
       {i, 0, n}]];
   Block[{i=1}, Do[
       observableTrajectory[set, label, observable] = results[[i++]],

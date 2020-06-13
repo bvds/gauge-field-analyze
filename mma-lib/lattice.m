@@ -33,6 +33,12 @@ latticeIndex[coords_List, dimensions_] :=
   Do[i += (coords[[k]] - 1)*delta;
    delta *= dimensions[[k]], {k, Length[dimensions]}]; i];
 
+makeCoordList[] := Block[
+    {result = Array[Null&, latticeVolume[]]},
+    Do[Block[{coord = latticeCoordinates[k]},
+             result[[linearSiteIndex[coord]]] = coord],
+       {k, latticeVolume[]}]; result];
+
 shift::usage = "Wrap-around, assuming periodic boundary conditions.";
 shift[dir_, coordIn_List, size_:1] :=
   Block[{cc = coordIn},
