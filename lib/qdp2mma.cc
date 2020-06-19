@@ -138,19 +138,35 @@ namespace mma {
   */
   void dump_lattice(std::string& filename,
 		    const QDP::multi1d<QDP::LatticeColorMatrix>& u,
-		    const QDP::Real& beta)
+		    const Params& params)
   {
     std::ofstream to(filename);
     to.precision(15);  // Double, no matter what
     to << std::fixed;  // Fixed point:  handle exponents manually
 
     // A lot of this is also in the XML file.
-    to << "beta=" << beta << "; ";
+    to << "beta=" << params.beta << "; ";
     to << "nd=" << Nd << "; nc=" << Nc << ";" << std::endl;
     to << "latticeDimensions=";
     write(to, QDP::Layout::lattSize());
     to << ";" << std::endl;
     to << "latticeLayout=\"" << CONFIG_LAYOUT << "\";" << std::endl;
+
+    to << "latticeBC=\"" << params.GaugeBC << "\"; " << std::endl;
+    if(params.GaugeBC == "TRANS_GAUGEBC") {
+        count = 0;
+        to << "transverseBCPhases=";
+        write(to, params.phases);
+        to << "; " << std::endl;
+        count = 0;
+        to << "transverseBCDirections=";
+        // Shift to match Mathematica array numbering.
+        write(to, params.transverseDirs+1);
+        to << ";" << std::endl;
+    } else {
+        to << "transverseBCPhases=Null; ";
+        to << "transverseBCDirections=Null;" << std::endl;
+    }
 
     to << "gaugeField=";
 

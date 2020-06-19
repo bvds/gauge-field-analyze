@@ -12,6 +12,16 @@
 
 namespace mma {
 
+  struct Params 
+  {
+      QDP::multi1d<int> nrow;
+      QDP::Real beta;
+      std::string GaugeBC;
+      QDP::multi1d<Real> phases;
+      QDP::multi1d<int> transverseDirs;
+  };
+
+
   void write(std::ostream& to, const QDP::ColorMatrix &from);
   void write(std::ostream& to, const QDP::Complex &from);
   void write(std::ostream& to, const QDP::Real &from);
@@ -19,7 +29,7 @@ namespace mma {
 
   void dump_lattice(std::string& filename,
 		    const QDP::multi1d<QDP::LatticeColorMatrix>& u,
-		    const QDP::Real& beta);
+		    const Params& params);
 
 } // namespace mma
 

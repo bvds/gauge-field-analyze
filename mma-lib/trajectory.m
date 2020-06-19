@@ -37,21 +37,23 @@ Options[linkSaddlePoint] =
         printDetails -> True},
        Options[linkSaddlePointStep]];
 linkSaddlePoint[dir_, coords_, opts:OptionsPattern[]] := 
- Block[{maxShift = 4 Pi, u0 = getLink[dir, coords], u1, u2,
-        linkShiftNorm,
-        sopts = Apply[Sequence, FilterRules[
-            {opts}, Options[linkSaddlePointStep]]],
-        u2SumStaples, count = 0, uu,
-        debug = printLevel[OptionValue[printDetails], 1]},
-  u2 = u1 = SUPower[u0, 0.5];
-  u2SumStaples = u2.sumStaples[dir, coords];
-  While[maxShift > OptionValue[Tolerance] && 
-	count < OptionValue[maxCount],
-	count++;
-	u1 = linkSaddlePointStep[u2SumStaples, u1, sopts]];
-  uu = u1.u2;
-  If[debug > 0, SUMatrixQ[uu, Tolerance -> 10^-7]];
-  {uu, First[SUNorm[uu.ConjugateTranspose[u0]]]}];
+ If[boundaryLinkQ[dir, coords],
+    {getLink[dir, coords], 0},
+    Block[{maxShift = 4 Pi, u0 = getLink[dir, coords], u1, u2,
+           linkShiftNorm,
+           sopts = Apply[Sequence, FilterRules[
+               {opts}, Options[linkSaddlePointStep]]],
+           u2SumStaples, count = 0, uu,
+           debug = printLevel[OptionValue[printDetails], 1]},
+     u2 = u1 = SUPower[u0, 0.5];
+     u2SumStaples = u2.sumStaples[dir, coords];
+     While[maxShift > OptionValue[Tolerance] && 
+	   count < OptionValue[maxCount],
+	   count++;
+	   u1 = linkSaddlePointStep[u2SumStaples, u1, sopts]];
+     uu = u1.u2;
+     If[debug > 0, SUMatrixQ[uu, Tolerance -> 10^-7]];
+     {uu, First[SUNorm[uu.ConjugateTranspose[u0]]]}]];
 
 singleLinkStep::usage = "Apply one-link saddle point step to all links, returning the updated links and the size of the step.";
 Options[singleLinkStep] = Options[linkSaddlePoint];
@@ -75,16 +77,16 @@ Options[makeObservableTrajectory] = Join[
         "periodic" -> "../data/3-3/periodic-16-28"}]; 
 makeObservableTrajectory[set_, label_, n_, 
                             opts:OptionsPattern[]] := 
-    Block[{gaugeField, delta, gaugeField0, distance = 0,
+ Block[{gaugeField, delta, gaugeField0, distance = 0,
+           shiftDistance,
            debug = printLevel[OptionValue[printDetails], 1],
         diagonalQ = StringMatchQ[label, "s*"],
-        lastGaugeField, coordList, dd, results, gaugeSegments,
+        coordList, dd, results, gaugeSegments,
         sopts = Apply[Sequence, FilterRules[
             {opts}, Options[singleLinkStep]]]},
   Get[OptionValue["periodic"] <> "-" <> ToString[set] <> ".m"];
   If[diagonalQ,
      coordList = makeCoordList[]];
-  lastGaugeField = gaugeField;
   
   results = Transpose[Table[
       Catch[
@@ -93,6 +95,7 @@ makeObservableTrajectory[set_, label_, n_,
       If[i > 0,
          If[diagonalQ,
             {gaugeField, dd} = singleLinkStep[coordList, sopts],
+            shiftDistance = Null; (* not always defined *)
             Check[
                 Get[StringRiffle[{OptionValue["step"], ToString[set],
                                   label, ToString[i]},"-"]<>".m"],
@@ -100,13 +103,12 @@ makeObservableTrajectory[set_, label_, n_,
                 Throw[Nothing, Get::noopen],
                 {Get::noopen}];
             gaugeField = gaugeField0;
-            dd = If[True,
-                    (* These are equivalent.
-                      However, delta is not defined for the
-                      diagonal-only steps. *)
-                    latticeDistance[gaugeField, lastGaugeField],
-                    Norm[delta]/Sqrt[2*nd*latticeVolume[]]]];
-         lastGaugeField = gaugeField;
+            (* Delta is not defined for the
+              diagonal-only steps. *)
+            dd = If[
+                shiftDistance =!= Null,
+                shiftDistance,
+                Norm[delta]/Sqrt[2*nd*latticeVolume[]]]];
          distance += dd];
       If[Mod[i, OptionValue["skip"]] == 0, Table[
           {i, If[debug > 0, Print["  ", DateObject[], " start ", observable]];

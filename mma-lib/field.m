@@ -44,7 +44,7 @@ Options[linkCorrelators] = {
     (* See Malin Sjödahl, arXiv:0906.1121v2 [hep-ph] 31 Jul 2009
       for a discussion why these are zero.  I believe that this
       is because the vacuum is even under charge conjugation.*)
-    "anomoly" -> False,
+    "anomaly" -> False,
     "distFlag" -> False, "timing" -> False,
     (* Drop any that are zero under symmetries *)
     "operators" -> Automatic};
@@ -58,7 +58,7 @@ linkCorrelators[n_, OptionsPattern[]] :=
                    opsList2,
                    (* Remove cases that are zero. *)
                    Complement[opsList3,
-                              If[OptionValue["anomoly"],
+                              If[OptionValue["anomaly"],
                                  {"3m1a", "3m1b", "3m6", "3m9"},
                                  (* remove "3m1a" because it is big *)
                                  {"3m1a", "3m3", "3m7", "3m10"}]]],
@@ -76,7 +76,7 @@ linkCorrelators[n_, OptionsPattern[]] :=
     displace = Function[dx, 
        Mod[dx + latticeDimensions/2, latticeDimensions] -
        latticeDimensions/2],
-    fabc = N[If[OptionValue["anomoly"], SUSymmetric[], SUStructure[]]],
+    fabc = N[If[OptionValue["anomaly"], SUSymmetric[], SUStructure[]]],
     addTimeNull = If[
         OptionValue["timing"],
         Function[{timer, expr},
@@ -295,6 +295,7 @@ trace[a_, b_] := Block[{x = Flatten[a].Flatten[Transpose[b]]},
                           Abort[]];
                        Re[x]];
 trace[a__] := Tr[Dot[a]]/;Length[{a}]!=2;
+(* "t4" is redundant with "t3" *)
 opsList22 = {"t1", "m1", "l", "t2", "m2", "t3"};
 (* See arXiv:1207.0609v2 [hep-ph] 2 Oct 2012 for color multiplets.
    arXiv:hep-ph/9803241v1 4 Mar 1998 gives more complete discussion. *)
@@ -353,16 +354,16 @@ linkCorrelators[22, OptionsPattern[]] :=
     distFlag = OptionValue["distFlag"],
     ops = Which[OptionValue["operators"] === All,
                 Flatten[Outer[List, opsList22,
-                              If[OptionValue["anomoly"],
+                              If[OptionValue["anomaly"],
                                  colorList4A, colorList4[]]], 1],
                 OptionValue["operators"] === Automatic,
                 (* Remove miltiplets that are zero. *)
                 Complement[
                     Flatten[Outer[List, opsList22,
-                                  If[OptionValue["anomoly"],
+                                  If[OptionValue["anomaly"],
                                      colorList4A, colorList4[]]], 1],
                     Flatten[Outer[List,
-                                  {"l", "t2", "m2", "t3"},
+                                  {"l", "t2", "m2", "t3a", "t3b"},
                                   {"8A", "Re10"}], 1]],
                 True,
                 OptionValue["operators"]],
@@ -418,7 +419,8 @@ linkCorrelators[22, OptionsPattern[]] :=
                 If[dir1 != dir2,
                  Block[
                      {dir3 = cross[dir1, dir2], w1t, w2t, w1z, w2z,
-                      w1tt, w2tt, w1zz, w2zz, sig},
+                      w1tt, w2tt, w1zz, w2zz, w1zt, w2zt,
+                      w1tz, w2tz, sig},
                   sig = Signature[{dir1, dir2, dir3}];
                   w1t = getf[flf, dir2, x1];
                   w2t = getf[flf, dir2, x2];
@@ -447,6 +449,17 @@ linkCorrelators[22, OptionsPattern[]] :=
                      addTimeNull[tupdate,
                                  updateColor4[tallies, "t3", {i}, distFlag,
                                               w2z, w2zz, w1t, w1tt]]];
+                  If[sig > 0,
+                     w1zt = getf[flf, dir3, shift[dir2, x1]];
+                     w1tz = getf[flf, dir2, shift[dir3, x1]];
+                     w2zt = getf[flf, dir3, shift[dir2, x2]];
+                     w2tz = getf[flf, dir2, shift[dir3, x2]];
+                     addTimeNull[tupdate,
+                                 updateColor4[tallies, "t4", {i}, distFlag,
+                                              w1z, w1zt, w2t, w2tz]];
+                     addTimeNull[tupdate,
+                                 updateColor4[tallies, "t4", {i}, distFlag,
+                                              w2z, w2zt, w1t, w1tz]]];
                   addTimeNull[tupdate,
                               updateColor4[tallies, "m1", {i}, distFlag,
                                      w1t, w1l, w2t, w2l]];
@@ -491,11 +504,11 @@ linkCorrelators["4x", OptionsPattern[]] :=
     distFlag = OptionValue["distFlag"],
     ops = Which[OptionValue["operators"] === All,
                 Flatten[Outer[List, opsList4x,
-                              If[OptionValue["anomoly"],
+                              If[OptionValue["anomaly"],
                                  colorList4A, colorList4[]]], 1],
                 OptionValue["operators"] === Automatic,
                 Flatten[Outer[List, opsList4x,
-                              If[OptionValue["anomoly"],
+                              If[OptionValue["anomaly"],
                                  colorList4A,
                                  (* Must be symmetric under w1 <-> w2 *)
                                  Complement[colorList4[],

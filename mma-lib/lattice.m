@@ -49,6 +49,27 @@ wrapIt[coords_] := wrapIt[coords, latticeDimensions];
 wrapIt[coords_List, dims_] :=
     MapThread[(1 + Mod[#1 - 1, #2])&, {coords, dims}];
 
+boundaryLinkQ[dir_, coords_] :=
+    Which[latticeBC == "PERIODIC_GAUGEBC",
+          False,
+          latticeBC == "TRANS_GAUGEBC",
+          Block[{f = (dir == #1 && (
+              coords[[#2]] == 1 || coords[[#2]] == latticeDimensions[[#2]]))&},
+                f[transverseBCDirections[[1]], transverseBCDirections[[2]]] ||
+                f[transverseBCDirections[[2]], transverseBCDirections[[1]]]],
+          True,
+          $Failed];
+boundarySiteQ[coords_] :=
+    Which[latticeBC == "PERIODIC_GAUGEBC",
+          False,
+          latticeBC == "TRANS_GAUGEBC",
+          Block[{f = (coords[[#]] == 1 || coords[[#]] ==
+                      latticeDimensions[[#]])&},
+                f[transverseBCDirections[[1]]] ||
+                f[transverseBCDirections[[2]]]],
+          True,
+          $Failed];
+
 plaquette[dir1_, dir2_, coords_List] := Tr[
     getLink[dir1, coords].
     getLink[dir2, shift[dir1, coords]].
@@ -810,11 +831,12 @@ setRandomGauge[] :=
  Do[Block[
    {coords = latticeCoordinates[i],
     vt = randomSUMatrix[]},
-  Do[
-      setLink[dd, shift[dd, coords, -1],
-	      getLink[dd, shift[dd, coords, -1]].vt];
-      setLink[dd, coords, ConjugateTranspose[vt].getLink[dd, coords]],
-      {dd, nd}]],
+   If[!boundarySiteQ[coords],
+      Do[
+          setLink[dd, shift[dd, coords, -1],
+	          getLink[dd, shift[dd, coords, -1]].vt];
+          setLink[dd, coords, ConjugateTranspose[vt].getLink[dd, coords]],
+          {dd, nd}]]],
     {i, latticeVolume[]}];
 
 setAxialGauge::usage = "Set axial gauge for the current lattice configuration.
@@ -827,7 +849,7 @@ Options[setAxialGauge] = {"center" -> False, "abelian" -> True,
 setAxialGauge[dir_, opts:OptionsPattern[]] :=
  Do[Block[{coords = latticeCoordinates[i], debug = OptionValue["debug"],
        popts = Apply[Sequence, FilterRules[{opts}, Options[getPhases]]]},
-   If[coords[[dir]] == 1,
+   If[coords[[dir]] == 1 && !boundarySiteQ[coords],
     Block[{v = IdentityMatrix[nc], vt, ct, phases, centerValues},
      (* Initial values *)
      If[False,
@@ -912,7 +934,7 @@ setLandauGauge[OptionsPattern[]] :=
               normSum = 0.0},
              If[Not[ListQ[coords]],
                 Messsage[General::list, coords, 0]];
-             If[Mod[Total[coords], 2] == cb,
+             If[Mod[Total[coords], 2] == cb && !boundarySiteQ[coords],
                 (* Construct gauge transform *)
                 (* One can use the links themselves
                   and project onto traceless antihermitian
@@ -954,7 +976,8 @@ setLaundauAxialGauge[dir1_, OptionsPattern[]] :=
      Use checkerboard to avoid conflicts in link updates. *)
    Do[Scan[update, ParallelTable[
      Block[{coords = latticeCoordinates[i], sum, gauge, lastU, firstU},
-      If[coords[[dir1]] == 1 && Mod[Total[coords], 2] == cb,
+           If[coords[[dir1]] == 1 && Mod[Total[coords], 2] == cb &&
+              !boundarySiteQ[coords],
          lastU = getLink[dir1, shift[dir1, coords, -1]];
          Table[
              (* Iterate through a Polyakov loop in direction dir1 *)

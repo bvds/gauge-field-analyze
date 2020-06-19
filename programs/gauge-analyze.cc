@@ -44,19 +44,22 @@ Program_Parameters parse_input_arguments(int argc, char **argv)
  */
 
  //! Holds params for Heat-bath
-struct HBItrParams 
-{
-  QDP::multi1d<int> nrow;
-  QDP::Real beta;
-};
 void read(QDP::XMLReader& xml_in, const std::string& path,
-	  HBItrParams& hbitr_params,
+	  mma::Params& hbitr_params,
 	  std::string& cfg_file)
 {
   try {
     QDP::XMLReader paramtop(xml_in, path);
     QDP::read(paramtop, "HBItr/nrow", hbitr_params.nrow);
     QDP::read(paramtop, "HBItr/GaugeAction/beta", hbitr_params.beta);
+    QDP::XMLReader bcparam(paramtop, "HBItr/GaugeAction/GaugeState/GaugeBC");
+    QDP::read(bcparam, "./Name", hbitr_params.GaugeBC);
+    if(hbitr_params.GaugeBC == "TRANS_GAUGEBC") {
+        QDP::read(bcparam, "./phases",
+                  hbitr_params.phases);
+        QDP::read(bcparam, "./transverse_dirs",
+                  hbitr_params.transverseDirs);
+    }
     QDP::read(paramtop, "Cfg/cfg_file", cfg_file);
   }
   catch(const std::string& e) {
@@ -105,7 +108,7 @@ int main(int argc, char **argv)
    * discover_dims_mode anyway.  Finally, it is not clear if 
    * discover_dims_mode has ever been tested.
    */
-  HBItrParams hbitr_params;
+  mma::Params hbitr_params;
   std::string cfg_file;
   try
     {
@@ -149,7 +152,7 @@ int main(int argc, char **argv)
             << std::endl;
 
   try {
-    mma::dump_lattice(params.output_file, u, hbitr_params.beta);
+      mma::dump_lattice(params.output_file, u, hbitr_params);
   } catch (std::exception &err) {
     QDPIO::cerr << err.what() << std::endl;
     return 1;
