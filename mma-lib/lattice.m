@@ -49,15 +49,22 @@ wrapIt[coords_] := wrapIt[coords, latticeDimensions];
 wrapIt[coords_List, dims_] :=
     MapThread[(1 + Mod[#1 - 1, #2])&, {coords, dims}];
 
+
+(* Handle lattice where some number of links-sites have
+  been frozen. *)
+
+lattice::invalidBC = "Unknown value for latticeBC"
 boundaryLinkQ[dir_, coords_] :=
     Which[latticeBC == "PERIODIC_GAUGEBC",
           False,
           latticeBC == "TRANS_GAUGEBC",
           Block[{f = (dir == #1 && (
-              coords[[#2]] == 1 || coords[[#2]] == latticeDimensions[[#2]]))&},
+              coords[[#2]] == 1 || coords[[#2]] == latticeDimensions[[#2]] ||
+              coords[[#1]] == latticeDimensions[[#1]]))&},
                 f[transverseBCDirections[[1]], transverseBCDirections[[2]]] ||
                 f[transverseBCDirections[[2]], transverseBCDirections[[1]]]],
           True,
+          Message[lattice::ivalidBC];
           $Failed];
 boundarySiteQ[coords_] :=
     Which[latticeBC == "PERIODIC_GAUGEBC",
@@ -68,7 +75,71 @@ boundarySiteQ[coords_] :=
                 f[transverseBCDirections[[1]]] ||
                 f[transverseBCDirections[[2]]]],
           True,
+          Message[lattice::ivalidBC];
           $Failed];
+reducedSiteCount[] :=
+    latticeVolume[]*Which[
+        latticeBC == "PERIODIC_GAUGEBC",
+        1,
+        latticeBC == "TRANS_GAUGEBC",
+        Block[{l1, l2},
+              {l1, l2} = Map[latticeDimensions[[#]]&,
+                             transverseBCDirections];
+              (l1-2)*(l2-2)/(l1 l2)],
+        True,
+        Message[lattice::invalidBC];
+        $Failed];
+reducedLinkCount[] :=
+    latticeVolume[]*Which[
+        latticeBC == "PERIODIC_GAUGEBC",
+        nd,
+        latticeBC == "TRANS_GAUGEBC",
+        Block[{l1, l2},
+              {l1, l2} = Map[latticeDimensions[[#]]&,
+                             transverseBCDirections];
+              (nd*(l1-2)*(l2-2) + l1 + l2 - 4)/(l1 l2)],
+        True,
+        Message[lattice::invalidBC];
+        $Failed];
+reducedSiteIndex::usage = "Version of latticeIndex where only sites that have not been masked are indexed.";
+reducedSiteIndex[coords_] :=
+    Which[
+        latticeBC == "PERIODIC_GAUGEBC",
+        latticeIndex[coords],
+        latticeBC == "TRANS_GAUGEBC",
+        Block[{cords = coords, dims = latticeDimensions},
+              Do[
+                  cords[[transverseBCDirections[[i]]]] -= 1;
+                  dims[[transverseBCDirections[[i]]]] -= 2, {i, 2}];
+              latticeIndex[cords, dims]],
+        True,
+        Message[lattice::invalidBC];
+        $Failed];
+(* Helper function to construct a lookup table since
+  a direct calculation is too difficult. *)
+reducedLinkIndex::count = "Wrong number of links.";
+reducedLinkCache[dims_List, transDirs_List] :=
+    reducdLinkCache[dims, transDirs] =
+    Block[{y = Association[], count = 1},
+          Do[
+              Block[{coords = latticeCoordinates[i]},
+                    If[!boundaryLinkQ[dir, coords],
+                       y[{dir, coords}] = count++]],
+              {i, latticeVolume[]}, {dir, nd}];
+          If[Length[y] != reducedLinkCount[],
+             Message[reducedLinkIndex::count]];
+          y];
+reducedLinkIndex[dir_, coords_List] :=
+    Which[
+        latticeBC == "PERIODIC_GAUGEBC",
+        (latticeIndex[coords] -1) * nd + dir,
+        latticeBC == "TRANS_GAUGEBC",
+        reducedLinkCache[latticeDimensions, transverseBCDirections][
+            {dir, coords}],
+        True,
+        Message[lattice::invalidBC];
+        $Failed];
+
 
 plaquette[dir1_, dir2_, coords_List] := Tr[
     getLink[dir1, coords].

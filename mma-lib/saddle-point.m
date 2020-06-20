@@ -144,42 +144,66 @@ describes the type of shift:
                   Axial gauge in that direction
 *)
 
+lattice::fixedTransBC = "The combination fixed>0 and TRANS_GAUGEBC not implemented";
 nGrad::usage = "Size of basis for lattice-wide shifts.";
-nGrad[fixed_] := If[fixed < 1, nd,
-   nd - 1 + 1/latticeDimensions[[fixed]]] latticeVolume[]*(nc^2 - 1);
+nGrad[fixed_] := (nc^2 - 1)*If[
+    fixed < 1,
+    reducedLinkCount[],
+    If[latticeBC != "PERIODIC_GAUGEBC",
+       Message[lattice::fixedTransBC];
+       Return[$Failed]];
+    latticeVolume[]*(nd - 1 + 1/latticeDimensions[[fixed]])];
 coords2grad::usage = "Use latticeIndex, rather than linearSiteIndex \
 to order the sites, so we can handle fixed>0.
 For efficient code parallelization, links that are spatially close \
 should be close in the basis.";
 coords2grad[fixed_][dir_, coords_, generator_] :=
-    generator + (nc^2 - 1)*If[fixed>0,
-    Block[{cords = coords, dimensions = latticeDimensions},
-          cords[[fixed]] = 1; dimensions[[fixed]] = 1;
-          (latticeIndex[cords, dimensions] - 1) *
-          (1 + (nd-1) latticeDimensions[[fixed]]) +
-          If[fixed<dir, 1 + latticeDimensions[[fixed]]*(dir - 2),
-               latticeDimensions[[fixed]]*(dir - 1)] +
-          If[dir==fixed, 1, coords[[fixed]]] - 1],
-     (* non-Axial case *)
-     (latticeIndex[coords] - 1)*nd + dir - 1];
+    generator + (nc^2 - 1)*
+    If[fixed>0,
+       If[latticeBC != "PERIODIC_GAUGEBC",
+          Message[lattice::fixedTransBC];
+          Return[$Failed]];
+       Block[{cords = coords, dimensions = latticeDimensions},
+        cords[[fixed]] = 1; dimensions[[fixed]] = 1;
+        (latticeIndex[cords, dimensions] - 1) *
+        (1 + (nd-1) latticeDimensions[[fixed]]) +
+        If[fixed<dir, 1 + latticeDimensions[[fixed]]*(dir - 2),
+           latticeDimensions[[fixed]]*(dir - 1)] +
+        If[dir==fixed, 1, coords[[fixed]]] - 1],
+       (* non-Axial case *)
+       If[boundaryLinkQ[dir, coords],
+          Infinity,
+          reducedLinkIndex[dir, coords] - 1]];
 nGauge::usage = "Size of basis for a gauge tranformation.  fixed=0: \
 arbitrary gauge tranformation.  fixed>0:  gauge transforms that \
 preserve Axial gauge in the \"fixed\" direction.";
-nGauge[fixed_] := latticeVolume[] (nc^2 - 1) If[fixed < 1, 1,
-    1/latticeDimensions[[fixed]]];
+nGauge[fixed_] := (nc^2 - 1)*
+    If[fixed < 1,
+       reducedSiteCount[],
+       If[latticeBC != "PERIODIC_GAUGEBC",
+          Message[lattice::fixedTransBC];
+          Return[$Failed]];
+       latiiceVolume[]/latticeDimensions[[fixed]]];
 coords2gauge[fixed_][coordsIn_, generator_] :=
-  generator + (nc^2 - 1)*
-    Block[{coords = coordsIn, dimensions = latticeDimensions},
-     If[fixed > 0, coords[[fixed]] = 1; dimensions[[fixed]] = 1];
-     latticeIndex[coords, dimensions] - 1];
+  generator + (nc^2 - 1)*(
+   If[fixed > 0,
+      Block[{coords = coordsIn, dimensions = latticeDimensions},
+            If[latticeBC != "PERIODIC_GAUGEBC",
+               Message[lattice::fixedTransBC];
+               Return[$Failed]];
+            coords[[fixed]] = 1; dimensions[[fixed]] = 1;
+            latticeIndex[coords, dimensions]],
+      If[boundarySiteQ[coordsIn],
+         Infinity,
+         reducedSiteIndex[coordsIn]]] - 1);
 gradLinkTake[fixed_][dir_, coords_] :=
     {1, nc^2 - 1} + coords2grad[fixed][dir, coords, 0];
-symAdd::usage = oneAdd::useage = "If full=False, take the lower triangle.  The export to an *.mtx file dumps the lower triangle of a symmetric matrix..";
+symAdd::usage = oneAdd::useage = "If full=False, take the lower triangle.  The export to an *.mtx file dumps the lower triangle of a symmetric matrix.";
 symAdd::index = "Invalid index.";
 SetAttributes[symAdd, HoldAll];
-symAdd[m_, i_, j_, value_, full_:True] := (
-    If[full || i>=j, m[{i, j}] = Lookup[m, Key[{i, j}], 0.0] + value];
-    If[full || j>=i, m[{j, i}] = Lookup[m, Key[{j, i}], 0.0] + value]);
+symAdd[m_, i_, j_, value_, full_:True] :=
+    (If[full || i>=j, m[{i, j}] = Lookup[m, Key[{i, j}], 0.0] + value];
+     If[full || j>=i, m[{j, i}] = Lookup[m, Key[{j, i}], 0.0] + value]);
 SetAttributes[oneAdd, HoldAll];
 oneAdd[m_, i_, j_, value_, full_:True] :=
     If[full || i>=j, m[{i, j}] = Lookup[m, Key[{i, j}], 0.0] + value];
@@ -196,15 +220,16 @@ infinitesimal gauge transformations.  The result is returned as a \
 SparseArray.";
 gaugeTransformShifts::axial = "Not Axial gauge.";
 SetAttributes[gaugeTransformShifts, HoldFirst];
-gaugeTransformShifts[rootGaugeField_Symbol, fixed_: - 1] :=
+gaugeTransformShifts[rootGaugeField_Symbol, fixed_: -1] :=
  ParallelSum[
   Block[{gaugeShifts = Association[], gen = SUGenerators[],
     c2grad = coords2grad[fixed]},
    Do[Block[{coords = latticeCoordinates[i], gindex, index1, index2,
-      u1, u2, ugu1, ugu2}, u1 = getLink[rootGaugeField][dir, coords];
-     u2 = getLink[rootGaugeField][dir, shift[dir, coords, -1]];(*
-     Only do the axial direction once.
-     But verify that lattice is in Axial gauge. *)
+             u1, u2, ugu1, ugu2},
+     u1 = getLink[rootGaugeField][dir, coords];
+     u2 = getLink[rootGaugeField][dir, shift[dir, coords, -1]];
+     (* Only do the axial direction once.
+       But verify that lattice is in Axial gauge. *)
      If[dir == fixed && coords[[fixed]] > 1,
 	If[AnyTrue[Abs[u1 - u2], (# > 10^-6)&, 2],
 	   Message[gaugeTransformShifts::axial]; Return[$Failed]];
@@ -214,15 +239,18 @@ gaugeTransformShifts[rootGaugeField_Symbol, fixed_: - 1] :=
      ugu1 = ConjugateTranspose[u1].gen[[gac]].u1;
      index2 = c2grad[dir, shift[dir, coords, -1], 0];
      ugu2 = u2.gen[[gac]].ConjugateTranspose[u2];
-     Do[oneAdd[gaugeShifts, gindex, index1 + ac,
-       2 reTrDot[ugu1, gen[[ac]]]];
-      oneAdd[gaugeShifts, gindex,
-       index2 + ac, -2 reTrDot[ugu2, gen[[ac]]]], {ac,
-       nc^2 - 1}]], {i, kernel, latticeVolume[], $KernelCount}, {gac,
-     nc^2 - 1}, {dir, nd}];
+     Do[
+         oneAdd[gaugeShifts, gindex, index1 + ac,
+                2 reTrDot[ugu1, gen[[ac]]]];
+         oneAdd[gaugeShifts, gindex,
+                index2 + ac, -2 reTrDot[ugu2, gen[[ac]]]],
+         {ac, nc^2 - 1}]],
+      {i, kernel, latticeVolume[], $KernelCount},
+      {gac, nc^2 - 1}, {dir, nd}];
    SparseArray[
-    Normal[gaugeShifts], {nGauge[fixed],
-     nGrad[fixed]}]], {kernel, $KernelCount}];
+       Select[Normal[gaugeShifts],
+              #[[1, 1]]<Infinity && #[[1, 2]]<Infinity&],
+       {nGauge[fixed], nGrad[fixed]}]], {kernel, $KernelCount}];
 
 
 (* Hessian and gradient *)
@@ -276,10 +304,14 @@ latticeHessian[getRootLink_, OptionsPattern[]] :=
         vv0011 = v00.gen[[ca1]].c11, vv1001 = v10.gen[[ca1]].c01,
         vv1100 = v11.gen[[ca1]].c00, vv0110 = v01.gen[[ca1]].c10, t0, z},
        (* Negative for inverse links. *)
-       grad[[g1]] += -Im[Tr[w3.gen[[ca1]]]];
-       grad[[g3]] += Im[Tr[w1.gen[[ca1]]]];
-       grad[[g2]] += -Im[Tr[w4.gen[[ca1]]]];
-       grad[[g4]] += Im[Tr[w2.gen[[ca1]]]];
+       If[g1 < Infinity,
+          grad[[g1]] += -Im[Tr[w3.gen[[ca1]]]]];
+       If[g3 < Infinity,
+          grad[[g3]] += Im[Tr[w1.gen[[ca1]]]]];
+       If[g2 < Infinity,
+          grad[[g2]] += -Im[Tr[w4.gen[[ca1]]]]];
+       If[g4 < Infinity,
+          grad[[g4]] += Im[Tr[w2.gen[[ca1]]]]];
        (* Time is dominated by matrix construction,
        and matrix construction is dominated by the inner color loop. *)
        t0 = SessionTime[];
@@ -301,7 +333,10 @@ latticeHessian[getRootLink_, OptionsPattern[]] :=
 	{ca1, nc^2 - 1}]],
       {dir1, nd - 1}, {dir2, dir1 + 1, nd},
       {i, kernel, latticeVolume[], $KernelCount}];
-   {SparseArray[Normal[hess], {nGrad[fixed], nGrad[fixed]}], grad}],
+   {SparseArray[
+       Select[Normal[hess],
+              #[[1, 1]]<Infinity && #[[1, 2]]<Infinity&],
+       {nGrad[fixed], nGrad[fixed]}], grad}],
   {kernel, $KernelCount}]];
 
 
@@ -702,9 +737,11 @@ applyDelta[tgf_, delta_, fixed_] :=
    Do[
     Block[{coords = latticeCoordinates[i]},
      tgf[[dir, linearSiteIndex[coords]]] =
-       getLink[tgf][dir, coords].
-       MatrixExp[I Take[delta, gradMap[dir, coords]].SUGenerators[]].
-       getLink[tgf][dir, coords]],
+     getLink[tgf][dir, coords].
+     If[boundaryLinkQ[dir, coords],
+        IdentityMatrix[nc],
+        MatrixExp[I Take[delta, gradMap[dir, coords]].SUGenerators[]]].
+     getLink[tgf][dir, coords]],
     {dir, nd}, {i, latticeVolume[]}]];
 
 latticeSaddlePointStep::usage =
