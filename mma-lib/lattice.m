@@ -58,11 +58,10 @@ boundaryLinkQ[dir_, coords_] :=
     Which[latticeBC == "PERIODIC_GAUGEBC",
           False,
           latticeBC == "TRANS_GAUGEBC",
-          Block[{f = (dir == #1 && (
-              coords[[#2]] == 1 || coords[[#2]] == latticeDimensions[[#2]] ||
-              coords[[#1]] == latticeDimensions[[#1]]))&},
-                f[transverseBCDirections[[1]], transverseBCDirections[[2]]] ||
-                f[transverseBCDirections[[2]], transverseBCDirections[[1]]]],
+          Block[{f = ((dir != # && coords[[#]] == 1) ||
+                      coords[[#]] == latticeDimensions[[#]])&},
+                f[transverseBCDirections[[1]]] ||
+                f[transverseBCDirections[[2]]]],
           True,
           Message[lattice::ivalidBC];
           $Failed];
@@ -117,9 +116,9 @@ reducedSiteIndex[coords_] :=
         $Failed];
 (* Helper function to construct a lookup table since
   a direct calculation is too difficult. *)
-reducedLinkIndex::count = "Wrong number of links.";
+reducedLinkIndex::count = "Wrong number of links. cache length `1`, count=`2`, reducedLinkCount = `3`";
 reducedLinkCache[dims_List, transDirs_List] :=
-    reducdLinkCache[dims, transDirs] =
+    reducedLinkCache[dims, transDirs] =
     Block[{y = Association[], count = 1},
           Do[
               Block[{coords = latticeCoordinates[i]},
@@ -127,7 +126,9 @@ reducedLinkCache[dims_List, transDirs_List] :=
                        y[{dir, coords}] = count++]],
               {i, latticeVolume[]}, {dir, nd}];
           If[Length[y] != reducedLinkCount[],
-             Message[reducedLinkIndex::count]];
+             (* Print[{dims, transDirs, latticeDimensions}]; *)
+             Message[reducedLinkIndex::count,
+                     Length[y], count, reducedLinkCount[]]];
           y];
 reducedLinkIndex[dir_, coords_List] :=
     Which[
@@ -910,22 +911,94 @@ setRandomGauge[] :=
           {dd, nd}]]],
     {i, latticeVolume[]}];
 
+
+getBoundaryPhase::usage = "Add up phases going around edge for a given starting point on the boundary.";
+getBoundaryPhase::unknown = "Unknown Method";
+Options[getBoundaryPhase] = {
+    Method -> "straight", "debug" -> False};
+getBoundaryPhase[dir_, coords_, OptionsPattern[]] :=
+ Block[{dirt, sign, dt,
+        debug = OptionValue["debug"]},
+  Scan[(sign = If[#==dir, 1, -1]; If[#!=dir, dirt=#])&,
+             transverseBCDirections];
+  dt = coords[[dirt]] - (latticeDimensions[[dirt]]+1)/2;
+  If[debug, Print["dt=", dt, ", sign=", sign]];
+  Which[
+      OptionValue[Method] === "discontinuous",
+      (* "discontinuous" and "matchBoundary" should be identical
+        if the phase on each boundary link is proportional to
+        the angle about the middle of the lattice
+        subtended by that link. *)
+      Block[{fraction = ArcTan[Abs[dt],
+                (latticeDimensions[[dir]] - 1)/2]/Pi},
+            If[debug, Print[{N[fraction], dt,
+                             (latticeDimensions[[dir]] - 1)/2}]];
+            DiagonalMatrix[Exp[
+                I sign*Sign[dt]*transverseBCPhases*fraction]]],
+      OptionValue[Method] === "smooth",
+      Block[{fraction = ArcTan[latticeDimensions[[dirt]] -1,
+                               latticeDimensions[[dir]] - 1]/Pi},
+            fraction *= 2*dt/(latticeDimensions[[dirt]] -1);
+            If[debug, Print[{N[fraction], dt,
+                             (latticeDimensions[[dir]] - 1)/2}]];
+            DiagonalMatrix[Exp[
+                I sign*transverseBCPhases*fraction]]],
+      OptionValue[Method] === "matchBoundary",
+      Block[{y = coords, v = IdentityMatrix[nc]},
+       Which[dt > 0,
+             While[y[[dirt]] < latticeDimensions[[dirt]],
+                   v = v.getLink[dirt, y];
+                   y[[dirt]] += 1];
+             While[y[[dir]] < latticeDimensions[[dir]],
+                   v = v.getLink[dir, y];
+                   y[[dir]] += 1];
+             While[y[[dirt]] > coords[[dirt]],
+                   y[[dirt]] -= 1;
+                   v = v.ConjugateTranspose[getLink[dirt, y]]],
+             dt < 0,
+             While[y[[dirt]] > 1,
+                   y[[dirt]] -= 1;
+                   v = v.ConjugateTranspose[getLink[dirt, y]]];
+             While[y[[dir]] < latticeDimensions[[dir]],
+                   v = v.getLink[dir, y];
+                   y[[dir]] += 1];
+             While[y[[dirt]] < coords[[dirt]],
+                   v = v.getLink[dirt, y];
+                   y[[dirt]] += 1]];
+       v],
+      OptionValue[Method] === "straight",
+      (* Axial gauge transform without committing any
+        crimes at the boundaries. *)
+      Block[{y = coords, v = IdentityMatrix[nc]},
+       While[y[[dir]] < latticeDimensions[[dir]],
+             v = v.getLink[dir, y];
+             y[[dir]] += 1];
+       v],
+      True,
+      Message[getBoundaryPhase::unknown];
+      Return[$Failed]]]/;
+ latticeBC == "TRANS_GAUGEBC" && coords[[dir]] == 1 &&
+ MemberQ[transverseBCDirections, dir];
+
+
 setAxialGauge::usage = "Set axial gauge for the current lattice configuration.
 That is, links along any Polyakov loop in direction dir are constant and
 diagonal.  In the case \"center\" -> True, set the gauge relative to the
 nearest element of the center of the group for each axial-direction link.
 Option \"abelian\" -> True rotates the field so that it is diagonal.";
-Options[setAxialGauge] = {"center" -> False, "abelian" -> True,
-                         "debug" -> False};
+Options[setAxialGauge] = Join[{"center" -> False, "abelian" -> False,
+                               "debug" -> False},
+                              Options[getBoundaryPhase]];
+setAxialGauge::options = "Invalid combination of options.";
 setAxialGauge[dir_, opts:OptionsPattern[]] :=
- Do[Block[{coords = latticeCoordinates[i], debug = OptionValue["debug"],
-       popts = Apply[Sequence, FilterRules[{opts}, Options[getPhases]]]},
+ Block[{popts = Apply[Sequence, FilterRules[{opts},
+                      Options[getPhases]]],
+        gbopts = Apply[Sequence, FilterRules[{opts},
+                       Options[getBoundaryPhase]]],
+        debug = OptionValue["debug"]},
+  Do[Block[{coords = latticeCoordinates[i]},
    If[coords[[dir]] == 1 && !boundarySiteQ[coords],
-    Block[{v = IdentityMatrix[nc], vt, ct, phases, centerValues},
-     (* Initial values *)
-     If[False,
-	Do[Print[{j, getLink[dir, shift[dir, coords, j - 1]]}],
-	   {j, latticeDimensions[[dir]]}]];
+    Block[{v = IdentityMatrix[nc], ww, vt, ct, phases, centerValues},
      Do[v = v.getLink[dir, shift[dir, coords, j - 1]],
 	{j, latticeDimensions[[dir]]}];
      If[debug, Print["Full product:", v]];
@@ -941,16 +1014,22 @@ setAxialGauge[dir_, opts:OptionsPattern[]] :=
      If[OptionValue["abelian"],
         (* Since we want the diagonal part,
           use getPhases instead of SUPower. *)
-        phases = Sort[First[getPhases[v, False]], Greater];
+        {phases, ww} = Take[getPhases[v, True, popts], 2];
+        (* Convert to an SU(N) matrix *)
+        ww[[-1]] /= Det[ww];
         v = DiagonalMatrix[Exp[I*phases/latticeDimensions[[dir]]]],
         v = SUPower[v, 1/latticeDimensions[[dir]]]];
      If[debug, Print["Root:", v]];
      Do[
       (* Apply gauge choice to each site *)
       ct = shift[dir, coords, j - 1];
-      (* Solving the linear system instead of using the Hermitian
-        conjugate decreases the floating point error. *)
-      vt = LinearSolve[getLink[dir, shift[dir, ct, -1]], v];
+      If[j == 1,
+         If[OptionValue["abelian"],
+            vt = Transpose[ww],
+            Continue[]],
+         (* Solving the linear system instead of using the Hermitian
+           conjugate decreases the floating point error. *)
+         vt = LinearSolve[getLink[dir, shift[dir, ct, -1]], v]];
       If[OptionValue["center"],
          vt *= Exp[I 2 Pi centerValues[[j-1]]/nc]]; 
       Do[setLink[dd, shift[dd, ct, -1],
@@ -959,14 +1038,58 @@ setAxialGauge[dir_, opts:OptionsPattern[]] :=
                  (* Solving the linear system instead of using the
                    Hermitian conjugate decreases the floating point error. *)
                  LinearSolve[vt, getLink[dd,ct]]],
-	 {dd, nd}], {j, 2, latticeDimensions[[dir]]}];
+	 {dd, nd}],
+      {j, latticeDimensions[[dir]]}];
      (* Verify that it all worked out *)
      If[debug,
-	Do[Print[{j, getLink[dir, shift[dir, coords, j - 1]]}],
-	   {j, latticeDimensions[[dir]]}];
+	If[False,
+           Do[Print[{j, Chop[getLink[dir, shift[dir, coords, j - 1]]]}],
+	      {j, latticeDimensions[[dir]]}]];
       Print["Final link diff:",
-	    Chop[v - getLink[dir, shift[dir, coords, -1]]]]]]]],
-          {i, latticeVolume[]}];
+	    Chop[v - getLink[dir, shift[dir, coords, -1]]]]]]];
+   (*
+     Special case of fixed boundary fields.
+     The site is on a boundary but the link is not.
+     Apply axial gauge until the next boundary is reached.
+    *)
+   If[boundarySiteQ[coords] && !boundaryLinkQ[dir, coords],
+    Block[{ui = IdentityMatrix[nc], up, gidagger, gf, gg, vt, y,
+           phases, count, ww},
+     If[OptionValue["center"] || OptionValue["abelian"],
+        Message[setAxialGauge::options];
+        Return[]];
+     (* Initial values *)
+     up = getBoundaryPhase[dir, coords, gbopts];
+     y = coords; count = 0;
+     While[!boundaryLinkQ[dir, y],
+           ui = ui.getLink[dir, y];
+           count += 1; y = shift[dir, y]];
+     If[debug, Print["Full product:", ui]];
+     gidagger = SUPower[up, 0.5].ConjugateTranspose[SUPower[ui, 0.5]];
+     gf = ConjugateTranspose[SUPower[ui, 0.5]].SUPower[up, 0.5];
+     gg = SUPower[up, 1/count];
+     setLink[dir, coords, gidagger.getLink[dir, coords]];
+     y = shift[dir, coords];
+     (* Apply gauge choice to each interior site *)
+     While[
+         !boundaryLinkQ[dir, y],
+         (* Solving the linear system instead of using the Hermitian
+           conjugate decreases the floating point error. *)
+         vt = LinearSolve[getLink[dir, shift[dir, y, -1]], gg];
+         Do[
+             setLink[dd, shift[dd, y, -1],
+                     getLink[dd, shift[dd, y, -1]].vt];
+	     setLink[dd, y,
+                     LinearSolve[vt, getLink[dd, y]]],
+	     {dd, nd}];
+         y = shift[dir, y]];
+     y = shift[dir, y, -1];
+     setLink[dir, y, getLink[dir, y].gf];
+     (* Verify that it all worked out *)
+     If[debug,
+        Print["Final link diff:",
+	      SUNorm[LinearSolve[gg, getLink[dir, y]]]]]]]],
+     {i, latticeVolume[]}]];
 
 (*
   Using "center"->False then "center"->True works substantially better.
@@ -1087,33 +1210,37 @@ setLaundauAxialGauge[dir1_, OptionsPattern[]] :=
 
 
 nStrategies = 6;
-Options[applyGaugeTransforms] = {"abelian" -> False, "maxAbelianGauge"->False,
-                                 "backwards" -> False,
-                                 "loopFunction" -> (Null&)};
-applyGaugeTransforms[s_, OptionsPattern[]] :=
+Options[applyGaugeTransforms] = Join[
+    {"maxAbelianGauge" -> False,
+     "backwards" -> False, "loopFunction" -> (Null&)},
+    FilterRules[Options[setLandauGauge],
+                {Except["center"], Except["damping"]}],
+    FilterRules[Options[setAxialGauge],
+                {Except["center"]}]];
+applyGaugeTransforms[s_, opts:OptionsPattern[]] :=
  (* New direction each time setAxialGauge[] is called. *)
- Block[{lastDir = nd, dir},
+ Block[{lastDir = nd, dir,
+        aopts = Apply[Sequence, FilterRules[{opts},
+                      Options[setAxialGauge]]],
+        lopts = Apply[Sequence, FilterRules[{opts},
+                      Options[setLandauGauge]]]},
    dir = Function[lastDir = Mod[lastDir, nd] + 1];
    Scan[(Which[
        (* go backwards *)
        # == 1, setAxialGauge[
            If[OptionValue["backwards"], nd + 1 - dir[], dir[]],
-           "center" -> False, "abelian"->OptionValue["abelian"]],
+           "center" -> False, aopts],
        # == 2, setAxialGauge[
            If[OptionValue["backwards"], nd + 1 - dir[], dir[]],
-           "center" -> True, "abelian"->OptionValue["abelian"]],
+           "center" -> True, aopts],
        # == 3,
-       setLandauGauge["center" -> False, "damping" -> 1,
-                       "maxAbelianGauge" -> OptionValue["maxAbelianGauge"]],
+       setLandauGauge["center" -> False, "damping" -> 1, lopts],
        # == 4,
-       setLandauGauge["center" -> True, "damping" -> 1,
-                       "maxAbelianGauge" -> OptionValue["maxAbelianGauge"]],
+       setLandauGauge["center" -> True, "damping" -> 1, lopts],
        # == 5,
-       setLandauGauge["center" -> False, "damping" -> 1.5,
-                       "maxAbelianGauge" -> OptionValue["maxAbelianGauge"]],
+       setLandauGauge["center" -> False, "damping" -> 1.5, lopts],
        # == 6,
-       setLandauGauge["center" -> True, "damping" -> 1.5,
-                       "maxAbelianGauge" -> OptionValue["maxAbelianGauge"]],
+       setLandauGauge["center" -> True, "damping" -> 1.5, lopts],
        (* In practice, these don't work well *)
        (* # == 7,
         setMinimumAxialGauge[dir[], "center" -> False, "damping" -> 1],

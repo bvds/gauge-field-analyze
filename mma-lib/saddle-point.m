@@ -220,7 +220,9 @@ infinitesimal gauge transformations.  The result is returned as a \
 SparseArray.";
 gaugeTransformShifts::axial = "Not Axial gauge.";
 SetAttributes[gaugeTransformShifts, HoldFirst];
-gaugeTransformShifts[rootGaugeField_Symbol, fixed_: -1] :=
+gaugeTransformShifts[rootGaugeField_Symbol, fixed_: -1] := (
+  (* In boundary case, make sure lookup table is initialized *)
+ reducedLinkIndex[1, Table[1, {nd}]];
  ParallelSum[
   Block[{gaugeShifts = Association[], gen = SUGenerators[],
     c2grad = coords2grad[fixed]},
@@ -250,7 +252,7 @@ gaugeTransformShifts[rootGaugeField_Symbol, fixed_: -1] :=
    SparseArray[
        Select[Normal[gaugeShifts],
               #[[1, 1]]<Infinity && #[[1, 2]]<Infinity&],
-       {nGauge[fixed], nGrad[fixed]}]], {kernel, $KernelCount}];
+       {nGauge[fixed], nGrad[fixed]}]], {kernel, $KernelCount}]);
 
 
 (* Hessian and gradient *)
@@ -264,6 +266,8 @@ with choosing an Axial gauge in that direction.
 Set the option fullMatrix to True to explicitly compute the upper triangle of the matrix.";
 latticeHessian[getRootLink_, OptionsPattern[]] :=
  Block[{fixed = OptionValue[fixedDir]},
+  (* In boundary case, make sure lookup table is initialized *)
+  reducedLinkIndex[1, Table[1, {nd}]];
  (* Adding elements to a SparseArray one at a time is very inefficient
     in Mathematica; see
     https://mathematica.stackexchange.com/questions/777/efficient-by-element-updates-to-sparsearrays.
