@@ -898,6 +898,13 @@ setGlobalGauge::usage = "Perform global color rotation. u is a unitary matrix.";
 setGlobalGauge[u_] :=
     (gaugeField = Map[u.#.ConjugateTranspose[u]&, gaugeField, {2}]);
 
+setSiteGauge::usage == "Apply a gauge transform to a single lattice site.";
+setSiteGauge[coords_, u_] := 
+    Do[setLink[dir, coords, u.getLink[dir, coords]];
+       setLink[dir, shift[dir, coords, -1], 
+               getLink[dir, shift[dir, coords, -1]].ConjugateTranspose[u]],
+       {dir, nd}];
+
 setRandomGauge::usage = "Perform a random gauge transform.";
 setRandomGauge[] :=
  Do[Block[

@@ -1162,11 +1162,11 @@ the image of the map should have minimal length.
 A unitary matrix $U$ can be factored as
 %
 \be
-U = V^\da \begin{pmatrix}
+U = V \begin{pmatrix}
     \mathrm{e}^{i \lambda_1} & & &\\
     & \mathrm{e}^{i \lambda_2} & &\\
     & & \ddots & \\
-    & & & \mathrm{e}^{i \lambda_N}\end{pmatrix} V
+    & & & \mathrm{e}^{i \lambda_N}\end{pmatrix} V^\da
 \eq
 %
 where $V$ is a unitary matrix and $-\pi < \lambda_i < \pi$.
@@ -1197,20 +1197,20 @@ $\lambda_j^\prime - \lambda_k^\prime \le 2 \pi$.
 The $\SU(3)$ case is shown in Fig.~\ref{hexagon}.
 Using $\lambda_j^\prime$, we define $U^t$ as:
 \be
-U^t = V^\da \begin{pmatrix}
+U^t = V \begin{pmatrix}
     \mathrm{e}^{i\lambda_1^\prime t} & & &\\
     & \mathrm{e}^{i\lambda_2^\prime t} & &\\
     & & \ddots & \\
-    & & & \mathrm{e}^{i\lambda_N^\prime t}\end{pmatrix} V \; .
+    & & & \mathrm{e}^{i\lambda_N^\prime t}\end{pmatrix} V^\da \; .
 \eq
 This definition of $U^t$ fulfills the conditions listed above.
 Similarly, we define the logarithm of $U$ as:
 \be
-\log U = i V^\da \begin{pmatrix}
+\log U = i V \begin{pmatrix}
     \lambda_1^\prime & & &\\
     & \lambda_2^\prime & &\\
     & & \ddots & \\
-    & & & \lambda_N^\prime\end{pmatrix} V \; .
+    & & & \lambda_N^\prime\end{pmatrix} V^\da \; .
 \eq
 Thus, the norm defined in Eqn.~(\ref{sunorm}) is simply
 \be
@@ -1225,7 +1225,7 @@ For lattices of interest, the basis size $n_L$ is large enough
 that direct solution is not possible and one must resort to Krylov
 space methods (sparse matrix methods).
 The Hessian matrix $H$ is sparse, with an $(N^2-1)\times(N^2-1)$
-color block structure and $6D+1$ nonzero blocks per row/column.
+color block structure and $6D-5$ nonzero blocks per row/column.
 The gauge transform matrix $G$ has the same color block structure
 with $2 D$ nonzero blocks per row and $2$ nonzero blocks per column.
 

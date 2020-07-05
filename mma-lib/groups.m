@@ -35,6 +35,16 @@ SUMatrixQ[mat_?SquareMatrixQ, OptionsPattern[]] :=
              Print["Details:  ", diffs];
              False]];
 
+trace::usage = "Trace of the product of Hermitian matrices.  \
+This allows for future optimization.";
+trace[a_, b_] := Block[{x = Flatten[a].Flatten[Transpose[b]]},
+                       If[Abs[Im[x]]>10^-8,
+                          Print["non-hermetian arg", {a, b}];
+                          Print[Column[Map[Short, Stack[_]]]];
+                          Abort[]];
+                       Re[x]];
+trace[a__] := Tr[Dot[a]]/;Length[{a}]!=2;
+
 SUGenerators::usage = "Construct the generators for SU(N), caching the result.
 Normalization Tr[T_a T_b] = delta_{ab}/2.";
 SUGenerators[] := SUGenerators[nc];

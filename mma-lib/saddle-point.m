@@ -10,19 +10,11 @@
 
 (* Random utility functions. *)
 
+Get[DirectoryName[$InputFileName] <> "matrix.m"];
 methodName[x_] := If[Head[x] === List, First[x], x];
 (* Tricky:  explicit Sequence[...] will disappear! *)
 methodOptions[x_] := Apply[Sequence,
 			   If[Head[x] === List, Rest[x], {}]];
-SetAttributes[addTime, {HoldAll, SequenceHold}];
-addTime[timer_, expr_] :=
- Block[{t1 = SessionTime[], result = expr},
-  timer += SessionTime[] - t1; result]; 
-printMemory[n_] := EngineeringForm[N[ByteCount[n]], 3];
-printLevel[opt_, default_] :=
-    Which[NumberQ[opt], opt,
-          opt === True, default, opt === False, 0,
-          True, default];
 
 
 (* Define norms for shifts *)
@@ -198,18 +190,6 @@ coords2gauge[fixed_][coordsIn_, generator_] :=
          reducedSiteIndex[coordsIn]]] - 1);
 gradLinkTake[fixed_][dir_, coords_] :=
     {1, nc^2 - 1} + coords2grad[fixed][dir, coords, 0];
-symAdd::usage = oneAdd::useage = "If full=False, take the lower triangle.  The export to an *.mtx file dumps the lower triangle of a symmetric matrix.";
-symAdd::index = "Invalid index.";
-SetAttributes[symAdd, HoldAll];
-symAdd[m_, i_, j_, value_, full_:True] :=
-    (If[full || i>=j, m[{i, j}] = Lookup[m, Key[{i, j}], 0.0] + value];
-     If[full || j>=i, m[{j, i}] = Lookup[m, Key[{j, i}], 0.0] + value]);
-SetAttributes[oneAdd, HoldAll];
-oneAdd[m_, i_, j_, value_, full_:True] :=
-    If[full || i>=j, m[{i, j}] = Lookup[m, Key[{i, j}], 0.0] + value];
-reTrDot::usage = "Compute Re[Tr[a.b]] where a and b are color matrices.";
-reTrDot = Compile[{{x, _Complex, 2}, {y, _Complex, 2}},
-	Sum[Re[x[[i, j]] y[[j, i]]], {i, nc}, {j, nc}], {{nc, _Integer}}];
 
 
 (* Gauge Transform Operator *)
@@ -221,8 +201,10 @@ SparseArray.";
 gaugeTransformShifts::axial = "Not Axial gauge.";
 SetAttributes[gaugeTransformShifts, HoldFirst];
 gaugeTransformShifts[rootGaugeField_Symbol, fixed_: -1] := (
-  (* In boundary case, make sure lookup table is initialized *)
- reducedLinkIndex[1, Table[1, {nd}]];
+  (* In the boundary case, make sure lookup table is initialized
+   before parallelization. *)
+  If[latticeBC =!= "PERIODIC_GAUGEBC",
+     reducedLinkIndex[1, Table[1, {nd}]]];
  ParallelSum[
   Block[{gaugeShifts = Association[], gen = SUGenerators[],
     c2grad = coords2grad[fixed]},
@@ -249,25 +231,29 @@ gaugeTransformShifts[rootGaugeField_Symbol, fixed_: -1] := (
          {ac, nc^2 - 1}]],
       {i, kernel, latticeVolume[], $KernelCount},
       {gac, nc^2 - 1}, {dir, nd}];
-   SparseArray[
-       Select[Normal[gaugeShifts],
-              #[[1, 1]]<Infinity && #[[1, 2]]<Infinity&],
-       {nGauge[fixed], nGrad[fixed]}]], {kernel, $KernelCount}]);
+   If[latticeBC =!= "PERIODIC_GAUGEBC",
+      gaugeShifts = KeySelect[gaugeShifts,
+                              (#[[1]]<Infinity && #[[2]]<Infinity)&]];
+   SparseArray[Normal[gaugeShifts],
+               {nGauge[fixed], nGrad[fixed]}]],
+  {kernel, $KernelCount}]);
 
 
 (* Hessian and gradient *)
 
-Options[latticeHessian] = {allLinks -> True, fixedDir -> 0,
+Options[actionHessian] = {allLinks -> True, fixedDir -> 0,
                            fullMatrix -> False};
-latticeHessian::usage = "Set allLinks to False to compare with \
+actionHessian::usage = "Set allLinks to False to compare with \
 single-link code.  Option fixedDir>0 will apply a constant shift to \
 any link a given Polyakov loop winding in that direction, compatible \
 with choosing an Axial gauge in that direction.
 Set the option fullMatrix to True to explicitly compute the upper triangle of the matrix.";
-latticeHessian[getRootLink_, OptionsPattern[]] :=
+actionHessian[getRootLink_, OptionsPattern[]] :=
  Block[{fixed = OptionValue[fixedDir]},
-  (* In boundary case, make sure lookup table is initialized *)
-  reducedLinkIndex[1, Table[1, {nd}]];
+  (* In the boundary case, make sure lookup table is initialized
+   before parallelization. *)
+  If[latticeBC =!= "PERIODIC_GAUGEBC",
+     reducedLinkIndex[1, Table[1, {nd}]]];
  (* Adding elements to a SparseArray one at a time is very inefficient
     in Mathematica; see
     https://mathematica.stackexchange.com/questions/777/efficient-by-element-updates-to-sparsearrays.
@@ -337,10 +323,11 @@ latticeHessian[getRootLink_, OptionsPattern[]] :=
 	{ca1, nc^2 - 1}]],
       {dir1, nd - 1}, {dir2, dir1 + 1, nd},
       {i, kernel, latticeVolume[], $KernelCount}];
-   {SparseArray[
-       Select[Normal[hess],
-              #[[1, 1]]<Infinity && #[[1, 2]]<Infinity&],
-       {nGrad[fixed], nGrad[fixed]}], grad}],
+   If[latticeBC =!= "PERIODIC_GAUGEBC",
+      hess = KeySelect[hess,
+                       (#[[1]]<Infinity && #[[2]]<Infinity)&]];
+   {SparseArray[Normal[hess],
+                {nGrad[fixed], nGrad[fixed]}], grad}],
   {kernel, $KernelCount}]];
 
 
@@ -755,7 +742,7 @@ correct method.  Can apply this to both dense and sparse systems.";
 (* For passing options through to subfunctions: 
 https://mathematica.stackexchange.com/questions/353/functions-with-options/ *)
 Options[latticeSaddlePointStep] = Join[
-    Options[findDelta], Options[latticeHessian],
+    Options[findDelta], Options[actionHessian],
     {stepFile -> None, returnShifts -> False}];
 latticeSaddlePointStep[opts:OptionsPattern[]] :=
  Block[{hess, grad, gauge, delta, gaugeField0,
@@ -766,9 +753,9 @@ latticeSaddlePointStep[opts:OptionsPattern[]] :=
         action = OptionValue[externalAction]},
   gaugeField0 = makeRootLattice[];
   If[action =!= "read",
-     {hess, grad} = latticeHessian[
+     {hess, grad} = actionHessian[
          getLink[gaugeField0],
-         Apply[Sequence, FilterRules[{opts}, Options[latticeHessian]]]];
+         Apply[Sequence, FilterRules[{opts}, Options[actionHessian]]]];
      If[debug > 2,
         Print["Constructed hess, grad"]];
      gauge = If[OptionValue[fixedDir] > -1,
