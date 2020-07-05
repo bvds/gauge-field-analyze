@@ -13,13 +13,12 @@ connecting them to the continuum fields. \
 \>", "Text",
  CellChangeTimes->{{3.799587021295973*^9, 
   3.799587164733938*^9}},ExpressionUUID->"b2d242cf-5b71-4532-a05c-\
-66d91216da90"]
-}, Open  ]],
+66d91216da90"],
 
 Cell[CellGroupData[{
 
-Cell["Library", \
-"Title",ExpressionUUID->"34abd02b-ba3e-4aee-9a81-48acc7df2018"],
+Cell["Load Library", \
+"Chapter",ExpressionUUID->"34abd02b-ba3e-4aee-9a81-48acc7df2018"],
 
 Cell[BoxData[
  RowBox[{
@@ -99,7 +98,8 @@ Cell[BoxData[{
 
 Cell[CellGroupData[{
 
-Cell["Input", "Title",ExpressionUUID->"3243e328-ab65-4a4c-b1ac-c9da6913161c"],
+Cell["Input", \
+"Chapter",ExpressionUUID->"3243e328-ab65-4a4c-b1ac-c9da6913161c"],
 
 Cell["\<\
 Input a gauge configuration near the saddle point and go to Landau gauge :\
@@ -1119,7 +1119,7 @@ Cell[CellGroupData[{
 Cell[BoxData[
  RowBox[{
   RowBox[{"<<", "\"\<../data/3-3/winding-10.10.20-28-1-5.m\>\""}], ";", 
-  RowBox[{"<<", "\"\<../data/3-3/wstep-10.10.20-28-1-5-sa-100.m\>\""}], ";", 
+  RowBox[{"<<", "\"\<../data/3-3/wstep-10.10.20-28-1-5-c-18.m\>\""}], ";", 
   RowBox[{"gaugeField", "=", "gaugeField0"}], ";", 
   RowBox[{"Print", "[", 
    RowBox[{"{", 
@@ -1129,12 +1129,10 @@ Cell[BoxData[
       RowBox[{"\"\<center\>\"", "\[Rule]", "True"}], "]"}], ",", 
      RowBox[{"averagePlaquette", "[", "]"}], ",", 
      RowBox[{"applyGaugeTransforms", "[", 
-      RowBox[{
-       RowBox[{"{", 
-        RowBox[{
-        "1", ",", "1", ",", "6", ",", "1", ",", "5", ",", "6", ",", "5", ",", 
-         "6", ",", "5", ",", "6", ",", "5", ",", "6"}], "}"}], ",", 
-       RowBox[{"Method", "\[Rule]", "\"\<straight\>\""}]}], "]"}], ",", 
+      RowBox[{"{", 
+       RowBox[{
+       "1", ",", "1", ",", "6", ",", "1", ",", "5", ",", "6", ",", "5", ",", 
+        "6", ",", "5", ",", "6", ",", "5", ",", "6"}], "}"}], "]"}], ",", 
      RowBox[{"latticeNorm", "[", "]"}], ",", 
      RowBox[{"averagePlaquette", "[", "]"}]}], "}"}], "]"}], 
   ";"}]], "Input",ExpressionUUID->"b8f495b6-bb3a-4572-a17c-583d081652b2"],
@@ -1142,10 +1140,10 @@ Cell[BoxData[
 Cell[BoxData[
  RowBox[{"{", 
   RowBox[{
-  "0.27834361321176687`", ",", "0.27834361321176687`", ",", 
-   "0.9983996917911555`", ",", "0.25912019960690846`", ",", 
-   "0.25912019960690846`", ",", "0.9983996917911551`"}], 
-  "}"}]], "Print",ExpressionUUID->"f3b4b587-c240-4839-9d57-ba2514a4cb4a"]
+  "0.405193387829229`", ",", "0.405193387829229`", ",", "0.962155160289808`", 
+   ",", "0.4031021571918958`", ",", "0.4031021571918958`", ",", 
+   "0.9621551602898082`"}], 
+  "}"}]], "Print",ExpressionUUID->"4fe00780-34bd-482b-87f7-0f8131d6a131"]
 }, Open  ]]
 }, Open  ]],
 
@@ -3317,7 +3315,7 @@ Cell[BoxData[
   RowBox[{
   "0.8925115324316586`", ",", "3.602972946119983`", ",", 
    "2.963656010340393`"}], 
-  "}"}]], "Print",ExpressionUUID->"960bdf52-4540-41bc-8ccf-2aaf920acfc5"],
+  "}"}]], "Print",ExpressionUUID->"a92b4f27-55c2-4193-83b1-c0206eaa70ba"],
 
 Cell[BoxData[
  RowBox[{"{", 
@@ -3325,7 +3323,7 @@ Cell[BoxData[
   "0.4151112611824028`", ",", "0.4151112611824028`", ",", 
    "0.3954536513504429`", ",", "0.3954536513504429`", ",", 
    "0.993951855230007`"}], 
-  "}"}]], "Print",ExpressionUUID->"d4f0b5c0-057c-400d-9062-757989dbb2d5"]
+  "}"}]], "Print",ExpressionUUID->"a687762c-24c6-4d4b-9c75-1c674aa121d0"]
 }, Open  ]]
 }, Open  ]],
 
@@ -3358,15 +3356,15 @@ Cell[BoxData[
   
   SequenceForm["ops: ", {"2l", "2t1", "2t2", "2t11", "2t12", "2t13"}],
   Editable->
-   False]], "Print",ExpressionUUID->"a5a924ce-ce9c-4d1e-8286-a4b682b63bca"],
+   False]], "Print",ExpressionUUID->"4ccb8adf-d87a-4d71-bfc5-f74d031b90a3"],
 
 Cell[BoxData[
  InterpretationBox[
   RowBox[{"\<\"Total time: \"\>", "\[InvisibleSpace]", 
-   "43.676583`7.790763652201472"}],
-  SequenceForm["Total time: ", 43.676583`7.790763652201472],
+   "51.896439`7.865652556533862"}],
+  SequenceForm["Total time: ", 51.896439`7.865652556533862],
   Editable->
-   False]], "Print",ExpressionUUID->"1bd53c9f-d1ea-402b-818a-ffe9ad2be096"]
+   False]], "Print",ExpressionUUID->"2bab3e45-ec39-4604-b37f-1775bedd445d"]
 }, Open  ]]
 }, Open  ]],
 
@@ -3746,7 +3744,7 @@ Cell[BoxData[
   RowBox[{
    RowBox[{"{", 
     RowBox[{
-    "f", "=", "\"\<../cache/3-4/field-correlators-16-48-15-a-20.m\>\""}], 
+    "f", "=", "\"\<../cache/3-4/field-correlators-16-48-15-a-15.m\>\""}], 
     "}"}], ",", 
    RowBox[{
     RowBox[{"DeleteFile", "[", "f", "]"}], ";", 
@@ -3759,7 +3757,7 @@ Cell[BoxData[
         "fieldCorr4xA"}], "}"}]}], "]"}]}]}], 
   "]"}]], "Input",ExpressionUUID->"d599ea97-7173-4804-8b8c-327ca86cdd04"]
 }, Open  ]]
-}, Closed]],
+}, Open  ]],
 
 Cell[CellGroupData[{
 
@@ -3797,7 +3795,7 @@ Cell[BoxData[
   RowBox[{
   "3.6061729614771116`", ",", "2.96454298243095`", ",", "0.5859638382358799`",
     ",", "0.5859638382358799`", ",", "0.8923739637716761`"}], 
-  "}"}]], "Print",ExpressionUUID->"b757fac3-3e96-4822-a7a1-a258e7ef56f3"]
+  "}"}]], "Print",ExpressionUUID->"f1e7f4b9-34bd-48b5-81b1-4988c7d06f45"]
 }, Open  ]],
 
 Cell["The original field, Landau gauge.", \
@@ -4071,11 +4069,13 @@ Cell[BoxData[
 Cell[CellGroupData[{
 
 Cell["Analysis", \
-"Title",ExpressionUUID->"40fc8713-6d38-4714-a06e-91355f7af4f2"],
+"Chapter",ExpressionUUID->"40fc8713-6d38-4714-a06e-91355f7af4f2"],
 
-Cell["Have tested the \[OpenCurlyDoubleQuote]anomaly\[CloseCurlyDoubleQuote] \
-= False cases.", \
-"Text",ExpressionUUID->"bc950b4d-5f4b-4a3c-93fd-fc024e258ddb"],
+Cell["\<\
+Have tested the \[OpenCurlyDoubleQuote]anomaly\[CloseCurlyDoubleQuote] = \
+False cases.
+Correlators for SU(4) are almost identical to the SU(3) case\
+\>", "Text",ExpressionUUID->"bc950b4d-5f4b-4a3c-93fd-fc024e258ddb"],
 
 Cell[CellGroupData[{
 
@@ -4199,6 +4199,10 @@ Cell[BoxData[
   "Column"]], \
 "Output",ExpressionUUID->"9525e9a7-cd1a-45e5-a273-bfc8fc9cb64b"]
 }, Open  ]],
+
+Cell[BoxData[
+ RowBox[{"setAxialGauge", "[", "3", 
+  "]"}]], "Input",ExpressionUUID->"c5398a55-ddf3-4d89-8241-4c430c59e17d"],
 
 Cell["Animation of links, going through the entire lattice.", \
 "Text",ExpressionUUID->"fadec7da-71fd-45e0-90fc-0a65366b3b6b"],
@@ -5219,46 +5223,6 @@ Cell[CellGroupData[{
 Cell["2-point correlators", \
 "Section",ExpressionUUID->"9093f0a7-75f8-4581-9d35-a9c9554c7d70"],
 
-Cell[CellGroupData[{
-
-Cell[BoxData[
- RowBox[{"Block", "[", 
-  RowBox[{
-   RowBox[{"{", 
-    RowBox[{"nc", "=", "3"}], "}"}], ",", 
-   RowBox[{"Table", "[", 
-    RowBox[{
-     RowBox[{"{", 
-      RowBox[{"i", ",", " ", 
-       RowBox[{"8.", " ", 
-        RowBox[{
-         RowBox[{"(", 
-          RowBox[{"nc", "-", "1"}], ")"}], "/", 
-         RowBox[{"(", 
-          RowBox[{
-           RowBox[{"i", "^", "2"}], " ", "nc"}], ")"}]}]}]}], "}"}], ",", 
-     RowBox[{"{", 
-      RowBox[{"i", ",", "5", ",", "10"}], "}"}]}], "]"}]}], 
-  "]"}]], "Input",ExpressionUUID->"41721d3c-1368-4d47-8b16-17d05f081633"],
-
-Cell[BoxData[
- RowBox[{"{", 
-  RowBox[{
-   RowBox[{"{", 
-    RowBox[{"5", ",", "0.21333333333333335`"}], "}"}], ",", 
-   RowBox[{"{", 
-    RowBox[{"6", ",", "0.14814814814814814`"}], "}"}], ",", 
-   RowBox[{"{", 
-    RowBox[{"7", ",", "0.10884353741496598`"}], "}"}], ",", 
-   RowBox[{"{", 
-    RowBox[{"8", ",", "0.08333333333333333`"}], "}"}], ",", 
-   RowBox[{"{", 
-    RowBox[{"9", ",", "0.06584362139917696`"}], "}"}], ",", 
-   RowBox[{"{", 
-    RowBox[{"10", ",", "0.05333333333333334`"}], "}"}]}], 
-  "}"}]], "Output",ExpressionUUID->"e6c7f4ad-1407-4f92-a727-417588382284"]
-}, Open  ]],
-
 Cell[BoxData[
  RowBox[{"GraphicsColumn", "[", 
   RowBox[{
@@ -5335,15 +5299,15 @@ Cell[BoxData[
   
   SequenceForm["ops: ", {"2l", "2t1", "2t2", "2t11", "2t12", "2t13"}],
   Editable->
-   False]], "Print",ExpressionUUID->"ef80ec6f-d624-4650-8031-81a712e2b51c"],
+   False]], "Print",ExpressionUUID->"b4c7b51d-8476-4407-a474-8f26250e85b6"],
 
 Cell[BoxData[
  InterpretationBox[
   RowBox[{"\<\"Total time: \"\>", "\[InvisibleSpace]", 
-   "125.205954`8.248139979484856"}],
-  SequenceForm["Total time: ", 125.205954`8.248139979484856],
+   "47.744401`7.829437446895703"}],
+  SequenceForm["Total time: ", 47.744401`7.829437446895703],
   Editable->
-   False]], "Print",ExpressionUUID->"cc308a28-d9dd-4827-9706-8eb668083d26"]
+   False]], "Print",ExpressionUUID->"06e7a01c-bd78-4458-b750-aade6b6c6916"]
 }, Open  ]]
 }, Open  ]],
 
@@ -5575,7 +5539,7 @@ Cell[BoxData[
       RowBox[{"ImageSize", "\[Rule]", 
        RowBox[{"2.0", "*", "figureWidth"}]}]}], "]"}]}]}], 
   "]"}]], "Input",ExpressionUUID->"77dbe536-55c9-49c9-9f69-5720309c1cb9"]
-}, Closed]],
+}, Open  ]],
 
 Cell[CellGroupData[{
 
@@ -5773,7 +5737,7 @@ Cell[BoxData[
      RowBox[{"ImageSize", "\[Rule]", 
       RowBox[{"2.0", "*", "figureWidth"}]}]}], "]"}]}], 
   "]"}]], "Input",ExpressionUUID->"9fd68514-567f-4223-81c0-8e3b38020252"]
-}, Closed]],
+}, Open  ]],
 
 Cell[CellGroupData[{
 
@@ -5992,11 +5956,12 @@ Cell[BoxData[
      RowBox[{"ImageSize", "\[Rule]", 
       RowBox[{"2.0", "*", "figureWidth"}]}]}], "]"}]}], 
   "]"}]], "Input",ExpressionUUID->"fa838f8b-bb87-4bee-b694-46d8da655af6"]
-}, Closed]]
+}, Open  ]]
+}, Open  ]]
 }, Open  ]]
 },
-WindowSize->{1167, 672},
-WindowMargins->{{30, Automatic}, {Automatic, 30}},
+WindowSize->{756, 710},
+WindowMargins->{{139, Automatic}, {0, Automatic}},
 PrivateNotebookOptions->{"FileOutlineCache"->False},
 CellChangeTimes->None,
 TrackCellChangeTimes->False,
