@@ -285,16 +285,6 @@ linkCorrelators[n_, OptionsPattern[]] :=
                                 (#[[1]]*(#[[1]]-1))]}&],
        result, {2}]]/;n==2||n==3;
  
-(* Use the fundamental representation *)
-trace::usage = "Trace of the product of Hermitian matrices.  \
-This allows for future optimization.";
-trace[a_, b_] := Block[{x = Flatten[a].Flatten[Transpose[b]]},
-                       If[Abs[Im[x]]>10^-8,
-                          Print["non-hermetian arg", {a, b}];
-                          Print[Column[Map[Short, Stack[_]]]];
-                          Abort[]];
-                       Re[x]];
-trace[a__] := Tr[Dot[a]]/;Length[{a}]!=2;
 (* "t4" is redundant with "t3" *)
 opsList22 = {"t1", "m1", "l", "t2", "m2", "t3"};
 (* See arXiv:1207.0609v2 [hep-ph] 2 Oct 2012 for color multiplets.
