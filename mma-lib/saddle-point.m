@@ -31,7 +31,7 @@ compareVectors[a_, b_] := {{(shiftNormMax[a]+shiftNormMax[b])/2,
                            {(Norm[a]+Norm[b])/2, 1-Norm[a]/Norm[b]},
                            Block[{cos = a.b/(Norm[a] Norm[b])},
                                  {cos, Sqrt[(1+cos) (1-cos)]}]};
-
+matrixAsymmetry[mat_] := Max[Abs[Flatten[hess-Transpose[mat]]]];
 
 (* Shift cutoff *)
 
@@ -407,7 +407,7 @@ order of decreasing magnitude.  Thus, for large shifts, one must find
 the last eigenvalues/vectors.";
 findDelta::external = "External program exited with error `1`.";
 findDelta::dynamicPartMethod = "Only dynamicPartMethod = Automatic is supported.";
-findDelta::asymmetric = "Hessian must be symmetric unless Method->\"External\".";
+findDelta::asymmetric = "Hessian must be symmetric unless Method->\"External\". Max asymmetry `1`";
 findDelta::symmetric = "Since Method->\"External\", you can set fullMatrix -> False.";
 Options[findDelta] = {dynamicPartMethod -> Automatic, printDetails -> True,
   Method -> "Dense", ignoreCutoff -> False, dampingFactor -> 1,
@@ -434,10 +434,9 @@ SetAttributes[findDelta, HoldFirst];
 findDelta[{hess_, grad_, gauge_}, OptionsPattern[]] :=
  Block[{hessp, gradp, zzz = If[OptionValue[ignoreCutoff], Infinity, 1],
         damping = OptionValue[dampingFactor], values, oo, proj},
-       (* The Mathematica function doesn't work so well
-         for small perturbations. *)
-    If[Norm[hess-Transpose[hess]] > $MachineEpsilon,
-       Message[findDelta::asymmetric];
+    (* SymmetricMatrixQ[] has trouble with small nonzero elements *)
+    If[matrixAsymmetry[hess] > 10^-12,
+       Message[findDelta::asymmetric, matrixAsymmetry[hess]];
        Return[$Failed]];
     If[MatrixQ[gauge],
        (* Find projection onto subspace orthogonal to all gauge transforms.
@@ -475,8 +474,9 @@ findDelta[{hess_, grad_, gauge_}, opts:OptionsPattern[]] :=
     smallProj, smallProj0, tinit = SessionTime[],
         tdp = 0, tsp = 0, tdot = 0, countdp = 0, countdot = 0, countsp = 0,
         countGauge = dynamicPartCounter},
-   If[Not[SymmetricMatrixQ[hess]],
-      Message[findDelta::asymmetric];
+   (* SymmetricMatrixQ[] has trouble with small nonzero elements *)
+   If[matrixAsymmetry[hess] > 10^-12,
+      Message[findDelta::asymmetric, matrixAsymmetry[hess]];
       Return[$Failed]];
    dp0 = If[MatrixQ[gauge],
 	    dynamicPart[gauge,
@@ -746,7 +746,7 @@ Options[latticeSaddlePointStep] = Join[
     {stepFile -> None, returnShifts -> False}];
 latticeSaddlePointStep[opts:OptionsPattern[]] :=
  Block[{hess, grad, gauge, delta, gaugeField0,
-        options = {opts}, output = "", error = "",
+        output = "", error = "",
         stepOut = None, stepShifts,
 	t0 = SessionTime[], t1, t2, t3,
         debug = printLevel[OptionValue[printDetails], 3],
@@ -791,7 +791,7 @@ latticeSaddlePointStep[opts:OptionsPattern[]] :=
            Print["Saving step to ", OptionValue[stepFile]]];
         DeleteFile[OptionValue[stepFile]];
         Save[OptionValue[stepFile],
-             {output, error, options, stepOut,
+             {output, error, {opts}, stepOut,
               delta, stepShifts, gaugeField0}]]];
   t3 = SessionTime[];
   If[debug > 1,

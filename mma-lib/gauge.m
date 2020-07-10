@@ -23,17 +23,13 @@ Options[landauGaugeHessian] = {
       delta > 0: use finite differences to approximate derivatives.
       The two should match modulo numerical errors. *)
     "delta" -> 0,
-    "debug" -> False};
+    "debugHessian" -> False};
 landauGaugeHessian::usage = "Find the Hessian and gradient for the lattice \
 norm (squared). \
 Set the option fullMatrix to True to explicitly compute the upper \
 triangle of the matrix.";
 landauGaugeHessian[OptionsPattern[]] :=
  Block[{delta = OptionValue["delta"]},
-  (* In the boundary case, make sure the lookup table is initialized
-   before parallelization. *)
-  If[latticeBC =!= "PERIODIC_GAUGEBC",
-     reducedLinkIndex[1, Table[1, {nd}]]];
  (* Adding elements to a SparseArray one at a time is very inefficient
     in Mathematica; see
     https://mathematica.stackexchange.com/questions/777/efficient-by-element-updates-to-sparsearrays.
@@ -98,11 +94,7 @@ landauGaugeHessian[OptionsPattern[]] :=
   Algebraic derivatives
  *)
 landauGaugeHessian[OptionsPattern[]] :=
-    Block[{debug = OptionValue["debug"], count = 0},
-  (* In the boundary case, make sure the lookup table is initialized
-   before parallelization. *)
-  If[latticeBC =!= "PERIODIC_GAUGEBC",
-     reducedLinkIndex[1, Table[1, {nd}]]];
+    Block[{debug = OptionValue["debugHessian"], count = 0},
  (* Adding elements to a SparseArray one at a time is very inefficient
     in Mathematica; see
     https://mathematica.stackexchange.com/questions/777/efficient-by-element-updates-to-sparsearrays.
@@ -112,7 +104,7 @@ landauGaugeHessian[OptionsPattern[]] :=
    Block[{hess = Association[],
     grad = Array[0.0&, ngindex[]],
     gen = SUGenerators[] + 0.0 I,
-    full = OptionValue[fullMatrix]
+    full = OptionValue[fullMatrix],
     coords},
    Do[coords = latticeCoordinates[i];
     Block[{
@@ -137,16 +129,19 @@ landauGaugeHessian[OptionsPattern[]] :=
      (* This is just -I SULog[uu] *)
      grad2 = vv.(phases * vvd);
      grad3 = 2*Map[reTrDot[#, grad2]&, gen];
-     (* left-left derivative in diagonalized link basis. *)
+     (* left-left derivative in diagonalized link basis.
+       Only construct the diagonal since off-diagonal elements are zero. *)
      adllrr = Table[
          (* Select non-diagonal vs. diagonal generators.
            In our ordering of the SU(N) generators,
            diagonal generators are at the end. *)
          If[i < nc^2 + 1 - nc,
-            Sum[Block[{dphase = phases[[k1]]-phases[[k2]]},
-                      Abs[gen[[i, k1, k2]]] dphase*
-                         Cot[dphase/2]],
-                {k1, nc}, {k2, k1 - 1}],
+            (* Only calculate one triangle, using symmetry. *)
+            2*Sum[Block[
+                {dphase = phases[[k1]]-phases[[k2]]},
+                Re[gen[[i, k1, k2]] gen[[i, k2, k1]]]*dphase*
+                   Cot[dphase/2]],
+                  {k1, nc}, {k2, k1 - 1}],
             1],
          {i, nc^2 -1}];
      (* Equivalent to Transpose[vvadj].DiagonalMatrix[adllrr].vvadj *)
@@ -156,13 +151,23 @@ landauGaugeHessian[OptionsPattern[]] :=
          If[
              (* Select non-diagonal vs. diagonal generators. *)
              i < nc^2 + 1 - nc && j < nc^2 + 1 - nc,
-             (* Specific to our ordering of the SU(N) generators:
-               First all the real ones, then the imaginary. *)
+             (* Our ordering of the SU(N) generators starts with all
+               the real ones, then the imaginary ones.
+               This picks out the non-zero cases. *)
              If[i ==j || Abs[i - j] == nc (nc-1)/2,
-                Sum[Block[{dphase = phases[[k1]]-phases[[k2]]},
-                          Abs[gen[[i, k1, k2]]]*dphase*
-                             If[i==j, -Cot[dphase/2], Sign[j - i]]],
-                    {k1, nc}, {k2, k1 - 1}],
+                (* Only calculate one triangle, using symmetry *)
+                2*Sum[Block[
+                    {dphase = phases[[k1]]-phases[[k2]]},
+                    If[True,
+                       (* Thee two are equivalent.
+                        They differ by machine epsilon. *)
+                       -dphase*If[i==j,
+                                 Re[gen[[i, k1, k2]]*gen[[j, k2, k1]]]*
+                                 Cot[dphase/2],
+                                 Im[gen[[i, k1, k2]]*gen[[j, k2, k1]]]],
+                       2*dphase*Im[gen[[i, k1, k2]]*gen[[j, k2, k1]]/
+                                   (Exp[I dphase]-1)]]],
+                      {k1, nc}, {k2, k1 - 1}],
                 0],
              If[i == j, -1, 0]],
          {i, nc^2 -1}, {j, nc^2 - 1}];
@@ -276,3 +281,95 @@ landauGaugeHessian[OptionsPattern[]] :=
    {SparseArray[Normal[hess],
                 {ngindex[], ngindex[]}], grad}],
    {kernel, If[debug, 1, $KernelCount]}]]/;OptionValue["delta"]==0;
+
+(*
+  Create matrix associated with global color rotations
+ *)
+globalColorRotations::usage =
+  "Return a matrix generating the nc^2-1 global color rotations.  \
+The result is returned as a SparseArray.";
+globalColorRotations[] :=
+    SparseArray[
+        Table[
+            {Mod[i-1, nc^2 -1]+1, i} -> 1,
+            {i, ngindex[]}],
+        {nc^2-1, ngindex[]}];
+
+SetAttributes[applyGaugeTransform, HoldFirst];
+applyGaugeTransform[gf_, delta_] :=
+ Block[{gi, gg},
+  Do[
+   Block[{coords = latticeCoordinates[i]},
+    gi = coords2gindex[coords, 0] + {1, nc^2 -1};
+    gg = MatrixExp[I Take[delta, gi].SUGenerators[]];
+    Do[
+        gf[[dir, linearSiteIndex[coords]]] =
+        gg.getLink[gf][dir, coords];
+        gf[[dir, linearSiteIndex[shift[dir, coords, -1]]]] =
+        getLink[gf][dir, shift[dir, coords, -1]].ConjugateTranspose[gg],
+        {dir, nd}]],
+   {i, latticeVolume[]}]];
+
+minimumNormGaugeStep::usage =
+  "Find a gauge transform that minimizes the lattice norm.";
+(* This is a modification of latticeSaddlePointStep. *)
+Options[minimumNormGaugeStep] = Join[
+    Options[findDelta], Options[landauGaugeHessian],
+    {stepFile -> None, returnShifts -> False}];
+minimumNormGaugeStep[opts:OptionsPattern[]] :=
+ Block[{hess, grad, gauge, delta,
+        output = "", error = "",
+        stepOut = None, stepShifts,
+	t0 = SessionTime[], t1, t2, t3,
+        debug = printLevel[OptionValue[printDetails], 3],
+        action = OptionValue[externalAction]},
+  gaugeField0 = gaugeField;
+  If[action =!= "read",
+     Print["calling landauGaugeHessian"];
+     {hess, grad} = landauGaugeHessian[
+         Apply[Sequence, FilterRules[{opts}, Options[landauGaugeHessian]]]];
+     If[debug > 2,
+        Print["Constructed hess, grad"]];
+     gauge = globalColorRotations[];
+     If[debug > 2,
+        Print["Constructed gauge"]]];
+  t1 = SessionTime[];
+  (* Debug prints *)
+  Which[False,
+        Print["hessian difference:  ", Chop[Normal[hess] - hess0]];
+        Print["gradient difference:  ", Chop[grad - gradient0]],
+        False,
+        Print["hessian:", Normal[hess]];
+        Print["gradient:  ", grad];
+        Print["gauge:  ", gauge],
+        False,
+        Print["hessian, first link:  ",
+              Normal[Take[hess, nc^2 - 1, nc^2 - 1]]];
+        Print["gradient, first link:  ", Take[grad, nc^2 - 1]]];
+  delta = findDelta[
+      {hess, grad, gauge},
+      Apply[Sequence, FilterRules[{opts}, Options[findDelta]]]];
+  (* Debug prints *)
+  Which[
+      False, Print["delta difference:  ", Chop[delta - delta0]],
+      False, Print["delta:  ", delta],
+      False, Print["delta, first link:  ", Take[delta, nc^2 - 1]]];
+  t2 = SessionTime[];
+  If[action =!= "write",
+     applyGaugeTransform[gaugeField0, delta];
+     If[StringQ[OptionValue[stepFile]],
+        If[debug > 2,
+           Print["Saving step to ", OptionValue[stepFile]]];
+        DeleteFile[OptionValue[stepFile]];
+        Save[OptionValue[stepFile],
+             {output, error, {opts}, stepOut,
+              delta, stepShifts, gaugeField0}]]];
+  t3 = SessionTime[];
+  If[debug > 1,
+     Print["minimumNormGaugeStep times:\n"
+           <> "    matrices = ", t1 - t0,
+           " s, findDelta = ", t2 - t1,
+           " s, applyGaugeTransform = ", t3 - t2, " s"]];
+  If[OptionValue[returnShifts],
+     {gaugeField0, stepShifts, stepOut},
+     gaugeField0]];
