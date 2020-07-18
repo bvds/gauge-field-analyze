@@ -48,17 +48,17 @@ trace[a__] := Tr[Dot[a]]/;Length[{a}]!=2;
 SUGenerators::usage = "Construct the generators for SU(N), caching the result.
 Normalization Tr[T_a T_b] = delta_{ab}/2.";
 SUGenerators[] := SUGenerators[nc];
-SUGenerators[n_?IntegerQ] :=
- SUGenerators[n] =
-  Join[Flatten[
-    Table[If[(i == k1 && j == k2) || (i == k2 && j == k1), 1/2,
-      0], {i, 2, n}, {j, i - 1}, {k1, n}, {k2, n}], 1],
-   Flatten[Table[
-     Which[i == k1 && j == k2, I/2, i == k2 && j == k1, -I/2, True,
-      0], {i, 2, n}, {j, i - 1}, {k1, n}, {k2, n}], 1],
-   Table[Which[k1 != k2, 0, k1 < i, 1/Sqrt[2 i (i - 1)],
-     k1 == i, (1 - i)/Sqrt[2 i (i - 1)], True, 0], {i, 2, n}, {k1,
-	n}, {k2, n}]];
+SUGenerators[n_?IntegerQ] := SUGenerators[n] =
+Join[
+    Flatten[Table[
+        If[(i == k1 && j == k2) || (i == k2 && j == k1), 1/2, 0],
+        {i, 2, n}, {j, i - 1}, {k1, n}, {k2, n}], 1],
+    Flatten[Table[
+        Which[i == k1 && j == k2, I/2, i == k2 && j == k1, -I/2, True, 0],
+        {i, 2, n}, {j, i - 1}, {k1, n}, {k2, n}], 1],
+    Table[Which[k1 != k2, 0, k1 < i, 1/Sqrt[2 i (i - 1)],
+                k1 == i, (1 - i)/Sqrt[2 i (i - 1)], True, 0],
+          {i, 2, n}, {k1, n}, {k2, n}]];
 SUSymmetric::usage = "Construct the symmetric coefficients d_{a,b,c},
 caching the result.  This tensor is sparse.";
 SUSymmetric[] := SUSymmetric[nc];

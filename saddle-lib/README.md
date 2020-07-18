@@ -68,3 +68,8 @@ https://github.com/xianyi/OpenBLAS/issues/1461#issuecomment-469252560).
 I tried [`librsb`](http://librsb.sourceforge.net), but it
 did not perform very well.  In addition, it cannot take advantage
 of the color block structure of the matrices.
+
+## Run
+
+See the main program file `shifts.c` for instructions on
+running the excutables `shifts` and `pshifts`.

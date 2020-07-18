@@ -172,11 +172,13 @@ void sortMatrixLocal(SparseMatrix *mat, int wrank, int wsize, int debug);
 /*
          matrix.c
 */
-int indexRank(const mat_int i, const int wsize, const mat_int n);
-mat_int localSize(const unsigned int wrank, const int wsize, const mat_int n);
-mat_int rankIndex(const unsigned int wrank, const int wsize, const mat_int n);
-mat_int maxLocalSize(const int wsize, const mat_int n);
-void rankSanityTest(mat_int n);
+int indexRank(const mat_int i, const int wsize, const mat_int partitions);
+mat_int localSize(const unsigned int wrank, const int wsize,
+                  const mat_int partitions);
+mat_int rankIndex(const unsigned int wrank, const int wsize,
+                  const mat_int partitions);
+mat_int maxLocalSize(const int wsize, const mat_int partitions);
+void rankSanityTest(mat_int partitions);
 void sparseMatrixRead(SparseMatrix *mat, char *fileName, char descr,
                       int tFlag, int blockSize, mat_int partitions,
                       int chunkSize, int debug, _MPI_Comm mpicom);

@@ -14,30 +14,42 @@
   Divide vectors and matrices up for mpi.  
   Without mpi, wrank = 0 and wsize = 1 gives
   the desired single-process behavior.
+
+  "partitions" is used to specify how matrix rows/columns 
+  are assigned to each mpi process.  For a matrix dimension of n,
+  each processor assigned an integer multiple of n/partitions.
+  
+  The routine localsize(...) determines this multiple.
+  This can be used to minimize the mpi communication overhead.
+
+  Setting partitions = n/blockSize will effectively disable any 
+  effect of "partitions".
  */
-int indexRank(const mat_int i, const int wsize, const mat_int n) {
-    if(i/(n/wsize + 1) < n%wsize) 
-        return i/(n/wsize + 1);
+int indexRank(const mat_int i, const int wsize, const mat_int partitions) {
+    if(i/(partitions/wsize + 1) < partitions%wsize)
+        return i/(partitions/wsize + 1);
     else
-        return (i-n%wsize)/(n/wsize);
+        return (i-partitions%wsize)/(partitions/wsize);
 }
-mat_int localSize(const unsigned int wrank, const int wsize, const mat_int n) {
-    return n/wsize + ((wrank<(n%wsize))?1:0);
+mat_int localSize(const unsigned int wrank, const int wsize,
+                  const mat_int partitions) {
+    return partitions/wsize + ((wrank<(partitions%wsize))?1:0);
 }
 // Lowest rank has maximum size
-mat_int maxLocalSize(const int wsize, const mat_int n) {
-    return localSize(0, wsize, n);
+mat_int maxLocalSize(const int wsize, const mat_int partitions) {
+    return localSize(0, wsize, partitions);
 }
-mat_int rankIndex(const unsigned int wrank, const int wsize, const mat_int n) {
-    if(wrank < n%wsize)
-        return wrank*(n/wsize + 1);
+mat_int rankIndex(const unsigned int wrank, const int wsize,
+                  const mat_int partitions) {
+    if(wrank < partitions%wsize)
+        return wrank*(partitions/wsize + 1);
     else
-        return wrank*(n/wsize) + n%wsize;
+        return wrank*(partitions/wsize) + partitions%wsize;
 }
 
 
 // Sanity tests for localSize, rankIndex, and indexRank
-void rankSanityTest(mat_int n) {
+void rankSanityTest(mat_int partitions) {
     int i, wsize = 1;
     mat_int k;
 #ifdef USE_MPI
@@ -45,12 +57,14 @@ void rankSanityTest(mat_int n) {
 #endif
     k = 0;
     for(i=0; i<wsize; i++) {
-        assert(i == indexRank(rankIndex(i, wsize, n), wsize, n));
-        assert(localSize(i, wsize, n) == rankIndex(i + 1, wsize, n)
-               - rankIndex(i, wsize, n));
-        k += localSize(i, wsize, n);
+        assert(i == indexRank(rankIndex(i, wsize, partitions),
+                              wsize, partitions));
+        assert(localSize(i, wsize, partitions) ==
+               rankIndex(i + 1, wsize, partitions)
+               - rankIndex(i, wsize, partitions));
+        k += localSize(i, wsize, partitions);
     }
-    assert(k == n);
+    assert(k == partitions);
 }
 
 

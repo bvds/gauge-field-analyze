@@ -111,6 +111,21 @@ void dynamicInit(const mat_int nrow, const mat_int ncol,
     MALLOC(gaugeData.x, nrow*sizeof(*gaugeData.x));
     MALLOC(gaugeData.z, ncol*sizeof(*gaugeData.z));
 
+
+    /* If the lowest eigenvalue of gaugeProduct is known, 
+       then we can just set it.  This is a work-around for the fact
+       that TRLAN doesn't work for small matrices.
+    */
+    tmp  = cJSON_GetObjectItemCaseSensitive(options,
+                                            "lowestGaugeProductEigenvalue");
+    if(cJSON_IsNumber(tmp)) {
+        gaugeData.minEigenvalue = tmp->valuedouble;
+        printf("Setting lowest eigenvalue of gaugeProduct to %le\n",
+               tmp->valuedouble);
+        return;
+    }
+
+
     /* Calculate the smallest eigenvalue of gaugeProduct.  
        This will inform the stopping condition for MINRES.
 

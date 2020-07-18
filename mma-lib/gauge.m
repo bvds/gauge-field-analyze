@@ -23,7 +23,7 @@ Options[landauGaugeHessian] = {
       delta > 0: use finite differences to approximate derivatives.
       The two should match modulo numerical errors. *)
     "delta" -> 0,
-    "debugHessian" -> False};
+    "timing" -> False, "debugHessian" -> False};
 landauGaugeHessian::usage = "Find the Hessian and gradient for the lattice \
 norm (squared). \
 Set the option fullMatrix to True to explicitly compute the upper \
@@ -58,7 +58,6 @@ landauGaugeHessian[OptionsPattern[]] :=
             grad[[sr+ca1]] +=
             (idl[uu.MatrixExp[-I delta gen[[ca1]]/2]] -
              idl[uu.MatrixExp[I delta gen[[ca1]]/2]])/delta];
-         t0 = SessionTime[];
          Do[
              oneAdd[hess, sr + ca1, sr + ca2,
                     Sum[
@@ -91,77 +90,84 @@ landauGaugeHessian[OptionsPattern[]] :=
   {kernel, $KernelCount}]]/;OptionValue["delta"]>0;
 
 (*
-  Algebraic derivatives
+  Algebraic derivatives, debug version
  *)
 landauGaugeHessian[OptionsPattern[]] :=
-    Block[{debug = OptionValue["debugHessian"], count = 0},
- (* Adding elements to a SparseArray one at a time is very inefficient
-    in Mathematica; see
-    https://mathematica.stackexchange.com/questions/777/efficient-by-element-updates-to-sparsearrays.
-    Instead, we accumulate Array elements in an Association and create a
-    SparseArray at the end. *)
-  If[debug, Sum, ParallelSum][
-   Block[{hess = Association[],
-    grad = Array[0.0&, ngindex[]],
-    gen = SUGenerators[] + 0.0 I,
-    full = OptionValue[fullMatrix],
-    coords},
-   Do[coords = latticeCoordinates[i];
-    Block[{
-        uu = getLink[dir, coords],
-        phases, vectors, center, vv, vvd, vvadj, grad2, grad3,
-        adllrr, allrr, adlr, alr,
-        sl = coords2gindex[coords, 0],
-        sr = coords2gindex[shift[dir, coords, -1], 0]
-        },
-     {phases, vectors, center} = getPhases[uu, True];
-     vv = Transpose[vectors]; vvd = Conjugate[vectors];
-     (* Adjoint represenatation of vv.
+ Block[{
+     hess = Association[],
+     grad = Array[0.0&, ngindex[]],
+     gen = SUGenerators[],
+     full = OptionValue[fullMatrix],
+     diagLookup, offDiagLookup,
+     coords, count = 0},
+  (* Non-diagonal generators of SU(N) *)
+  diagLookup = Flatten[Table[
+      If[gen[[i, k1, k2]] != 0 && k1 != k2,
+         (* factor of 2 since we only do k2 < k2 *)
+         {i, k1, k2, N[2*gen[[i, k1, k2]] gen[[i, k2, k1]]]},
+         Nothing],
+      {i, nc^2-1}, {k1, 2, nc}, {k2, k1 -1}], 2];
+  offDiagLookup = Flatten[Table[
+      If[Im[gen[[i, k1, k2]] gen[[j, k2, k1]]] != 0 &&
+         k1 != k2,
+         {i, j, k1, k2, N[2*Im[gen[[i, k1, k2]] gen[[j, k2, k1]]]]},
+         Nothing],
+      {i, 2, nc^2-1}, {j, i-1}, {k1, 2, nc}, {k2, k1 -1}], 3];
+  Do[coords = latticeCoordinates[i];
+   Block[{
+     uu = getLink[dir, coords],
+     phases, vectors, center, vv, vvd, vvadj, grad2, grad3,
+     adllrr, allrr, adlr, alr,
+     sl = coords2gindex[coords, 0],
+     sr = coords2gindex[shift[dir, coords, -1], 0]},
+    {phases, vectors, center} = getPhases[uu, True];
+    vv = Transpose[vectors]; vvd = Conjugate[vectors];
+    (* Adjoint represenatation of vv.
       This code minimizes the number of matrix multiplications. *)
-     vvadj = 2 Outer[reTrDot[#1, #2]&, Map[vv.#.vvd&, gen], gen, 1];
-     If[debug && False,
-        Print["vvadj = ", MatrixForm[vvadj]];
-        Print["  verify orthogonality: ",
-              MatrixForm[Chop[vvadj.Transpose[vvadj]]]]];
-     If[debug && False,
-        Print["check vv ",
-              Chop[uu - vv.DiagonalMatrix[Exp[I phases]].vvd]]];
-     (* This is just -I SULog[uu] *)
-     grad2 = vv.(phases * vvd);
-     grad3 = 2*Map[reTrDot[#, grad2]&, gen];
-     (* left-left derivative in diagonalized link basis.
-       Only construct the diagonal since off-diagonal elements are zero. *)
-     adllrr = Table[
-         (* Select non-diagonal vs. diagonal generators.
-           In our ordering of the SU(N) generators,
-           diagonal generators are at the end. *)
-         If[i < nc^2 + 1 - nc,
-            (* Only calculate one triangle, using symmetry. *)
-            2*Sum[Block[
-                {dphase = phases[[k1]]-phases[[k2]]},
-                Re[gen[[i, k1, k2]] gen[[i, k2, k1]]]*dphase*
-                   Cot[dphase/2]],
-                  {k1, nc}, {k2, k1 - 1}],
-            1],
-         {i, nc^2 -1}];
-     (* Equivalent to Transpose[vvadj].DiagonalMatrix[adllrr].vvadj *)
-     allrr = LinearSolve[vvadj, adllrr*vvadj];
-     (* left-right derivative in diagonalized link basis. *)
-     adlr = Table[
-         If[
-             (* Select non-diagonal vs. diagonal generators. *)
-             i < nc^2 + 1 - nc && j < nc^2 + 1 - nc,
-             (* Our ordering of the SU(N) generators starts with all
-               the real ones, then the imaginary ones.
-               This picks out the non-zero cases. *)
-             If[i ==j || Abs[i - j] == nc (nc-1)/2,
-                (* Only calculate one triangle, using symmetry *)
-                2*Sum[Block[
-                    {dphase = phases[[k1]]-phases[[k2]]},
-                    If[True,
-                       (* Thee two are equivalent.
+    vvadj = 2 Outer[reTrDot[#1, #2]&, Map[vv.#.vvd&, gen], gen, 1];
+    If[False,
+       Print["vvadj = ", MatrixForm[vvadj]];
+       Print["  verify orthogonality: ",
+             MatrixForm[Chop[vvadj.Transpose[vvadj]]]]];
+    If[False,
+       Print["check vv ",
+             Chop[uu - vv.DiagonalMatrix[Exp[I phases]].vvd]]];
+    (* This is just -I SULog[uu] *)
+    grad2 = vv.(phases * vvd);
+    grad3 = 2*Map[reTrDot[#, grad2]&, gen];
+    (* left-left derivative in diagonalized link basis.
+      Only construct the diagonal since off-diagonal elements are zero. *)
+    adllrr = Table[
+        (* Select non-diagonal vs. diagonal generators.
+          In our ordering of the SU(N) generators,
+          diagonal generators are at the end. *)
+        If[i < nc^2 + 1 - nc,
+           (* Only calculate one triangle, using symmetry. *)
+           2*Sum[Block[
+               {dphase = phases[[k1]]-phases[[k2]]},
+               Re[gen[[i, k1, k2]] gen[[i, k2, k1]]]*dphase*
+                 Cot[dphase/2]],
+                 {k1, nc}, {k2, k1 - 1}],
+           1],
+        {i, nc^2 -1}];
+    (* Equivalent to Transpose[vvadj].DiagonalMatrix[adllrr].vvadj *)
+    allrr = LinearSolve[vvadj, adllrr*vvadj];
+    (* left-right derivative in diagonalized link basis. *)
+    adlr = Table[
+        If[
+            (* Select non-diagonal vs. diagonal generators. *)
+            i < nc^2 + 1 - nc && j < nc^2 + 1 - nc,
+            (* Our ordering of the SU(N) generators starts with all
+              the real ones, then the imaginary ones.
+              This picks out the non-zero cases. *)
+            If[i ==j || Abs[i - j] == nc (nc-1)/2,
+               (* Only calculate one triangle, using symmetry *)
+               2*Sum[Block[
+                   {dphase = phases[[k1]]-phases[[k2]]},
+                   If[True,
+                      (* Thee two are equivalent.
                         They differ by machine epsilon. *)
-                       -dphase*If[i==j,
+                      -dphase*If[i==j,
                                  Re[gen[[i, k1, k2]]*gen[[j, k2, k1]]]*
                                  Cot[dphase/2],
                                  Im[gen[[i, k1, k2]]*gen[[j, k2, k1]]]],
@@ -171,96 +177,194 @@ landauGaugeHessian[OptionsPattern[]] :=
                 0],
              If[i == j, -1, 0]],
          {i, nc^2 -1}, {j, nc^2 - 1}];
-     alr = LinearSolve[vvadj, adlr.vvadj];
-     If[debug,
-        Block[{delta = 10^-3, error = 10^-3, chopd = 10^-7,
-               idl = First[SUNorm[#]]^2&,
-               dderiv, ngrad, term1, term2,
-               dl, dll, drr, dlr, zzz, yyy},
-              dl = Table[(idl[MatrixExp[I delta gen[[ca1]]/2].uu] -
-                             idl[MatrixExp[-I delta gen[[ca1]]/2].uu])/delta,
-                            {ca1, nc^2 - 1}];
-              zzz = 2 Table[Sum[Tr[gen[[i]].vvd.gen[[j]].vv]*
-                                dl[[j]],
-                                {j, nc^2 -1}],
-                            {i, nc^2-1}];
-              If[Max[Abs[dl-grad3]] > error,
-                 Print["Numeric gradient in diagonal space ", Chop[zzz, chopd]];
-                 Print["Numeric gradient ", dl];
-                 Print["algebraic gradient ", grad3]];
-              dderiv = Table[Sum[
-                        z1*z2*SULog[MatrixExp[
-                            I delta (z1 gen[[ca1]] + z2 gen[[ca2]])/2].
-                                             DiagonalMatrix[Exp[I phases]]],
-                        {z1, {-1, 1}}, {z2, {-1, 1}}]/delta^2,
-                          {ca1, nc^2 - 1}, {ca2, nc^2 -1}];
-              term2 = -2*I Map[Tr[#.DiagonalMatrix[phases]]&, dderiv, {2}];
-              ngrad = Table[Sum[
-                  z*SULog[MatrixExp[
-                      I delta z gen[[ca]]/2].
-                                   DiagonalMatrix[Exp[I phases]]],
-                  {z, {-1, 1}}]/delta,
-                             {ca, nc^2 - 1}];
-              term1 = -2*Outer[Tr[#1.#2]&, ngrad, ngrad, 1];
-              dll = Table[Sum[
-                        z1*z2*idl[MatrixExp[
-                            I delta (z1 gen[[ca1]] + z2 gen[[ca2]])/2].uu],
-                        {z1, {-1, 1}}, {z2, {-1, 1}}]/delta^2,
-                          {ca1, nc^2 - 1}, {ca2, nc^2 -1}];
-              zzz = 4 Table[Sum[Tr[gen[[i1]].vvd.gen[[j1]].vv]*
-                                Tr[gen[[i2]].vvd.gen[[j2]].vv]*
-                                dll[[j1, j2]],
-                                {j1, nc^2 -1}, {j2, nc^2 -1}],
-                            {i1, nc^2-1}, {i2, nc^2-1}];
-              If[Max[Abs[Flatten[allrr - dll]]] > error ||
-                 (count++ < 1 && False),
-                 Print["Second derivative term ",
-                       MatrixForm[Chop[term2, chopd]]];
-                 Print["First derivative term ",
-                       MatrixForm[Chop[term1, chopd]]];
-                 Print["Sum ",
-                       MatrixForm[Chop[term1 + term2, chopd]]];
-                 Print["Numeric dll in diagonal space ",
-                       MatrixForm[Chop[zzz, chopd]]];
-                 Print["algebraic dll in diagonal space",
-                       MatrixForm[Chop[adllrr, chopd]]];
-                 Print["Numeric dll ", MatrixForm[dll]];
-                 Print["algebraic dll",
-                       MatrixForm[Chop[allrr, chopd]]]];
-              drr = Table[Sum[
-                  z1*z2*idl[uu.MatrixExp[
-                      -I delta (z1 gen[[ca1]] + z2 gen[[ca2]])/2]],
-                  {z1, {-1, 1}}, {z2, {-1, 1}}]/delta^2,
-                          {ca1, nc^2 - 1}, {ca2, nc^2 -1}];
-              If[Max[Abs[Flatten[allrr - drr]]] > error,
-                  Print["Numeric  drr ", MatrixForm[drr]]];
-              dlr = Table[Sum[
-                        z1*z2*idl[
-                            MatrixExp[I delta z1 gen[[ca1]]/2].uu.
-                                     MatrixExp[-I delta z2 gen[[ca2]]/2]],
-                        {z1, {-1, 1}}, {z2, {-1, 1}}]/delta^2,
-                          {ca1, nc^2 - 1}, {ca2, nc^2 -1}];
-              zzz = 4 Table[Sum[Tr[gen[[i1]].vvd.gen[[j1]].vv]*
-                                Tr[gen[[i2]].vvd.gen[[j2]].vv]*
-                                dlr[[j1, j2]],
-                                {j1, nc^2 -1}, {j2, nc^2 -1}],
-                            {i1, nc^2-1}, {i2, nc^2-1}];
-              If[Max[Abs[Flatten[alr - dlr]]] > error,
-                 Print["Numeric dlr in diagonal space ",
-                       MatrixForm[Chop[zzz, chopd]]];
-                 Print["algebraic dlr in diagonal space",
-                       MatrixForm[Chop[adlr, chopd]]];
-                 Print["Numeric dlr ", MatrixForm[dlr]];
-                 Print["algebraic dlr",
-                       MatrixForm[Chop[alr, chopd]]]]
-        ]];
-     Do[
+    alr = LinearSolve[vvadj, adlr.vvadj];
+    Block[{delta = 10^-3, error = 10^-3, chopd = 10^-7,
+           idl = First[SUNorm[#]]^2&,
+           dderiv, ngrad, term1, term2,
+           dl, dll, drr, dlr, zzz, yyy},
+     dl = Table[(idl[MatrixExp[I delta gen[[ca1]]/2].uu] -
+                 idl[MatrixExp[-I delta gen[[ca1]]/2].uu])/delta,
+                {ca1, nc^2 - 1}];
+     zzz = 2 Table[Sum[Tr[gen[[i]].vvd.gen[[j]].vv]*
+                       dl[[j]],
+                       {j, nc^2 -1}],
+                   {i, nc^2-1}];
+     If[Max[Abs[dl-grad3]] > error,
+        Print["Numeric gradient in diagonal space ", Chop[zzz, chopd]];
+        Print["Numeric gradient ", dl];
+        Print["algebraic gradient ", grad3]];
+     dderiv = Table[Sum[
+         z1*z2*SULog[MatrixExp[
+             I delta (z1 gen[[ca1]] + z2 gen[[ca2]])/2].
+                              DiagonalMatrix[Exp[I phases]]],
+         {z1, {-1, 1}}, {z2, {-1, 1}}]/delta^2,
+                    {ca1, nc^2 - 1}, {ca2, nc^2 -1}];
+     term2 = -2*I Map[Tr[#.DiagonalMatrix[phases]]&, dderiv, {2}];
+     ngrad = Table[Sum[
+         z*SULog[MatrixExp[
+             I delta z gen[[ca]]/2].
+                          DiagonalMatrix[Exp[I phases]]],
+         {z, {-1, 1}}]/delta,
+                   {ca, nc^2 - 1}];
+     term1 = -2*Outer[Tr[#1.#2]&, ngrad, ngrad, 1];
+     dll = Table[Sum[
+         z1*z2*idl[MatrixExp[
+             I delta (z1 gen[[ca1]] + z2 gen[[ca2]])/2].uu],
+         {z1, {-1, 1}}, {z2, {-1, 1}}]/delta^2,
+                 {ca1, nc^2 - 1}, {ca2, nc^2 -1}];
+     zzz = 4 Table[Sum[Tr[gen[[i1]].vvd.gen[[j1]].vv]*
+                       Tr[gen[[i2]].vvd.gen[[j2]].vv]*
+                       dll[[j1, j2]],
+                       {j1, nc^2 -1}, {j2, nc^2 -1}],
+                   {i1, nc^2-1}, {i2, nc^2-1}];
+     If[Max[Abs[Flatten[allrr - dll]]] > error ||
+        (count++ < 1 && True),
+        Print["Second derivative term ",
+              MatrixForm[Chop[term2, chopd]]];
+        Print["First derivative term ",
+              MatrixForm[Chop[term1, chopd]]];
+        Print["Sum ",
+              MatrixForm[Chop[term1 + term2, chopd]]];
+        Print["Numeric dll in diagonal space ",
+              MatrixForm[Chop[zzz, chopd]]];
+        Print["algebraic dll in diagonal space",
+              MatrixForm[Chop[adllrr, chopd]]];
+        Print["Numeric dll ", MatrixForm[dll]];
+        Print["algebraic dll",
+              MatrixForm[Chop[allrr, chopd]]]];
+     drr = Table[Sum[
+         z1*z2*idl[uu.MatrixExp[
+             -I delta (z1 gen[[ca1]] + z2 gen[[ca2]])/2]],
+         {z1, {-1, 1}}, {z2, {-1, 1}}]/delta^2,
+                 {ca1, nc^2 - 1}, {ca2, nc^2 -1}];
+     If[Max[Abs[Flatten[allrr - drr]]] > error,
+        Print["Numeric  drr ", MatrixForm[drr]]];
+     dlr = Table[Sum[
+         z1*z2*idl[
+             MatrixExp[I delta z1 gen[[ca1]]/2].uu.
+                      MatrixExp[-I delta z2 gen[[ca2]]/2]],
+         {z1, {-1, 1}}, {z2, {-1, 1}}]/delta^2,
+                 {ca1, nc^2 - 1}, {ca2, nc^2 -1}];
+     zzz = 4 Table[Sum[Tr[gen[[i1]].vvd.gen[[j1]].vv]*
+                       Tr[gen[[i2]].vvd.gen[[j2]].vv]*
+                       dlr[[j1, j2]],
+                       {j1, nc^2 -1}, {j2, nc^2 -1}],
+                   {i1, nc^2-1}, {i2, nc^2-1}];
+     If[Max[Abs[Flatten[alr - dlr]]] > error || count<2,
+        Print["Numeric dlr in diagonal space ",
+              MatrixForm[Chop[zzz, chopd]]];
+        Print["algebraic dlr in diagonal space",
+              MatrixForm[Chop[adlr, chopd]]];
+        Print["Numeric dlr ", MatrixForm[dlr]];
+        Print["algebraic dlr",
+              MatrixForm[Chop[alr, chopd]]]]
+    ];
+    Do[
+        (* Negative for inverse links. *)
+        If[sr < Infinity,
+           grad[[sl+ca1]] += grad3[[ca1]]];
+        If[sl < Infinity,
+           grad[[sr+ca1]] += -grad3[[ca1]]];
+        Do[
+            oneAdd[hess, sr + ca1, sr + ca2,
+                   allrr[[ca1, ca2]],
+                   full];
+            oneAdd[hess, sl + ca1, sl + ca2,
+                   allrr[[ca1, ca2]],
+                   full];
+            symAdd[hess, sl + ca1, sr + ca2,
+                   alr[[ca1, ca2]],
+                   full],
+	    {ca2, nc^2 - 1}],
+        {ca1, nc^2 - 1}]],
+     {dir, nd},
+     {i, latticeVolume[]}];
+  If[latticeBC =!= "PERIODIC_GAUGEBC",
+     hess = KeySelect[hess,
+                      (#[[1]]<Infinity && #[[2]]<Infinity)&]];
+  {SparseArray[Normal[hess],
+               {ngindex[], ngindex[]}], grad}
+ ]/; OptionValue["delta"]==0 && OptionValue["debugHessian"];
+
+(*
+  Algebraic derivatives, fast
+ *)
+(* Adding elements to a SparseArray one at a time is very inefficient
+  in Mathematica; see
+  https://mathematica.stackexchange.com/questions/777/efficient-by-element-updates-to-sparsearrays.
+  Instead, we accumulate Array elements in an Association and create a
+  SparseArray at the end. *)
+landauGaugeHessian[OptionsPattern[]] :=
+   ParallelSum[
+   Block[{hess = Association[],
+     grad = Array[0.0&, ngindex[]],
+     gen = SUGenerators[],
+     full = OptionValue[fullMatrix],
+     diagLookup, offDiagLookup,
+          addTimeNull = If[
+              OptionValue["timing"],
+              Function[{timer, expr},
+                       Block[{t1 = SessionTime[]},
+                             expr; timer += SessionTime[] - t1],
+                       {HoldAll, SequenceHold}],
+              Null&],
+     t0 = SessionTime[], tm = 0, ta = 0, tc = 0,
+     coords},
+    diagLookup = Table[Block[
+        (* For Cartan (diagonal) generators. *)
+        {z = {0, 0, 2 Tr[gen[[i]].gen[[i]]]}},
+        Do[
+            If[gen[[i, k1, k2]] != 0,
+               (* factor of 2 since we only do k1 < k2 *)
+               z = {k1, k2, N[Re[2*gen[[i, k1, k2]]*gen[[i, k2, k1]]]]}],
+            {k1, 2, nc}, {k2, k1 -1}];
+        z], {i, nc^2-1}];
+   offDiagLookup = Flatten[Table[
+       If[Im[gen[[i, k1, k2]] gen[[j, k2, k1]]] != 0,
+          (* factor of 2 since we only do k1 < k2 *)
+          {i, j, k1, k2, N[-2*Im[gen[[i, k1, k2]] gen[[j, k2, k1]]]]},
+          Nothing],
+       {i, nc^2-1}, {j, nc^2 -1}, {k1, 2, nc}, {k2, k1 -1}], 3];
+   Do[coords = latticeCoordinates[i];
+    Block[{
+        uu = getLink[dir, coords],
+        phases, vectors, center,
+        vv, vvd, vvadj, grad2, grad3,
+        adllrr, allrr, adlr, alr,
+        sl = coords2gindex[coords, 0],
+        sr = coords2gindex[shift[dir, coords, -1], 0]
+        },
+     {phases, vectors, center} = getPhases[uu, True];
+     vv = Transpose[vectors]; vvd = Conjugate[vectors];
+     (* Adjoint represenatation of vv.
+      This code minimizes the number of matrix multiplications. *)
+     vvadj = 2 Outer[reTrDot[#1, #2]&, Map[vv.#.vvd&, gen], gen, 1];
+     (* This is just -I SULog[uu] *)
+     grad2 = vv.(phases * vvd);
+     grad3 = 2*Map[reTrDot[#, grad2]&, gen];
+     (* left-left derivative in diagonalized link basis.
+       Only construct the diagonal since off-diagonal elements are zero. *)
+     addTimeNull[tc, adllrr = Map[
+         If[#[[1]] == 0,
+            #[[3]],
+            Block[{dphase = phases[[#[[1]]]]-phases[[#[[2]]]]},
+                  #[[3]]*dphase*Cot[dphase/2]]]&,
+           diagLookup]];
+     (* Equivalent to Transpose[vvadj].DiagonalMatrix[adllrr].vvadj *)
+     addTimeNull[tm, allrr = LinearSolve[vvadj, adllrr*vvadj]];
+     (* left-right derivative in diagonalized link basis. *)
+     attTimeNull[tc, adlr = SparseArray[Map[
+         (Take[#, 2] -> #[[5]]*(phases[[#[[3]]]]-phases[[#[[4]]]]))&,
+         offDiagLookup], {nc^2 - 1, nc^2 -1}]];
+     (* Equivalent to
+       Transpose[vvadj].(adlr - DiagonalMatrix[adllrr]).vvadj *)
+     addTimeNull[tm, alr = LinearSolve[vvadj, adlr.vvadj - adllrr*vvadj]];
+     addTimeNull[ta, Do[
          (* Negative for inverse links. *)
          If[sr < Infinity,
             grad[[sl+ca1]] += grad3[[ca1]]];
          If[sl < Infinity,
             grad[[sr+ca1]] += -grad3[[ca1]]];
-         t0 = SessionTime[];
          Do[
              oneAdd[hess, sr + ca1, sr + ca2,
                     allrr[[ca1, ca2]],
@@ -272,15 +376,19 @@ landauGaugeHessian[OptionsPattern[]] :=
                     alr[[ca1, ca2]],
                     full],
 	     {ca2, nc^2 - 1}],
-         {ca1, nc^2 - 1}]],
+         {ca1, nc^2 - 1}]]],
       {dir, nd},
-      {i, kernel, latticeVolume[], If[debug, 1, $KernelCount]}];
+      {i, kernel, latticeVolume[], $KernelCount}];
+   If[OptionValue["timing"],
+      Print[kernel, ": times: ", {tc, tm, ta, SessionTime[] - t0}]];
    If[latticeBC =!= "PERIODIC_GAUGEBC",
       hess = KeySelect[hess,
                        (#[[1]]<Infinity && #[[2]]<Infinity)&]];
    {SparseArray[Normal[hess],
                 {ngindex[], ngindex[]}], grad}],
-   {kernel, If[debug, 1, $KernelCount]}]]/;OptionValue["delta"]==0;
+   {kernel, $KernelCount}]/;
+    OptionValue["delta"]==0 && !OptionValue["debugHessian"];
+
 
 (*
   Create matrix associated with global color rotations
@@ -288,12 +396,13 @@ landauGaugeHessian[OptionsPattern[]] :=
 globalColorRotations::usage =
   "Return a matrix generating the nc^2-1 global color rotations.  \
 The result is returned as a SparseArray.";
-globalColorRotations[] :=
+globalColorRotations[] := Block[{z = N[1/Sqrt[latticeVolume[]]]},
     SparseArray[
         Table[
-            {Mod[i-1, nc^2 -1]+1, i} -> 1,
+             (* saddle-lib expects floating point matrix elements *)
+            {Mod[i-1, nc^2 -1]+1, i} -> z,
             {i, ngindex[]}],
-        {nc^2-1, ngindex[]}];
+        {nc^2-1, ngindex[]}]];
 
 SetAttributes[applyGaugeTransform, HoldFirst];
 applyGaugeTransform[gf_, delta_] :=
@@ -322,8 +431,8 @@ minimumNormGaugeStep[opts:OptionsPattern[]] :=
         stepOut = None, stepShifts,
 	t0 = SessionTime[], t1, t2, t3,
         debug = printLevel[OptionValue[printDetails], 3],
-        action = OptionValue[externalAction]},
-  gaugeField0 = gaugeField;
+        action = OptionValue[externalAction],
+        gaugeField0 = gaugeField},
   If[action =!= "read",
      Print["calling landauGaugeHessian"];
      {hess, grad} = landauGaugeHessian[

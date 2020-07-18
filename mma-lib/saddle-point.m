@@ -421,6 +421,9 @@ Options[findDelta] = {dynamicPartMethod -> Automatic, printDetails -> True,
   (* A numerical value will invoke the MPI version.
      Number of MPI processes.*)
   processes -> Automatic,
+  (* Specify the way matrices are divided among processors.
+     See saddle-lib/matrix.c for details. *)
+  "partitions" -> Automatic,
   (* Currently, hard-coded for a single AMD Epyc processor. *)
   mpiFlags -> None,
   (* Not used. *)
@@ -544,9 +547,11 @@ findDelta[{hess_, grad_, gauge_}, opts:OptionsPattern[]] :=
 
 SetAttributes[runRemote, HoldRest];
 runRemote[command_, output_:None, error_:None] :=
-    Block[{out = RunProcess[command,
+    Block[{out},
+          If[False, Print["Running:  ", command]];
+          out = RunProcess[command,
                (* Path to scp, ssh ... *)
-               ProcessEnvironment -> <|"PATH"->"/usr/bin:/usr/local/bin"|>]},
+               ProcessEnvironment -> <|"PATH"->"/usr/bin:/usr/local/bin"|>];
           If[output =!= None,
              output = out["StandardOutput"]];
           If[StringLength[out["StandardOutput"]]>0,
@@ -620,7 +625,9 @@ findDelta[data:{hess_, grad_, gauge_}, opts:OptionsPattern[]] :=
    If[action =!= "read",
       Export[localPath <> configFile, {
           "blockSize" -> nc^2 - 1,
-          "partitions" -> latticeDimensions[[-1]],
+          "partitions" -> If[OptionValue["partitions"] === Automatic,
+                             latticeDimensions[[-1]],
+                             OptionValue["partitions"]],
           "n" -> Length[grad],
           "gaugeDimension" -> Length[gauge],
           "eigenCutoffRescale" ->
@@ -662,24 +669,28 @@ findDelta[data:{hess_, grad_, gauge_}, opts:OptionsPattern[]] :=
    (* Run external program on a remote host *)
    If[action == "remote" || action == "detach",
       If[debug > 2,
-         Print["Running ", executable, " at ", remote]];
-      If[runRemote[{"scp", localPath <> configFile,
+         Print["Sending files to ", remote]];
+      If[runRemote[{"scp", "-B", localPath <> configFile,
                     localPath <> hessFile, localPath <> gradFile,
                     localPath <> gaugeFile,
                     remote}] != 0, Return[$Failed]];
-      If[runRemote[{"ssh", remoteHost, "rm -f",
+      If[runRemote[{"ssh", "-o", "BatchMode=true", remoteHost, "rm -f",
                     remotePath <> "/" <> shiftFile,
                     remotePath <> "/" <> outFile}] != 0,
          Return[$Failed]]];
    (* Run external program on a remote host interactively *)
    If[action == "remote",
-      If[runRemote[{"ssh", remoteHost, mpi,
+      If[runRemote[{"ssh", "-o", "BatchMode=true", remoteHost, mpi,
                     remotePath <> "/" <> executable,
                     remotePath <> "/" <> configFile,
                     remotePath <> "/" <> shiftFile,
                     remotePath <> "/" <> outFile},
                    output, error] != 0, Return[$Failed]]];
-   (* Start up external program and detach *)
+   (* Start up external program and detach.
+    After detaching, we then poll the external
+    server every 60 seconds to see if the program is
+    completed.  Thus, the connection to the remote server
+    can be interrupted during the calculation. *)
    If[action == "detach",
       (* nohup is not relevant here, because there is no remote terminal.
         We just need to make sure stdout and stderr are redirected.
@@ -687,16 +698,17 @@ findDelta[data:{hess_, grad_, gauge_}, opts:OptionsPattern[]] :=
             ssh localhost "(cd lattice/gauge-field-analyze/saddle-lib; touch junk; sleep 10s 1>/dev/null 2>/dev/null; rm junk) 1>/dev/null 2>&1 &"
        *)
       If[runRemote[{
-          "ssh", remoteHost,
+          "ssh", "-o BatchMode=true", remoteHost,
           "(cd", remotePath, ";rm -f done;", mpi,
           " ./" <> executable, configFile, shiftFile, outFile,
           "1>shifts.log 2>shifts.err; touch done) >/dev/null 2>&1 &"
           }] != 0, Return[$Failed]];
-      Print[DateObject[], "Starting external program."]];
+      Print[DateObject[], "Started external program and detached."]];
    If[action == "read" || action == "detach",
       Block[{dt = 60, tt = 0},
-            While[RunProcess[{"ssh", remoteHost, "test", "-e",
-                              remotePath <> "/" <> "done"},
+            While[RunProcess[{"ssh", "-o BatchMode=true", remoteHost,
+                              "test -e",
+                              remotePath <> "/done"},
                              "ExitCode"] != 0,
                   tt += dt;
                   Pause[dt]];
