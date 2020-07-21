@@ -67,21 +67,29 @@ meaning. We infer the effect on the lattice links by using the \
 rotation back onto the lattice.  We demand that the norm of the \
 largest shift on any single link be less than the cutoff (default \
 value Pi).";
-Options[applyCutoff3] = {"eigenCutoffMax" -> Pi, "eigenCutoff2" -> Pi, "zzz" -> 1};
+Options[applyCutoff3] = {
+    (* When finding a minimum, (as opposed to a saddle
+      point, we want to remove all negative second derivative (concave)
+      components. *)
+    "removeConcave" -> False,
+    "eigenCutoffMax" -> N[Pi], "eigenCutoff2" -> N[Pi], "zzz" -> 1};
 applyCutoff3[hess_, grad_, proj_, OptionsPattern[]] :=
  Block[{result, count = 0, countMax = 0, count2 = 0,
+        countConcave = If[OptionValue["removeConcave"], 0, Null],
         firstValue = Null, lastValue = Null},
   result = MapThread[
       Block[{
+          testConcave = OptionValue["removeConcave"] && #1 <= 0,
           testMax = OptionValue["zzz"] < Infinity &&
                     OptionValue["eigenCutoffMax"] OptionValue["zzz"] Abs[#1] <=
                                Abs[#2] shiftNormMax[#3],
           test2 = OptionValue["zzz"] < Infinity &&
                   OptionValue["eigenCutoff2"] OptionValue["zzz"] Abs[#1] <=
                              Abs[#2] shiftNorm2[#3]},
+            If[testConcave, countConcave++];
             If[testMax, countMax++];
             If[test2, count2++];
-            If[testMax || test2,
+            If[testMax || test2 || testConcave,
 	       count += 1;
 	       If[firstValue === Null, firstValue = #4];
 	       lastValue = #4;
@@ -89,8 +97,8 @@ applyCutoff3[hess_, grad_, proj_, OptionsPattern[]] :=
 	       #2/#1]]&,
       {hess, grad, proj, Range[Length[grad]]}];
   If[count > 0,
-     Print["applyCutoff3:  {total, max, norm} = ",
-           {count, countMax, count2}, " of ", Length[hess],
+     Print["applyCutoff3:  {total, max, norm, concave} = ",
+           {count, countMax, count2, countConcave}, " of ", Length[hess],
 	   " eigenpairs between ", {firstValue, lastValue}]];
   result];
 cutoffNullspace::usage =
@@ -99,15 +107,18 @@ violate the cutoff.";
 Options[cutoffNullspace] = Options[applyCutoff3];
 cutoffNullspace[hess_, grad_, proj_, OptionsPattern[]] :=
  Block[{result,  count = 0, countMax = 0, count2 = 0,
+        countConcave = If[OptionValue["removeConcave"], 0, Null],
         firstValue = Null, lastValue = Null},
    result = MapThread[
       Block[{
+          testConcave = OptionValue["removeConcave"] && #1 <= 0,
           testMax = OptionValue["zzz"] < Infinity &&
                     OptionValue["eigenCutoffMax"] OptionValue["zzz"] Abs[#1] <=
                                Abs[#2] shiftNormMax[#3],
           test2 = OptionValue["zzz"] < Infinity &&
                   OptionValue["eigenCutoff2"] OptionValue["zzz"] Abs[#1] <=
                              Abs[#2] shiftNorm2[#3]},
+            If[testConcave, countConcave++];
             If[testMax, countMax++];
             If[test2, count2++];
             If[testMax || test2,
@@ -118,8 +129,8 @@ cutoffNullspace[hess_, grad_, proj_, OptionsPattern[]] :=
 	       Nothing]]&,
 	   {hess, grad, proj, Range[Length[grad]]}];
    If[count > 0 || True,
-      Print["cutoffNullspace:  {total, max, norm} = ",
-            {count, countMax, count2}, " of ", Length[hess],
+      Print["cutoffNullspace:  {total, max, norm, concave} = ",
+            {count, countMax, count2, countConcave}, " of ", Length[hess],
 	    " eigenpairs between ", {firstValue, lastValue}]];
    result];
 
@@ -409,32 +420,34 @@ findDelta::external = "External program exited with error `1`.";
 findDelta::dynamicPartMethod = "Only dynamicPartMethod = Automatic is supported.";
 findDelta::asymmetric = "Hessian must be symmetric unless Method->\"External\". Max asymmetry `1`";
 findDelta::symmetric = "Since Method->\"External\", you can set fullMatrix -> False.";
-Options[findDelta] = {dynamicPartMethod -> Automatic, printDetails -> True,
-  Method -> "Dense", ignoreCutoff -> False, dampingFactor -> 1,
-  storeHess -> False, largeShiftOptions -> {},
-  storeBB -> False, debugProj -> False, externalAction -> Automatic,
-  remoteHost -> "samson",
-  (* Used by BLAS libraries and matrixVector()
+Options[findDelta] = Join[
+    Options[applyCutoff3],
+    {dynamicPartMethod -> Automatic, printDetails -> True,
+     Method -> "Dense", ignoreCutoff -> False, dampingFactor -> 1,
+     storeHess -> False, largeShiftOptions -> {},
+     storeBB -> False, debugProj -> False, externalAction -> Automatic,
+     remoteHost -> "samson",
+     (* Used by BLAS libraries and matrixVector()
      Extensive benchmarking shows 2 threads * maximum MPI processes
-     is optimal. *)
-  threads -> 2,
-  (* A numerical value will invoke the MPI version.
+     is optimal. *)         
+     threads -> 2,
+     (* A numerical value will invoke the MPI version.
      Number of MPI processes.*)
-  processes -> Automatic,
-  (* Specify the way matrices are divided among processors.
+     processes -> Automatic,
+     (* Specify the way matrices are divided among processors.
      See saddle-lib/matrix.c for details. *)
-  "partitions" -> Automatic,
-  (* Currently, hard-coded for a single AMD Epyc processor. *)
-  mpiFlags -> None,
-  (* Not used. *)
-  chunkSize -> 1,
-  (* Roughly speaking, the relative error in the matrix norm of
+     "partitions" -> Automatic,
+     (* Currently, hard-coded for a single AMD Epyc processor. *)
+     mpiFlags -> None,
+     (* Not used. *)
+     chunkSize -> 1,
+     (* Roughly speaking, the relative error in the matrix norm of
      one link goes as Norm[shift]^3/48. *)
-  eigenCutoffMax -> 2, eigenCutoff2 -> 2, rescaleCutoff -> 2};
+     rescaleCutoff -> 2}];
 SetAttributes[findDelta, HoldFirst];
 
 (* Dense matrix version (default) *)
-findDelta[{hess_, grad_, gauge_}, OptionsPattern[]] :=
+findDelta[{hess_, grad_, gauge_}, opts:OptionsPattern[]] :=
  Block[{hessp, gradp, zzz = If[OptionValue[ignoreCutoff], Infinity, 1],
         damping = OptionValue[dampingFactor], values, oo, proj},
     (* SymmetricMatrixQ[] has trouble with small nonzero elements *)
@@ -454,10 +467,10 @@ findDelta[{hess_, grad_, gauge_}, OptionsPattern[]] :=
     (* Debug print to compare with call to testOp(...) in shifts.c *)
     If[False, Print["Dynamic hess.grad: ", hess.grad]];
     {values, oo} = Eigensystem[Normal[hessp]];
-    stepShifts = applyCutoff3[values, oo.gradp, oo.proj,
-                              "eigenCutoffMax" -> OptionValue[eigenCutoffMax],
-                              "eigenCutoff2" -> OptionValue[eigenCutoff2],
-                              "zzz" -> zzz].oo.proj;
+    stepShifts = applyCutoff3[
+        values, oo.gradp, oo.proj,
+        "zzz" -> zzz,
+        Apply[Sequence, FilterRules[{opts}, Options[applyCutoff3]]]].oo.proj;
     Print["shifts norms and rescale:  ",
 	  {shiftNormMax[stepShifts], shiftNorm2[stepShifts],
 	   stepShifts.hess.stepShifts/stepShifts.grad}];
@@ -473,6 +486,7 @@ findDelta[{hess_, grad_, gauge_}, OptionsPattern[]] :=
 findDelta[{hess_, grad_, gauge_}, opts:OptionsPattern[]] :=
     Block[{zzz = If[OptionValue[ignoreCutoff], Infinity, 1],
     minresFun = minresLabels[methodName[OptionValue[Method]]],
+    squareHess = Not[OptionValue["removeConcave"]],
     damping = OptionValue[dampingFactor], result, dp, dp0,
     smallProj, smallProj0, tinit = SessionTime[],
         tdp = 0, tsp = 0, tdot = 0, countdp = 0, countdot = 0, countsp = 0,
@@ -507,16 +521,19 @@ findDelta[{hess_, grad_, gauge_}, opts:OptionsPattern[]] :=
 	Message[findDelta::lastPairs]; Return[$Failed]];
      {vals, vecs} = ersatzLanczos[
          Block[{y = dp[addTime[tdot, countdot++; hess.#]]},
-               dp[addTime[tdot, countdot++; hess.y]]]&,
+               If[squareHess,
+                  dp[addTime[tdot, countdot++; hess.y]],
+                  y]]&,
          Length[grad],
 	 Apply[Sequence, options],
 	 (* Need to determine a reasonable estimate for this. *)
 	 eigenPairs -> -Min[120, Length[grad]],
          orthoSubspace -> dp,
 	 initialVector -> grad, printDetails -> 1];
-     Module[{largeShiftSpace = cutoffNullspace[Sqrt[vals], vecs.grad, vecs,
-               "eigenCutoffMax" -> OptionValue[eigenCutoffMax],
-               "eigenCutoff2" -> OptionValue[eigenCutoff2], "zzz" -> zzz]},
+     Module[{largeShiftSpace = cutoffNullspace[
+         If[squareHess, Sqrt[vals], vals],
+         vecs.grad, vecs, "zzz" -> zzz,
+         Apply[Sequence, FilterRules[{opts}, Options[cutoffNullspace]]]]},
 	    If[Length[largeShiftSpace] > 0,
 	       (# - (largeShiftSpace.#).largeShiftSpace)&, Identity]]];
    smallProj = (addTime[tsp, countsp++; smallProj0[#]]&);
@@ -630,15 +647,18 @@ findDelta[data:{hess_, grad_, gauge_}, opts:OptionsPattern[]] :=
                              OptionValue["partitions"]],
           "n" -> Length[grad],
           "gaugeDimension" -> Length[gauge],
+          "removeConcave" -> OptionValue["removeConcave"],
           "eigenCutoffRescale" ->
               If[OptionValue[ignoreCutoff], 10.0^20, 1.0],
           "eigenCutoffMax" ->
-              OptionValue[eigenCutoffMax]/.Infinity -> 10.0^20,
+              OptionValue["eigenCutoffMax"]/.Infinity -> 10.0^20,
           "eigenCutoff2" ->
-              OptionValue[eigenCutoff2]/.Infinity -> 10.0^20,
+              OptionValue["eigenCutoff2"]/.Infinity -> 10.0^20,
           "dynamicPartOptions" ->
               {methodOptions[OptionValue[dynamicPartMethod]]}/.symbolString,
-          "largeShiftOptions" -> OptionValue[largeShiftOptions]/.symbolString,
+          "largeShiftOptions" -> Append[
+              OptionValue[largeShiftOptions]/.symbolString,
+              "squareHess" -> !OptionValue["removeConcave"]],
           "linearSolveOptions" ->
 	      {methodOptions[OptionValue[Method]]}/.symbolString,
           "chunkSize" -> OptionValue[chunkSize],
@@ -733,6 +753,35 @@ findDelta[data:{hess_, grad_, gauge_}, opts:OptionsPattern[]] :=
    -damping applyCutoff2[stepShifts, OptionValue[rescaleCutoff],
                          If[OptionValue[ignoreCutoff], Infinity, 1]]] /;
  methodName[OptionValue[Method]] === "External";
+
+(*
+  Use steepest descent to determine the next step.
+  This assumes that grad is in the nullspace of gauge,
+  so gauge is ignored.
+
+  Eigenvalue-related cutoffs are ignored. 
+ *)
+findDelta::badGrad = "Gradient has overlap with gauge.";
+findDelta[{hess_, grad_, gauge_}, OptionsPattern[]] :=
+ Block[{zzz = If[OptionValue[ignoreCutoff], Infinity, 1],
+        damping = OptionValue[dampingFactor], x},
+    (* SymmetricMatrixQ[] has trouble with small nonzero elements *)
+    If[matrixAsymmetry[hess] > 10^-12,
+       Message[findDelta::asymmetric, matrixAsymmetry[hess]];
+       Return[$Failed]];
+    If[MatrixQ[gauge] &&
+       Norm[gauge.grad] > 10^-12 Norm[grad] Norm[gauge],
+       Message[findDelta::badGrad];
+       Return[$Failed]];
+    x = grad.grad/grad.hess.grad;
+    stepShifts = x*grad;
+    Print["steepest descent size:  ", x];
+    If[OptionValue[storeHess],
+       Print["Define hess0, grad0"];
+       hess0 = hess; grad0 = grad];
+    -damping applyCutoff2[stepShifts, OptionValue[rescaleCutoff], zzz]] /;
+ OptionValue[Method] === "steepestDescent";
+
 
 SetAttributes[applyDelta, HoldFirst];
 applyDelta[tgf_, delta_, fixed_] :=

@@ -98,6 +98,7 @@ void largeShifts(SparseMatrix *hess, cJSON *options,
     void *mpicomp = NULL;
     wrank = 0;
 #endif
+    cJSON_bool squareHess;
     cJSON *tmp;
     TIME_TYPE t2, tf;
     double t1f = 0.0;
@@ -112,6 +113,10 @@ void largeShifts(SparseMatrix *hess, cJSON *options,
 
     assert(eval != NULL);
     assert(evec != NULL);
+
+    // Default is to square the Hessian matrix
+    tmp  = cJSON_GetObjectItemCaseSensitive(options, "squareHess");
+    squareHess = cJSON_IsBool(tmp)?cJSON_IsTrue(tmp):1==1;
 
     // Would need a separate flag for the lohi == 0 case.
     tmp  = cJSON_GetObjectItemCaseSensitive(options, "eigenPairs");
@@ -189,7 +194,10 @@ void largeShifts(SparseMatrix *hess, cJSON *options,
     tol = cJSON_IsNumber(tmp)?tmp->valuedouble:-1.0; 
 
     // Used by HessOp2
-    MALLOC(eigenData.z, nrow * sizeof(double));
+    if(squareHess)
+        MALLOC(eigenData.z, nrow * sizeof(double));
+    else
+        eigenData.z = NULL;
     mev = ned; // Allocate memory for the number of requested eigenpairs
     *eval = (double *) malloc(mev*sizeof(double));
     *evec = (double *) malloc(mev*nrow*sizeof(double));
@@ -205,8 +213,8 @@ void largeShifts(SparseMatrix *hess, cJSON *options,
     }
 
     // call TRLAN to compute the eigenvalues
-    trlan(hessOp2, dynamicProject, &info, nrow, mev, *eval, *evec,
-          nrow, lwrk, wrk);
+    trlan(squareHess?hessOp2:hessOp, dynamicProject, &info, nrow, mev,
+          *eval, *evec, nrow, lwrk, wrk);
     *nvals = info.nec;
     ierr = info.stat;
     if(printDetails > 1) {
@@ -255,11 +263,12 @@ void largeShifts(SparseMatrix *hess, cJSON *options,
     }
 
 #ifndef USE_PRIMME
-    /* We have calculated eigenvalues for hess^2.
+    /* If we have calculated eigenvalues for hess^2.
        Convert to abs(eigenvalues) of hess itself. */
-    for(i=0; i<*nvals; i++) {
-        (*eval)[i] = sqrt((*eval)[i]);
-    }
+    if(squareHess)
+        for(i=0; i<*nvals; i++) {
+            (*eval)[i] = sqrt((*eval)[i]);
+        }
 #endif
 }
 

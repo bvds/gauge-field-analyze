@@ -23,6 +23,8 @@ Options[landauGaugeHessian] = {
       delta > 0: use finite differences to approximate derivatives.
       The two should match modulo numerical errors. *)
     "delta" -> 0,
+    (* Set to false to compare with single-site minimization *)
+    "includeLeftRight" -> True,
     "timing" -> False, "debugHessian" -> False};
 landauGaugeHessian::usage = "Find the Hessian and gradient for the lattice \
 norm (squared). \
@@ -71,13 +73,14 @@ landauGaugeHessian[OptionsPattern[]] :=
                             I delta (z1 gen[[ca1]] + z2 gen[[ca2]])/2].uu],
                         {z1, {-1, 1}}, {z2, {-1, 1}}]/delta^2,
                     full];
-             symAdd[hess, sl + ca1, sr + ca2,
+             If[OptionValue["includeLeftRight"],
+                symAdd[hess, sl + ca1, sr + ca2,
                     Sum[
                         z1*z2*idl[
                             MatrixExp[I delta z1 gen[[ca1]]/2].uu.
                                      MatrixExp[-I delta z2 gen[[ca2]]/2]],
                         {z1, {-1, 1}}, {z2, {-1, 1}}]/delta^2,
-                    full],
+                       full]],
 	     {ca2, nc^2 - 1}],
          {ca1, nc^2 - 1}]],
       {dir, nd},
@@ -272,9 +275,10 @@ landauGaugeHessian[OptionsPattern[]] :=
             oneAdd[hess, sl + ca1, sl + ca2,
                    allrr[[ca1, ca2]],
                    full];
-            symAdd[hess, sl + ca1, sr + ca2,
+            If[OptionValue["includeLeftRight"],
+               symAdd[hess, sl + ca1, sr + ca2,
                    alr[[ca1, ca2]],
-                   full],
+                      full]],
 	    {ca2, nc^2 - 1}],
         {ca1, nc^2 - 1}]],
      {dir, nd},
@@ -285,6 +289,7 @@ landauGaugeHessian[OptionsPattern[]] :=
   {SparseArray[Normal[hess],
                {ngindex[], ngindex[]}], grad}
  ]/; OptionValue["delta"]==0 && OptionValue["debugHessian"];
+
 
 (*
   Algebraic derivatives, fast
@@ -300,6 +305,7 @@ landauGaugeHessian[OptionsPattern[]] :=
      grad = Array[0.0&, ngindex[]],
      gen = SUGenerators[],
      full = OptionValue[fullMatrix],
+     includeLeftRight = OptionValue["includeLeftRight"],
      diagLookup, offDiagLookup,
           addTimeNull = If[
               OptionValue["timing"],
@@ -372,9 +378,9 @@ landauGaugeHessian[OptionsPattern[]] :=
              oneAdd[hess, sl + ca1, sl + ca2,
                     allrr[[ca1, ca2]],
                     full];
-             symAdd[hess, sl + ca1, sr + ca2,
+             If[includeLeftRight, symAdd[hess, sl + ca1, sr + ca2,
                     alr[[ca1, ca2]],
-                    full],
+                    full]],
 	     {ca2, nc^2 - 1}],
          {ca1, nc^2 - 1}]]],
       {dir, nd},
@@ -406,11 +412,23 @@ globalColorRotations[] := Block[{z = N[1/Sqrt[latticeVolume[]]]},
 
 SetAttributes[applyGaugeTransform, HoldFirst];
 applyGaugeTransform[gf_, delta_] :=
- Block[{gi, gg},
+ Block[{gi, gg, sum, asum, count=0},
   Do[
    Block[{coords = latticeCoordinates[i]},
     gi = coords2gindex[coords, 0] + {1, nc^2 -1};
     gg = MatrixExp[I Take[delta, gi].SUGenerators[]];
+    If[False, 
+       sum = Sum[
+           SULog[getLink[dir, coords]]
+           - SULog[getLink[dir, shift[dir, coords, -1]]],
+           {dir, nd}];
+       asum = -Map[2*Im[Tr[sum.#]]&, SUGenerators[]]/(2 nd);
+       If[count++ < 10,
+          Print["norms: ",
+             {Norm[Take[delta, gi] - asum],
+              Take[delta, gi].asum/(Norm[Take[delta, gi]]*Norm[asum]),
+              Norm[Take[delta, gi]],
+              Norm[asum]}]]];
     Do[
         gf[[dir, linearSiteIndex[coords]]] =
         gg.getLink[gf][dir, coords];

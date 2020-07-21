@@ -25,13 +25,15 @@ void cutoffNullspace(mat_int n, int nvals, cJSON *options,
                      cJSON *jout, _MPI_Comm mpicom) {
     mat_int j, blocks;
     int i, wrank;
-    int testMax, test2, countMax = 0, count2 = 0;
+    int testConcave, testMax, test2,
+        countConcave = 0, countMax = 0, count2 = 0;
     int na;
     int firstValue = -1;
     int lastValue = -1;
     double norm2, vecnorm2,  maxnorm2, vecdotgrad;
     double cutoffMax, cutoff2, zzz;
     cJSON *tmp;
+    cJSON_bool removeConcave, squareHess;
 #ifdef USE_MPI
     MPI_Comm_rank(mpicom, &wrank);
 #else
@@ -42,12 +44,21 @@ void cutoffNullspace(mat_int n, int nvals, cJSON *options,
     tmp  = cJSON_GetObjectItemCaseSensitive(options, "blockSize");
     assert(cJSON_IsNumber(tmp));
     na = tmp->valueint;
+    tmp  = cJSON_GetObjectItemCaseSensitive(options, "removeConcave");
+    removeConcave = cJSON_IsBool(tmp)?cJSON_IsTrue(tmp):1==0;
     tmp  = cJSON_GetObjectItemCaseSensitive(options, "eigenCutoffMax");
     cutoffMax = cJSON_IsNumber(tmp)?tmp->valuedouble:1.0;
     tmp  = cJSON_GetObjectItemCaseSensitive(options, "eigenCutoff2");
     cutoff2 = cJSON_IsNumber(tmp)?tmp->valuedouble:1.0;
     tmp  = cJSON_GetObjectItemCaseSensitive(options, "eigenCutoffRescale");
     zzz = cJSON_IsNumber(tmp)?tmp->valuedouble:1.0;
+
+    // Sanity test for squaring the Hessian
+    tmp  = cJSON_GetObjectItemCaseSensitive(options, "largeShiftOptions");
+    assert(tmp != NULL);
+    tmp  = cJSON_GetObjectItemCaseSensitive(tmp, "squareHess");
+    squareHess = cJSON_IsBool(tmp)?cJSON_IsTrue(tmp):1==1;
+    assert(removeConcave != squareHess);
 
     // Color blocks should be evenly divided among processes
     assert(n%na == 0);
@@ -86,6 +97,9 @@ void cutoffNullspace(mat_int n, int nvals, cJSON *options,
         MPI_Allreduce(MPI_IN_PLACE, &blocks, 1, _MPI_MAT_INT,
                       MPI_SUM, mpicom);
 #endif
+        testConcave = removeConcave && (*vals)[i] < 0.0;
+        if(testConcave)
+            countConcave++;
         /* If eigenvectors are normalized, then vecnorm2
            is not needed. */
         testMax = cutoffMax*zzz*fabs((*vals)[i])*vecnorm2 <=
@@ -96,7 +110,7 @@ void cutoffNullspace(mat_int n, int nvals, cJSON *options,
             fabs(vecdotgrad);
         if(test2)
             count2++;
-        if(testMax || test2) {
+        if(testMax || test2 || testConcave) {
             if(firstValue < 0)
                 firstValue = i;
             lastValue = i;
@@ -115,8 +129,11 @@ void cutoffNullspace(mat_int n, int nvals, cJSON *options,
     cJSON_AddNumberToObject(jout, "nvals", nvals);
     cJSON_AddNumberToObject(jout, "nvalsMax", countMax);
     cJSON_AddNumberToObject(jout, "nvals2", count2);
+    cJSON_AddNumberToObject(jout, "nvalsConcave", countConcave);
     if(wrank == 0) {
-        printf("cutoffNullSpace:  %u (max %i, norm %i) of %u eigenpairs between [%i, %i]\n",
-               *nLargeShifts, countMax, count2, nvals, firstValue, lastValue);
+        printf("cutoffNullSpace:  %u (max %i, norm %i, concave %i) "
+               "of %u eigenpairs between [%i, %i]\n",
+               *nLargeShifts, countMax, count2, countConcave,
+               nvals, firstValue, lastValue);
     }
 }

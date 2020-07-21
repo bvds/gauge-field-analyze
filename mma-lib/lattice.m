@@ -186,32 +186,35 @@ latticeNorm[lattice_, opts:OptionsPattern[]]:=
              Norm[y]/Sqrt[Length[y]]]];
 
 makeTrivialLattice::usage =
-  "All links identity for a given nd,nc,latticeDimensions.
-Can add small random pertubation or choose and element of the center.";
+  "All links identity for a given nd, nc, latticeDimensions.
+Can add small random pertubation, optionally diagonal,  or choose \
+a random element of the center.";
 Options[makeTrivialLattice] = {randomGauge -> False,
-  randomCenter -> False,
+  randomCenter -> False, "diagonal" -> False,
   randomPerturbation -> 0};
-makeTrivialLattice[
-  OptionsPattern[]] := (gaugeField =
-   Table[If[OptionValue[randomPerturbation] > 0,
-     MatrixExp[
-      I Table[RandomReal[
-          OptionValue[randomPerturbation]],
-	      {nc^2 - 1}] .SUGenerators[]],
-            IdentityMatrix[nc]]*
-         If[OptionValue[randomCenter],
-            Exp[I 2 Pi RandomInteger[nc-1]/nc], 1],
-         {nd}, {latticeVolume[]}];
-  Clear[linearSiteIndex];
-  Do[linearSiteIndex[latticeCoordinates[i]] = i,
-     {i, latticeVolume[]}];
-  If[OptionValue[randomGauge],
-   Do[Block[{coords = latticeCoordinates[i], u = randomSUMatrix[]},
-     Do[setLink[dir, coords, u.getLink[dir, coords]];
-      setLink[dir, shift[dir, coords, -1],
-	      getLink[dir, shift[dir, coords, -1]].
-		     ConjugateTranspose[u]], {dir, nd}]],
-      {i, latticeVolume[]}]]);
+makeTrivialLattice[OptionsPattern[]] := (
+    gaugeField =
+    Table[If[
+        OptionValue[randomPerturbation] > 0,
+        MatrixExp[I If[OptionValue["diagonal"],
+                       RandomReal[{-1, 1}*OptionValue[randomPerturbation],
+	                          nc - 1].Take[SUGenerators[], -(nc - 1)],
+                       RandomReal[{-1, 1}*OptionValue[randomPerturbation],
+	                          nc^2 - 1].SUGenerators[]]],
+        IdentityMatrix[nc]]*
+          If[OptionValue[randomCenter],
+             Exp[I 2 Pi RandomInteger[nc-1]/nc], 1],
+          {nd}, {latticeVolume[]}];
+    Clear[linearSiteIndex];
+    Do[linearSiteIndex[latticeCoordinates[i]] = i,
+       {i, latticeVolume[]}];
+    If[OptionValue[randomGauge],
+       Do[Block[{coords = latticeCoordinates[i], u = randomSUMatrix[]},
+                Do[setLink[dir, coords, u.getLink[dir, coords]];
+                   setLink[dir, shift[dir, coords, -1],
+	                   getLink[dir, shift[dir, coords, -1]].
+		                  ConjugateTranspose[u]], {dir, nd}]],
+          {i, latticeVolume[]}]]);
 
 polyakovLoop[dir_, anchor_, op_] :=
   (* Simple loop. *)
