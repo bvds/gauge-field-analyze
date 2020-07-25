@@ -53,14 +53,15 @@ applyCutoff1[hess_?VectorQ, grad_, cutoff_: Pi, zzz_: 1] :=
    shift = grad/hess;
    Which[Pi zzz <= Norm[shift], Map[0&, shift],
          Norm[shift] < cutoff  zzz, shift,
-    True, (cutoff/Norm[shift]) shift]]];
+         True, (cutoff/Norm[shift]) shift]]];
+applyCutoff2::rescale = "Rescale maxNorm `1` to `2`";
 applyCutoff2::usage = "Rescale shifts on an entire lattice so that \
 the largest norm of a shift on a link is less than the cutoff.";
 applyCutoff2[shifts_?ArrayQ, cutoff_: 1, zzz_: 1] :=
  Block[{maxNorm = shiftNormMax[shifts]},
   If[maxNorm < cutoff zzz, shifts,
-   Print["applyCutoff2: rescale maxNorm ", maxNorm, " to ",
-    cutoff]; (cutoff/maxNorm) shifts]];
+     Message[applyCutoff2::rescale, NumberForm[maxNorm, 8], cutoff];
+     (cutoff/maxNorm) shifts]];
 applyCutoff3::usage = "Apply cutoff to the eigenspace of the Hessian. \
  In this case, the shifts are independent, but have no direct \
 meaning. We infer the effect on the lattice links by using the \
@@ -73,6 +74,7 @@ Options[applyCutoff3] = {
       components. *)
     "removeConcave" -> False,
     "eigenCutoffMax" -> N[Pi], "eigenCutoff2" -> N[Pi], "zzz" -> 1};
+applyCutoff3::count = "{total, max, norm, concave} = `1` of `2` eigenpairs between `3`";
 applyCutoff3[hess_, grad_, proj_, OptionsPattern[]] :=
  Block[{result, count = 0, countMax = 0, count2 = 0,
         countConcave = If[OptionValue["removeConcave"], 0, Null],
@@ -97,9 +99,8 @@ applyCutoff3[hess_, grad_, proj_, OptionsPattern[]] :=
 	       #2/#1]]&,
       {hess, grad, proj, Range[Length[grad]]}];
   If[count > 0,
-     Print["applyCutoff3:  {total, max, norm, concave} = ",
-           {count, countMax, count2, countConcave}, " of ", Length[hess],
-	   " eigenpairs between ", {firstValue, lastValue}]];
+     Message[applyCutoff3::count, {count, countMax, count2, countConcave},
+             Length[hess], {firstValue, lastValue}]];
   result];
 cutoffNullspace::usage =
   "Select vectors in proj that are associated with shifts that \
@@ -437,6 +438,7 @@ Options[findDelta] = Join[
      (* Specify the way matrices are divided among processors.
      See saddle-lib/matrix.c for details. *)
      "partitions" -> Automatic,
+     "gaugePartitions" -> Automatic,
      (* Currently, hard-coded for a single AMD Epyc processor. *)
      mpiFlags -> None,
      (* Not used. *)
@@ -563,7 +565,7 @@ findDelta[{hess_, grad_, gauge_}, opts:OptionsPattern[]] :=
  KeyExistsQ[minresLabels, methodName[OptionValue[Method]]];
 
 SetAttributes[runRemote, HoldRest];
-runRemote[command_, output_:None, error_:None] :=
+runRemote[command_, debug_, output_:None, error_:None] :=
     Block[{out},
           If[False, Print["Running:  ", command]];
           out = RunProcess[command,
@@ -571,7 +573,7 @@ runRemote[command_, output_:None, error_:None] :=
                ProcessEnvironment -> <|"PATH"->"/usr/bin:/usr/local/bin"|>];
           If[output =!= None,
              output = out["StandardOutput"]];
-          If[StringLength[out["StandardOutput"]]>0,
+          If[debug > 0 && StringLength[out["StandardOutput"]]>0,
              Print[Style[out["StandardOutput"], FontColor -> Blue]]];
           If[error =!= None,
              error = out["StandardError"]];
@@ -645,6 +647,10 @@ findDelta[data:{hess_, grad_, gauge_}, opts:OptionsPattern[]] :=
           "partitions" -> If[OptionValue["partitions"] === Automatic,
                              latticeDimensions[[-1]],
                              OptionValue["partitions"]],
+          "gaugePartitions" -> If[OptionValue["gaugePartitions"] === Automatic,
+                                  Min[Length[gauge]/(nc^2 -1),
+                                      latticeDimensions[[-1]]],
+                                  OptionValue["gaugePartitions"]],
           "n" -> Length[grad],
           "gaugeDimension" -> Length[gauge],
           "removeConcave" -> OptionValue["removeConcave"],
@@ -680,7 +686,8 @@ findDelta[data:{hess_, grad_, gauge_}, opts:OptionsPattern[]] :=
                         localPath <> configFile,
                         localPath <> shiftFile,
                         localPath <> outFile}];
-      Print[Style[output = out["StandardOutput"], FontColor -> Blue]];
+      If[debug > 0,
+         Print[Style[output = out["StandardOutput"], FontColor -> Blue]]];
       If[StringLength[out["StandardError"]]>0,
          Print[Style[error = out["StandardError"], FontColor -> Red]]];
       If[out["ExitCode"] != 0,
@@ -693,10 +700,10 @@ findDelta[data:{hess_, grad_, gauge_}, opts:OptionsPattern[]] :=
       If[runRemote[{"scp", "-B", localPath <> configFile,
                     localPath <> hessFile, localPath <> gradFile,
                     localPath <> gaugeFile,
-                    remote}] != 0, Return[$Failed]];
+                    remote}, debug] != 0, Return[$Failed]];
       If[runRemote[{"ssh", "-o", "BatchMode=true", remoteHost, "rm -f",
                     remotePath <> "/" <> shiftFile,
-                    remotePath <> "/" <> outFile}] != 0,
+                    remotePath <> "/" <> outFile}, debug] != 0,
          Return[$Failed]]];
    (* Run external program on a remote host interactively *)
    If[action == "remote",
@@ -705,7 +712,7 @@ findDelta[data:{hess_, grad_, gauge_}, opts:OptionsPattern[]] :=
                     remotePath <> "/" <> configFile,
                     remotePath <> "/" <> shiftFile,
                     remotePath <> "/" <> outFile},
-                   output, error] != 0, Return[$Failed]]];
+                   debug, output, error] != 0, Return[$Failed]]];
    (* Start up external program and detach.
     After detaching, we then poll the external
     server every 60 seconds to see if the program is
@@ -722,7 +729,7 @@ findDelta[data:{hess_, grad_, gauge_}, opts:OptionsPattern[]] :=
           "(cd", remotePath, ";rm -f done;", mpi,
           " ./" <> executable, configFile, shiftFile, outFile,
           "1>shifts.log 2>shifts.err; touch done) >/dev/null 2>&1 &"
-          }] != 0, Return[$Failed]];
+          }, debug] != 0, Return[$Failed]];
       Print[DateObject[], "Started external program and detached."]];
    If[action == "read" || action == "detach",
       Block[{dt = 60, tt = 0},
@@ -736,9 +743,10 @@ findDelta[data:{hess_, grad_, gauge_}, opts:OptionsPattern[]] :=
       If[runRemote[{"scp",
                     remote <> "/" <> "shifts.log",
                     remote <> "/" <> "shifts.err",
-                    localPath}] != 0, Return[$Failed]];
-      Print[Style[output = ReadString[localPath <> "shifts.log"],
-                  FontColor -> Blue]];
+                    localPath}, debug] != 0, Return[$Failed]];
+      If[debug > 0,
+         Print[Style[output = ReadString[localPath <> "shifts.log"],
+                     FontColor -> Blue]]];
       error = ReadString[localPath <> "shifts.err"];
       If[error =!= EndOfFile,
          Print[Style[error, FontColor -> Red]]]];
@@ -746,7 +754,7 @@ findDelta[data:{hess_, grad_, gauge_}, opts:OptionsPattern[]] :=
    If[action == "read" || action == "remote" || action == "detach",
       If[runRemote[{"scp", remote <> "/" <> shiftFile,
                     remote <> "/" <> outFile,
-                    localPath}] != 0,
+                    localPath}, debug] != 0,
          Return[$Failed]]];
    stepOut = Import[localPath <> outFile];
    stepShifts = ReadList[localPath <> shiftFile, Number];
@@ -764,6 +772,7 @@ findDelta[data:{hess_, grad_, gauge_}, opts:OptionsPattern[]] :=
 findDelta::badGrad = "Gradient has overlap with gauge.";
 findDelta[{hess_, grad_, gauge_}, OptionsPattern[]] :=
  Block[{zzz = If[OptionValue[ignoreCutoff], Infinity, 1],
+        debug = printLevel[OptionValue[printDetails], 1],
         damping = OptionValue[dampingFactor], x},
     (* SymmetricMatrixQ[] has trouble with small nonzero elements *)
     If[matrixAsymmetry[hess] > 10^-12,
@@ -775,7 +784,8 @@ findDelta[{hess_, grad_, gauge_}, OptionsPattern[]] :=
        Return[$Failed]];
     x = grad.grad/grad.hess.grad;
     stepShifts = x*grad;
-    Print["steepest descent size:  ", x];
+    If[debug > 0,
+       Print["steepest descent size:  ", x]];
     If[OptionValue[storeHess],
        Print["Define hess0, grad0"];
        hess0 = hess; grad0 = grad];

@@ -81,7 +81,7 @@ int main(int argc, char **argv){
     cJSON *jopts, *tmp, *jout;
     int i, blockSize, chunkSize, nLargeShifts, wsize, wrank;
     mat_int k, n, partitions, local_n,
-        gaugeDimension, local_gaugeDimension;
+        gaugePartitions, gaugeDimension, local_gaugeDimension;
     FILE *fp;
     int nread, threads, printDetails;
     TIME_TYPE t0, t1, t2;
@@ -127,22 +127,33 @@ int main(int argc, char **argv){
                                jopts, "gaugeDimension")->valueint;
     assert(gaugeDimension%blockSize == 0);
     tmp = cJSON_GetObjectItemCaseSensitive(jopts, "partitions");
-    partitions = cJSON_IsNumber(tmp) && tmp->valueint>0?
-        (mat_int) tmp->valueint:gaugeDimension/blockSize;
+    if(cJSON_IsNumber(tmp)) {
+        partitions = (mat_int) tmp->valueint;
+        gaugePartitions = partitions;
+    } else {
+        partitions = n/blockSize;
+        gaugePartitions = gaugeDimension/blockSize;
+    }
+    tmp = cJSON_GetObjectItemCaseSensitive(jopts, "gaugePartitions");
+    if(cJSON_IsNumber(tmp)) {
+        gaugePartitions = (mat_int) tmp->valueint;
+    }
     assert(n%partitions == 0);
     assert((n/partitions)%blockSize == 0);
-    assert(gaugeDimension%partitions == 0);
-    assert((gaugeDimension/partitions)%blockSize == 0);
+    assert(gaugeDimension%gaugePartitions == 0);
+    assert((gaugeDimension/gaugePartitions)%blockSize == 0);
     rankSanityTest(partitions);
+    rankSanityTest(gaugePartitions);
     local_n = n/partitions*localSize(wrank, wsize, partitions);
-    local_gaugeDimension = gaugeDimension/partitions*
-        localSize(wrank, wsize, partitions);
+    local_gaugeDimension = gaugeDimension/gaugePartitions*
+        localSize(wrank, wsize, gaugePartitions);
     assert(wsize>1 || local_n == n);
     assert(wsize>1 || local_gaugeDimension == gaugeDimension);
     if(wrank == 0 && printDetails > 2)
         printf("Parameter file %s:  n=%i gauge=%i "
-               "blockSize=%i partitions=%i\n",
-               argv[1], n, gaugeDimension, blockSize, partitions);
+               "blockSize=%i partitions=%i gaugePartitions = %i\n",
+               argv[1], n, gaugeDimension, blockSize, partitions,
+               gaugePartitions);
     // Not used currently
     tmp = cJSON_GetObjectItemCaseSensitive(jopts, "chunkSize");
     chunkSize = cJSON_IsNumber(tmp)?tmp->valueint:1;
@@ -224,7 +235,7 @@ int main(int argc, char **argv){
     tmp = cJSON_GetObjectItemCaseSensitive(jopts, "gaugeFile");
     gaugeFile = catStrings(dataPath, tmp->valuestring);
     SparseMatrix gauge, gaugeT;
-    sparseMatrixRead(&gauge, gaugeFile, 'g', 0, blockSize, partitions,
+    sparseMatrixRead(&gauge, gaugeFile, 'g', 0, blockSize, gaugePartitions,
                      chunkSize, printDetails, mpicom);
     sparseMatrixRead(&gaugeT, gaugeFile, 'g', 1, blockSize, partitions,
                      chunkSize, printDetails, mpicom);

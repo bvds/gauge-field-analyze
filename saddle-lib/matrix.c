@@ -15,15 +15,18 @@
   Without mpi, wrank = 0 and wsize = 1 gives
   the desired single-process behavior.
 
-  "partitions" is used to specify how matrix rows/columns 
-  are assigned to each mpi process.  For a matrix dimension of n,
+  "partitions" is used to specify how matrix rows
+  are assigned to each mpi process.  For a matrix with n rows,
   each processor assigned an integer multiple of n/partitions.
+  Since each proccess is also assigned some integral number 
+  of blocks, n/partitions must be divisible by blockSize.
   
   The routine localsize(...) determines this multiple.
-  This can be used to minimize the mpi communication overhead.
+  The choice of "partitions" can be used to minimize the mpi 
+  communication overhead.
 
-  Setting partitions = n/blockSize will effectively disable any 
-  effect of "partitions".
+  Setting partitions = n/blockSize will distribute blocks 
+  evenly among the mpi processes.
  */
 int indexRank(const mat_int i, const int wsize, const mat_int partitions) {
     if(i/(partitions/wsize + 1) < partitions%wsize)

@@ -23,6 +23,7 @@ Options[landauGaugeHessian] = {
       delta > 0: use finite differences to approximate derivatives.
       The two should match modulo numerical errors. *)
     "delta" -> 0,
+    "returnStats" -> False,
     (* Set to false to compare with single-site minimization *)
     "includeLeftRight" -> True,
     "timing" -> False, "debugHessian" -> False};
@@ -307,15 +308,15 @@ landauGaugeHessian[OptionsPattern[]] :=
      full = OptionValue[fullMatrix],
      includeLeftRight = OptionValue["includeLeftRight"],
      diagLookup, offDiagLookup,
-          addTimeNull = If[
-              OptionValue["timing"],
-              Function[{timer, expr},
-                       Block[{t1 = SessionTime[]},
-                             expr; timer += SessionTime[] - t1],
-                       {HoldAll, SequenceHold}],
-              Null&],
+     addTimeNull = If[
+         OptionValue["timing"],
+         Function[{timer, expr},
+                  Block[{t1 = SessionTime[]},
+                        expr; timer += SessionTime[] - t1],
+                  {HoldAll, SequenceHold}],
+         Null&],
      t0 = SessionTime[], tm = 0, ta = 0, tc = 0,
-     coords},
+     coords, countLarge = 0, countWithLarge = 0, hasLarge},
     diagLookup = Table[Block[
         (* For Cartan (diagonal) generators. *)
         {z = {0, 0, 2 Tr[gen[[i]].gen[[i]]]}},
@@ -341,6 +342,14 @@ landauGaugeHessian[OptionsPattern[]] :=
         sr = coords2gindex[shift[dir, coords, -1], 0]
         },
      {phases, vectors, center} = getPhases[uu, True];
+     (* Analyze distribution of phase differences *)
+     If[OptionValue["returnStats"],
+        hasLarge = False;
+        Do[If[Abs[phases[[i]] - phases[[j]]] > Pi,
+              hasLarge = True;
+              countLarge += 1],
+           {i, 2, nc}, {j, i-1}];
+        If[hasLarge, countWithLarge += 1]];
      vv = Transpose[vectors]; vvd = Conjugate[vectors];
      (* Adjoint represenatation of vv.
       This code minimizes the number of matrix multiplications. *)
@@ -391,7 +400,11 @@ landauGaugeHessian[OptionsPattern[]] :=
       hess = KeySelect[hess,
                        (#[[1]]<Infinity && #[[2]]<Infinity)&]];
    {SparseArray[Normal[hess],
-                {ngindex[], ngindex[]}], grad}],
+                {ngindex[], ngindex[]}], grad,
+    (* Associated stats *)
+    If[OptionValue["returnStats"],
+       {countLarge, countWithLarge},
+       Nothing]}],
    {kernel, $KernelCount}]/;
     OptionValue["delta"]==0 && !OptionValue["debugHessian"];
 
@@ -412,23 +425,11 @@ globalColorRotations[] := Block[{z = N[1/Sqrt[latticeVolume[]]]},
 
 SetAttributes[applyGaugeTransform, HoldFirst];
 applyGaugeTransform[gf_, delta_] :=
- Block[{gi, gg, sum, asum, count=0},
+ Block[{gi, gg},
   Do[
    Block[{coords = latticeCoordinates[i]},
     gi = coords2gindex[coords, 0] + {1, nc^2 -1};
     gg = MatrixExp[I Take[delta, gi].SUGenerators[]];
-    If[False, 
-       sum = Sum[
-           SULog[getLink[dir, coords]]
-           - SULog[getLink[dir, shift[dir, coords, -1]]],
-           {dir, nd}];
-       asum = -Map[2*Im[Tr[sum.#]]&, SUGenerators[]]/(2 nd);
-       If[count++ < 10,
-          Print["norms: ",
-             {Norm[Take[delta, gi] - asum],
-              Take[delta, gi].asum/(Norm[Take[delta, gi]]*Norm[asum]),
-              Norm[Take[delta, gi]],
-              Norm[asum]}]]];
     Do[
         gf[[dir, linearSiteIndex[coords]]] =
         gg.getLink[gf][dir, coords];
@@ -452,7 +453,6 @@ minimumNormGaugeStep[opts:OptionsPattern[]] :=
         action = OptionValue[externalAction],
         gaugeField0 = gaugeField},
   If[action =!= "read",
-     Print["calling landauGaugeHessian"];
      {hess, grad} = landauGaugeHessian[
          Apply[Sequence, FilterRules[{opts}, Options[landauGaugeHessian]]]];
      If[debug > 2,
