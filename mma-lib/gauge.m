@@ -49,15 +49,15 @@ landauGaugeHessian[OptionsPattern[]] :=
     Block[{
         uu = getLink[dir, coords],
         sl = coords2gindex[coords, 0],
-        sr = coords2gindex[shift[dir, coords, -1], 0]
+        sr = coords2gindex[shift[dir, coords], 0]
         },
      Do[
          (* Negative for inverse links. *)
-         If[sr < Infinity,
+         If[sl < Infinity,
             grad[[sl+ca1]] +=
             (idl[MatrixExp[I delta gen[[ca1]]/2].uu] -
              idl[MatrixExp[-I delta gen[[ca1]]/2].uu])/delta];
-         If[sl < Infinity,
+         If[sr < Infinity,
             grad[[sr+ca1]] +=
             (idl[uu.MatrixExp[-I delta gen[[ca1]]/2]] -
              idl[uu.MatrixExp[I delta gen[[ca1]]/2]])/delta];
@@ -123,7 +123,7 @@ landauGaugeHessian[OptionsPattern[]] :=
      phases, vectors, center, vv, vvd, vvadj, grad2, grad3,
      adllrr, allrr, adlr, alr,
      sl = coords2gindex[coords, 0],
-     sr = coords2gindex[shift[dir, coords, -1], 0]},
+     sr = coords2gindex[shift[dir, coords], 0]},
     {phases, vectors, center} = getPhases[uu, True];
     vv = Transpose[vectors]; vvd = Conjugate[vectors];
     (* Adjoint represenatation of vv.
@@ -265,9 +265,9 @@ landauGaugeHessian[OptionsPattern[]] :=
     ];
     Do[
         (* Negative for inverse links. *)
-        If[sr < Infinity,
-           grad[[sl+ca1]] += grad3[[ca1]]];
         If[sl < Infinity,
+           grad[[sl+ca1]] += grad3[[ca1]]];
+        If[sr < Infinity,
            grad[[sr+ca1]] += -grad3[[ca1]]];
         Do[
             oneAdd[hess, sr + ca1, sr + ca2,
@@ -339,7 +339,7 @@ landauGaugeHessian[OptionsPattern[]] :=
         vv, vvd, vvadj, grad2, grad3,
         adllrr, allrr, adlr, alr,
         sl = coords2gindex[coords, 0],
-        sr = coords2gindex[shift[dir, coords, -1], 0]
+        sr = coords2gindex[shift[dir, coords], 0]
         },
      {phases, vectors, center} = getPhases[uu, True];
      (* Analyze distribution of phase differences *)
@@ -376,9 +376,9 @@ landauGaugeHessian[OptionsPattern[]] :=
      addTimeNull[tm, alr = LinearSolve[vvadj, adlr.vvadj - adllrr*vvadj]];
      addTimeNull[ta, Do[
          (* Negative for inverse links. *)
-         If[sr < Infinity,
-            grad[[sl+ca1]] += grad3[[ca1]]];
          If[sl < Infinity,
+            grad[[sl+ca1]] += grad3[[ca1]]];
+         If[sr < Infinity,
             grad[[sr+ca1]] += -grad3[[ca1]]];
          Do[
              oneAdd[hess, sr + ca1, sr + ca2,
