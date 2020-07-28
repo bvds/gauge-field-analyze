@@ -73,7 +73,8 @@ typedef struct {
     mat_int blockSize;
     mat_int rows;       // global number of rows
     mat_int columns;    // global number of columns
-    mat_int partitions;
+    mat_int rowParts;   // row partitions
+    mat_int colParts;   // column partitions
     double *value;
 #if USE_MKL_MATRIX
     MKL_INT *i;
@@ -180,7 +181,8 @@ mat_int rankIndex(const unsigned int wrank, const int wsize,
 mat_int maxLocalSize(const int wsize, const mat_int partitions);
 void rankSanityTest(mat_int partitions);
 void sparseMatrixRead(SparseMatrix *mat, char *fileName, char descr,
-                      int tFlag, int blockSize, mat_int partitions,
+                      int tFlag, int blockSize, mat_int rowParts,
+                      mat_int colParts,
                       int chunkSize, int debug, _MPI_Comm mpicom);
 void sparseMatrixStats(SparseMatrix *mat, char *matrixName);
 void sparseMatrixFree(SparseMatrix *mat);

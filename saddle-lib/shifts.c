@@ -199,7 +199,8 @@ int main(int argc, char **argv){
     tmp = cJSON_GetObjectItemCaseSensitive(jopts, "hessFile");
     hessFile = catStrings(dataPath, tmp->valuestring);
     SparseMatrix hess;
-    sparseMatrixRead(&hess, hessFile, 's', 0, blockSize, partitions,
+    sparseMatrixRead(&hess, hessFile, 's', 0, blockSize,
+                     partitions, partitions,
                      chunkSize, printDetails, mpicom);
     assert(hess.rows == n);
     assert(hess.columns == n);
@@ -235,14 +236,16 @@ int main(int argc, char **argv){
     tmp = cJSON_GetObjectItemCaseSensitive(jopts, "gaugeFile");
     gaugeFile = catStrings(dataPath, tmp->valuestring);
     SparseMatrix gauge, gaugeT;
-    sparseMatrixRead(&gauge, gaugeFile, 'g', 0, blockSize, gaugePartitions,
-                     chunkSize, printDetails, mpicom);
-    sparseMatrixRead(&gaugeT, gaugeFile, 'g', 1, blockSize, partitions,
+    sparseMatrixRead(&gauge, gaugeFile, 'g', 0, blockSize,
+                     gaugePartitions, partitions,
                      chunkSize, printDetails, mpicom);
     assert(gauge.rows == gaugeDimension);
     assert(gauge.columns == n);
-    assert(gaugeT.columns == gaugeDimension);
+    sparseMatrixRead(&gaugeT, gaugeFile, 'g', 1, blockSize,
+                     partitions, gaugePartitions,
+                     chunkSize, printDetails, mpicom);
     assert(gaugeT.rows == n);
+    assert(gaugeT.columns == gaugeDimension);
 
     ADD_TIME(tio, t1, t0);
 #if 0 // Debug:  Test matrix-vector multiplication, printing result  

@@ -117,7 +117,7 @@ pshifts: $(POBJS)
 	$(MPICC) -c -DUSE_MPI -o $@ $< $(CFLAGS)
 
 prun:
-	mpirun -np 2 xterm -e gdb -ex run --args ./pshifts ../hess-grad-gauge.json junk.out
+	mpirun -np 2 xterm -e gdb -ex run --args ./pshifts hess-grad-gauge.json junk.out
 
 clean:
 	rm shifts *.o
