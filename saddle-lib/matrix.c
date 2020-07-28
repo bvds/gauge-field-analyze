@@ -28,7 +28,9 @@
   Setting partitions = n/blockSize will distribute blocks 
   evenly among the mpi processes.
  */
-int indexRank(const mat_int i, const int wsize, const mat_int partitions) {
+int indexRank(const mat_int ii, const int wsize,
+              const mat_int n, const mat_int partitions) {
+    mat_int i = ii/(n/partitions);
     if(partitions < (mat_int) wsize)
         return i<partitions?i:partitions;
     else if(i/(partitions/wsize + 1) < partitions%wsize)
@@ -37,24 +39,27 @@ int indexRank(const mat_int i, const int wsize, const mat_int partitions) {
         return (i-partitions%wsize)/(partitions/wsize);
 }
 mat_int localSize(const unsigned int wrank, const int wsize,
-                  const mat_int partitions) {
-    return partitions/wsize + ((wrank<(partitions%wsize))?1:0);
+                  const mat_int n, const mat_int partitions) {
+    mat_int psize = n/partitions;
+    return psize*(partitions/wsize + ((wrank<(partitions%wsize))?1:0));
 }
 // Lowest rank has maximum size
-mat_int maxLocalSize(const int wsize, const mat_int partitions) {
-    return localSize(0, wsize, partitions);
+mat_int maxLocalSize(const int wsize,
+                     const mat_int n, const mat_int partitions) {
+    return localSize(0, wsize, n, partitions);
 }
 mat_int rankIndex(const unsigned int wrank, const int wsize,
-                  const mat_int partitions) {
+                  const mat_int n, const mat_int partitions) {
+    mat_int psize = n/partitions;
     if(wrank < partitions%wsize)
-        return wrank*(partitions/wsize + 1);
+        return psize*wrank*(partitions/wsize + 1);
     else
-        return wrank*(partitions/wsize) + partitions%wsize;
+        return psize*(wrank*(partitions/wsize) + partitions%wsize);
 }
 
 
 // Sanity tests for localSize, rankIndex, and indexRank
-void rankSanityTest(mat_int partitions) {
+void rankSanityTest(const mat_int n, const mat_int partitions) {
     int i, wsize = 1;
     mat_int k;
 #ifdef USE_MPI
@@ -63,14 +68,14 @@ void rankSanityTest(mat_int partitions) {
     k = 0;
     for(i=0; i<wsize; i++) {
         assert((i<(int) partitions?i:(int) partitions) ==
-               indexRank(rankIndex(i, wsize, partitions),
-                         wsize, partitions));
-        assert(localSize(i, wsize, partitions) ==
-               rankIndex(i + 1, wsize, partitions)
-               - rankIndex(i, wsize, partitions));
-        k += localSize(i, wsize, partitions);
+               indexRank(rankIndex(i, wsize, n, partitions),
+                         wsize, n, partitions));
+        assert(localSize(i, wsize, n, partitions) ==
+               rankIndex(i + 1, wsize, n, partitions)
+               - rankIndex(i, wsize, n, partitions));
+        k += localSize(i, wsize, n, partitions);
     }
-    assert(k == partitions);
+    assert(k == n);
 }
 
 
@@ -89,8 +94,8 @@ void testMatrixVector(SparseMatrix *mat, double *in) {
     wrank = 0;
 #endif
 
-    nrow = (mat->rows/mat->rowParts)*localSize(wrank, wsize, mat->rowParts);
-    ncol = (mat->columns/mat->colParts)*localSize(wrank, wsize, mat->colParts);
+    nrow = localSize(wrank, wsize, mat->rows, mat->rowParts);
+    ncol = localSize(wrank, wsize, mat->columns, mat->colParts);
     y = malloc(nrow * sizeof(double));
     matrixVector(mat, ncol, in, nrow, y);
     for(i=0; i<wsize; i++) {
@@ -316,9 +321,8 @@ void sparseMatrixRead(SparseMatrix *mat, char *fileName, char descr,
         In the non-MPI case, this should do nothing.
     */
 #ifdef USE_MPI
-    mat_int rowPart = mat->rows/mat->rowParts;
-    lower = rowPart*rankIndex(wrank, wsize, mat->rowParts);
-    upper = lower + rowPart*localSize(wrank, wsize, mat->rowParts);
+    lower = rankIndex(wrank, wsize, mat->rows, mat->rowParts);
+    upper = lower + localSize(wrank, wsize, mat->rows, mat->rowParts);
     // One could expand this to handle the general case.
     assert(mat->blockSize == 1);
     for(k=0, l=0; k<mat->blocks; k++)
@@ -504,14 +508,14 @@ void sparseMatrixRead(SparseMatrix *mat, char *fileName, char descr,
       In the non-MPI case, this should work trivially.
       In particular, the sort should have no effect.
     */
-    const mat_int colPart = mat->columns/mat->colParts;
 #ifdef USE_TASK
     int needs, *allNeeds = malloc(wsize*sizeof(*allNeeds));
     int p, q, jrank = -1, lastJrank = -1;
     mat_int j0 = 0;
 
     for(p=0; p<2; p++)
-        MALLOC(mat->gather[p], colPart*maxLocalSize(wsize, mat->colParts)*
+        MALLOC(mat->gather[p],
+               maxLocalSize(wsize, mat->columns, mat->colParts)*
                sizeof(*mat->value));
 
     /* For the debug print, processes take turns sorting the matrix.
@@ -549,7 +553,7 @@ void sparseMatrixRead(SparseMatrix *mat, char *fileName, char descr,
     mat->task[0].start = 0;
     for(k=0, mat->taskCount=0, mat->iCount=0; ; k++) {
         if(k < mat->blocks) {
-            jrank = indexRank(mat->j[k]/colPart, wsize, mat->colParts);
+            jrank = indexRank(mat->j[k], wsize, mat->columns, mat->colParts);
             /* Verify (jrank-wrank)%wsize is non-decreasing.
                This is not, strictly speaking, necessary, but it
                does verify that sortMatrixLocal() is working as
@@ -564,7 +568,7 @@ void sparseMatrixRead(SparseMatrix *mat, char *fileName, char descr,
                 exit(55);
             }
             if(k==0 || jrank != lastJrank)
-                j0 = colPart*rankIndex(jrank, wsize, mat->colParts);
+                j0 =  rankIndex(jrank, wsize, mat->columns, mat->colParts);
             mat->j[k] -= j0;  // shift j-index
         }
         if(k == mat->blocks || (k>0 && jrank != lastJrank)) {
@@ -596,8 +600,8 @@ void sparseMatrixRead(SparseMatrix *mat, char *fileName, char descr,
         // Start receive for next round of work
         if(p+1 < mat->taskCount && mat->task[p+1].doRank != wrank) {
             mat->task[p].receiveFrom = mat->task[p+1].doRank;
-            mat->task[p].receiveSize =
-                colPart*localSize(mat->task[p+1].doRank, wsize, mat->colParts);
+            mat->task[p].receiveSize = localSize(mat->task[p+1].doRank, wsize,
+                                                 mat->columns, mat->colParts);
         } else {
             mat->task[p].receiveFrom = -1;
             mat->task[p].receiveSize = 0;
@@ -659,7 +663,7 @@ void sparseMatrixRead(SparseMatrix *mat, char *fileName, char descr,
         printTasks(mat, wsize, wrank);
 #else // USE_TASK
     MALLOC(mat->gather, mat->columns*sizeof(*mat->gather));
-    mat->lowerColumn = colPart*rankIndex(wrank, wsize, mat->colParts);
+    mat->lowerColumn = rankIndex(wrank, wsize, mat->columns, mat->colParts);
 
     /* Create row pointers */
     mat->ip = malloc((mat->blocks+1)*sizeof(*mat->ip));

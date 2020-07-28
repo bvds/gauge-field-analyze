@@ -66,10 +66,10 @@ void sortMatrixLocal(SparseMatrix *mat, int wrank, int wsize, int debug) {
     int jrank;
     const mat_index cols = mat->columns;
     const mat_int n = mat->blocks;
-    const mat_index rowPart = mat->rows/mat->rowParts,
-        colPart = mat->columns/mat->colParts;
-    const mat_index localRows = rowPart*localSize(wrank, wsize, mat->rowParts);
-    const mat_index localj0 = colPart*rankIndex(wrank, wsize, mat->colParts);
+    const mat_index localRows = localSize(wrank, wsize,
+                                          mat->rows, mat->rowParts);
+    const mat_index localj0 = rankIndex(wrank, wsize,
+                                        mat->columns, mat->colParts);
 
     elementRank = malloc(n * sizeof(*elementRank));
 
@@ -77,12 +77,12 @@ void sortMatrixLocal(SparseMatrix *mat, int wrank, int wsize, int debug) {
         i = (mat->i)[k];
         j = (mat->j)[k];
         assert(i < localRows);
-        jrank = indexRank(j/colPart, wsize, mat->colParts);
-        j0 = colPart*rankIndex(jrank, wsize, mat->colParts);
+        jrank = indexRank(j, wsize, mat->columns, mat->colParts);
+        j0 = rankIndex(jrank, wsize, mat->columns, mat->colParts);
         /* C standard for mod of negative numbers is screwy.
            add cols to avoid issue. */
         elementRank[k] = localRows*((cols + j0 - localj0)%cols) +
-            i*colPart*localSize(jrank, wsize, mat->colParts) +
+            i*localSize(jrank, wsize, mat->columns, mat->colParts) +
             j - j0;
         assert(elementRank[k] < localRows*cols);
     }

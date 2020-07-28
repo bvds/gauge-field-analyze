@@ -142,11 +142,11 @@ int main(int argc, char **argv){
     assert((n/partitions)%blockSize == 0);
     assert(gaugeDimension%gaugePartitions == 0);
     assert((gaugeDimension/gaugePartitions)%blockSize == 0);
-    rankSanityTest(partitions);
-    rankSanityTest(gaugePartitions);
-    local_n = n/partitions*localSize(wrank, wsize, partitions);
-    local_gaugeDimension = gaugeDimension/gaugePartitions*
-        localSize(wrank, wsize, gaugePartitions);
+    rankSanityTest(n, partitions);
+    rankSanityTest(gaugeDimension, gaugePartitions);
+    local_n = localSize(wrank, wsize, n, partitions);
+    local_gaugeDimension = localSize(wrank, wsize,
+                                     gaugeDimension, gaugePartitions);
     assert(wsize>1 || local_n == n);
     assert(wsize>1 || local_gaugeDimension == gaugeDimension);
     if(wrank == 0 && printDetails > 2)
@@ -216,7 +216,7 @@ int main(int argc, char **argv){
         printf("Opening file %s for a vector of length %i\n", gradFile, n);
     fp = fopen(gradFile, "r");
     for(k=0; k<n; k++){
-        if(indexRank(k/(n/partitions), wsize, partitions) == wrank)
+        if(indexRank(k, wsize, n, partitions) == wrank)
             nread = fscanf(fp, "%le", gradp++);
         else
             nread = fscanf(fp, "%le", &dummy);
