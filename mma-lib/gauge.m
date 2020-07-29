@@ -306,7 +306,6 @@ landauGaugeHessian[OptionsPattern[]] :=
      grad = Array[0.0&, ngindex[]],
      gen = SUGenerators[],
      full = OptionValue[fullMatrix],
-     includeLeftRight = OptionValue["includeLeftRight"],
      diagLookup, offDiagLookup,
      addTimeNull = If[
          OptionValue["timing"],
@@ -387,9 +386,9 @@ landauGaugeHessian[OptionsPattern[]] :=
              oneAdd[hess, sl + ca1, sl + ca2,
                     allrr[[ca1, ca2]],
                     full];
-             If[includeLeftRight, symAdd[hess, sl + ca1, sr + ca2,
+             symAdd[hess, sl + ca1, sr + ca2,
                     alr[[ca1, ca2]],
-                    full]],
+                    full],
 	     {ca2, nc^2 - 1}],
          {ca1, nc^2 - 1}]]],
       {dir, nd},
