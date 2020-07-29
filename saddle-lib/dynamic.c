@@ -108,7 +108,10 @@ void dynamicInit(const mat_int nrow, const mat_int ncol,
                         (integer) gauge->rows);
 
     gaugeData.b = malloc(nrow*sizeof(*gaugeData.b));
-    MALLOC(gaugeData.x, nrow*sizeof(*gaugeData.x));
+    /* In minres-qlp/minresqlpModule.f90, x(1) is accessed
+       even if nrow = 0 */
+    MALLOC(gaugeData.x, (nrow+1)*sizeof(*gaugeData.x));
+    gaugeData.x[0] = -1.0;
     MALLOC(gaugeData.z, ncol*sizeof(*gaugeData.z));
 
 
@@ -120,8 +123,9 @@ void dynamicInit(const mat_int nrow, const mat_int ncol,
                                             "lowestGaugeProductEigenvalue");
     if(cJSON_IsNumber(tmp)) {
         gaugeData.minEigenvalue = tmp->valuedouble;
-        printf("Setting lowest eigenvalue of gaugeProduct to %le\n",
-               tmp->valuedouble);
+        if(gaugeData.printDetails > 0 && wrank == 0)
+            printf("Setting lowest eigenvalue of gaugeProduct to %le\n",
+                   tmp->valuedouble);
         return;
     }
 

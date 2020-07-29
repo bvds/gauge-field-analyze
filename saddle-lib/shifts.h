@@ -53,7 +53,8 @@ typedef unsigned int mat_int;
         mat_int start;
         mat_int end;
         int doRank;
-        int sendTo;
+        int *sendTo;
+        int sendToCount;
         int receiveFrom;
         mat_int receiveSize;
     } TaskList;
@@ -94,7 +95,8 @@ typedef struct {
     double localTime;
     int count;
 #ifdef USE_TASK
-    TaskList* task;
+    TaskList *task;
+    int *sendToList; // "private" pointer used to free the allocated memory.
     int taskCount;
     double *gather[2];
 #else

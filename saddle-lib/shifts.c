@@ -5,10 +5,10 @@
     Example usage:
     ./shifts hess-grad-gauge.json shifts.dat out.json
     Valgrind debugging example:
-    valgrind --tool=memcheck --leak-check=yes --show-reachable=yes --num-callers=20 --track-fds=yes ./shifts ../hess-grad-gauge.json junk.dat junk.json
+    valgrind --tool=memcheck --leak-check=yes --show-reachable=yes --num-callers=20 --track-fds=yes ./shifts hess-grad-gauge.json junk.out junk.json
 
     Invoke gdb in parallel version:
-    mpirun -np 2 xterm -e gdb -ex run --args ./pshifts ../hess-grad-gauge.json junk.out junk.json
+    mpirun -np 2 xterm -e gdb -ex run --args ./pshifts hess-grad-gauge.json junk.out junk.json
 
 */
 
@@ -297,7 +297,7 @@ int main(int argc, char **argv){
     if(wrank == 0) {
         char *joutString = cJSON_Print(jout);
         if(printDetails>2)
-            printf("Opening output file %s\n", argv[2]);
+            printf("Opening output file %s\n", argv[3]);
         fp = fopen(argv[3], "w");
         fprintf(fp, "%s\n", joutString);
         fclose(fp);

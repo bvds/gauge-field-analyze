@@ -141,7 +141,7 @@ void printMatrixBlocks(SparseMatrix *mat, int wrank, int wsize,
 
 #ifdef USE_TASK
 void printTasks(SparseMatrix *mat, int wsize, int wrank) {
-    int p, q;
+    int p, q, i;
     TaskList *task;
     for(p = 0; p<wsize; p++) {
 #ifdef USE_MPI
@@ -153,9 +153,12 @@ void printTasks(SparseMatrix *mat, int wsize, int wrank) {
                        "sendTo, receiveFrom, receiveSize\n");
             for(q=0; q<mat->taskCount; q++) {
                 task = mat->task + q;
-                printf("%2i:  %2i %2i %3i %3i %3i %3i %3i\n", wrank, q,
-                       task->doRank, task->start, task->end,
-                       task->sendTo, task->receiveFrom, task->receiveSize);
+                printf("%2i:  %2i %2i %3i %3i [", wrank, q,
+                       task->doRank, task->start, task->end);
+                for(i=0; i<task->sendToCount; i++) {
+                    printf("%s%i", i>0?",":"", task->sendTo[i]);
+                }
+                printf( "] %3i %3i\n",task->receiveFrom, task->receiveSize);
             }
         }
     }
@@ -548,9 +551,12 @@ void sparseMatrixRead(SparseMatrix *mat, char *fileName, char descr,
        can happen, for instance, if the first blocks are zero.
     */
     mat_int *iTemp = malloc((mat->blocks + wsize)*sizeof(*iTemp));
+    int *sendTop;
     mat->ip = malloc((mat->blocks+1)*sizeof(*mat->ip));
     mat->task = malloc(wsize*sizeof(TaskList));
+    mat->sendToList = sendTop = malloc(wsize*sizeof(*mat->sendToList));
     mat->task[0].start = 0;
+    lastJrank = wrank;
     for(k=0, mat->taskCount=0, mat->iCount=0; ; k++) {
         if(k < mat->blocks) {
             jrank = indexRank(mat->j[k], wsize, mat->columns, mat->colParts);
@@ -571,11 +577,12 @@ void sparseMatrixRead(SparseMatrix *mat, char *fileName, char descr,
                 j0 =  rankIndex(jrank, wsize, mat->columns, mat->colParts);
             mat->j[k] -= j0;  // shift j-index
         }
-        if(k == mat->blocks || (k>0 && jrank != lastJrank)) {
+        /* Always start with a local task, even if it is empty. */
+        if(k == mat->blocks || jrank != lastJrank) {
             // End of process block
             mat->task[mat->taskCount].doRank = lastJrank;
             mat->task[mat->taskCount].end = mat->iCount;
-            mat->task[mat->taskCount].sendTo = -1; // Don't send is default.
+            mat->task[mat->taskCount].sendToCount = 0;
             mat->taskCount++;
             if(k == mat->blocks)
                 break;
@@ -610,7 +617,7 @@ void sparseMatrixRead(SparseMatrix *mat, char *fileName, char descr,
             needs = mat->task[p].doRank;
         else
             needs = -1;
-        if(1)
+        if(0 == 1)
             printf("process %i:  matrix %s%s, p=%i needs=%i\n", wrank,
                    fileName, tFlag?"T":"", p, needs);
 #ifdef USE_MPI
@@ -620,43 +627,36 @@ void sparseMatrixRead(SparseMatrix *mat, char *fileName, char descr,
 #endif
         for(q = 0; q<wsize; q++) {
             if(allNeeds[q] == wrank && q != wrank) {
-                /* Verify that each row starts with the
-                   process-local block and the process-local
-                   block is non-empty.
-
-                   Error here:
-                   The process-local block may be empty. */
+                /* Verify that each process starts with a
+                   process-local task, which may be empty. */
                 if(p == 0) {
                     printf("%i:  matrix %s%s, allNeeds[%i]=%i\n",
                             wrank, fileName, tFlag?"T":"", q, allNeeds[q]);
-                    continue;
-                    // exit(77);
+                    exit(77);
                 }
-                /* Demand that the work is fairly evenly distributed 
-                   across processes.  See comment below. */
-                assert(p-1 < mat->taskCount);
-                /* Max of one send per task. True if the process-block
-                 structure is fairly even across processes. If needed,
-                 one could extend this to the general case.
-
-                But, in that case, the work on each process must be 
-                fairly asymmetric and our overall strategy may not
-                be efficient anyway. */
-                if(mat->task[p-1].sendTo != -1) {
-                    fprintf(stderr, "%i: matrix %s%s multiple sends.\n",
-                            wrank, fileName, tFlag?"T":"");
-                    fprintf(stderr, "%i: task %i sendTo=%i and %i.  "
-                            "Maybe too many processes?\n",
-                            wrank, p-1, mat->task[p-1].sendTo, q);
-                    exit(79);
+                /* 
+                   Add task, if needed.
+                */
+                while(p-1 >= mat->taskCount) {
+                    mat->task[mat->taskCount].sendToCount = 0;
+                    mat->task[mat->taskCount].receiveFrom = -1;
+                    mat->task[mat->taskCount].doRank = -1;
+                    mat->taskCount++;
                 }
-                mat->task[p-1].sendTo = q;
+                /* Initialize sendTo */
+                if(mat->task[p-1].sendToCount == 0)
+                    mat->task[p-1].sendTo = sendTop;
+                /*
+                  Update sendTo
+                */
+                mat->task[p-1].sendTo[mat->task[p-1].sendToCount] = q;
+                mat->task[p-1].sendToCount++;
+                sendTop++;
             }
         }
     }
     free(allNeeds);
 
-        printTasks(mat, wsize, wrank);
     if(debug>3)
         printMatrixBlocks(mat, wrank, wsize, fileName, tFlag);
     if(debug>2)
@@ -772,6 +772,7 @@ void sparseMatrixFree(SparseMatrix *mat) {
     for(i=0; i<2; i++)
         FREE(mat->gather[i]);
     free(mat->task);
+    free(mat->sendToList);
 #else
     FREE(mat->gather);
 #endif
@@ -799,16 +800,20 @@ void matrixVector(SparseMatrix *a,
     mat_int row, j, k, start, end;
     double *outp, *ap;
 #ifdef USE_MPI
-    int wrank;
+    int wrank, wsize;
     MPI_Comm mpicom = a->mpicom;
+    MPI_Comm_size(mpicom, &wsize);
 #ifdef USE_TASK
+    int send;
     const double *gather;
-    MPI_Request sent = MPI_REQUEST_NULL, received = MPI_REQUEST_NULL;
+    MPI_Request *sent, received = MPI_REQUEST_NULL;
+    sent = malloc(wsize*sizeof(MPI_Request));
+    for(send=0; send<wsize; send++)
+        sent[send] = MPI_REQUEST_NULL;
 #else // USE_TASK
     mat_int offset = 0;
-    int rank, wsize;
+    int rank;
     double *gather;
-    MPI_Comm_size(mpicom, &wsize);
 #endif // USE_TASK
 #else // USE_MPI
     const double *gather;
@@ -843,9 +848,9 @@ void matrixVector(SparseMatrix *a,
 
 #ifdef USE_MPI
 #ifdef USE_TASK
-        if(task->sendTo != -1) {
+        for(send = 0; send<task->sendToCount; send++) {
             MPI_Isend(in, lin, MPI_DOUBLE,
-               task->sendTo, p+1, mpicom, &sent);
+               task->sendTo[send], p+1, mpicom, sent+send);
         }
         if(task->receiveFrom != -1) {
             // Alternate between the two gather arrays.
@@ -926,8 +931,8 @@ void matrixVector(SparseMatrix *a,
         /* Verify that any current messages are complete
            before starting the next task or exiting.
 	   Subsequent code may modify the 'in' array. */
-        if(task->sendTo != -1)
-            MPI_Wait(&sent, MPI_STATUS_IGNORE);
+        for(send=0; send<task->sendToCount; send++)
+            MPI_Wait(sent+send, MPI_STATUS_IGNORE);
         if(task->receiveFrom != -1)
             MPI_Wait(&received, MPI_STATUS_IGNORE);
 #endif // USE_TASK
@@ -935,6 +940,11 @@ void matrixVector(SparseMatrix *a,
     } // loop over tasks
 
     ADD_TIME(a->mpiTime, t1, t0);
+#ifdef USE_MPI
+#ifdef USE_TASK
+    free(sent);
+#endif
+#endif
 #endif  // MKL or not
     a->count += 1;
 }
