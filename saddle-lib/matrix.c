@@ -641,6 +641,8 @@ void sparseMatrixRead(SparseMatrix *mat, char *fileName, char descr,
                     mat->task[mat->taskCount].sendToCount = 0;
                     mat->task[mat->taskCount].receiveFrom = -1;
                     mat->task[mat->taskCount].doRank = -1;
+                    mat->task[mat->taskCount].start = 0;
+                    mat->task[mat->taskCount].end = 0;
                     mat->taskCount++;
                 }
                 /* Initialize sendTo */
