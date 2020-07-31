@@ -441,8 +441,11 @@ minimumNormGaugeStep::usage =
   "Find a gauge transform that minimizes the lattice norm.";
 (* This is a modification of latticeSaddlePointStep. *)
 Options[minimumNormGaugeStep] = Join[
-    Options[findDelta], Options[landauGaugeHessian],
-    {stepFile -> None, returnShifts -> False}];
+    FilterRules[Options[findDelta],
+                {Except["removeConcave"]}],
+    Options[landauGaugeHessian],
+    {"removeConcave" -> True, stepFile -> None,
+     returnShifts -> False}];
 minimumNormGaugeStep[opts:OptionsPattern[]] :=
  Block[{hess, grad, gauge, delta,
         output = "", error = "",
@@ -474,7 +477,9 @@ minimumNormGaugeStep[opts:OptionsPattern[]] :=
         Print["gradient, first link:  ", Take[grad, nc^2 - 1]]];
   delta = findDelta[
       {hess, grad, gauge},
-      Apply[Sequence, FilterRules[{opts}, Options[findDelta]]]];
+      Apply[Sequence, FilterRules[
+          Join[{opts}, Options[minimumNormGaugeStep]],
+          Options[findDelta]]]];
   (* Debug prints *)
   Which[
       False, Print["delta difference:  ", Chop[delta - delta0]],
@@ -499,3 +504,58 @@ minimumNormGaugeStep[opts:OptionsPattern[]] :=
   If[OptionValue[returnShifts],
      {gaugeField0, stepShifts, stepOut},
      gaugeField0]];
+
+
+nStrategies = 7;
+Options[applyGaugeTransforms] = Join[
+    {"maxAbelianGauge" -> False,
+     "backwards" -> False, "loopFunction" -> (Null&)},
+    FilterRules[Options[setLandauGauge],
+                {Except["center"], Except["damping"]}],
+    FilterRules[Options[setAxialGauge],
+                {Except["center"]}],
+    Options[minimumNormGaugeStep]];
+applyGaugeTransforms[s_, opts:OptionsPattern[]] :=
+ (* New direction each time setAxialGauge[] is called. *)
+ Block[{lastDir = nd, dir,
+        aopts = Apply[Sequence, FilterRules[{opts},
+                      Options[setAxialGauge]]],
+        lopts = Apply[Sequence, FilterRules[{opts},
+                      Options[setLandauGauge]]],
+        gopts = Apply[Sequence, FilterRules[{opts},
+                      Options[minimumNormGaugeStep]]]},
+   dir = Function[lastDir = Mod[lastDir, nd] + 1];
+   Scan[(Which[
+       (* go backwards *)
+       # == 1, setAxialGauge[
+           If[OptionValue["backwards"], nd + 1 - dir[], dir[]],
+           "center" -> False, aopts],
+       # == 2, setAxialGauge[
+           If[OptionValue["backwards"], nd + 1 - dir[], dir[]],
+           "center" -> True, aopts],
+       # == 3,
+       setLandauGauge["center" -> False, "damping" -> 1, lopts],
+       # == 4,
+       setLandauGauge["center" -> True, "damping" -> 1, lopts],
+       # == 5,
+       setLandauGauge["center" -> False, "damping" -> 1.5, lopts],
+       # == 6,
+       setLandauGauge["center" -> True, "damping" -> 1.5, lopts],
+       # == 7,
+       (* At this point, we already know the minimum lies near
+         the identity of the center.
+         We know that "damping" = dampingFactor = 1 is optimal. *)
+       minimumNormGaugeStep[gopts],
+       (* In practice, these don't work well *)
+       (* # == 7,
+        setMinimumAxialGauge[dir[], "center" -> False, "damping" -> 1],
+        # == 8,
+        setMinimumAxialGauge[dir[], "center" -> True, "damping" -> 1],
+        # == 9,
+        setMinimumAxialGauge[dir[], "center" -> False, "damping" -> 1.5],
+        # == 10,
+        setMinimumAxialGauge[dir[], "center" -> True, "damping" -> 1.5]*)
+       True,
+       Abort[]
+         ];OptionValue["loopFunction"][])&, s];
+   latticeNorm["center" -> True]];

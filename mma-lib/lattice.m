@@ -1219,52 +1219,6 @@ setLaundauAxialGauge[dir1_, OptionsPattern[]] :=
      {i, latticeVolume[]}, Method->"CoarsestGrained"], {4}], {cb, 0, 1}]];
 
 
-nStrategies = 6;
-Options[applyGaugeTransforms] = Join[
-    {"maxAbelianGauge" -> False,
-     "backwards" -> False, "loopFunction" -> (Null&)},
-    FilterRules[Options[setLandauGauge],
-                {Except["center"], Except["damping"]}],
-    FilterRules[Options[setAxialGauge],
-                {Except["center"]}]];
-applyGaugeTransforms[s_, opts:OptionsPattern[]] :=
- (* New direction each time setAxialGauge[] is called. *)
- Block[{lastDir = nd, dir,
-        aopts = Apply[Sequence, FilterRules[{opts},
-                      Options[setAxialGauge]]],
-        lopts = Apply[Sequence, FilterRules[{opts},
-                      Options[setLandauGauge]]]},
-   dir = Function[lastDir = Mod[lastDir, nd] + 1];
-   Scan[(Which[
-       (* go backwards *)
-       # == 1, setAxialGauge[
-           If[OptionValue["backwards"], nd + 1 - dir[], dir[]],
-           "center" -> False, aopts],
-       # == 2, setAxialGauge[
-           If[OptionValue["backwards"], nd + 1 - dir[], dir[]],
-           "center" -> True, aopts],
-       # == 3,
-       setLandauGauge["center" -> False, "damping" -> 1, lopts],
-       # == 4,
-       setLandauGauge["center" -> True, "damping" -> 1, lopts],
-       # == 5,
-       setLandauGauge["center" -> False, "damping" -> 1.5, lopts],
-       # == 6,
-       setLandauGauge["center" -> True, "damping" -> 1.5, lopts],
-       (* In practice, these don't work well *)
-       (* # == 7,
-        setMinimumAxialGauge[dir[], "center" -> False, "damping" -> 1],
-        # == 8,
-        setMinimumAxialGauge[dir[], "center" -> True, "damping" -> 1],
-        # == 9,
-        setMinimumAxialGauge[dir[], "center" -> False, "damping" -> 1.5],
-        # == 10,
-        setMinimumAxialGauge[dir[], "center" -> True, "damping" -> 1.5]*)
-       True,
-       Abort[]
-         ];OptionValue["loopFunction"][])&, s];
-   latticeNorm["center" -> True]];
-
 sumStaples::usage = "Returns a general matrix in color space.";
 sumStaples[dir1_, coords_] := Block[{total = zeroMatrix[]},
  Do[If[dir2 != dir1,
