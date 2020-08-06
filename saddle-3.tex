@@ -33,9 +33,11 @@
 \newcommand{\config}{\mathcal{U}}
 \newcommand{\orelax}{\xi}
 \newcommand{\heigen}{h}
+\newcommand\wilson[2]{\Omega_{#1 \times #2}}
 \DeclareMathOperator{\SU}{SU}
 \DeclareMathOperator{\Tr}{Tr}
 \newcommand\fnorm[1]{\left\lVert #1 \right\rVert_\mathrm{F}}
+\newcommand\cov[2]{\mathrm{cov}\!\left(#1, #2\right)}
 
 \begin{document}
 %\draft
@@ -47,8 +49,12 @@
 \noaffiliation
 
 \begin{abstract}
-  We find saddle points of $\SU(N)$ action in three space-time dimensions
-  and see characteristics consistent with Witten's Master Field.
+  We find saddle points of $\SU(N)$ Yang Mills action in three
+  space-time dimensions and examine their properties using
+  various gauge invariant operators.  In addition, we use Landau
+  gauge to study the gauge fields themselves.  The ultimate goal of this work
+  to to determine the functional form of the vacuum gauge field in
+  the large $N$ limit, Witten's Master Field.
 \end{abstract}
 
 \pacs{Valid PACS appear here.
@@ -87,20 +93,26 @@ classical configuration of the gauge field, the
 Although this idea was compelling, there seemed to be no
 way to figure out exactly what this Master Field could be.
 
-To motivate our approach to studying the QCD vacuum, note the following:
+However, in the intervening 40 years, we have learned a number
+of things that make the quest for the master field perhaps
+attainable.  We note the following:
 
 \begin{enumerate}
 
 \item Quarks are not important.  In the language of Lattice QCD,
  one says that the quenched approximation (no dynamical
- quarks) is a good approximation to the full theory.
+ quarks) is a good approximation to the full theory.  Numerous
+ lattice calculations have given us a good understanding
+ of the size and nature of this approximation.
 
 \item The $N\to\infty$ limit of QCD is a good approximation to the
  physical case $N=3$.  This has been demonstrated in numerous
  perturbative and non-perturbative calculations~\cite{lucini_sun_2013}.
  In particular, Teper and collaborators have shown this to be the case for
  the glueball spectrum in both 2+1~\cite{teper_$mathrmsun$_1998,lucini_$mathrmsun$_2002,athenodorou_sun_2017}
- and 3+1 dimensions~\cite{teper_large-n_2005}.
+ and 3+1 dimensions~\cite{teper_large-n_2005}.  Indeed, properties
+ of the $N\to\infty$ master field should be seen, in an approximate sense,
+ in $\SU(2)$ and $\SU(3)$ calculations.
 
 \item The behavior of $\SU(N)$ gauge theory in 3 space-time dimensions
   is remarkably similar to the 4 dimensional theory~\cite{teper_$mathrmsun$_1998,lucini_$mathrmsun$_2002,teper_large-n_2005}.
@@ -109,36 +121,41 @@ To motivate our approach to studying the QCD vacuum, note the following:
   fluctuations while in 3 dimensions the coupling is dimensionful ---
   once a scale is generated, the theories behave in a very similar manner.
 
-\item In Witten's Master Field picture, the master field is
-  a semi-classical field.  That is, it is a saddle point
-  of the QCD action.
-
 \end{enumerate}
 
 These facts suggest a research program for studying the QCD vacuum state:
-one should look at saddle-points of the gauge field action
-in 3 spacetime dimensions, looking for a description that emerges in
-the $N\to \infty$ limit.  Hopefully, this description
+one should look at approximate saddle-points of the gauge field action
+in 3 spacetime dimensions for various values of $N$, looking for a
+description that emerges in the $N\to \infty$ limit.
+Hopefully, this description
 can then be generalized to the 4 dimensional theory.
 
 If we take the Master Field picture seriously, then a typical gauge
-field configuration in a Monte Carlo simulation should contain
-this master field and---to some approximation---be able to
+field configuration in a finite $N$ Monte Carlo simulation should
+contain some approximation of this master field and should be able to
 produce the full spectrum of long-range observables. This
 approximation should become increasingly precise as $N\to\infty$.
 
-I pursue the first step of this program in the following.
+In the present work, we will pursue the first steps of this program.
 We will start with conventional 2+1 dimension lattice gauge
 theory field configurations for various values of $N$ and
 calculate the nearest associated saddle-point configurations.
-These saddle-point field configurations should provide
-a good starting-point for understanding the 2+1 dimension
-vacuum in the $N\to\infty$ limit.
+Using these configurations we can determing  measure various
+physical observables and see how well they approximate the
+full theory.
 
-\section{The Wilson action}
+We will pay special attention to Landau gauge transformed
+field configurations.  Landau gauge gives us the best hope
+of connecting the Wilson link variables to the continuum
+Yang Mills fields.
+
+\section{Definitions}
 
 The purpose of the section is to set some notation.
-We introduce a $D$-dimensional spacetime lattice with lattice
+
+\subsection{The Wilson action}
+
+We introduce a periodic $D$-dimensional spacetime lattice with lattice
 spacing $a$ and sites labeled by $x$, with a total of $V_L$ sites.
 The lattice has $L_\mu$ sites in direction $\mu$;
 in the case of a cubic lattice, we will drop the $\mu$ subscript
@@ -178,13 +195,13 @@ $\left(\mbox{mass}\right)^{1/2}$, consistent with $\beta$ being dimensionless.
 The Wilson action is invariant under $\SU(N)$ gauge transforms:
 %
 \be
-    U_\mu(x) \to U_G(x) U_\mu(x) U_G^\da(x+a \hat{\mu})
-         \; , \quad U_G(x) \in \SU(N) \; .
+    U_\mu(x) \to U_\mu^\prime(x) = U_G(x) U_\mu(x) U_G^\da(x+a \hat{\mu})
+         \; , \quad U_G(x) \in \SU(N) \; . \label{gauget}
 \eq
 %
 The lattice has a total of $n_G = V_L\left(N^2-1\right)$ gauge symmetries.
 
-\section{Norms}
+\subsection{Norms}
 
 It is useful to define a number of norms.  We define the norm
 of a link field using the Frobenius norm of the logarithm,
@@ -196,8 +213,8 @@ of a link field using the Frobenius norm of the logarithm,
    \label{sunorm}
 \eq
 and the matrix logarithm is defined in Appendix~\ref{roots}.
-Note that the norm reaches its maximum value for elements
-of the center $\zentrum$ of $\SU(N)$: 
+Note that the norm reaches its maximum value for non-identity
+elements of the center $\zentrum$ of $\SU(N)$:
 \be
     \fnorm{z} = 2\pi \sqrt{\frac{N-1}{N}} \; ,
      \quad z\in \zentrum,\; z\ne\mathbb{I} \; .
@@ -228,17 +245,23 @@ That is, $\left\lVert U_\mu(x) \right\rVert_\zentrum$ is the distance
 of $U_\mu(x)$ from the nearest element of $\zentrum$.
 Analogous to Eqn.~(\ref{latnorm2}), we can
 use $\left\lVert U_\mu(x) \right\rVert_\zentrum$ to define
-the associated lattice norm $\left\lVert \config \right\rVert_\zentrum$.
+the associated lattice norm
+\be
+    \left\lVert \config \right\rVert_\zentrum =
+\sqrt{\frac{1}{V_L D} \sum_{\mu,x}
+  \left\lVert U_\mu(x) \right\rVert_\zentrum^2}
+   \; . \label{latnormz}
+\eq
 
 \section{Observables}
 
-A number of observables and gauge choices will be used to
-monitor the behavior of the gauge fields when moving from
+We will use Polyakov loops and Wilson loops to monitor the
+behavior of the gauge fields when moving from
 the original Euclidean lattice configuration toward
-the saddle-point.  The goal here is not to make precise
+a saddle-point.  The goal here is not to make precise
 measurements of the string tension and glueball spectra
-but to probe that gauge field itself in a more qualitative
-fashion for just a single lattice configuration.
+but to probe the qualitative behavior for just a single
+lattice configuration.
 
 As we move toward the saddle-point of a lattice configuration,
 we expect that the perturbative (quantum) fluctuations of
@@ -248,9 +271,6 @@ operators~\cite{teper_$mathrmsun$_1998,lucini_glueballs_2004}
 might behave during this process.  We will not tackle that
 issue in the present investigation, but will stick to the bare
 (unimproved) operators.
-In particular, we will use Polyakov loop correlators to measure
-effective potential at various length scales and will use Wilson loops
-and Wilson loop correlators to further probe the system.
 
 \subsection{Coulomb corrections}
 
@@ -261,7 +281,7 @@ dominated by a $1/r$ Coulomb force potential and a
 long-distance regime having a linear confining
 potential~\cite{bali_static_2000,brambilla_effective-field_2005}.
 In $D=3$, the Coulomb potential goes as $\log(r)$ and there is no 
-clear separation; some care must be taken to distinguish it from
+clear separation and some care must be taken to distinguish it from
 the linear confining potential.
 
 If we consider a pair of charges separated by some
@@ -270,7 +290,7 @@ equal to the energy stored in the electric
 field produced by those charges (electrostatics in $D-1$
 dimensions).  Equivalently, we can consider currents
 in $D$ Euclidean spacetime dimensions.  In that case,
-the classical action associated with the abelian field is equal to the
+the classical action is equal to the
 energy of the magnetic field produced by those currents
 (magnetostatics in $D$ dimensions).  Using the textbook
 formula~\cite{jackson_classical_1975}
@@ -345,7 +365,7 @@ contribution to the Wilson loop using
 where $c_p$ and $c_q$ in Eqns.~(\ref{cpf}) and (\ref{cwf})
 should be equivalent.
 
-\subsection{Loop Operators}
+\subsection{Polyakov Loops}
 
 Let us define a Polyakov loop that winds once around the lattice
 in the direction $\mu$ and goes through site $x$:
@@ -354,7 +374,7 @@ in the direction $\mu$ and goes through site $x$:
 \eq
 and define the correlator:
 \be
-\Phi_\mu(r) = \frac{1}{C_\phi} \sum_{x, x_\mu=1} \sum_{y, y_\mu=1}
+\Phi_\mu(r) = \frac{1}{C_\Phi} \sum_{x, x_\mu=1} \sum_{y, y_\mu=1}
            \delta_{r,|x-y|}
            \langle 0 | \frac{1}{N} \Tr\left(\phi_\mu^\dagger(y)\right)
            \frac{1}{N} \Tr\left(\phi_\mu(x)\right) |0\rangle
@@ -363,72 +383,110 @@ and define the correlator:
 %
 where the normalization constant $C_\Phi$ is chosen such that
 $\Phi_\mu(r)=1$ for the bare vacuum.  To obtain the string tension,
-we fit the correlator $\Phi_\mu(r)$ to an exponential plus a constant term,
+we fit the correlator $\Phi_\mu(r)$ to an effective potential $F_\mu(r)$.
+This effective potential contains an area law term (linear confinement)
+plus coulomb corrections from Eqn.~(\ref{cpf}) plus power law corrections:
 %  M. Teper, “Large N and confining flux tubes as strings -
 %  a view from the lattice,”
 %  Acta Phys. Polon. B 40, 3249 (2009). [arXiv:0912.3339 [hep-lat]].
 %
-including the bosonic string
-correction~\cite{teper_large_2009,aharony_effective_2013} in the $\hat{\mu}$
-direction as well as the Coulomb terms from Eqn.~(\ref{cpf}):
-\be
-         c_0 \sum_{\mbox{images}} \exp\left(
-         -\sigma a^2 r L_\mu\sqrt{1-\frac{\pi}{3 a^2 \sigma L_\mu^2}}
-         - c_q 2 L_\mu \log(r) - c_p 2 L_\mu\right)
-         + c_1 \; .  \label{stringmodel}
-\eq    
+\begin{eqnarray}
+         F_\mu(r) &=& c_0 \exp\left(
+         -\sigma a^2 r L_\mu
+         - c_q 2 L_\mu \log(r) - c_p 2 L_\mu
+         - c_1 \frac{L_\mu}{r} - c_2 \frac{r}{L_\mu} - \cdots \right)\nonumber\\
+         & & + \left[\,\mbox{$2 (D-1)$ transverse images}\,\right]
+         \; .  \label{stringmodel}
+\end{eqnarray}
+%
+In the case of
+a cube-shaped lattice $L_\mu = L$, the $c_p$ term can be absorbed into
+the normalization constant $c_0$ and $c_2$ is indistinguishable from
+the string tension.  If excited states are ignored, the $c_2$ term corresponds
+to the Luscher correction~\cite{teper_large_2009}.
 Since the lattices we use are relatively small, we include contributions
 from fields wrapping around the lattice in the plane transverse to
-$\hat{\mu}$.  That is, we sum over the two closest images of the Polyakov
-loop in each transverse direction.  The constant $c_1$ should,
-in principle, not be necessary; but when measuring the string tension
-for a single lattice configuration, we find large constant
-fluctuations will otherwise interfere with the fit.
-When finding the string tension, we fit $\Phi_\mu(r)$ to
-Eqn.~(\ref{stringmodel}) for each $\mu$.  In the case of
-a cube-shaped lattice $L_\mu = L$, the $c_p$ term can be absorbed into
-the normalization constant $c_0$.
+$\hat{\mu}$.  Thus, we sum over the two closest images of the Polyakov
+loop in each transverse direction.
+
+This effective potential is, in principle, equivalent to the more
+conventional sum over states plus finite longitudinal length
+corrections~\cite{teper_large_2009,aharony_effective_2013}.
+We use the effective potential form since we are interested in
+the behavior over various transverse separations $r$, rather than
+just the large $r$ limit.
 
 \begin{figure}
-  \includegraphics{polycorr16}
+  \includegraphics{polycorr12-16-20}
   \caption{Polyakov loop correlator vs.\ loop area together with
-    a fit to Eqn.~(\ref{stringmodel}) for $L_\mu r>21$.
+    a fit to Eqn.~(\ref{stringmodel}) for $L_\mu r>23$.
     Each color represents a different Polyakov loop direction.
-    The data is from 100 lattice
-    configurations. \label{pcorr16}}
+    The data is from 300 lattice configurations. \label{pcorr16}}
 \end{figure}
 
-For precise measurement the string tension, this process is
-not ideal since the correlator calculation re-uses the same link
-fields for various values of $r$ and $\mu$; the $\Phi_\mu(r)$ are not
-statistically independent.
-However, this does allow us to monitor the behavior of the correlator at
-various distance scales.  An example for a $16\times 20 \times 24$
-lattice is shown in Fig.~\ref{pcorr16}.  The lattice configurations
+When measuring $\Phi_\mu(r)$ for a single lattice configuration
+the link fields are re-used for each value of $r$.  This means
+that the loop correlators $\Phi_\mu(r)$ versus $r$ are not statistically
+independent, compromising the $\chi^2$ fitting process.  To address this,
+we calculate the sample covariance matrix $\mathcal{C}$:
+\be
+\mathcal{C}_{i, j} = \cov{\Phi_\mu(r_i)}{\Phi_\mu(r_j)} 
+\eq
+using $>300$ Euclidean Lattice Monte Carlo configurations, where
+$\left\{r_1, r_2, \ldots\right\}$ is the set of possible transverse
+separations.  Then, one can fit the correlators to the effective
+potential using the standard formula:
+\be
+\chi^2 = \sum_{i,j} \left(\Phi_\mu(r_i) - F_\mu(r_i)\right)
+               \left(\mathcal{C}^{-1}\right)_{i,j}
+               \left(\Phi_\mu(r_j) - F_\mu(r_j)\right)
+\eq
+
+An example for an $\SU(3)$, $12\times 16 \times 20$
+lattice, $\beta=28$ is shown in Fig.~\ref{pcorr16}.  The lattice configurations
 were generated with the Chroma library~\cite{edwards_chroma_2005};
 see Appendix~\ref{configurations} for details.
-The string tension $\sigma a^2 = 0.01595(62)$
+The string tension $\sigma a^2 = 0.0157(20)$
 agrees with Teper's value for $\beta=28$,
 $\sigma a^2 = 0.016210(54)$~\cite{lucini_$mathrmsun$_2002,athenodorou_sun_2017}.
-The fit has $\chi^2=220$ for 347 degrees of freedom, reflecting
-the fact that the correlators are not statistically independent.
+The fit has $\chi^2=292$ for 223 degrees of freedom,
+with the covariance matrix derived from 600 lattice configurations.
+Also, the leading power-law corrections are rather small.
+However, it should be noted that several model parameters,
+$c_1$, $c_p$, and $c_q$ are highly correlated since
+we don't have sufficient longitudinal values to distinguish
+between them.  We also see that including the transverse
+images of the Polyakov loop are important for the fit.
+
+\subsection{Wilson loops}
 
 Similarly, we define a Wilson loop operator using a product of
-link fields lying on the perimeter a rectangle having the given
+link fields lying on the perimeter of a rectangle having the given
 dimensions:
 \be
-       W_{w_1\times w_2} = \frac{1}{C_W} \sum_{\mu \ne \nu, x}\,
+       \wilson{w_1}{w_2} = \frac{1}{C_W} \sum_{\mu \ne \nu, x}\,
          \underbrace{U_\mu(x) U_\mu(x+a \hat{\mu}) \,\cdots\, U_\nu^\dagger (x)
          }_{\mbox{$w_1\times w_2$ rectangle}}
 \eq
-with normalization $C_W$ chosen such that $W_{m\times n} = \mathbb{I}$
+with normalization $C_W$ chosen such that $\wilson{m}{n} = \mathbb{I}$
 for the bare vacuum.  In this case, we can fit $\left\langle 0 \right|
-\frac{1}{N} \Tr W_{w_1\times w_2} \left|0\right\rangle $ to the function
-\be
-     c_0^\prime \exp\left(
+\frac{1}{N} \Tr \wilson{w_1}{w_2} \left|0\right\rangle $ to an effective
+potential containing a linearly confining term plus Coulomb terms
+plus power law corrections:
+%
+\begin{eqnarray}
+     W_{w_1,w_2} &=& c_0^\prime \exp\left(
      -\sigma a^2 w_1 w_2 - \mathcal{S}_{w_1\times w_2}\left(c_q, c_p\right)
-     \right)  \; .  \label{wfit}
-\eq
+     - c_2 \left(\frac{w_1}{w_2}+\frac{w_2}{w_1}\right) - \cdots
+     \right)\nonumber\\
+     & & + c_0^\prime \exp\left(
+     -\sigma a^2 (L_1 L_2 - w_1 w_2) -
+     \mathcal{S}_{w_1\times w_2}\left(c_q, c_p\right) - c_1\left(L_1 +L_2 - w_1 -w_2\right) - \cdots
+     \right)\; .  \label{wfit}
+\end{eqnarray}
+
+
+\subsection{Operator distributions}
 
 The quantity that is actually measured can be generalized, as well.
 For some loop operator $\mathcal{O}\in\SU(N)$, one usually
@@ -450,7 +508,7 @@ center of $\SU(N)$ at the vertices.
   \includegraphics{polydist1}
   \includegraphics{polydistr}
   \caption{Distribution for the Wilson loop operator
-    $W_{5\times 5}$ for $\SU(3)$, $\beta=28$, $L^3=16^2$,
+    $wilson_{5\times 5}$ for $\SU(3)$, $\beta=28$, $L^3=16^3$,
     averaging over 100 lattice configurations.
     Also shown is the distribution for the strong coupling limit.
     The distribution is
@@ -461,7 +519,7 @@ center of $\SU(N)$ at the vertices.
 \end{figure}
 \begin{figure}
   \includegraphics{polydist2}
-  \caption{Distribution for $\Tr W_{5\times 5}/N$  for
+  \caption{Distribution for $\Tr wilson_{5\times 5}/N$  for
     the data shown in Fig.~\ref{polydist1}.  
     The distribution is symmetric under complex conjugation,
     $\mathcal{O}\to\mathcal{O}^\dagger$.
@@ -475,20 +533,20 @@ $5\times5$ Wilson loop operator for $\SU(3)$ in Fig.~\ref{polydist1}.
 For comparison, we also show the distribution for
 the strong coupling limit (random $\SU(N)$ matrices).
 Notice that the shape of the two distributions appear to
-be quite similar, except that the $W_{5\times5}$ distribution
+be quite similar, except that the $\wilson{5}{5}$ distribution
 is shifted toward $\mathbb{I}$, reflecting the fact that
-$\langle\Tr W_{5\times5}\rangle >0$.
+$\langle\Tr \wilson{5}{5}\rangle >0$.
 
 We can relate the distribution in $\lambda_j$-space to the
 distribution of $\Tr\mathcal{O}$.
 For $\SU(2)$, $\Tr \mathcal{O}$ is real and for $\SU(3)$, $\Tr \mathcal{O}$
 is complex.  In both cases, the map from the $\lambda_j$-space to
-$\Tr \mathcal{O}$ is injective.  Thus, one can just as well look at the
+$\Tr \mathcal{O}$ is injective and one can just as well look at the
 distribution of $\Tr \mathcal{O}$; see Fig.~\ref{polydist2}.
 However, for $N>3$, information is lost when taking the trace
 of $\mathcal{O}$.
 
-\subsection{Landau gauge}
+\section{Landau gauge}
 
 In the continuum, the choice of Landau gauge $\partial_\mu A^\mu = 0$
 is equivalent to minimizing $\Tr A_\mu A^\mu$ over all space.  The fact that
@@ -497,7 +555,7 @@ equivalent to the statement that $\Tr A_\mu A^\mu$, integrated over space,
 has multiple local minima.~\cite{maas_more_2009}.
 We are interested here in Landau gauge mainly
 because it gives us, if $\Tr A_\mu A^\mu$ is small enough, the
-hope of connecting the
+hope of connecting the lattice
 link fields to the continuum degrees of freedom.
 On the lattice, this is equivalent to finding a gauge transform
 that minimizes the lattice norm $\fnorm{\config}$.  In this
@@ -528,7 +586,21 @@ convergence.
 In practice, we find the fastest convergence for $\orelax \approx 1.7$;
 however, it can become unstable for slightly higher $\orelax$.
 We generally use $\orelax=1.5$ as a compromise between speed and stability.
-We will come back to this minimization later (Table~\ref{center4}).
+
+A variation of this procedure would be to minimize
+$\left\lVert \config \right\rVert_\zentrum$ instead.
+That is, we minimize the norm of the link
+fields modulo some element of the center of $\SU(N)$, a ``center step.''
+In this case, we find a gauge transform $U_G$ on $x$
+that minimizes $\left\lVert U_\mu(x) \right\rVert_\zentrum$ for the $2D$
+links connected to $x$.
+That is, when computing the logarithms in Eqn.~(\ref{landau}) one uses
+\be
+\log\left(U_\mu(x)\right) \to \log\left(z^k U_\mu(x)\right)
+\, , \;\mbox{
+  where $z^k\in\zentrum$ minimizes}\; \fnorm{z^k U_\mu(x)} \;.
+\eq
+
 
 \subsection{Maximal center gauge}
 
@@ -640,19 +712,8 @@ for finding Landau gauge.
 On the lattice, maximal center gauge corresponds
 to a gauge transform that minimizes
 $\left\lVert \config \right\rVert_\zentrum$. 
-A local minimum of $\left\lVert \config \right\rVert_\zentrum$
-can be found via a small modification of the ``Landau step'' discussed
-above. That is, when computing the logarithms
-in Eqn.~(\ref{landau}) one uses
-\be
-\log\left(U_\mu(x)\right) \to \log\left(z^k U_\mu(x)\right)
-\, , \;\mbox{
-  where $z^k\in\zentrum$ minimizes}\; \fnorm{z^k U_\mu(x)} \;.
-\eq
-One can then apply the associated gauge transform to each site of
-the lattice as described above.
-If we apply some number of these ``center steps'' to a lattice
-configuration, we find quick convergence to some local
+If we apply some number of ``center steps,'' defined above,
+to a lattice configuration, we find quick convergence to some local
 minimum of $\left\lVert \config \right\rVert_\zentrum$ with
 link fields distributed fairly evenly across $\zentrum$.
 See Table~\ref{center1} for an example.
@@ -661,10 +722,10 @@ However, this procedure fails to remove long-range field fluctuations
 associated with the random choice of gauge.  We can remove
 such fluctuations by another gauge choice:  axial gauge
 $\partial_\mu A_\mu = 0$ (no sum on $\mu$).
-That is, for direction $\mu$, we choose a gauge such that $U_\mu(x)$ is replaced
-by the $L_\mu^\mathrm{th}$ root of the associated Polyakov loop,
-$U_\mu(x) \to \phi_\mu(x)^{1/L_\mu}$ (the root is defined in
-Appendix~\ref{roots}).
+That is, for direction $\mu$, we choose a gauge such that $U_\mu(x)$
+is replaced by the $L_\mu^\mathrm{th}$ root of the associated Polyakov loop,
+$U_\mu(x) \to \phi_\mu(x)^{1/L_\mu}$ where the root is defined in
+Appendix~\ref{roots}.
 % While not a complete gauge fixing, this gauge choice does
 % remove most long-scale fluctuations caused by the
 % gauge choice itself.
@@ -698,9 +759,9 @@ here was the end result of a an extensive Monte Carlo study that
 included a number of other gauge fixing strategies, as well.)
 We see a substantially reduced lattice norm, relative to
 Table~\ref{center3}.  We also see that virtually all the
-links are closest to identity element.  Thus, this gauge
-choice also minimizes $\fnorm{\config}$,
-which corresponds to Landau gauge.
+links are closest to identity element.  Thus, this procedure
+minimizes both $\left\lVert \config\right\rVert_\zentrum$ and
+$\fnorm{\config}$.
 We won't give details here, but similar calculations for
 $\SU(2)$ and $\SU(4)$ produce comparable results.
 In conclusion, we find evidence that, for $D=3$,
@@ -716,11 +777,41 @@ Presumably, in these studies, relatively large local minima of
 $\left\lVert \config \right\rVert_\zentrum$ were being investigated
 rather than configurations near a global minimum.
 
-\section{Finding the saddle point}
 
-In the following, we will introduce an iterative procedure
-for finding the saddle-point associated with a single
-lattice configuration.
+\subsection{Newton's method minimization}
+
+We introduce a final strategy for finding Landau gauge:
+Newton's method.  Here, we find a gauge transform, Eqn.~(\ref{gauget}),
+that minimizes the lattice norm squared $\sum_{\mu,x}\fnorm{U_\mu^\prime(x)}^2$
+as a function of $B_a(x)$,
+where $U_G(x) = \exp\left(i B_a(x)\, T_a\right)$.
+We construct the the gradient and hessian matrices
+and solve the associated linear system to find a local minimum of
+$\fnorm{\config}^2$.
+Details of this method can be found in Appendix~\ref{newtonNorm}.
+
+How, does this method compare with the much simpler ``Landau step'' defined
+earlier?  In a ``Landau step'' we minimize the fields in the tangent space
+of the gauge group, which can be justified if the gauge fields are small.
+In Newton's method, we assume the gauge transform is small, but
+assume nothing about the gauge fields.
+
+In practice, we find that Newton's method performs well in the
+vicinity of a local minimum of $\fnorm{\config}^2$.
+The convergence of ``Landau step'' is slower, but is less susceptible
+to getting stuck in a non-optimal local minimum.  In addition,
+the ``Landau step'' requires significantly fewer computational resources.
+
+Thus, when minimizing $\fnorm{\config}^2$, we will mostly rely
+on ``Landau steps'' and apply 2-3 Newton's method steps at the very end,
+when already close to the minimum.
+
+\section{Finding the saddle point}
+\label{saddlePoint}
+
+In the following, we will introduce an iterative
+procedure---Newton's method---for finding the saddle-point
+of the action associated with a single lattice configuration.
 
 \subsection{Shifts of the gauge fields}
 
@@ -751,7 +842,7 @@ where $T_a$ are generators of $\SU(N)$, with normalization
 $\delta_{a,b} = 2 \Tr(T_a T_b)$ and the square root is defined
 in Appendix~\ref{roots}.
 We can then take partial derivatives of $N S/\beta$ with
-respect to the $n_L$ shifts $\mathbf{w} = \left(w_a(\mu, x), \ldots\right)$
+respect to the $n_L$ shifts $\mathbf{w} = \left(w_1(1, x_1), \ldots\right)$
 to obtain the gradient vector $\mathbf{q}$ and Hessian matrix
 $H$.  The gradient and Hessian can be used to estimate the
 position of the nearest saddle point.
@@ -808,7 +899,7 @@ the action $S$ as being quadratic in $\mathbf{w}$.  If $\mathbf{w}$
 is too large, the quadratic approximation is no longer valid.
 Thus, we need to monitor the size of the shifts.
 Using Eqn.~(\ref{sunorm}), we will define two norms for the shifts:
-a lattice-wide $\infty$-norm, taking the Frobenius norm at each link
+a lattice-wide $\infty$-norm,
 \be
 \left\lVert \mathbf{w}\right\rVert_{\mathrm{max}} =
      \max_{x,\mu} \fnorm{e^{i w_{a}(\mu, x) T_a}}
@@ -841,7 +932,8 @@ find $H$ and $\mathbf{q}$, solve the linear system
 \eq
 and shift the gauge fields using $\mathbf{w} = -\mathbf{y}$.
 Since the action $S$ is not quadratic in $\mathbf{w}$, one
-would then iterate this process to find the actual saddle point.
+would then iterate this process to find the actual saddle point
+(Newton's method).
 
 However, in practice, this procedure does not work.  To see why, let us
 look at the eigenvalues of $H$.  As seen in Figure~\ref{eigenAll},
@@ -850,14 +942,13 @@ due to the gauge symmetry of the theory.  Thus, the linear
 system (\ref{linear1}) will be nearly singular and
 the solution will be numerically unstable.  We must be more careful.
 
-To address this issue, we remove directions in shift-space corresponding
-to infinitesimal gauge transforms.  To do this, we start
-by calculating the null-space $P_G$ of the gauge transform matrix $G$,
+To address this issue, we find the null-space $P_G$ of the gauge
+transform matrix $G$,
 \be
-G P_G^T = 0
+G P_G^T = 0 \; , \quad P_G P_G^T = \mathbb{I}\; .
 \eq
-where $P_G P_G^T = \mathbb{I}$.  Then we project $H$ and $\mathbf{q}$ onto
-the space of non-gauge-transform shifts:
+Then we project $H$ and $\mathbf{q}$ onto
+the subspace of non-gauge-transform shifts:
 \be
          H^\prime = P_G H P_G^T \quad \mbox{and} \quad
          \mathbf{q}^\prime = P_G \mathbf{q} \; .
@@ -899,32 +990,22 @@ In any case where $\left|\heigen_i\right|\ll
 \left|\overline{q}_i\right|$,
 there will be a large shift that will dominate the solution
 to the linear system.
-Thus, we impose a cutoff $\Lambda_2$:
-\be
-    \frac{\sqrt{2} \left|\overline{q}_i\right|\left\lVert P_G^T \mathbf{v}_i\right\rVert_2}{\left|\heigen_i\right|}
-     < \Lambda_2 \label{lambda2}
-\eq
+Thus, we impose cutoffs $\Lambda_2$ and $\Lambda_\mathrm{max}$:
+\begin{eqnarray}
+    \sqrt{2} \left|\overline{q}_i\right|\left\lVert P_G^T \mathbf{v}_i\right\rVert_2
+     &<& \left|\heigen_i\right|\,\Lambda_2 \label{lambda2} \\
+    \sqrt{2} \left|\overline{q}_i\right|
+      \left\lVert P_G^T \mathbf{v}_i\right\rVert_\mathrm{max}
+    &<& \left|\heigen_i\right|\,\Lambda_\mathrm{max} \; .
+\end{eqnarray}
 %
-and set $\overline{y}_i=0$ whenever the cutoff is violated.
-That is, we remove any eigenpairs inside the v-shaped
-region shown in Fig.~\ref{shiftPairs}.  For additional safety, we
-we also impose a maximum value cutoff
-\be
-    \frac{\sqrt{2} \left|\overline{q}_i\right|
-      \left\lVert P_G^T \mathbf{v}_i\right\rVert_\mathrm{max}}
-    {\left|\heigen_i\right|}
-    < \Lambda_\mathrm{max} \; .
-\eq
-Thus,
-\be
-      \mathbf{y} = P_G^T \left. V^T
-                    \overline{\mathbf{y}}\right|_{\Lambda_2,\Lambda_\mathrm{max}} \; .
-\eq
+and set $\overline{y}_i=0$ whenever a cutoff is violated.
+That is, we remove any eigenpairs inside a v-shaped
+region like the one shown in Fig.~\ref{shiftPairs}.  
 
 Finally, since the gauge symmetry of the action is non-linear,
 we do not want to shift the fields by too much before recalculating
-the matrix $G$.  Likewise, we want to ensure the shift is small
-enough on each link to be consistent with the quadratic expansion.
+the matrix $G$.  
 Thus, it is useful to add a damping factor $\gamma$ and
 further rescale by $\Lambda_s$ when the shift would
 otherwise be large:
@@ -1118,21 +1199,6 @@ Fig.~\ref{corrLink995}.
 
 \section{Gauge Fields}
 
-{\bf To do:  look at the fields themselves.
-
-  Ideas:
-  \begin{itemize}
-  \item  Look at $A_{\mu,a}$ directly in the $A_0=0$ (axial) gauge.
-
-  \item Find some nice way to express the Faraday tensor $F_{\mu,\nu}$ and
-    plot it.
-
-  \item Impose fixed boundary conditions on a cylinder where we fix the
-    link fields to correspond to one center charge inside the
-    cylinder.
-    
-  \end{itemize}
-}
 
 
 \section{Conclusions}
@@ -1144,7 +1210,10 @@ the master field emerge, approximately, at finite $N$.
 As an example of this, we
 see that a saddle point of a single lattice configuration
 contains the necessary physics, at least approximately, to produce the
-low-energy spectrum of the theory.
+correct low-energy spectrum of the theory, string tensions,
+and Wilson loop expectation values.
+
+In addition, we see 
 
 \vspace{10mm}
 \noindent {Acknowledgments}:
@@ -1288,6 +1357,128 @@ The lattice configurations were sampled after 10,000 thermalizing
 steps, with 3000 steps between samples for results that use
 multiple lattice configurations.  We used 4 over-relaxations steps
 for every heat bath step.
+
+\section{Newton's method for minimizing the lattice norm}
+\label{newtonNorm}
+
+Let us use Newton's method to find a gauge transform, Eqn.~(\ref{gauget}),
+that minimizes the lattice norm squared $\sum_{\mu,x}\fnorm{U_\mu^\prime(x)}^2$
+as a function of $B_a(x)$,
+where $U_G(x) = \exp\left(i B_a(x)\, T_a\right)$.
+The strategy employed here closely follows the strategy used to find
+saddle-points of the action, Section~\ref{saddlePoint} and
+Appendix~\ref{krylov}, with one important difference:  we are trying
+to find a minimum, rather than a saddle-point.  The $n_G$ partial
+derivatives
+%
+\be
+   \left.\frac{\partial}{\partial_{B_b(y)}} \sum_{\mu,x}
+   \fnorm{U_\mu^\prime(x)}^2\right|_{B_a(x)=0} =
+   2 \Im \sum_\mu \Tr\left[T_b \log\left(U_\mu(y)\right)
+             - \log\left(U_\mu(y-a\hat\mu)\right)T_b\right]
+   \label{normGrad}
+\eq
+can be used to construct the gradient vector $\mathbf{q}$.
+Likewise, one can calculate the $n_G\times n_G$ Hessian matrix
+$H$ from
+\be
+   \left.\frac{\partial^2}{\partial_{B_b(y)}\partial_{B_c(z)}} \sum_{\mu,x}
+         \fnorm{U_\mu^\prime(x)}^2\right|_{B_a(x)=0} \; .
+\eq
+which is nonzero when $y$ and $z$ are the same site or neighboring sites.
+The full expression for $H$ is rather lengthy and
+will not be given here.  Also, we construct a vector
+$\mathbf{b} =  \left(B_1(x_1), \ldots \right)$ representing the
+gauge transform.
+
+As with the saddle point calculation, we define two
+norms for the gauge transform:
+a lattice-wide $\infty$-norm,
+\be
+\left\lVert U_G \right\rVert_{\mathrm{max}} =
+     \max_{x} \fnorm{e^{i B_{a}(x) T_a}}
+     = \max_{x} \sqrt{\frac{1}{2}\sum_a B_a^2(x)}
+\eq
+as well as a lattice-wide Euclidean norm, averaged over sites
+\be
+\left\lVert U_G\right\rVert_2 =
+      \sqrt{\frac{1}{V_L} \sum_{x}
+        \fnorm{e^{i B_{a}(x) T_a}}^2}
+     = \sqrt{\frac{1}{2 V_L} \sum_{x, a} B_a^2(x)}
+        \; .  \label{normshiftsize}
+\eq
+
+\begin{figure}
+\includegraphics{normShiftPairs0}\\
+\includegraphics{normShiftPairs1}
+\caption{Scatter plot of eigenvalue-gradient pairs of $H^\prime$
+  for a $6^3$ lattice, $\beta = 8.175$, $N=3$.
+  The first plot is for a typical lattice configuration before any
+  gauge fixing.  The second plot is for a lattice configuration
+  after 3-axial gauge steps and 6 ``Landau steps'' have been
+  applied.
+  \label{normShiftPairs}}
+\end{figure}
+
+The lattice norm is invariant under global color rotations and
+the gradient will be zero in those directions.
+Thus, we introduce an $N\times n_G$ matrix $G$
+representing $N$ infinitesmimal global color rotations.
+We use the associated null-space operator $P_G$,
+\be
+G P_G^T = 0 \;, \quad P_G P_G^T = \mathbb{I} \; ,
+\eq
+to project $H$ and $\mathbf{q}$ onto
+the space of non-global-color-rotation transforms:
+\be
+         H^\prime = P_G H P_G^T \quad \mbox{and} \quad
+         \mathbf{q}^\prime = P_G \mathbf{q} \; .
+\eq
+%
+Let $\mathbf{y}^\prime$ be a solution of the linear system
+\be
+   H^\prime \mathbf{y}^\prime = \mathbf{q}^\prime \label{normlinear2}
+\eq
+and define eigenvalues
+$\left(\heigen_1, \heigen_2, \ldots\right)$ and
+eigenvectors $V=\left(\mathbf{v}_1, \mathbf{v}_2, \ldots\right)$
+of $H^\prime$ and
+define $\overline{\mathbf{y}} = V \mathbf{y}^\prime$ and
+$\overline{\mathbf{q}}  = V \mathbf{q}^\prime$.
+ In any case where $\left|\heigen_i\right|\ll
+\left|\overline{q}_i\right|$,
+there will be a large gauge transform that will dominate the solution
+to the linear system.
+Likewise $\heigen_i<0$ corresponds to a local maximum of the function.
+Thus, we impose a cutoffs $\Lambda_2$ and $\Lambda_\mathrm{max}$:
+\begin{eqnarray}
+    \sqrt{2} \left|\overline{q}_i\right|\left\lVert P_G^T \mathbf{v}_i\right\rVert_2
+     &<& \heigen_i \, \Lambda_2 \label{normlambda2}\\
+    \sqrt{2} \left|\overline{q}_i\right|
+      \left\lVert P_G^T \mathbf{v}_i\right\rVert_\mathrm{max}
+    &<& \heigen_i\, \Lambda_\mathrm{max} \; .
+\end{eqnarray}
+%
+and set $\overline{y}_i=0$ whenever a cutoff is violated.
+That is, we remove any eigenpairs to the left
+of the slanted line shown in Fig.~\ref{normShiftPairs}.
+The resulting gauge transform is
+\be
+      \mathbf{b} = -P_G^T \left. V^T
+                    \overline{\mathbf{y}}\right|_{\Lambda_2,\Lambda_\mathrm{max}} \; .
+\eq
+%
+(Numerically, we find that including a damping factor does not
+improve convergence.)
+
+Looking a Fig.~\ref{normShiftPairs}, we see that for a random
+gauge choice, $H^\prime$ has many
+negative eigenvalues and one should
+expect that Newton's method will work very poorly.
+However, after some intial minimization of the lattice
+norm, we see that very few---if any---eigenvalues violate the cutoffs
+and Newton's method should work quite well.
+
 
 \bibliography{physics}  % Use physics.bib
 
