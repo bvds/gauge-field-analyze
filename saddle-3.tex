@@ -21,6 +21,7 @@
 %
 %
 \usepackage{amsmath}
+\usepackage{mathtools} % For MoveEqnLeft
 \usepackage{amsfonts}
 \usepackage{graphicx}
 %
@@ -33,7 +34,7 @@
 \newcommand{\config}{\mathcal{U}}
 \newcommand{\orelax}{\xi}
 \newcommand{\heigen}{h}
-\newcommand\wilson[2]{\Omega_{#1 \times #2}}
+\newcommand\wilson[4]{\Omega_{#1, #2}\left(#3,#4\right)}
 \DeclareMathOperator{\SU}{SU}
 \DeclareMathOperator{\Tr}{Tr}
 \newcommand\fnorm[1]{\left\lVert #1 \right\rVert_\mathrm{F}}
@@ -341,31 +342,32 @@ a more complicated expression
                  \sqrt{(x^\prime-x)^2+ w_2^2}}
                \nonumber\\
                & &  +\left[w_1 \leftrightarrow w_2 \right]\\
-   &=&  2 \eta - 2 w_1 -2 w_2
-               - 2 w_1 \log\left(\frac{\varepsilon\left(\eta +w_1\right)}{
-                 w_1 w_2}\right)
-               \nonumber\\
-   & &  +\left[w_1 \leftrightarrow w_2\right] + O(\varepsilon) \, ,\\
+               &=&  \Theta\!\left(w_1, w_2\right) +
+               \Theta\!\left(w_2, w_1\right)
+              - 2 (w_1 + w_2) \log(\varepsilon) + O(\varepsilon) 
 \end{eqnarray}
-where $\eta=\sqrt{w_1^2+w_2^2}$.  Similar the the above, 
+where
+\be
+\Theta\!\left(\ell, r\right) = 2 \left(
+    \sqrt{\ell^2+r^2} - \ell - r
+    - \ell\log\left(\frac{\sqrt{\ell^2+r^2} + \ell}{r\ell}\right)
+   \right) \;.
+\eq
+Similar the the above, 
 we obtain a self-energy term that is proportional to the perimeter of
 the rectangle.  Thus, we can fit the Coulomb
 contribution to the Wilson loop using
 %
-\begin{eqnarray}
-  \mathcal{S}_{w_1\times w_2}\left(c_q, c_p\right) & = &
-     c_q 2 \left(\eta
-        -  w_1 - w_2
-        -  w_1 \log\left(\frac{\eta +w_1}{w_1 w_2}\right)
-        + \left[w_1 \leftrightarrow w_2\right]\right)
-        \nonumber\\ 
- &&  + c_p  2\left(w_1+w_2\right)  \label{cwf}
-\end{eqnarray}
+\be
+    c_q  \left(\Theta\!\left(w_1, w_2\right) +
+               \Theta\!\left(w_2, w_1\right)\right)
+        + c_p  2\left(w_1+w_2\right)  \label{cwf}
+\eq
 %
 where $c_p$ and $c_q$ in Eqns.~(\ref{cpf}) and (\ref{cwf})
 should be equivalent.
 
-\subsection{Polyakov Loops}
+\subsection{Polyakov loop correlators}
 
 Let us define a Polyakov loop that winds once around the lattice
 in the direction $\mu$ and goes through site $x$:
@@ -374,16 +376,22 @@ in the direction $\mu$ and goes through site $x$:
 \eq
 and define the correlator:
 \be
-\Phi_\mu(r) = \frac{1}{C_\Phi} \sum_{x, x_\mu=1} \sum_{y, y_\mu=1}
-           \delta_{r,|x-y|}
+\Phi_\mu(\mathbf{r}) = \frac{1}{C_\Phi(\mathbf{r})} \sum_{x, \,y,\, x^\mu = y^\mu =1}
+           \delta_{\mathbf{r},\mathbf{\Delta}(x-y)}
            \langle 0 | \frac{1}{N} \Tr\left(\phi_\mu^\dagger(y)\right)
            \frac{1}{N} \Tr\left(\phi_\mu(x)\right) |0\rangle
            \label{pcorr}
 \eq
 %
-where the normalization constant $C_\Phi$ is chosen such that
-$\Phi_\mu(r)=1$ for the bare vacuum.  To obtain the string tension,
-we fit the correlator $\Phi_\mu(r)$ to an effective potential $F_\mu(r)$.
+where the normalization constant $C_\Phi(\mathbf{r})$ is chosen such that
+$\Phi_\mu(\mathbf{r})=1$ for the bare vacuum and
+$\mathbf{\Delta}(x-y)$ is the minimum length vector between
+$x$ and $y$ taking into account lattice periodicity,
+permuting and reflecting the components so that they lie
+in a trianglular region $r_i\ge 0$, $r_i\le r_j$, $i<j$.
+To obtain the string tension,
+we fit the correlator $\Phi_\mu(\mathbf{r})$ to an effective
+potential $F_\mu(\mathbf{r})$.
 This effective potential contains an area law term (linear confinement)
 plus coulomb corrections from Eqn.~(\ref{cpf}) plus power law corrections:
 %  M. Teper, “Large N and confining flux tubes as strings -
@@ -391,19 +399,21 @@ plus coulomb corrections from Eqn.~(\ref{cpf}) plus power law corrections:
 %  Acta Phys. Polon. B 40, 3249 (2009). [arXiv:0912.3339 [hep-lat]].
 %
 \begin{eqnarray}
-         F_\mu(r) &=& c_0 \exp\left(
-         -\sigma a^2 r L_\mu
-         - c_q 2 L_\mu \log(r) - c_p 2 L_\mu
-         - c_1 \frac{L_\mu}{r} - c_2 \frac{r}{L_\mu} - \cdots \right)\nonumber\\
+         F_\mu(\mathbf{r}) &=& c_0 \exp\left(
+         -\sigma a^2 \left|\mathbf{r}\right| L_\mu
+         - c_q 2 L_\mu \log(\left|\mathbf{r}\right|) - c_p 2 L_\mu
+         - c_1 \frac{L_\mu}{\left|\mathbf{r}\right|}
+         - c_2 \frac{\left|\mathbf{r}\right|}{L_\mu} - \cdots \right)\nonumber\\
          & & + \left[\,\mbox{$2 (D-1)$ transverse images}\,\right]
          \; .  \label{stringmodel}
 \end{eqnarray}
 %
 In the case of
 a cube-shaped lattice $L_\mu = L$, the $c_p$ term can be absorbed into
-the normalization constant $c_0$ and $c_2$ is indistinguishable from
+the normalization constant $c_0$ and the $c_2$ term is indistinguishable from
 the string tension.  If excited states are ignored, the $c_2$ term corresponds
-to the Luscher correction~\cite{teper_large_2009}.
+to the Luscher correction~\cite{luscher_anomalies_1980}, with value
+$c_2 = -\pi/6$.
 Since the lattices we use are relatively small, we include contributions
 from fields wrapping around the lattice in the plane transverse to
 $\hat{\mu}$.  Thus, we sum over the two closest images of the Polyakov
@@ -413,37 +423,40 @@ This effective potential is, in principle, equivalent to the more
 conventional sum over states plus finite longitudinal length
 corrections~\cite{teper_large_2009,aharony_effective_2013}.
 We use the effective potential form since we are interested in
-the behavior over various transverse separations $r$, rather than
-just the large $r$ limit.
+the behavior over a range transverse separations, rather than
+just the large $\mathbf{r}$ limit.
 
 \begin{figure}
   \includegraphics{polycorr12-16-20}
   \caption{Polyakov loop correlator vs.\ loop area together with
-    a fit to Eqn.~(\ref{stringmodel}) for $L_\mu r>23$.
+    a fit to Eqn.~(\ref{stringmodel}) for an $\SU(3)$,
+    $12\times 16 \times 20$ lattice, $\beta=28$,
+    with $L_\mu \left|\mathbf{r}\right|>23$.
     Each color represents a different Polyakov loop direction.
     The data is from 300 lattice configurations. \label{pcorr16}}
 \end{figure}
 
-When measuring $\Phi_\mu(r)$ for a single lattice configuration
-the link fields are re-used for each value of $r$.  This means
-that the loop correlators $\Phi_\mu(r)$ versus $r$ are not statistically
-independent, compromising the $\chi^2$ fitting process.  To address this,
+When measuring $\Phi_\mu(\mathbf{r})$ for a single lattice configuration
+the link fields are re-used for each value of $\mathbf{r}$.  This means
+that the loop correlators $\Phi_\mu(\mathbf{r})$ versus $\mathbf{r}$
+are not statistically independent, compromising the $\chi^2$ fitting process.
+To address this,
 we calculate the sample covariance matrix $\mathcal{C}$:
 \be
-\mathcal{C}_{i, j} = \cov{\Phi_\mu(r_i)}{\Phi_\mu(r_j)} 
+\mathcal{C}_{i, j} = \cov{\Phi_\mu(\mathbf{r}_i)}{\Phi_\mu(\mathbf{r}_j)} 
 \eq
-using $>300$ Euclidean Lattice Monte Carlo configurations, where
-$\left\{r_1, r_2, \ldots\right\}$ is the set of possible transverse
-separations.  Then, one can fit the correlators to the effective
+using $\ge 300$ Euclidean Lattice Monte Carlo configurations, where
+$\left\{\mathbf{r}_1, \mathbf{r}_2, \ldots\right\}$ is the set of
+possible transverse separations.
+Then, one can fit the correlators to the effective
 potential using the standard formula:
 \be
-\chi^2 = \sum_{i,j} \left(\Phi_\mu(r_i) - F_\mu(r_i)\right)
+\chi^2 = \sum_{i,j} \left(\Phi_\mu(\mathbf{r}_i) - F_\mu(\mathbf{r}_i)\right)
                \left(\mathcal{C}^{-1}\right)_{i,j}
-               \left(\Phi_\mu(r_j) - F_\mu(r_j)\right)
+               \left(\Phi_\mu(\mathbf{r}_j) - F_\mu(\mathbf{r}_j)\right)
 \eq
 
-An example for an $\SU(3)$, $12\times 16 \times 20$
-lattice, $\beta=28$ is shown in Fig.~\ref{pcorr16}.  The lattice configurations
+An example fit is shown in Fig.~\ref{pcorr16}.  The lattice configurations
 were generated with the Chroma library~\cite{edwards_chroma_2005};
 see Appendix~\ref{configurations} for details.
 The string tension $\sigma a^2 = 0.0157(20)$
@@ -451,40 +464,92 @@ agrees with Teper's value for $\beta=28$,
 $\sigma a^2 = 0.016210(54)$~\cite{lucini_$mathrmsun$_2002,athenodorou_sun_2017}.
 The fit has $\chi^2=292$ for 223 degrees of freedom,
 with the covariance matrix derived from 600 lattice configurations.
-Also, the leading power-law corrections are rather small.
 However, it should be noted that several model parameters,
 $c_1$, $c_p$, and $c_q$ are highly correlated since
 we don't have sufficient longitudinal values to distinguish
-between them.  We also see that including the transverse
+between them.  We also see that inclusion of the transverse
 images of the Polyakov loop are important for the fit.
 
 \subsection{Wilson loops}
 
-Similarly, we define a Wilson loop operator using a product of
-link fields lying on the perimeter of a rectangle having the given
-dimensions:
+\begin{figure}
+  \includegraphics{wilsonFit-16}
+  \caption{Wilson loop expectation value vs.\ loop size together with
+    a fit to Eqn.~(\ref{wfit}) for an $\SU(3)$,
+    $16^3$ lattice, $\beta=28$.  The data is from 30 lattice
+    configurations.  The error bars on
+    the data are too small to be seen. \label{wilsonFit16}}
+\end{figure}
+
+We define the Wilson loop operator in the $\mu,\nu$-plane using a product of
+link fields lying on the perimeter of a $w_1\times w_2$ rectangle
+having the given dimensions:
 \be
-       \wilson{w_1}{w_2} = \frac{1}{C_W} \sum_{\mu \ne \nu, x}\,
+       \wilson{\mu}{\nu}{w_1}{w_2} = \frac{1}{C_W} \sum_{x}\,
          \underbrace{U_\mu(x) U_\mu(x+a \hat{\mu}) \,\cdots\, U_\nu^\dagger (x)
          }_{\mbox{$w_1\times w_2$ rectangle}}
 \eq
-with normalization $C_W$ chosen such that $\wilson{m}{n} = \mathbb{I}$
-for the bare vacuum.  In this case, we can fit $\left\langle 0 \right|
-\frac{1}{N} \Tr \wilson{w_1}{w_2} \left|0\right\rangle $ to an effective
+with normalization $C_W$ chosen such that $\wilson{\mu}{\nu}{m}{n} = \mathbb{I}$
+for the bare vacuum.  In this case, we can fit
+$\mathcal{W} = \left\langle 0 \right|
+\frac{1}{N} \Tr \wilson{\mu}{\nu}{w_1}{w_2} \left|0\right\rangle $
+to an effective
 potential containing a linearly confining term plus Coulomb terms
 plus power law corrections:
 %
-\begin{eqnarray}
-     W_{w_1,w_2} &=& c_0^\prime \exp\left(
-     -\sigma a^2 w_1 w_2 - \mathcal{S}_{w_1\times w_2}\left(c_q, c_p\right)
-     - c_2 \left(\frac{w_1}{w_2}+\frac{w_2}{w_1}\right) - \cdots
-     \right)\nonumber\\
-     & & + c_0^\prime \exp\left(
-     -\sigma a^2 (L_1 L_2 - w_1 w_2) -
-     \mathcal{S}_{w_1\times w_2}\left(c_q, c_p\right) - c_1\left(L_1 +L_2 - w_1 -w_2\right) - \cdots
-     \right)\; .  \label{wfit}
-\end{eqnarray}
+\begin{align}
+  \MoveEqLeft W\left(w_1, w_2; L_\mu, L_\nu\right) =  \nonumber \\
+       & c_0^\prime \exp\left[
+       -\sigma a^2 w_1 w_2 
+       - c_q  \left(\Theta\!\left(w_1, w_2\right) +
+       \Theta\!\left(w_2, w_1\right)\right)
+       - c_p  2\left(w_1+w_2\right)
+     \vphantom{\frac{w_1}{w_2}}\right. \nonumber \\ & \hspace{4em} \left.
+           - c_2 \left(\frac{w_1}{w_2}+\frac{w_2}{w_1}\right)
+           - c_3 \left(\frac{w_1}{w_2^2}+\frac{w_2}{w_1^2}\right)
+           - c_4 \left(\frac{1}{w_1^2}+\frac{1}{w_2^2}\right) - \cdots
+       \right]\nonumber\\ &
+      \mbox{} + c_0^\prime \exp\left[
+       -\sigma a^2 (L_\mu L_\nu - w_1 w_2) -
+           c_q  \left(\Theta\!\left(w_1, L_\nu - w_2\right) +
+               \Theta\!\left(w_2, L_\mu - w_1\right)\right)
+       \right. \nonumber \\ & \hspace{4em} \left.
+       - c_p  2\left(w_1+w_2\right) 
+     - c_1\left(L_1 +L_2 - w_1 -w_2\right) - \cdots
+     \right]\; .  \label{wfit}
+\end{align}
+%
+The second exponential term represents the contribution from
+the {\em exterior} of the rectangle, given that the lattice
+is periodic in the $\hat{\mu}$ and $\hat\nu$ directions.
 
+%
+\begin{table}
+  \caption{Parameters for the fit shown in Fig.~\ref{wilsonFit16}.
+    \label{wilsonparameters}}
+  \begin{tabular}{c|c}
+    name & value \\
+    \hline
+  $c_0$ &  1.36(14)\\
+  $\sigma a^2$ & 0.0133(43) \\
+  $c_q$ &  0.001(10)\\
+  $c_p$ &  0.0724(41)\\
+  $c_1$ &  0.267(84)\\
+  $c_2$ &  -0.106(48)\\
+  $c_3$ &  0.00(13)\\
+  $c_4$ & 0.249(90)\\
+  \end{tabular}
+\end{table}
+
+An example fit is shown in Fig.~\ref{wilsonFit16}.  
+The fit has $\chi^2=9$ for 13 degrees of freedom,
+with the covariance matrix derived from 70 lattice configurations.
+The best fit parameters are given in Table~\ref{wilsonparameters}.:
+The string tension agrees with Teper's value for $\beta=28$,
+$\sigma a^2 = 0.016210(54)$~\cite{lucini_$mathrmsun$_2002,athenodorou_sun_2017}.
+The Coulomb term $c_q$ is not significant, but it is highly anti-correlated
+with the string tension $\sigma a^2$.  The Wilson loop fit does not
+do a very good job untangling the two.
 
 \subsection{Operator distributions}
 
@@ -517,34 +582,34 @@ center of $\SU(N)$ at the vertices.
     $\lambda_2 \to -\lambda_2$.
    \label{polydist1}}
 \end{figure}
-\begin{figure}
-  \includegraphics{polydist2}
-  \caption{Distribution for $\Tr wilson_{5\times 5}/N$  for
-    the data shown in Fig.~\ref{polydist1}.  
-    The distribution is symmetric under complex conjugation,
-    $\mathcal{O}\to\mathcal{O}^\dagger$.
-    The distribution lies inside the blue lines representing
-    the edges of the triangle in Fig.~\ref{polydist1}.
-    \label{polydist2}}
-\end{figure}
+% \begin{figure}
+%  \includegraphics{polydist2}
+%  \caption{Distribution for $\Tr \wilson{\mu,\nu}{5}{5}/N$  for
+%    the data shown in Fig.~\ref{polydist1}.  
+%   The distribution is symmetric under complex conjugation,
+%    $\mathcal{O}\to\mathcal{O}^\dagger$.
+%    The distribution lies inside the blue lines representing
+%    the edges of the triangle in Fig.~\ref{polydist1}.
+%    \label{polydist2}}
+%\end{figure}
 
 By way of example, we show the distribution of the
 $5\times5$ Wilson loop operator for $\SU(3)$ in Fig.~\ref{polydist1}.
 For comparison, we also show the distribution for
 the strong coupling limit (random $\SU(N)$ matrices).
 Notice that the shape of the two distributions appear to
-be quite similar, except that the $\wilson{5}{5}$ distribution
+be quite similar, except that the $\wilson{\mu}{\nu}{5}{5}$ distribution
 is shifted toward $\mathbb{I}$, reflecting the fact that
-$\langle\Tr \wilson{5}{5}\rangle >0$.
+$\langle\Tr \wilson{\mu}{\nu}{5}{5}\rangle >0$.
 
-We can relate the distribution in $\lambda_j$-space to the
-distribution of $\Tr\mathcal{O}$.
-For $\SU(2)$, $\Tr \mathcal{O}$ is real and for $\SU(3)$, $\Tr \mathcal{O}$
-is complex.  In both cases, the map from the $\lambda_j$-space to
-$\Tr \mathcal{O}$ is injective and one can just as well look at the
-distribution of $\Tr \mathcal{O}$; see Fig.~\ref{polydist2}.
-However, for $N>3$, information is lost when taking the trace
-of $\mathcal{O}$.
+% We can relate the distribution in $\lambda_j$-space to the
+% distribution of $\Tr\mathcal{O}$.
+% For $\SU(2)$, $\Tr \mathcal{O}$ is real and for $\SU(3)$, $\Tr \mathcal{O}$
+% is complex.  In both cases, the map from the $\lambda_j$-space to
+% $\Tr \mathcal{O}$ is injective and one can just as well look at the
+% distribution of $\Tr \mathcal{O}$; see Fig.~\ref{polydist2}.
+% However, for $N>3$, information is lost when taking the trace
+% of $\mathcal{O}$.
 
 \section{Landau gauge}
 
