@@ -7,12 +7,11 @@
 
 linkSaddlePointStep::usage = "One iteration of the saddle point search applied to a single link.  Set ignoreCutoff -> True to test this against the explicit calculation.";
 Options[linkSaddlePointStep] = {ignoreCutoff -> False,
-    linkCutoff -> 1, rescaleCutoff -> 1, dampingFactor -> 1,
+    linkCutoff -> 1, dampingFactor -> 1,
     printHessian -> False, printShift -> False};
 linkSaddlePointStep[u2Staples_, u1_, OptionsPattern[]] := 
  Block[{
-     cutoff = If[OptionValue[ignoreCutoff], 1,
-                 OptionValue[linkCutoff]*OptionValue[rescaleCutoff]],
+     cutoff = If[OptionValue[ignoreCutoff], 1, OptionValue[linkCutoff]],
      zzz = If[OptionValue[ignoreCutoff], Infinity, 1],
    damping = OptionValue[dampingFactor], debug = False, 
    ff = u2Staples.u1, grad, mm, oo, values, deltas},
@@ -69,12 +68,17 @@ singleLinkStep[coordList_List:Null, opts:OptionsPattern[]] :=
 
 
 Options[makeObservableTrajectory] = Join[
-    Options[singleLinkStep], {
-        "observables" -> {"distance", "norm", "polyakovCorrelator",
-                          "wilsonDiagonal", "wilsonTriangle"},
-        "skip" -> 1,
-        "step" -> "../data/3-3/step-16-28", 
-        "periodic" -> "../data/3-3/periodic-16-28"}]; 
+    {"observables" -> {"distance", "norm", "polyakovCorrelator",
+                       "wilsonDiagonal", "wilsonTriangle"},
+     "skip" -> 1,
+     "step" -> "../data/3-3/step-16-28", 
+     "periodic" -> "../data/3-3/periodic-16-28",
+     (* Defaults for the Newton's steps *)
+     largeShiftOptions -> {eigenPairs -> -100, maxLanczosVecs -> 1000},
+     Method -> "External", externalAction -> "remote",
+     remoteHost -> "samson", processes -> 8
+    },
+    Options[singleLinkStep], Options[applyGaugeTransforms]]; 
 makeObservableTrajectory[set_, label_, n_, 
                             opts:OptionsPattern[]] := 
  Block[{gaugeField, delta, gaugeField0, distance = 0,
@@ -82,6 +86,9 @@ makeObservableTrajectory[set_, label_, n_,
            debug = printLevel[OptionValue[printDetails], 1],
         diagonalQ = StringMatchQ[label, "s*"],
         coordList, dd, results, gaugeSegments,
+        gopts = Apply[Sequence, FilterRules[
+            Join[{opts}, Options[makeObservableTrajectory]],
+            Options[applyGaugeTransforms]]],
         sopts = Apply[Sequence, FilterRules[
             {opts}, Options[singleLinkStep]]]},
   Get[OptionValue["periodic"] <> "-" <> ToString[set] <> ".m"];
@@ -116,10 +123,11 @@ makeObservableTrajectory[set_, label_, n_,
               observable == "distance",
               distance,
               observable == "norm",
-              (* Except for distance, which is already calculated above,
+              (* Except for distance, which is already accumulated above,
                 the quantities are gauge invariant, so fixing a gauge
-                won't cause any harm *)
-              applyGaugeTransforms[{1, 1, 6, 1, 5, 6, 5, 6, 5, 6, 5, 6, 5}];
+                won't cause any harm. *)
+              applyGaugeTransforms[Flatten[
+                  {1, 1, 6, 1, Table[{5, 6}, {12}], 7, 7, 7}], gopts];
               latticeNorm[],
               observable == "polyakovCorrelator",
               Map[talliesToAverageErrors,

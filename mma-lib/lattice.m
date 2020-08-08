@@ -756,6 +756,7 @@ Options[wilsonModel] = {printResult -> False, "order" -> 0,
                           upperCutoff limits the lattice size minus the width
                           of the Wilson loop. *)
                         "lowerCutoff" -> 0, "upperCutoff" -> 0,
+                        "upperAreaCutoff" -> 0,
                         "stringTension" -> Automatic, "pointPotential" -> True,
                         "coulomb" -> Automatic, "perimeter" -> Automatic,
                         "covarianceMatrix" -> None};
@@ -769,9 +770,11 @@ wilsonModel[data0_, OptionsPattern[]] :=
           MapIndexed[{#2[[1]], #1}&, Keys[data0]],
           (#[[2, 1]] > OptionValue["lowerCutoff"] &&
            #[[2, 2]] > OptionValue["lowerCutoff"] &&
+           #[[2, 1]] #[[2, 2]] < #[[2, 3]] #[[2,4]] -
+                           OptionValue["upperAreaCutoff"] &&
            #[[2, 1]] < #[[2, 3]] - OptionValue["upperCutoff"] &&
            #[[2, 2]] < #[[2, 4]] - OptionValue["upperCutoff"])&]]},
-     data = Normal[data0][[filter]];
+  data = Normal[data0][[filter]];
   If[OptionValue["stringTension"] =!= Automatic,
      a2sigma = OptionValue["stringTension"]];
   If[OptionValue["coulomb"] =!= Automatic,
@@ -925,7 +928,7 @@ setRandomGauge[] :=
 getBoundaryPhase::usage = "Add up phases going around edge for a given starting point on the boundary.";
 getBoundaryPhase::unknown = "Unknown Method";
 Options[getBoundaryPhase] = {
-    Method -> "straight", "debug" -> False};
+    "boundaryMethod" -> "straight", "debug" -> False};
 getBoundaryPhase[dir_, coords_, OptionsPattern[]] :=
  Block[{dirt, sign, dt,
         debug = OptionValue["debug"]},
@@ -934,7 +937,7 @@ getBoundaryPhase[dir_, coords_, OptionsPattern[]] :=
   dt = coords[[dirt]] - (latticeDimensions[[dirt]]+1)/2;
   If[debug, Print["dt=", dt, ", sign=", sign]];
   Which[
-      OptionValue[Method] === "discontinuous",
+      OptionValue["boundaryMethod"] === "discontinuous",
       (* "discontinuous" and "matchBoundary" should be identical
         if the phase on each boundary link is proportional to
         the angle about the middle of the lattice
@@ -945,7 +948,7 @@ getBoundaryPhase[dir_, coords_, OptionsPattern[]] :=
                              (latticeDimensions[[dir]] - 1)/2}]];
             DiagonalMatrix[Exp[
                 I sign*Sign[dt]*transverseBCPhases*fraction]]],
-      OptionValue[Method] === "smooth",
+      OptionValue["boundaryMethod"] === "smooth",
       Block[{fraction = ArcTan[latticeDimensions[[dirt]] -1,
                                latticeDimensions[[dir]] - 1]/Pi},
             fraction *= 2*dt/(latticeDimensions[[dirt]] -1);
@@ -953,7 +956,7 @@ getBoundaryPhase[dir_, coords_, OptionsPattern[]] :=
                              (latticeDimensions[[dir]] - 1)/2}]];
             DiagonalMatrix[Exp[
                 I sign*transverseBCPhases*fraction]]],
-      OptionValue[Method] === "matchBoundary",
+      OptionValue["boundaryMethod"] === "matchBoundary",
       Block[{y = coords, v = IdentityMatrix[nc]},
        Which[dt > 0,
              While[y[[dirt]] < latticeDimensions[[dirt]],
@@ -976,7 +979,7 @@ getBoundaryPhase[dir_, coords_, OptionsPattern[]] :=
                    v = v.getLink[dirt, y];
                    y[[dirt]] += 1]];
        v],
-      OptionValue[Method] === "straight",
+      OptionValue["boundaryMethod"] === "straight",
       (* Axial gauge transform without committing any
         crimes at the boundaries. *)
       Block[{y = coords, v = IdentityMatrix[nc]},

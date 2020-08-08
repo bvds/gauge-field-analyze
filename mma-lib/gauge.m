@@ -441,11 +441,14 @@ minimumNormGaugeStep::usage =
   "Find a gauge transform that minimizes the lattice norm.";
 (* This is a modification of latticeSaddlePointStep. *)
 Options[minimumNormGaugeStep] = Join[
+    {rescaleCutoff -> N[Pi], "removeConcave" -> True,
+     dynamicPartMethod -> {
+         Automatic, "lowestGaugeProductEigenvalue" -> 1.0},
+     stepFile -> None, returnShifts -> False},
     FilterRules[Options[findDelta],
-                {Except["removeConcave"]}],
-    Options[landauGaugeHessian],
-    {"removeConcave" -> True, stepFile -> None,
-     returnShifts -> False}];
+                {Except["removeConcave"], Except[dynamicPartMethod],
+                 Except[rescaleCutoff]}],
+    Options[landauGaugeHessian]];
 minimumNormGaugeStep[opts:OptionsPattern[]] :=
  Block[{hess, grad, gauge, delta,
         output = "", error = "",
@@ -514,7 +517,8 @@ Options[applyGaugeTransforms] = Join[
                 {Except["center"], Except["damping"]}],
     FilterRules[Options[setAxialGauge],
                 {Except["center"]}],
-    Options[minimumNormGaugeStep]];
+    FilterRules[Options[minimumNormGaugeStep],
+                {Except[returnShifts]}]];
 applyGaugeTransforms[s_, opts:OptionsPattern[]] :=
  (* New direction each time setAxialGauge[] is called. *)
  Block[{lastDir = nd, dir,
@@ -545,15 +549,15 @@ applyGaugeTransforms[s_, opts:OptionsPattern[]] :=
        (* At this point, we already know the minimum lies near
          the identity of the center.
          We know that "damping" = dampingFactor = 1 is optimal. *)
-       minimumNormGaugeStep[gopts],
+       gaugeField = minimumNormGaugeStep[gopts],
        (* In practice, these don't work well *)
-       (* # == 7,
+       (* # == 8,
         setMinimumAxialGauge[dir[], "center" -> False, "damping" -> 1],
-        # == 8,
-        setMinimumAxialGauge[dir[], "center" -> True, "damping" -> 1],
         # == 9,
-        setMinimumAxialGauge[dir[], "center" -> False, "damping" -> 1.5],
+        setMinimumAxialGauge[dir[], "center" -> True, "damping" -> 1],
         # == 10,
+        setMinimumAxialGauge[dir[], "center" -> False, "damping" -> 1.5],
+        # == 11,
         setMinimumAxialGauge[dir[], "center" -> True, "damping" -> 1.5]*)
        True,
        Abort[]
