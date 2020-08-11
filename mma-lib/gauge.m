@@ -443,7 +443,7 @@ minimumNormGaugeStep::usage =
 Options[minimumNormGaugeStep] = Join[
     {rescaleCutoff -> N[Pi], "removeConcave" -> True,
      dynamicPartMethod -> {
-         Automatic, "lowestGaugeProductEigenvalue" -> 1.0},
+         Automatic, "orthonormalFlag" -> True},
      stepFile -> None, returnShifts -> False},
     FilterRules[Options[findDelta],
                 {Except["removeConcave"], Except[dynamicPartMethod],

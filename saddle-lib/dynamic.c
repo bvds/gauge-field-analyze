@@ -16,7 +16,7 @@
 
    where
 
-      A.x = b, A = o.o^T, b = o.x
+      A.x = b, A = o.o^T, b = o.v
 
   In principle, one could apply a linear least squares
   solver to o itself.  However, A is pretty well-conditioned
@@ -24,6 +24,12 @@
 
   Also, we terminate the Conjugate Gradient solver based
   the upper limit of norm(o^T.x) relative to norm(v).
+
+  Finally, if o is orthonormal, we can simply calculate
+
+      v <- v - o^T.o.v
+
+   which is twice as fast.
 */
 
 struct {
@@ -42,6 +48,7 @@ struct {
     mat_int matVec;
     int maxItn;
     int printDetails;
+    int orthonormalFlag;
     doublereal minEigenvalue;
     // doublereal maxEigenvalue;
     integer itnlim;
@@ -90,18 +97,6 @@ void dynamicInit(const mat_int nrow, const mat_int ncol,
     gaugeData.mpicom = mpicom;
 
 
-    /*
-       The gauge configurations are single precision,
-       so rtol is normally about 1e-7.
-    */
-    tmp  = cJSON_GetObjectItemCaseSensitive(options, "rTolerance");
-    if(cJSON_IsNumber(tmp)) {
-        gaugeData.rtol = tmp->valuedouble;
-        gaugeData.rtolp = &gaugeData.rtol;
-    } else {
-        gaugeData.rtolp = NULL;
-    }
-
     tmp  = cJSON_GetObjectItemCaseSensitive(options, "maxIterations");
     gaugeData.itnlim = (cJSON_IsNumber(tmp)?tmp->valueint:
                         // Default value appropriate for reorthogonalization
@@ -114,19 +109,27 @@ void dynamicInit(const mat_int nrow, const mat_int ncol,
     gaugeData.x[0] = -1.0;
     MALLOC(gaugeData.z, ncol*sizeof(*gaugeData.z));
 
-
-    /* If the lowest eigenvalue of gaugeProduct is known, 
-       then we can just set it.  This is a work-around for the fact
-       that TRLAN doesn't work for small matrices.
+    /*
+      If the matrix is orthonormal, we can skip the lowest
+      eigenvalue calculation.  Default is False.
     */
-    tmp  = cJSON_GetObjectItemCaseSensitive(options,
-                                            "lowestGaugeProductEigenvalue");
-    if(cJSON_IsNumber(tmp)) {
-        gaugeData.minEigenvalue = tmp->valuedouble;
-        if(gaugeData.printDetails > 0 && wrank == 0)
-            printf("Setting lowest eigenvalue of gaugeProduct to %le\n",
-                   tmp->valuedouble);
+    tmp  = cJSON_GetObjectItemCaseSensitive(options, "orthonormalFlag");
+    gaugeData.orthonormalFlag = cJSON_IsBool(tmp)?cJSON_IsTrue(tmp):1==0;
+    if(gaugeData.orthonormalFlag) {
+        gaugeData.rtolp = NULL;
         return;
+    }
+
+     /*
+       The gauge configurations are single precision,
+       so rtol is normally about 1e-7.
+    */
+    tmp  = cJSON_GetObjectItemCaseSensitive(options, "rTolerance");
+    if(cJSON_IsNumber(tmp)) {
+        gaugeData.rtol = tmp->valuedouble;
+        gaugeData.rtolp = &gaugeData.rtol;
+    } else {
+        gaugeData.rtolp = NULL;
     }
 
 
@@ -234,16 +237,23 @@ void dynamicProject(const integer n, double *v, double *normDiff) {
     matrixVector(gaugeData.matrix, n, v,
                  gaugeData.nrow, gaugeData.b);
 
-    trancond = acondlim; // Always use MINRES
-    MINRESQLP(&gaugeData.nrow, gaugeProduct, gaugeData.b,
-              &shift, NULL, NULL, disablep, noutp, &gaugeData.itnlim,
-              gaugeData.rtolp, abstolp, maxxnormp, &trancond, &acondlim,
-              gaugeData.x, &istop, &itn, &rnorm, &arnorm,
-              &xnorm, &anorm, &acond);
+    if(gaugeData.orthonormalFlag) {
+        // Don't use gaugeData.x
+        matrixVector(gaugeData.matrixT,
+                     gaugeData.nrow, gaugeData.b,
+                     n, gaugeData.z);
+    } else {
+        trancond = acondlim; // Always use MINRES
+        MINRESQLP(&gaugeData.nrow, gaugeProduct, gaugeData.b,
+                  &shift, NULL, NULL, disablep, noutp, &gaugeData.itnlim,
+                  gaugeData.rtolp, abstolp, maxxnormp, &trancond, &acondlim,
+                  gaugeData.x, &istop, &itn, &rnorm, &arnorm,
+                  &xnorm, &anorm, &acond);
+        matrixVector(gaugeData.matrixT,
+                     gaugeData.nrow, gaugeData.x,
+                     n, gaugeData.z);
+    }
 
-    matrixVector(gaugeData.matrixT,
-                 gaugeData.nrow, gaugeData.x,
-                 n, gaugeData.z);
     // This could be combined with the above matrix product, BLAS style.
     DAXPY(&n, &minusone, gaugeData.z, &one, v, &one);
     if(normDiff != NULL){
@@ -256,18 +266,21 @@ void dynamicProject(const integer n, double *v, double *normDiff) {
 
     ADD_TIME(gaugeData.time, tf, t2);
     gaugeData.count += 1;
-    gaugeData.matVec += itn;
-    if(itn > gaugeData.maxItn) {
-        gaugeData.maxItn = itn;
-    }
-    if(istop == 8) {
-        gaugeData.usertol += 1;
-    }
+    gaugeData.matVec += 2;
+    if(!gaugeData.orthonormalFlag) {
+        gaugeData.matVec += 2*itn;
+        if(itn > gaugeData.maxItn) {
+            gaugeData.maxItn = itn;
+        }
+        if(istop == 8) {
+            gaugeData.usertol += 1;
+        }
 
-    if(istop >= 9) {
-        fprintf(stderr, "%i: MINRES returned with istop=%i in %s, exiting.\n",
-                wrank, istop, __FILE__);
-        exit(7);
+        if(istop >= 9) {
+            fprintf(stderr, "%i: MINRES returned with istop=%i in %s, exiting.\n",
+                    wrank, istop, __FILE__);
+            exit(7);
+        }
     }
 }
 
