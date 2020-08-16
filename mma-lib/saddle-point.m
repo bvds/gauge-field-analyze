@@ -428,6 +428,8 @@ Options[findDelta] = Join[
      storeHess -> False, largeShiftOptions -> {},
      storeBB -> False, debugProj -> False, externalAction -> Automatic,
      remoteHost -> "samson",
+     (* For "detach" and "read", polling interval in seconds. *)
+     readInterval -> 60,
      (* Used by BLAS libraries and matrixVector()
      Extensive benchmarking shows 2 threads * maximum MPI processes
      is optimal. *)         
@@ -733,7 +735,7 @@ findDelta[data:{hess_, grad_, gauge_}, opts:OptionsPattern[]] :=
       If[debug>0, Print[
           DateObject[], "Started external program and detached."]]];
    If[action == "read" || action == "detach",
-      Block[{dt = 60, tt = 0},
+      Block[{dt = OptionValue[readInterval], tt = 0},
             While[RunProcess[{"ssh", "-o BatchMode=true", remoteHost,
                               "test -e",
                               remotePath <> "/done"},

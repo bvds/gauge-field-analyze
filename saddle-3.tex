@@ -38,6 +38,7 @@
 \DeclareMathOperator{\SU}{SU}
 \DeclareMathOperator{\Tr}{Tr}
 \newcommand\fnorm[1]{\left\lVert #1 \right\rVert_\mathrm{F}}
+\newcommand\znorm[1]{\left\lVert #1 \right\rVert_\zentrum}
 \newcommand\cov[2]{\mathrm{cov}\!\left(#1, #2\right)}
 
 \begin{document}
@@ -239,18 +240,15 @@ lattice configuration:
 %
 We can also define a link norm modulo the center $\zentrum$,
 \be
-\left\lVert U_\mu(x) \right\rVert_\zentrum =
-    \min_{z\in \zentrum} \fnorm{z U_\mu(x)} \; .
+  \znorm{U_\mu(x)} = \min_{z\in \zentrum} \fnorm{z U_\mu(x)} \; .
 \eq
-That is, $\left\lVert U_\mu(x) \right\rVert_\zentrum$ is the distance
+That is, $\znorm{U_\mu(x)}$ is the distance
 of $U_\mu(x)$ from the nearest element of $\zentrum$.
 Analogous to Eqn.~(\ref{latnorm2}), we can
-use $\left\lVert U_\mu(x) \right\rVert_\zentrum$ to define
-the associated lattice norm
+use $\znorm{U_\mu(x)}$ to define the associated lattice norm
 \be
-    \left\lVert \config \right\rVert_\zentrum =
-\sqrt{\frac{1}{V_L D} \sum_{\mu,x}
-  \left\lVert U_\mu(x) \right\rVert_\zentrum^2}
+    \znorm{\config} = \sqrt{\frac{1}{V_L D} \sum_{\mu,x}
+  \znorm{U_\mu(x)}^2}
    \; . \label{latnormz}
 \eq
 
@@ -283,7 +281,10 @@ long-distance regime having a linear confining
 potential~\cite{bali_static_2000,brambilla_effective-field_2005}.
 In $D=3$, the Coulomb potential goes as $\log(r)$ and there is no 
 clear separation and some care must be taken to distinguish it from
-the linear confining potential.
+the linear confining potential.  In this section, we derive
+the functional form of the Coulomb contribution to
+the effective potential for Polyakov loop correlators and Wilson
+loops.
 
 If we consider a pair of charges separated by some
 distance $r$ at some instant in time, the Coulomb potential is
@@ -378,17 +379,16 @@ and define the correlator:
 \be
 \Phi_\mu(\mathbf{r}) = \frac{1}{C_\Phi(\mathbf{r})} \sum_{x, \,y,\, x^\mu = y^\mu =1}
            \delta_{\mathbf{r},\mathbf{\Delta}(x-y)}
-           \langle 0 | \frac{1}{N} \Tr\left(\phi_\mu^\dagger(y)\right)
-           \frac{1}{N} \Tr\left(\phi_\mu(x)\right) |0\rangle
+           \langle 0 | \Tr\left(\phi_\mu^\dagger(y)\right)
+            \Tr\left(\phi_\mu(x)\right) |0\rangle
            \label{pcorr}
 \eq
 %
 where the normalization constant $C_\Phi(\mathbf{r})$ is chosen such that
 $\Phi_\mu(\mathbf{r})=1$ for the bare vacuum and
-$\mathbf{\Delta}(x-y)$ is the minimum length vector between
-$x$ and $y$ taking into account lattice periodicity,
-permuting and reflecting the components so that they lie
-in a trianglular region $r_i\ge 0$, $r_i\le r_j$, $i<j$.
+$\mathbf{\Delta}(x-y)$ is the minimum length positive-component
+vector between $x$ and $y$ taking into account lattice periodicity
+and rotation \& reflection symmetries.
 To obtain the string tension,
 we fit the correlator $\Phi_\mu(\mathbf{r})$ to an effective
 potential $F_\mu(\mathbf{r})$.
@@ -436,7 +436,7 @@ just the large $\mathbf{r}$ limit.
     The data is from 300 lattice configurations. \label{pcorr16}}
 \end{figure}
 
-When measuring $\Phi_\mu(\mathbf{r})$ for a single lattice configuration
+When measuring $\Phi_\mu(\mathbf{r})$ for a single lattice configuration,
 the link fields are re-used for each value of $\mathbf{r}$.  This means
 that the loop correlators $\Phi_\mu(\mathbf{r})$ versus $\mathbf{r}$
 are not statistically independent, compromising the $\chi^2$ fitting process.
@@ -466,7 +466,7 @@ The fit has $\chi^2=292$ for 223 degrees of freedom,
 with the covariance matrix derived from 600 lattice configurations.
 However, it should be noted that several model parameters,
 $c_1$, $c_p$, and $c_q$ are highly correlated since
-we don't have sufficient longitudinal values to distinguish
+we don't have sufficient longitudinal values to clearly distinguish
 between them.  We also see that inclusion of the transverse
 images of the Polyakov loop are important for the fit.
 
@@ -492,7 +492,7 @@ having the given dimensions:
 with normalization $C_W$ chosen such that $\wilson{\mu}{\nu}{m}{n} = \mathbb{I}$
 for the bare vacuum.  In this case, we can fit
 $\mathcal{W} = \left\langle 0 \right|
-\frac{1}{N} \Tr \wilson{\mu}{\nu}{w_1}{w_2} \left|0\right\rangle $
+ \Tr \wilson{\mu}{\nu}{w_1}{w_2} \left|0\right\rangle $
 to an effective
 potential containing a linearly confining term plus Coulomb terms
 plus power law corrections:
@@ -556,7 +556,7 @@ do a very good job untangling the two.
 The quantity that is actually measured can be generalized, as well.
 For some loop operator $\mathcal{O}\in\SU(N)$, one usually
 measures the expectation value of the trace,
-$\langle 0 | \frac{1}{N} \Tr \mathcal{O} |0\rangle$, or for $k$-strings,
+$\langle 0 | \Tr \mathcal{O} |0\rangle$, or for $k$-strings,
 one measures expectation values of higher order operators
 like $\Tr\left( \mathcal{O}^k\right)$.
 However, this is not the most general gauge-invariant observable.
@@ -644,7 +644,8 @@ where
 At each site of the lattice, one can calculate $U_G(x)$ and apply it,
 moving through the lattice sites in a checkerboard fashion,
 first all the even sites and then all the odd sites.
-This constitutes one minimization step, a ``Landau step,'' in a
+This constitutes one minimization step, what we will call
+a ``Landau step,'' in a
 successive over-relaxation (SOR) procedure.
 The relaxation factor $\orelax$ can be adjusted to speed numerical
 convergence.
@@ -653,11 +654,11 @@ however, it can become unstable for slightly higher $\orelax$.
 We generally use $\orelax=1.5$ as a compromise between speed and stability.
 
 A variation of this procedure would be to minimize
-$\left\lVert \config \right\rVert_\zentrum$ instead.
+$\znorm{\config}$ instead.
 That is, we minimize the norm of the link
 fields modulo some element of the center of $\SU(N)$, a ``center step.''
 In this case, we find a gauge transform $U_G$ on $x$
-that minimizes $\left\lVert U_\mu(x) \right\rVert_\zentrum$ for the $2D$
+that minimizes $\znorm{U_\mu(x)}$ for the $2D$
 links connected to $x$.
 That is, when computing the logarithms in Eqn.~(\ref{landau}) one uses
 \be
@@ -684,7 +685,7 @@ for finding Landau gauge.
     to each element of the center, $z^k \in \zentrum$.
     \label{center1}}
   \begin{tabular}{c|c|c|ccc}
-    iteration $\kappa$ & operation & $\left\lVert \config_\kappa \right\rVert_\zentrum$
+    iteration $\kappa$ & operation & $\znorm{\config_\kappa}$
      & $z^0=\mathbb{I}$ & $z^1$ & $z^2$ \\
     \hline
     0 & original config & 2.377 & 4101 & 4121 & 4066\\
@@ -705,7 +706,7 @@ for finding Landau gauge.
     to $z^k \in \zentrum$.
     \label{center2}}
   \begin{tabular}{c|c|c|ccc}
-    iteration $\kappa$ & operation & $\left\lVert \config_\kappa \right\rVert_\zentrum$
+    iteration $\kappa$ & operation & $\znorm{\config_\kappa}$
      & $z^0=\mathbb{I}$ & $z^1$ & $z^2$ \\
     \hline
     0 & original config              & 2.377  & 4101 & 4121 & 4066\\
@@ -730,7 +731,7 @@ for finding Landau gauge.
     to $z^k \in \zentrum$.
     \label{center3}}
   \begin{tabular}{c|c|c|ccc}
-    iteration $\kappa$ & operation & $\left\lVert \config_\kappa \right\rVert_\zentrum$
+    iteration $\kappa$ & operation & $\znorm{\config_\kappa}$
      & $z^0=\mathbb{I}$ & $z^1$ & $z^2$ \\
     \hline
     0 & original config    & 2.377  & 4101 & 4121 & 4066\\
@@ -755,7 +756,7 @@ for finding Landau gauge.
     to $z^k \in \zentrum$.
     \label{center4}}
   \begin{tabular}{c|c|c|ccc}
-    iteration $\kappa$ & operation & $\left\lVert \config_\kappa \right\rVert_\zentrum$
+    iteration $\kappa$ & operation & $\znorm{\config_\kappa}$
      & $z^0=\mathbb{I}$ & $z^1$ & $z^2$ \\
     \hline
     0 & original config    & 2.377  & 4101 & 4121 & 4066\\
@@ -775,11 +776,10 @@ for finding Landau gauge.
   \end{table}
 
 On the lattice, maximal center gauge corresponds
-to a gauge transform that minimizes
-$\left\lVert \config \right\rVert_\zentrum$. 
+to a gauge transform that minimizes $\znorm{\config}$. 
 If we apply some number of ``center steps,'' defined above,
 to a lattice configuration, we find quick convergence to some local
-minimum of $\left\lVert \config \right\rVert_\zentrum$ with
+minimum of $\znorm{\config}$ with
 link fields distributed fairly evenly across $\zentrum$.
 See Table~\ref{center1} for an example.
 
@@ -800,7 +800,7 @@ object that this minimization is not appropriate for maximal center gauge
 since it preferentially minimizes the link fields
 with respect to $\mathbb{I}$ and not some other element of $\zentrum$.
 This leads us to a variation which we will call ``$\zentrum$-axial gauge''
-where we instead minimize $\left\lVert U_\mu(x) \right\rVert_\zentrum$
+where we instead minimize $\znorm{U_\mu(x)}$
 for the link fields in $\phi_\mu(x)$.  In Table~\ref{center2},
 we apply this gauge transform in each direction before applying
 some number of local minimizations.  One can see that this
@@ -825,8 +825,7 @@ included a number of other gauge fixing strategies, as well.)
 We see a substantially reduced lattice norm, relative to
 Table~\ref{center3}.  We also see that virtually all the
 links are closest to identity element.  Thus, this procedure
-minimizes both $\left\lVert \config\right\rVert_\zentrum$ and
-$\fnorm{\config}$.
+minimizes both $\znorm{\config}$ and $\fnorm{\config}$.
 We won't give details here, but similar calculations for
 $\SU(2)$ and $\SU(4)$ produce comparable results.
 In conclusion, we find evidence that, for $D=3$,
@@ -839,7 +838,7 @@ This analysis casts doubt on the various lattice studies involving
 maximal center gauge and center projections~\cite{
 del_debbio_center_1997,del_debbio_detection_1998,de_forcrand_relevance_1999}.
 Presumably, in these studies, relatively large local minima of
-$\left\lVert \config \right\rVert_\zentrum$ were being investigated
+$\znorm{\config}$ were being investigated
 rather than configurations near a global minimum.
 
 
@@ -1083,10 +1082,16 @@ Typically, $\Lambda_s = 1$ or $2$ is used.
 Armed with these three tools:  removing infinitesimal-gauge-transform shifts,
 imposing the $\Lambda$ cutoffs, and using the damping factor $\gamma$,
 we can apply the shift iteratively and find saddle-point configurations
-that are of physical interest.
+that are of physical interest.  
+
+For a $20^3$ lattice, $\SU(4)$, the Hessian is a
+$192,000 \times 192,000$ matrix with almost $20\times 10^6$
+nonzero matrix elements. Thus, the numerical calculations
+must be carried out using sparse matrix techniques;
+details are discussed in Appendix~\ref{krylov}.
 
 
-\section{Trajectories}
+\subsection{Trajectories}
 
 \begin{figure}
 \includegraphics{trajectory3}
@@ -1106,11 +1111,6 @@ that are of physical interest.
   \label{trajectory3}}
 \end{figure}
   
-We will apply our procedure to $\SU(3)$, $16 \times 20 \times 24$
-and $14 \times 18 \times 22$ lattice
-configurations, as well as a $\SU(4)$, $12 \times 16 \times 20$ lattice
-configuration.  Details of the numerical calculation
-are discussed in Appendices~\ref{krylov} and \ref{configurations}.
 
 By applying the procedure discussed in Section~\ref{saddle} iteratively,
 we produce a trajectory of lattice configurations $\config_0$,
@@ -1123,9 +1123,10 @@ space
 \eq
 where $\mathbf{w}_\rho$ is the shift used to generate $\config_\rho$
 from $\config_{\rho-1}$ and the norm is from Eqn.~(\ref{shiftsize}).
+
+
 In Fig.~\ref{trajectory3}, we show some trajectories
 in terms of $\Delta_\kappa$ and the string tension  $\sigma a^2$.
-
 Lucini and Teper report a string tension $\sigma a^2=0.016282(76)$
 for $N=3$, and $\beta=28$ (Ref.~\cite{lucini_$mathrmsun$_2002}, Table~5).
 For the initial configuration $\config_0$ used in Fig.\ref{trajectory3},
@@ -1262,9 +1263,63 @@ In the case where the off-diagonal color blocks of $H$ are dropped,
 we do not see the desired exponential behavior in the correlator,
 Fig.~\ref{corrLink995}.
 
-\section{Gauge Fields}
+\section{Gauge field correlators}
 
+In this section, we examine gauge correlations of
+the gauge fields.
+Since the lattice norm $\fnorm{\config}$ is invariant under global
+color rotations, the link fields in Landau gauge are physical up
+to global color rotations.  One can construct physically meaningful
+field correlators from color singlet combinations of the gauge fields
+in minimum $\fnorm{\config}$ gauge.
+We will express the correlators in terms of the tangent fields
+\be
+i \mathbf{A}_\mu(x) = i A_{\mu, a}\left(x\right) T_a =
+     \log\left(U_\mu(x)\right)
+\eq
+where the logarithm is defined in Appendix~\ref{roots}.
 
+\begin{table} \caption{2-point color singlet correlators. \label{field2}}
+  \begin{tabular}{ccc}
+    \framebox{2t} & $\displaystyle \sum_{\mu,\, x,\, \mathbf{R} \perp \hat{\mu}}
+    \Tr\mathbf{A}_\mu(x) \mathbf{A}_\mu(x+\mathbf{R})$ &
+    \raisebox{-2ex}{\includegraphics{field2t}} \\    
+    \framebox{$2 \ell$} & $\displaystyle \sum_{\mu,\, x,\, R}
+    \Tr\mathbf{A}_\mu(x) \mathbf{A}_\mu(x+R \hat{\mu})$ &
+    \raisebox{-2ex}{\includegraphics{field2l}}
+  \end{tabular}
+\end{table}
+
+\begin{table} \caption{3-point color singlet correlators. \label{field3}}
+  \begin{tabular}{ccc}
+    \framebox{3p$\ell$} & $\displaystyle \sum_{\mu,\, x,\, 0\le r \le R}
+     A_{\mu,a}(x) A_{\mu,b}(x+r\hat{\mu})A_{\mu,c}(x+R\hat{\mu}) f_{a,b,c}$ &
+    \raisebox{-2ex}{\includegraphics{field3pl}} \\    
+    \framebox{3pt1} & $\begin{array}{r}
+      \displaystyle \sum_{\substack{\mu,\, \nu,\, x,\\ 0\le r \le R,\,
+      \hat{\mu} \perp\hat{\nu}}} \left[
+      A_{\mu,a}(x) A_{\nu,b}(x+r\hat{\mu})A_{\nu,c}(x+R\hat{\mu}) + \mbox{}\right. \\
+      \displaystyle\left. A_{\nu,a}(x) A_{\nu,b}(x+r\hat{\mu})A_{\mu,c}(x+R\hat{\mu}) \right] f_{a,b,c} \end{array}$ &
+    \raisebox{-2ex}{\includegraphics{field3pt1}} \\
+    \framebox{3pt2} & $
+      \displaystyle \sum_{\substack{\mu,\, \nu,\, x,\\ 0\le r \le R,\,
+      \hat{\mu} \perp\hat{\nu}}}
+      A_{\nu,a}(x) A_{\mu,b}(x+r\hat{\mu})A_{\nu,c}(x+R\hat{\mu}) f_{a,b,c}$ &
+    \raisebox{-2ex}{\includegraphics{field3pt2}} \\    
+    \framebox{3m1} & $
+      \displaystyle \sum_{\substack{\mu, \nu,\, x,\\ 0\le r,\, 0 \le R,\,
+      \hat{\mu} \perp\hat{\nu}}}
+      A_{\mu,a}(x) A_{\mu,b}\left(x+\frac{R}{2} \hat{\mu}+r\hat{\nu}\right)
+       A_{\mu,c}(x+R\hat{\mu}) f_{a,b,c}$ &
+    \raisebox{-2ex}{\includegraphics{field3m1}} \\    
+    \framebox{3m2} & $
+      \displaystyle \sum_{\substack{\mu, \nu,\, x,\\ 0\le r,\, 0 \le R,\,
+      \hat{\mu} \perp\hat{\nu}}}
+      A_{\mu,a}(x) A_{\mu,b}\left(x+\frac{R}{2} \hat{\mu}+r\hat{\nu}\right)
+       A_{\nu,c}(x+R\hat{\mu}) f_{a,b,c}$ &
+    \raisebox{-2ex}{\includegraphics{field3m2}} \\    
+  \end{tabular}
+\end{table}
 
 \section{Conclusions}
 
@@ -1352,62 +1407,6 @@ Thus, the norm defined in Eqn.~(\ref{sunorm}) is simply
 \eq
 
 
-\section{Solving a constrained linear system}
-\label{krylov}
-
-For lattices of interest, the basis size $n_L$ is large enough
-that direct solution is not possible and one must resort to Krylov
-space methods (sparse matrix methods).
-The Hessian matrix $H$ is sparse, with an $(N^2-1)\times(N^2-1)$
-color block structure and $6D-5$ nonzero blocks per row/column.
-The gauge transform matrix $G$ has the same color block structure
-with $2 D$ nonzero blocks per row and $2$ nonzero blocks per column.
-
-In order to preserve the sparsity of the matrices, we never
-explicitly construct the space of non-transform shifts used in
-Eqn.~(\ref{linear2}).  Instead, we apply the projection
-operator $P_G$ to any Krylov space vector $\mathbf{v}$ using:
-\be
-    P_G \mathbf{v} = \mathbf{v} - G^T \mathbf{u} \; ,
-\eq
-where $\mathbf{u}$ is a solution of the linear system
-\be
-  G G^T \mathbf{u} = G \mathbf{v} \; .\label{gcg}
-\eq
-Eqn.~(\ref{gcg}) is solved using the conjugate gradient
-algorithm, subroutine MINRES-QLP~\cite{choi_algorithm_2014}.
-The matrix $G G^T$ is well-conditioned, so this typically converges
-in less than 40 steps.
-
-We use the Lanczos library nu-TRLan~\cite{yamazaki_adaptive_2010},
-modified so that $P_G$ is applied to any Krylov space vector, to
-find the smallest eigenpairs of $\left(P_G H\right)^2$.  From these, we find
-the eigenvectors $\left\{\mathbf{r}_1, \mathbf{r}_2, \ldots\right\}$
-associated with eigenpairs $\left(\heigen_i^2, \mathbf{r}_i\right)$
-that violate the $\Lambda$ cutoffs,
-%
-\begin{eqnarray}
-   \frac{\sqrt{2}\, \mathbf{r}_i \mathbf{\cdot} \mathbf{q}
-   \left\lVert \mathbf{r}_i\right\rVert_2}{\left|\heigen_i\right| }
-     &>& \Lambda_2  \quad\mbox{or} \\
-   \frac{\sqrt{2}\, \mathbf{r}_i\mathbf{\cdot} \mathbf{q}
-   \left\lVert \mathbf{r}_i\right\rVert_\mathrm{max}}{\left|\heigen_i\right| }
-     &>& \Lambda_\mathrm{max} \; .
-\end{eqnarray}
-%
-To ensure that we have found all the eigenpairs that violate the cutoffs,
-we may need to calculate as many as 2000 to 4000 of the lowest eigenpairs
-in the Lanzos routine.  As one moves along a trajectory towards the
-saddle point, the gradient vector decreases in magnitude and fewer eigenpairs
-exceed the $\Lambda$ cutoffs.
-
-Finally, we solve the linear system $H \mathbf{y} = \mathbf{q}$
-using the conjugate gradient algorithm,
-subroutine MINRES-QLP~\cite{choi_algorithm_2014}, modified so that
-the projection operators $P_G$ and 
-$\mathbb{I}- \sum_{i} \mathbf{r}_i \otimes \mathbf{r}_i$
-are applied to any Krylov space vector.
-
 \section{Lattice configurations}
 \label{configurations}
 
@@ -1422,6 +1421,7 @@ The lattice configurations were sampled after 10,000 thermalizing
 steps, with 3000 steps between samples for results that use
 multiple lattice configurations.  We used 4 over-relaxations steps
 for every heat bath step.
+
 
 \section{Newton's method for minimizing the lattice norm}
 \label{newtonNorm}
@@ -1543,6 +1543,63 @@ expect that Newton's method will work very poorly.
 However, after some intial minimization of the lattice
 norm, we see that very few---if any---eigenvalues violate the cutoffs
 and Newton's method should work quite well.
+
+
+\section{Solving a constrained linear system}
+\label{krylov}
+
+For lattices of interest, the basis size $n_L$ is large enough
+that direct solution is not possible and one must resort to Krylov
+space methods (sparse matrix methods).
+The Hessian matrix $H$ is sparse, with an $(N^2-1)\times(N^2-1)$
+color block structure and $6D-5$ nonzero blocks per row/column.
+The gauge transform matrix $G$ has the same color block structure
+with $2 D$ nonzero blocks per row and $2$ nonzero blocks per column.
+
+In order to preserve the sparsity of the matrices, we never
+explicitly construct the space of non-transform shifts used in
+Eqn.~(\ref{linear2}).  Instead, we apply the projection
+operator $P_G$ to any Krylov space vector $\mathbf{v}$ using:
+\be
+    P_G \mathbf{v} = \mathbf{v} - G^T \mathbf{u} \; ,
+\eq
+where $\mathbf{u}$ is a solution of the linear system
+\be
+  G G^T \mathbf{u} = G \mathbf{v} \; .\label{gcg}
+\eq
+Eqn.~(\ref{gcg}) is solved using the conjugate gradient
+algorithm, subroutine MINRES-QLP~\cite{choi_algorithm_2014}.
+The matrix $G G^T$ is well-conditioned, so this typically converges
+in less than 40 steps.
+
+We use the Lanczos library nu-TRLan~\cite{yamazaki_adaptive_2010},
+modified so that $P_G$ is applied to any Krylov space vector, to
+find the smallest eigenpairs of $\left(P_G H\right)^2$.  From these, we find
+the eigenvectors $\left\{\mathbf{r}_1, \mathbf{r}_2, \ldots\right\}$
+associated with eigenpairs $\left(\heigen_i^2, \mathbf{r}_i\right)$
+that violate the $\Lambda$ cutoffs,
+%
+\begin{eqnarray}
+   \frac{\sqrt{2}\, \mathbf{r}_i \mathbf{\cdot} \mathbf{q}
+   \left\lVert \mathbf{r}_i\right\rVert_2}{\left|\heigen_i\right| }
+     &>& \Lambda_2  \quad\mbox{or} \\
+   \frac{\sqrt{2}\, \mathbf{r}_i\mathbf{\cdot} \mathbf{q}
+   \left\lVert \mathbf{r}_i\right\rVert_\mathrm{max}}{\left|\heigen_i\right| }
+     &>& \Lambda_\mathrm{max} \; .
+\end{eqnarray}
+%
+To ensure that we have found all the eigenpairs that violate the cutoffs,
+we may need to calculate as many as 2000 to 4000 of the lowest eigenpairs
+in the Lanzos routine.  As one moves along a trajectory towards the
+saddle point, the gradient vector decreases in magnitude and fewer eigenpairs
+exceed the $\Lambda$ cutoffs.
+
+Finally, we solve the linear system $H \mathbf{y} = \mathbf{q}$
+using the conjugate gradient algorithm,
+subroutine MINRES-QLP~\cite{choi_algorithm_2014}, modified so that
+the projection operators $P_G$ and 
+$\mathbb{I}- \sum_{i} \mathbf{r}_i \otimes \mathbf{r}_i$
+are applied to any Krylov space vector.
 
 
 \bibliography{physics}  % Use physics.bib

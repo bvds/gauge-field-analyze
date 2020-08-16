@@ -75,7 +75,7 @@ Options[makeObservableTrajectory] = Join[
      "periodic" -> "../data/3-3/periodic-16-28",
      (* Defaults for the Newton's steps *)
      largeShiftOptions -> {eigenPairs -> -100, maxLanczosVecs -> 1000},
-     Method -> "External", externalAction -> "remote",
+     Method -> "External", externalAction -> "detach", readInterval -> 5,
      remoteHost -> "samson", processes -> 8
     },
     Options[singleLinkStep], Options[applyGaugeTransforms]]; 
