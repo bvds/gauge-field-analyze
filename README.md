@@ -34,14 +34,21 @@ In the root directory, generate the configuration files:
 
     autoreconf -f
 
+You also may need this:
+
+    automake --add-missing 
+
 To get configuration options:
 
     ./configure --help
 
-In particular, note the `--with-qdp` option.  To build:
+In particular, note the `--with-qdp` option.  To build, one
+can create a separate build directory like this:
 
-    ./configure [options]
+    mkdir 3-3-build/ ; cd 3-3-build
+    ../configure --with-qdp=/usr/local/qdp++/3-3/
     make
+
 
 ### Run
 
@@ -64,7 +71,7 @@ associated Mathematica input file:
     cd ../data/3-3/
     # create file periodic-16-28-in.xml
     ../../chroma/3-3-build/mainprogs/main/purgaug -i periodic-16-28-in.xml -o periodic-16-28-out.xml
-    ../../gauge-field-analyze/programs/ganalyze periodic-16-28.ini.xml5 periodic-16-28-5.m
+    ../../gauge-field-analyze/3-3-build/programs/ganalyze periodic-16-28.ini.xml5 periodic-16-28-5.m
 
 Or, if there is a lot of them:
 
