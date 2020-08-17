@@ -33,9 +33,6 @@ and packages `autoconf` and `g++`.
 In the root directory, generate the configuration files:
 
     autoreconf -f
-
-You also may need this:
-
     automake --add-missing 
 
 To get configuration options:
