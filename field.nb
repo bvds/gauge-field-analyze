@@ -3,8 +3,8 @@ Notebook[{
 Cell[CellGroupData[{
 Cell["Fields in Landau gauge", "Title",
  CellChangeTimes->{{3.7995869774198523`*^9, 
-  3.799587007562594*^9}},ExpressionUUID->"70ed3b8f-2353-4389-b61f-\
-7dc2ac8fdf50"],
+  3.799587007562594*^9}},ExpressionUUID->"0f7982cd-05be-4b87-aaa2-\
+779b4ba686ce"],
 
 Cell["\<\
 Look at the fields themselves, especially for saddle-point configurations.  \
@@ -12,13 +12,13 @@ In this case the norm of the link fields is small and it gives us the hope of \
 connecting them to the continuum fields. \
 \>", "Text",
  CellChangeTimes->{{3.799587021295973*^9, 
-  3.799587164733938*^9}},ExpressionUUID->"b2d242cf-5b71-4532-a05c-\
-66d91216da90"],
+  3.799587164733938*^9}},ExpressionUUID->"5d9ad2f3-3360-4da8-8683-\
+c32a1e049975"],
 
 Cell[CellGroupData[{
 
 Cell["Load Library", \
-"Chapter",ExpressionUUID->"34abd02b-ba3e-4aee-9a81-48acc7df2018"],
+"Chapter",ExpressionUUID->"1819e80e-4bd0-47d3-a7cb-2751f18707a6"],
 
 Cell[BoxData[
  RowBox[{
@@ -29,43 +29,45 @@ Cell[BoxData[
     RowBox[{"SelectedNotebook", "[", "]"}], ",", 
     RowBox[{"PrintPrecision", "\[Rule]", "10"}]}], "]"}]}]], "Input",
  InitializationCell->
-  True,ExpressionUUID->"5a5bd849-bd0f-4621-bc4c-c0587e570646"],
+  True,ExpressionUUID->"aad5595d-7785-431c-85ad-8e9eea532152"],
 
 Cell["\<\
 Disable current notebook FileOutlineCache and TrackCellChangeTimes (set \
 CellChangeTimes -> {}).  See: \
 https://stackoverflow.com/questions/2816628/version-control-of-mathematica-\
 notebooks \
-\>", "Text",ExpressionUUID->"1542a4e8-6510-4114-a499-9d8993e6b453"],
+\>", "Text",ExpressionUUID->"d1cea323-489b-4b12-8af4-ba7d3596d24f"],
 
 Cell["\<\
 For parallelization, I had to go to menu Evaluation->Parallel Kernel \
 Configuration and set the number manually.  Automatic launching of additional \
 kernels is broken?  Note that the parallelization is based on the leading \
 dimension of the table.\
-\>", "Text",ExpressionUUID->"392dad26-78ce-4287-bf5a-ff981039b35a"],
+\>", "Text",ExpressionUUID->"9f42f6f6-ca2a-49f9-b2db-4d27c66ac663"],
 
 Cell[BoxData[
  RowBox[{
   RowBox[{"<<", "\"\<mma-lib/groups.m\>\""}], ";", 
   RowBox[{"Needs", "[", "\"\<ErrorBarPlots`\>\"", "]"}]}]], "Input",
  InitializationCell->
-  True,ExpressionUUID->"8436c9c4-8cf8-4039-8a6b-5cc926914ddf"],
+  True,ExpressionUUID->"01273307-cda1-4c7d-8c02-fd98f563fcb5"],
 
 Cell[BoxData[
  RowBox[{
   RowBox[{"<<", "\"\<mma-lib/value-error.m\>\""}], ";", 
+  RowBox[{"<<", "\"\<mma-lib/saddle-point.m\>\""}], ";", 
   RowBox[{"<<", "\"\<mma-lib/lattice.m\>\""}], ";", 
+  RowBox[{"<<", "\"\<mma-lib/gauge.m\>\""}], ";", 
   RowBox[{"<<", "\"\<mma-lib/field.m\>\""}], ";"}]], "Input",
  InitializationCell->
-  True,ExpressionUUID->"de5a3dca-70cc-4d77-9613-0ce32d457c24"],
+  True,ExpressionUUID->"0c96c90b-8401-4ec4-926e-032f982f8b5c"],
 
 Cell[BoxData[
  RowBox[{
   RowBox[{"<<", "\"\<mma-lib/teper-results.m\>\""}], ";", 
   RowBox[{"<<", "\"\<mma-lib/plot.m\>\""}], ";"}]], "Input",
  InitializationCell->
-  True,ExpressionUUID->"baab5c35-5150-4856-839c-4847969f9aeb"],
+  True,ExpressionUUID->"bf94b4b6-bc25-4621-9d28-d4080f4dd8b7"],
 
 Cell[BoxData[{
  RowBox[{
@@ -93,17 +95,64 @@ Cell[BoxData[{
       "of", " ", "1.5", " ", "or", " ", "2", " ", "for", " ", "large", " ", 
      RowBox[{"figures", "."}]}]}], " ", "*)"}], ";"}]}], "Input",
  InitializationCell->
-  True,ExpressionUUID->"6d49e314-feb5-463e-8875-59ac13984cfe"]
+  True,ExpressionUUID->"96f9fa25-d37f-47b0-8531-0ad1384d2df0"],
+
+Cell["Set gauge before calculating correlators", \
+"Text",ExpressionUUID->"cd88af11-f5bb-4e41-ae7e-c6aa16437a6e"],
+
+Cell[BoxData[
+ RowBox[{
+  RowBox[{
+   RowBox[{"applyGaugeTransformStrategy", "[", 
+    RowBox[{"newtonQ_:", "True"}], "]"}], ":=", 
+   RowBox[{"Print", "[", 
+    RowBox[{"{", 
+     RowBox[{
+      RowBox[{"latticeNorm", "[", "]"}], ",", 
+      RowBox[{"latticeNorm", "[", 
+       RowBox[{"\"\<center\>\"", "\[Rule]", "True"}], "]"}], ",", 
+      RowBox[{"applyGaugeTransforms", "[", 
+       RowBox[{
+        RowBox[{"Flatten", "[", 
+         RowBox[{"{", 
+          RowBox[{"1", ",", "1", ",", "6", ",", "1", ",", 
+           RowBox[{"Table", "[", 
+            RowBox[{
+             RowBox[{"{", 
+              RowBox[{"5", ",", "6"}], "}"}], ",", 
+             RowBox[{"{", "12", "}"}]}], "]"}], ",", 
+           RowBox[{"If", "[", 
+            RowBox[{"newtonQ", ",", 
+             RowBox[{"{", 
+              RowBox[{"7", ",", "7", ",", "7"}], "}"}], ",", 
+             RowBox[{"{", "}"}]}], "]"}]}], "}"}], "]"}], ",", 
+        RowBox[{"largeShiftOptions", "\[Rule]", 
+         RowBox[{"{", 
+          RowBox[{
+           RowBox[{"eigenPairs", "\[Rule]", 
+            RowBox[{"-", "100"}]}], ",", 
+           RowBox[{"maxLanczosVecs", "\[Rule]", "1000"}]}], "}"}]}], ",", 
+        RowBox[{"printDetails", "\[Rule]", "1"}], ",", 
+        RowBox[{"Method", "\[Rule]", "\"\<External\>\""}], ",", 
+        RowBox[{"externalAction", "\[Rule]", "\"\<detach\>\""}], ",", 
+        RowBox[{"readInterval", "\[Rule]", "5"}], ",", 
+        RowBox[{"remoteHost", "\[Rule]", "\"\<samson\>\""}], ",", 
+        RowBox[{"processes", "\[Rule]", "8"}]}], "]"}], ",", 
+      RowBox[{"latticeNorm", "[", "]"}], ",", 
+      RowBox[{"averagePlaquette", "[", "]"}]}], "}"}], "]"}]}], 
+  ";"}]], "Input",
+ InitializationCell->
+  True,ExpressionUUID->"ddcee862-1b24-44b1-84c1-404125ecde5d"]
 }, Open  ]],
 
 Cell[CellGroupData[{
 
 Cell["Input", \
-"Chapter",ExpressionUUID->"3243e328-ab65-4a4c-b1ac-c9da6913161c"],
+"Chapter",ExpressionUUID->"3431069c-ad73-41ff-a3e4-64ad9a53b349"],
 
 Cell["\<\
 Input a gauge configuration near the saddle point and go to Landau gauge :\
-\>", "Text",ExpressionUUID->"b3a3cbfd-deb6-4c55-9997-d077838219b8"],
+\>", "Text",ExpressionUUID->"7ff817c8-6f02-4d57-93a5-2ad3604e67b2"],
 
 Cell["\<\
 3-point, just f_abc
@@ -115,13 +164,17 @@ Cell["\<\
 
 2 fields at 2 points
 3-3/12.16.20, all operators, 221 seconds
-3-3/20^3, all operators, ??? seconds\
-\>", "Text",ExpressionUUID->"08f24d06-62c3-4240-85cd-948b99e43f4d"],
+3-3/20^3, all operators, ??? seconds
+
+August 13, 2020 run:  Update to \[OpenCurlyDoubleQuote]field.nb\
+\[CloseCurlyDoubleQuote] detailing the calculation results was lost due to \
+Mma crash.\
+\>", "Text",ExpressionUUID->"4eac1f65-f79d-40d6-a682-aaafce20c213"],
 
 Cell[CellGroupData[{
 
 Cell["Create Random lattice ", \
-"Section",ExpressionUUID->"e7c4e4c2-867a-4cd5-b39f-ad257c2e4a79"],
+"Section",ExpressionUUID->"570684da-3a99-42ab-a40a-057d4d844e78"],
 
 Cell[CellGroupData[{
 
@@ -165,21 +218,21 @@ Cell[BoxData[{
    RowBox[{
    "averagePlaquette", "[", 
     "]"}]}]}]}], \
-"Input",ExpressionUUID->"ff34ffaf-e9a1-49d2-bdaf-291bf166e437"],
+"Input",ExpressionUUID->"9e6c01d8-39f2-4259-956f-3233cf844513"],
 
 Cell[BoxData[
  RowBox[{"-", 
   "0.014206750839136497`"}]], \
-"Output",ExpressionUUID->"7e06917f-79ed-4a37-aea9-00bcd16b6a4c"]
+"Output",ExpressionUUID->"82979a6a-9afb-4630-a98b-a8cd25efec85"]
 }, Open  ]],
 
 Cell[CellGroupData[{
 
 Cell["Calculate", \
-"Subsection",ExpressionUUID->"e417d66b-6b5e-49df-8544-04a86e9cdad1"],
+"Subsection",ExpressionUUID->"b474f76b-b482-4534-a62e-6344353652bd"],
 
 Cell["Get timing info.", \
-"Text",ExpressionUUID->"71b4b27d-7efe-47b8-bc20-18ef6c1c727a"],
+"Text",ExpressionUUID->"3263a58d-5edd-42ec-b5a3-ebd3e667d8a3"],
 
 Cell[CellGroupData[{
 
@@ -188,7 +241,7 @@ Cell[BoxData[
   RowBox[{"linkCorrelators", "[", 
    RowBox[{"2", ",", 
     RowBox[{"\"\<distFlag\>\"", "\[Rule]", "False"}]}], 
-   "]"}]}]], "Input",ExpressionUUID->"b75f27fd-1595-4550-933b-f0472a8533d4"],
+   "]"}]}]], "Input",ExpressionUUID->"d70fa4da-e67c-476e-8c7f-b8810cccb255"],
 
 Cell[CellGroupData[{
 
@@ -201,7 +254,7 @@ Cell[BoxData[
   
   SequenceForm["ops: ", {"2l", "2t1", "2t2", "2t11", "2t12", "2t13"}],
   Editable->
-   False]], "Print",ExpressionUUID->"59bf60f7-113b-4093-addc-c86aeecc8c24"],
+   False]], "Print",ExpressionUUID->"cccf820a-81f5-4ced-b457-35678f3c21a4"],
 
 Cell[BoxData[
  InterpretationBox[
@@ -209,7 +262,7 @@ Cell[BoxData[
    "0.205105`5.462491245455069"}],
   SequenceForm["Total time: ", 0.205105`5.462491245455069],
   Editable->
-   False]], "Print",ExpressionUUID->"845cf962-7f00-4d29-ade3-10bc6d544062"]
+   False]], "Print",ExpressionUUID->"624d593a-e741-437d-832e-9d7bbc148e96"]
 }, Open  ]]
 }, Open  ]],
 
@@ -222,7 +275,7 @@ Cell[BoxData[
     RowBox[{"3", ",", 
      RowBox[{"\"\<distFlag\>\"", "\[Rule]", "False"}], ",", 
      RowBox[{"\"\<timing\>\"", "\[Rule]", "True"}]}], "]"}]}], 
-  ";"}]], "Input",ExpressionUUID->"44f77821-5e42-4d1a-b183-5f6e7bdd7f28"],
+  ";"}]], "Input",ExpressionUUID->"fdb3d972-ae7d-4153-b83b-2aded8a1f1f4"],
 
 Cell[CellGroupData[{
 
@@ -238,7 +291,7 @@ Cell[BoxData[
   "ops: ", {
    "3m1b", "3m2", "3m4", "3m5", "3m6", "3m8", "3m9", "3pl", "3pt1", "3pt2"}],
   Editable->
-   False]], "Print",ExpressionUUID->"3d2f109e-759c-4de8-b2e2-b877bf654a09"],
+   False]], "Print",ExpressionUUID->"cf7fef89-e4a0-48fd-9186-21faa3e114c7"],
 
 Cell[BoxData[
  InterpretationBox[
@@ -252,7 +305,7 @@ Cell[BoxData[
    0.771119`6.037636401895145, -0.2820629999999668, 0.39976599999996787`, 
     0.5834429999999992}],
   Editable->False]], "Print",
- ShowCellLabel->True,ExpressionUUID->"98e30f13-606b-4a2f-9fc0-a74da1881215"],
+ ShowCellLabel->True,ExpressionUUID->"b66e0d1f-3562-4076-b728-e2032f1b7e6a"],
 
 Cell[BoxData[
  InterpretationBox[
@@ -266,7 +319,7 @@ Cell[BoxData[
    0.783714`6.044672602757935, -0.2891199999999623, 0.4059519999999636, 
     0.5976279999999989}],
   Editable->False]], "Print",
- ShowCellLabel->True,ExpressionUUID->"1a10387b-8cf9-4db6-8acf-8cee9a69e067"],
+ ShowCellLabel->True,ExpressionUUID->"73a47363-8f03-4ef2-818c-2ee0340247b3"],
 
 Cell[BoxData[
  InterpretationBox[
@@ -280,7 +333,7 @@ Cell[BoxData[
    1.086672`6.186613474681698, -0.407178999999985, 0.5652969999999861, 
     0.8341929999999993}],
   Editable->False]], "Print",
- ShowCellLabel->True,ExpressionUUID->"c9c0e6a1-c214-4d1a-b865-4845cd75427b"],
+ ShowCellLabel->True,ExpressionUUID->"2ff4ec72-0664-4d92-ba22-ef0d27c7b24b"],
 
 Cell[BoxData[
  InterpretationBox[
@@ -294,7 +347,7 @@ Cell[BoxData[
    1.145776`6.209614718890352, -0.42913000000002577`, 0.5959070000000268, 
     0.8798779999999992}],
   Editable->False]], "Print",
- ShowCellLabel->True,ExpressionUUID->"1b4fbdd3-8a1d-43a8-83e4-9b2b6dfe5d48"],
+ ShowCellLabel->True,ExpressionUUID->"b587c2da-d94e-47d4-9bb5-1036b8ac21d2"],
 
 Cell[BoxData[
  InterpretationBox[
@@ -308,7 +361,7 @@ Cell[BoxData[
    1.159049`6.21461679443388, -0.433795999999965, 0.6034919999999651, 
     0.8882170000000003}],
   Editable->False]], "Print",
- ShowCellLabel->True,ExpressionUUID->"d705ab6b-12aa-4902-8e8f-b79effd814be"],
+ ShowCellLabel->True,ExpressionUUID->"d1ef7bc9-df7f-4132-9d44-29c41b6136a9"],
 
 Cell[BoxData[
  InterpretationBox[
@@ -322,7 +375,7 @@ Cell[BoxData[
    1.208023`6.232590200890278, -0.4502080000000285, 0.6265400000000301, 
     0.9260259999999985}],
   Editable->False]], "Print",
- ShowCellLabel->True,ExpressionUUID->"e8e7dfc1-26b7-41c7-8903-366c7fb53479"],
+ ShowCellLabel->True,ExpressionUUID->"2019eec4-998e-467a-bfad-1ab7092afdfb"],
 
 Cell[BoxData[
  InterpretationBox[
@@ -330,7 +383,7 @@ Cell[BoxData[
    "1.254913`6.2491286161354065"}],
   SequenceForm["Total time: ", 1.254913`6.2491286161354065],
   Editable->
-   False]], "Print",ExpressionUUID->"465193dc-29bd-4af8-aaba-8e29ae7206bc"]
+   False]], "Print",ExpressionUUID->"97d8f948-ca51-4430-a0a7-912b2657be72"]
 }, Open  ]]
 }, Open  ]],
 
@@ -342,9 +395,9 @@ Cell[BoxData[
    RowBox[{"linkCorrelators", "[", 
     RowBox[{"3", ",", 
      RowBox[{"\"\<distFlag\>\"", "\[Rule]", "False"}], ",", 
-     RowBox[{"\"\<anomoly\>\"", "\[Rule]", "True"}], ",", 
+     RowBox[{"\"\<anomaly\>\"", "\[Rule]", "True"}], ",", 
      RowBox[{"\"\<timing\>\"", "\[Rule]", "True"}]}], "]"}]}], 
-  ";"}]], "Input",ExpressionUUID->"5efd2b25-9c3b-4b06-bc65-5a7a9d19743d"],
+  ";"}]], "Input",ExpressionUUID->"ae42dac4-9a3e-4055-a316-b262cbf4e955"],
 
 Cell[CellGroupData[{
 
@@ -360,7 +413,7 @@ Cell[BoxData[
   "ops: ", {
    "3m10", "3m2", "3m3", "3m4", "3m5", "3m7", "3m8", "3pl", "3pt1", "3pt2"}],
   Editable->
-   False]], "Print",ExpressionUUID->"8e6d58bc-2273-40f3-bd75-10d640ece4f4"],
+   False]], "Print",ExpressionUUID->"40e16e39-da16-4fcc-b524-981a1f1d32c7"],
 
 Cell[BoxData[
  InterpretationBox[
@@ -374,7 +427,7 @@ Cell[BoxData[
    0.776406`6.040603880752367, -0.28808499999996356`, 0.40218999999996374`, 
     0.5899930000000003}],
   Editable->False]], "Print",
- ShowCellLabel->True,ExpressionUUID->"6895af3a-eabd-4b74-8f58-262add0ccbb7"],
+ ShowCellLabel->True,ExpressionUUID->"1e378bab-de13-401a-a7a0-190fd0fe0905"],
 
 Cell[BoxData[
  InterpretationBox[
@@ -388,7 +441,7 @@ Cell[BoxData[
    0.811752`6.059938365148997, -0.29687299999996397`, 0.418728999999963, 
     0.6138400000000008}],
   Editable->False]], "Print",
- ShowCellLabel->True,ExpressionUUID->"84cf92f7-2362-46d4-8269-d362116e9fd6"],
+ ShowCellLabel->True,ExpressionUUID->"071de7b7-8be1-4cd4-a5fb-b3817cbe950f"],
 
 Cell[BoxData[
  InterpretationBox[
@@ -402,7 +455,7 @@ Cell[BoxData[
    1.06424`6.177554575905764, -0.4001080000000183, 0.5537050000000187, 
     0.8164339999999998}],
   Editable->False]], "Print",
- ShowCellLabel->True,ExpressionUUID->"3840aac2-d6cf-45a6-b5bc-346b81c4cea1"],
+ ShowCellLabel->True,ExpressionUUID->"0bd3a72f-1706-4eeb-820f-8cf8cd188063"],
 
 Cell[BoxData[
  InterpretationBox[
@@ -416,7 +469,7 @@ Cell[BoxData[
    1.098355`6.191257729223813, -0.4137160000000268, 0.5727820000000259, 
     0.8418570000000007}],
   Editable->False]], "Print",
- ShowCellLabel->True,ExpressionUUID->"b1995c2b-2707-4bb8-8223-250fde5e4a5a"],
+ ShowCellLabel->True,ExpressionUUID->"29150a02-9c8e-49d6-a831-e5018d439ce3"],
 
 Cell[BoxData[
  InterpretationBox[
@@ -430,7 +483,7 @@ Cell[BoxData[
    1.134634`6.205370791154761, -0.4289940000000064, 0.592409000000006, 
     0.8707250000000006}],
   Editable->False]], "Print",
- ShowCellLabel->True,ExpressionUUID->"0756f648-bb01-4e8d-9d48-f92d65ff0733"],
+ ShowCellLabel->True,ExpressionUUID->"66ec7bc5-c0c7-4679-8282-493e91d49968"],
 
 Cell[BoxData[
  InterpretationBox[
@@ -444,7 +497,7 @@ Cell[BoxData[
    1.174968`6.220541036684287, -0.4419930000000416, 0.6109710000000415, 
     0.9016509999999998}],
   Editable->False]], "Print",
- ShowCellLabel->True,ExpressionUUID->"7cea2d0e-0e1f-4c21-9b95-159787485375"],
+ ShowCellLabel->True,ExpressionUUID->"2be2848f-a41c-485d-bae7-97b7389d0b37"],
 
 Cell[BoxData[
  InterpretationBox[
@@ -452,7 +505,7 @@ Cell[BoxData[
    "1.226208`6.239079143047215"}],
   SequenceForm["Total time: ", 1.226208`6.239079143047215],
   Editable->
-   False]], "Print",ExpressionUUID->"1ac0162b-70d5-46c2-8a5e-64567ad05522"]
+   False]], "Print",ExpressionUUID->"601f5887-a4fd-47ec-b910-e547a40a1649"]
 }, Open  ]]
 }, Open  ]],
 
@@ -462,9 +515,9 @@ Cell[BoxData[
  RowBox[{"linkCorrelators", "[", 
   RowBox[{"22", ",", 
    RowBox[{"\"\<distFlag\>\"", "\[Rule]", "False"}], ",", 
-   RowBox[{"\"\<anomoly\>\"", "\[Rule]", "False"}], ",", 
+   RowBox[{"\"\<anomaly\>\"", "\[Rule]", "False"}], ",", 
    RowBox[{"\"\<timing\>\"", "\[Rule]", "True"}]}], 
-  "]"}]], "Input",ExpressionUUID->"0aa1634a-2df9-4d24-8634-4088db44d57f"],
+  "]"}]], "Input",ExpressionUUID->"fc90c3b1-4860-49ce-85cd-4c939ecac83d"],
 
 Cell[CellGroupData[{
 
@@ -528,7 +581,7 @@ Cell[BoxData[
     "t1", "8A"}, {"t1", "8S"}, {"t2", "1"}, {"t2", "27"}, {"t2", "8S"}, {
     "t3", "1"}, {"t3", "10S"}, {"t3", "27"}, {"t3", "8A"}, {"t3", "8S"}}],
   Editable->
-   False]], "Print",ExpressionUUID->"6ef1a82b-567a-413b-ada3-5b731a3ae902"],
+   False]], "Print",ExpressionUUID->"656e10e6-9378-42cc-a8ad-b37e26c1eab1"],
 
 Cell[BoxData[
  InterpretationBox[
@@ -539,7 +592,7 @@ Cell[BoxData[
   SequenceForm["Timing:  ", {0.291884`5.615725287057219, 0.2532589999999987}],
   
   Editable->False]], "Print",
- ShowCellLabel->True,ExpressionUUID->"0c2211b2-9dc5-4924-9205-12d009cc8131"],
+ ShowCellLabel->True,ExpressionUUID->"7b11c1dd-dbde-4ec3-a782-216f2429ffb2"],
 
 Cell[BoxData[
  InterpretationBox[
@@ -550,7 +603,7 @@ Cell[BoxData[
   SequenceForm[
   "Timing:  ", {0.284929`5.605251651701227, 0.24743299999999874`}],
   Editable->False]], "Print",
- ShowCellLabel->True,ExpressionUUID->"61d87a94-099f-40fe-87f5-92b5382d8649"],
+ ShowCellLabel->True,ExpressionUUID->"5516e300-d5f9-4ce8-acc3-c2375d6548c9"],
 
 Cell[BoxData[
  InterpretationBox[
@@ -561,7 +614,7 @@ Cell[BoxData[
   SequenceForm["Timing:  ", {0.428666`5.782634036280907, 0.3761290000000004}],
   
   Editable->False]], "Print",
- ShowCellLabel->True,ExpressionUUID->"a704eda5-10b0-40d4-ae14-0edfcfbca5d7"],
+ ShowCellLabel->True,ExpressionUUID->"95818f5d-2ce6-4d0b-b3bd-277879985a06"],
 
 Cell[BoxData[
  InterpretationBox[
@@ -572,7 +625,7 @@ Cell[BoxData[
   SequenceForm[
   "Timing:  ", {0.453235`5.806838437681662, 0.39742599999999895`}],
   Editable->False]], "Print",
- ShowCellLabel->True,ExpressionUUID->"997dc4a2-7e37-43af-b0b3-9c8590e87320"],
+ ShowCellLabel->True,ExpressionUUID->"3c45fce7-ca57-499c-a159-29550af8569a"],
 
 Cell[BoxData[
  InterpretationBox[
@@ -583,7 +636,7 @@ Cell[BoxData[
   SequenceForm["Timing:  ", {0.453387`5.806984061242242, 0.3979549999999994}],
   
   Editable->False]], "Print",
- ShowCellLabel->True,ExpressionUUID->"99f13f5d-b243-4dd0-86c2-c4aa950df3fc"],
+ ShowCellLabel->True,ExpressionUUID->"b5543ac8-92da-44c0-9ca6-3c71f020335f"],
 
 Cell[BoxData[
  InterpretationBox[
@@ -592,7 +645,7 @@ Cell[BoxData[
     RowBox[{"0.47342`5.825761598924347", ",", "0.4148309999999996`"}], "}"}]}],
   SequenceForm["Timing:  ", {0.47342`5.825761598924347, 0.4148309999999996}],
   Editable->False]], "Print",
- ShowCellLabel->True,ExpressionUUID->"1df11669-12fa-4ad8-8b3f-544d505c6f59"],
+ ShowCellLabel->True,ExpressionUUID->"4ef2b983-f06d-40c3-9cc8-970b33da4dd6"],
 
 Cell[BoxData[
  InterpretationBox[
@@ -600,7 +653,7 @@ Cell[BoxData[
    "0.512298`5.860037658235641"}],
   SequenceForm["Total time: ", 0.512298`5.860037658235641],
   Editable->
-   False]], "Print",ExpressionUUID->"6f1fe3f8-128d-48b9-9e94-f5a6a38ef280"]
+   False]], "Print",ExpressionUUID->"1bc7d098-778e-4cab-b9fc-26fd23765ccd"]
 }, Open  ]]
 }, Open  ]],
 
@@ -611,9 +664,9 @@ Cell[BoxData[
   RowBox[{"linkCorrelators", "[", 
    RowBox[{"22", ",", 
     RowBox[{"\"\<distFlag\>\"", "\[Rule]", "False"}], ",", 
-    RowBox[{"\"\<anomoly\>\"", "\[Rule]", "True"}], ",", 
+    RowBox[{"\"\<anomaly\>\"", "\[Rule]", "True"}], ",", 
     RowBox[{"\"\<timing\>\"", "\[Rule]", "True"}]}], "]"}], 
-  ";"}]], "Input",ExpressionUUID->"01f9b3a0-31e7-46c0-8f6e-18e75dee1df6"],
+  ";"}]], "Input",ExpressionUUID->"57c1255f-bf58-4416-9122-fd1f82718360"],
 
 Cell[CellGroupData[{
 
@@ -664,7 +717,7 @@ Cell[BoxData[
     "t1", "A1"}, {"t1", "A2"}, {"t1", "A3"}, {"t2", "A1"}, {"t2", "A2"}, {
     "t2", "A3"}, {"t3", "A1"}, {"t3", "A2"}, {"t3", "A3"}}],
   Editable->
-   False]], "Print",ExpressionUUID->"5d12dbc4-f022-440a-b7ff-008fc89477fb"],
+   False]], "Print",ExpressionUUID->"320627a9-d39d-4387-b675-717f2b45bbf2"],
 
 Cell[BoxData[
  InterpretationBox[
@@ -675,7 +728,7 @@ Cell[BoxData[
   SequenceForm[
   "Timing:  ", {0.257374`5.5610796700551655, 0.22289500000000023`}],
   Editable->False]], "Print",
- ShowCellLabel->True,ExpressionUUID->"557d2f15-4700-4abe-aced-ccf54a72c31a"],
+ ShowCellLabel->True,ExpressionUUID->"7628eb96-23d0-43e0-a647-c5680e835c70"],
 
 Cell[BoxData[
  InterpretationBox[
@@ -686,7 +739,7 @@ Cell[BoxData[
   SequenceForm[
   "Timing:  ", {0.245535`5.540628405588106, 0.21226200000000017`}],
   Editable->False]], "Print",
- ShowCellLabel->True,ExpressionUUID->"09b62a6e-1891-4f58-93b1-4ae2d6aaceb0"],
+ ShowCellLabel->True,ExpressionUUID->"9a3378fe-9d8c-4ee6-a60e-f1cdfd365974"],
 
 Cell[BoxData[
  InterpretationBox[
@@ -696,7 +749,7 @@ Cell[BoxData[
   
   SequenceForm["Timing:  ", {0.39684`5.749130438793323, 0.346687999999997}],
   Editable->False]], "Print",
- ShowCellLabel->True,ExpressionUUID->"a84000c0-cc08-4f3f-8dd6-303873674b4f"],
+ ShowCellLabel->True,ExpressionUUID->"b863f3e9-55f8-40af-b9d3-93e1d005da25"],
 
 Cell[BoxData[
  InterpretationBox[
@@ -705,7 +758,7 @@ Cell[BoxData[
     RowBox[{"0.418252`5.77195302418343", ",", "0.3654429999999965`"}], "}"}]}],
   SequenceForm["Timing:  ", {0.418252`5.77195302418343, 0.3654429999999965}],
   Editable->False]], "Print",
- ShowCellLabel->True,ExpressionUUID->"aa2fbeba-1a3e-4b3e-a56a-8131b69fe008"],
+ ShowCellLabel->True,ExpressionUUID->"7bd236cd-8807-4101-af10-9cfaf72c8e37"],
 
 Cell[BoxData[
  InterpretationBox[
@@ -716,7 +769,7 @@ Cell[BoxData[
   SequenceForm[
   "Timing:  ", {0.459557`5.812854383521929, 0.40164399999999706`}],
   Editable->False]], "Print",
- ShowCellLabel->True,ExpressionUUID->"3727c385-c4fb-4bb8-a43b-53722b36fff4"],
+ ShowCellLabel->True,ExpressionUUID->"5a7458c1-3e1b-47b5-87c2-886cd3ed6bc6"],
 
 Cell[BoxData[
  InterpretationBox[
@@ -727,7 +780,7 @@ Cell[BoxData[
   SequenceForm[
   "Timing:  ", {0.463577`5.816636878486639, 0.40443299999999816`}],
   Editable->False]], "Print",
- ShowCellLabel->True,ExpressionUUID->"f4a08d15-c4c2-40ad-8df0-849e14a118be"],
+ ShowCellLabel->True,ExpressionUUID->"9d4b5c5a-adbd-4ef2-bb4b-41421c4dbd63"],
 
 Cell[BoxData[
  InterpretationBox[
@@ -735,7 +788,7 @@ Cell[BoxData[
    "0.51115`5.859063362962555"}],
   SequenceForm["Total time: ", 0.51115`5.859063362962555],
   Editable->
-   False]], "Print",ExpressionUUID->"166dabb5-d96b-4d34-8627-dc0758217b6b"]
+   False]], "Print",ExpressionUUID->"d2e8d440-b913-44e0-b6de-19cc4ca21492"]
 }, Open  ]]
 }, Open  ]],
 
@@ -746,7 +799,7 @@ Cell[BoxData[
   RowBox[{"\"\<4x\>\"", ",", 
    RowBox[{"\"\<distFlag\>\"", "\[Rule]", "False"}], ",", 
    RowBox[{"\"\<timing\>\"", "\[Rule]", "True"}]}], 
-  "]"}]], "Input",ExpressionUUID->"5a5119c7-46f7-4711-9008-f08d8ff4bbea"],
+  "]"}]], "Input",ExpressionUUID->"60dca7ab-9182-46f2-b58f-5ceacbe727c9"],
 
 Cell[CellGroupData[{
 
@@ -791,7 +844,7 @@ Cell[BoxData[
     "4zr", "1"}, {"4zr", "27"}, {"4zr", "8S"}, {"4zz", "1"}, {"4zz", "27"}, {
     "4zz", "8S"}}],
   Editable->
-   False]], "Print",ExpressionUUID->"90facfb3-6033-4dd0-bdfb-51af200b02c8"],
+   False]], "Print",ExpressionUUID->"6d48bed4-5069-4bbc-ae45-535e0fb90b58"],
 
 Cell[BoxData[
  InterpretationBox[
@@ -802,7 +855,7 @@ Cell[BoxData[
   SequenceForm["Timing:  ", {0.173373`5.389496461998559, 0.1362630000000002}],
   
   Editable->False]], "Print",
- ShowCellLabel->True,ExpressionUUID->"1b9ee9ba-858d-468a-80c2-f6bdc6826085"],
+ ShowCellLabel->True,ExpressionUUID->"7616add2-d392-414e-b9f2-a34289f30790"],
 
 Cell[BoxData[
  InterpretationBox[
@@ -813,7 +866,7 @@ Cell[BoxData[
   SequenceForm[
   "Timing:  ", {0.175804`5.395543750015508, 0.13799700000000048`}],
   Editable->False]], "Print",
- ShowCellLabel->True,ExpressionUUID->"212ebd26-f267-4dcb-b59a-a96e27af1911"],
+ ShowCellLabel->True,ExpressionUUID->"17ff75a7-253c-4934-8fbe-4be07c1797e5"],
 
 Cell[BoxData[
  InterpretationBox[
@@ -824,7 +877,7 @@ Cell[BoxData[
   SequenceForm[
   "Timing:  ", {0.268953`5.580191390756156, 0.21431200000000078`}],
   Editable->False]], "Print",
- ShowCellLabel->True,ExpressionUUID->"7dbe1c3f-4a5f-4f2e-88c2-c74574b877d0"],
+ ShowCellLabel->True,ExpressionUUID->"d75cf821-8c5d-47e4-b219-f547df088068"],
 
 Cell[BoxData[
  InterpretationBox[
@@ -835,7 +888,7 @@ Cell[BoxData[
   SequenceForm[
   "Timing:  ", {0.274661`5.589311994758043, 0.21887200000000093`}],
   Editable->False]], "Print",
- ShowCellLabel->True,ExpressionUUID->"94388df6-b5f4-4369-8901-5025213c3a2b"],
+ ShowCellLabel->True,ExpressionUUID->"b6f03d5e-4d9a-4139-8a04-3fa66dd85d01"],
 
 Cell[BoxData[
  InterpretationBox[
@@ -846,7 +899,7 @@ Cell[BoxData[
   SequenceForm[
   "Timing:  ", {0.282793`5.6019836529603975, 0.22525500000000132`}],
   Editable->False]], "Print",
- ShowCellLabel->True,ExpressionUUID->"33286f2a-0cab-474f-abaa-7c474915efd2"],
+ ShowCellLabel->True,ExpressionUUID->"a1e6e95f-89bb-425d-9e6a-d9e51c02f389"],
 
 Cell[BoxData[
  InterpretationBox[
@@ -857,7 +910,7 @@ Cell[BoxData[
   SequenceForm[
   "Timing:  ", {0.288452`5.610588552344573, 0.22991600000000034`}],
   Editable->False]], "Print",
- ShowCellLabel->True,ExpressionUUID->"35cd23e3-25b6-411e-8818-6f35c469d149"],
+ ShowCellLabel->True,ExpressionUUID->"482c4373-599e-4a7d-a359-db0033ecd598"],
 
 Cell[BoxData[
  InterpretationBox[
@@ -865,7 +918,7 @@ Cell[BoxData[
    "0.336298`5.677239282358797"}],
   SequenceForm["Total time: ", 0.336298`5.677239282358797],
   Editable->
-   False]], "Print",ExpressionUUID->"c94b427a-6aff-4b1e-83c3-54af925054da"]
+   False]], "Print",ExpressionUUID->"aa8d5873-e92b-4e0d-8187-6451974c8548"]
 }, Open  ]]
 }, Open  ]],
 
@@ -876,8 +929,8 @@ Cell[BoxData[
   RowBox[{"\"\<4x\>\"", ",", 
    RowBox[{"\"\<distFlag\>\"", "\[Rule]", "False"}], ",", 
    RowBox[{"\"\<timing\>\"", "\[Rule]", "True"}], ",", 
-   RowBox[{"\"\<anomoly\>\"", "\[Rule]", "True"}]}], 
-  "]"}]], "Input",ExpressionUUID->"1d06dffc-18e8-4594-836d-71296c3dc886"],
+   RowBox[{"\"\<anomaly\>\"", "\[Rule]", "True"}]}], 
+  "]"}]], "Input",ExpressionUUID->"84d17aa6-9c55-4446-be3f-6538d97d1c75"],
 
 Cell[CellGroupData[{
 
@@ -922,7 +975,7 @@ Cell[BoxData[
     "4hz", "A3"}, {"4zr", "A1"}, {"4zr", "A2"}, {"4zr", "A3"}, {
     "4zz", "A1"}, {"4zz", "A2"}, {"4zz", "A3"}}],
   Editable->
-   False]], "Print",ExpressionUUID->"f448ae6b-6389-405a-bea0-5674428c1484"],
+   False]], "Print",ExpressionUUID->"74db5e57-d26c-46af-b251-442b2f61fb97"],
 
 Cell[BoxData[
  InterpretationBox[
@@ -933,7 +986,7 @@ Cell[BoxData[
   SequenceForm[
   "Timing:  ", {0.161925`5.359828903557922, 0.12991199999999978`}],
   Editable->False]], "Print",
- ShowCellLabel->True,ExpressionUUID->"9f282b4b-5b75-4918-9440-f225e0aaf335"],
+ ShowCellLabel->True,ExpressionUUID->"de5b1850-0d54-45a8-8903-47e9562237f5"],
 
 Cell[BoxData[
  InterpretationBox[
@@ -944,7 +997,7 @@ Cell[BoxData[
   SequenceForm["Timing:  ", {0.177967`5.400854477407354, 0.1421419999999992}],
   
   Editable->False]], "Print",
- ShowCellLabel->True,ExpressionUUID->"a6f5b06a-e99f-437a-a1b0-e580fd1afece"],
+ ShowCellLabel->True,ExpressionUUID->"8ebfa379-4a35-4cc5-ad34-902dd853e11a"],
 
 Cell[BoxData[
  InterpretationBox[
@@ -955,7 +1008,7 @@ Cell[BoxData[
   SequenceForm["Timing:  ", {0.276669`5.592475498197505, 0.2237000000000002}],
   
   Editable->False]], "Print",
- ShowCellLabel->True,ExpressionUUID->"587a8634-40ff-4f7d-9eff-c1c79a76cc5a"],
+ ShowCellLabel->True,ExpressionUUID->"f1e03553-b3ee-47d3-998b-fe033038af18"],
 
 Cell[BoxData[
  InterpretationBox[
@@ -966,7 +1019,7 @@ Cell[BoxData[
   SequenceForm[
   "Timing:  ", {0.287151`5.608625330877264, 0.23195900000000055`}],
   Editable->False]], "Print",
- ShowCellLabel->True,ExpressionUUID->"44ff9e53-41b4-497c-a3df-3cb389f7773d"],
+ ShowCellLabel->True,ExpressionUUID->"d253f8dd-706c-4ef3-a24b-8bbe3184a0a1"],
 
 Cell[BoxData[
  InterpretationBox[
@@ -977,7 +1030,7 @@ Cell[BoxData[
   SequenceForm["Timing:  ", {0.330754`5.670020102898404, 0.2683090000000011}],
   
   Editable->False]], "Print",
- ShowCellLabel->True,ExpressionUUID->"0992dde9-1008-45c4-9207-14200dc1c898"],
+ ShowCellLabel->True,ExpressionUUID->"1d31403a-abb1-4370-b0a2-1245be28ec6d"],
 
 Cell[BoxData[
  InterpretationBox[
@@ -988,7 +1041,7 @@ Cell[BoxData[
   SequenceForm[
   "Timing:  ", {0.330486`5.669668064523464, 0.26836700000000047`}],
   Editable->False]], "Print",
- ShowCellLabel->True,ExpressionUUID->"5f1eefce-82d7-4bb9-9707-9545000124a8"],
+ ShowCellLabel->True,ExpressionUUID->"26025b08-9b2e-451d-8af2-a811940767b1"],
 
 Cell[BoxData[
  InterpretationBox[
@@ -996,7 +1049,7 @@ Cell[BoxData[
    "0.376203`5.725937252305924"}],
   SequenceForm["Total time: ", 0.376203`5.725937252305924],
   Editable->
-   False]], "Print",ExpressionUUID->"fc088afd-4029-4f83-9734-9632006d6a67"]
+   False]], "Print",ExpressionUUID->"a51234e7-83a0-45b2-a822-37dba213e376"]
 }, Open  ]]
 }, Open  ]]
 }, Open  ]]
@@ -1005,12 +1058,12 @@ Cell[BoxData[
 Cell[CellGroupData[{
 
 Cell["3-3/6.6.20-28-1-5 winding", \
-"Section",ExpressionUUID->"a372101d-b9ca-4b91-b2e9-8de4c6b61e23"],
+"Section",ExpressionUUID->"5ba0a9bc-d292-4501-8373-369c8e6ad8e9"],
 
 Cell[BoxData[
  RowBox[{
   RowBox[{"<<", "\"\<../data/3-3/winding-6.6.20-28-1-5.m\>\""}], 
-  ";"}]], "Input",ExpressionUUID->"0ee126d5-166f-4cc9-a48e-fe23bc78d826"],
+  ";"}]], "Input",ExpressionUUID->"6d568b2e-780f-4ccc-9b5d-9596eb32ea8f"],
 
 Cell[CellGroupData[{
 
@@ -1018,24 +1071,8 @@ Cell[BoxData[
  RowBox[{
   RowBox[{"<<", "\"\<../data/3-3/winding-6.6.20-28-1-5.m\>\""}], ";", 
   RowBox[{"<<", "\"\<../data/3-3/wstep-6.6.20-28-1-5-a-10.m\>\""}], ";", 
-  RowBox[{"gaugeField", "=", "gaugeField0"}], ";", 
-  RowBox[{"Print", "[", 
-   RowBox[{"{", 
-    RowBox[{
-     RowBox[{"latticeNorm", "[", "]"}], ",", 
-     RowBox[{"latticeNorm", "[", 
-      RowBox[{"\"\<center\>\"", "\[Rule]", "True"}], "]"}], ",", 
-     RowBox[{"averagePlaquette", "[", "]"}], ",", 
-     RowBox[{"applyGaugeTransforms", "[", 
-      RowBox[{
-       RowBox[{"{", 
-        RowBox[{
-        "1", ",", "1", ",", "6", ",", "1", ",", "5", ",", "6", ",", "5", ",", 
-         "6", ",", "5", ",", "6", ",", "5", ",", "6"}], "}"}], ",", 
-       RowBox[{"Method", "\[Rule]", "\"\<straight\>\""}]}], "]"}], ",", 
-     RowBox[{"latticeNorm", "[", "]"}], ",", 
-     RowBox[{"averagePlaquette", "[", "]"}]}], "}"}], "]"}], 
-  ";"}]], "Input",ExpressionUUID->"374cd55c-4367-4b8d-b227-7b97e1f267e7"],
+  RowBox[{"gaugeField", "=", "gaugeField0"}], 
+  ";"}]], "Input",ExpressionUUID->"73779835-aa86-4a40-af16-b1810674f1cd"],
 
 Cell[BoxData[
  RowBox[{"{", 
@@ -1043,7 +1080,7 @@ Cell[BoxData[
   "0.33656496609933345`", ",", "0.33656496609933345`", ",", 
    "0.985034620063633`", ",", "0.3357412783821512`", ",", 
    "0.3357412783821512`", ",", "0.9850346200636326`"}], 
-  "}"}]], "Print",ExpressionUUID->"eda2ae4c-d082-4f65-861c-7c1eec98d0d7"]
+  "}"}]], "Print",ExpressionUUID->"e241f61c-41ee-45f7-a070-8e8255651210"]
 }, Open  ]],
 
 Cell[CellGroupData[{
@@ -1052,23 +1089,8 @@ Cell[BoxData[
  RowBox[{
   RowBox[{"<<", "\"\<../data/3-3/winding-6.6.20-28-1-5.m\>\""}], ";", 
   RowBox[{"<<", "\"\<../data/3-3/wstep-6.6.20-28-1-5-sc-20.m\>\""}], ";", 
-  RowBox[{"gaugeField", "=", "gaugeField0"}], ";", 
-  RowBox[{"Print", "[", 
-   RowBox[{"{", 
-    RowBox[{
-     RowBox[{"latticeNorm", "[", "]"}], ",", 
-     RowBox[{"latticeNorm", "[", 
-      RowBox[{"\"\<center\>\"", "\[Rule]", "True"}], "]"}], ",", 
-     RowBox[{"applyGaugeTransforms", "[", 
-      RowBox[{
-       RowBox[{"{", 
-        RowBox[{
-        "1", ",", "1", ",", "6", ",", "1", ",", "5", ",", "6", ",", "5", ",", 
-         "6", ",", "5", ",", "6", ",", "5", ",", "6"}], "}"}], ",", 
-       RowBox[{"Method", "\[Rule]", "\"\<smooth\>\""}]}], "]"}], ",", 
-     RowBox[{"latticeNorm", "[", "]"}], ",", 
-     RowBox[{"averagePlaquette", "[", "]"}]}], "}"}], "]"}], 
-  ";"}]], "Input",ExpressionUUID->"deb32ffe-c185-468c-84c9-e3f34de02428"],
+  RowBox[{"gaugeField", "=", "gaugeField0"}], 
+  ";"}]], "Input",ExpressionUUID->"af628f92-3322-43e5-afc4-9061a8501429"],
 
 Cell[BoxData[
  RowBox[{"{", 
@@ -1076,34 +1098,21 @@ Cell[BoxData[
   "0.22627093522865807`", ",", "0.22627093522865807`", ",", 
    "0.22674644766148916`", ",", "0.22674644766148916`", ",", 
    "0.9808312526838119`"}], 
-  "}"}]], "Print",ExpressionUUID->"6bd2955b-10cf-41e5-ac4f-ddd3b90dae41"]
+  "}"}]], "Print",ExpressionUUID->"a83e6c7c-6202-4024-9c5b-1c289df926ea"]
 }, Open  ]]
-}, Open  ]],
+}, Closed]],
 
 Cell[CellGroupData[{
 
 Cell["3-3/10.10.20-28-1-5 winding", \
-"Section",ExpressionUUID->"591834fe-c1ed-4c5e-bce7-98a81ef4bf00"],
+"Section",ExpressionUUID->"aaaee41a-a82c-4480-bce6-dc976276feb1"],
 
 Cell[CellGroupData[{
 
 Cell[BoxData[
  RowBox[{
-  RowBox[{"<<", "\"\<../data/3-3/winding-10.10.20-28-1-5.m\>\""}], ";", 
-  RowBox[{"Print", "[", 
-   RowBox[{"{", 
-    RowBox[{
-     RowBox[{"latticeNorm", "[", "]"}], ",", 
-     RowBox[{"latticeNorm", "[", 
-      RowBox[{"\"\<center\>\"", "\[Rule]", "True"}], "]"}], ",", 
-     RowBox[{"applyGaugeTransforms", "[", 
-      RowBox[{"{", 
-       RowBox[{
-       "1", ",", "1", ",", "6", ",", "1", ",", "5", ",", "6", ",", "5", ",", 
-        "6", ",", "5", ",", "6", ",", "5", ",", "6"}], "}"}], "]"}], ",", 
-     RowBox[{"latticeNorm", "[", "]"}], ",", 
-     RowBox[{"averagePlaquette", "[", "]"}]}], "}"}], "]"}], 
-  ";"}]], "Input",ExpressionUUID->"ca059ea1-7138-43a9-8f8c-2e1c72eaf1df"],
+  RowBox[{"<<", "\"\<../data/3-3/winding-10.10.20-28-1-5.m\>\""}], 
+  ";"}]], "Input",ExpressionUUID->"18cf5d28-593a-4174-82fd-ac133e52ea81"],
 
 Cell[BoxData[
  RowBox[{"{", 
@@ -1111,7 +1120,7 @@ Cell[BoxData[
   "2.548762050457538`", ",", "1.9820298439288526`", ",", 
    "0.42196600821175584`", ",", "0.42196600821175584`", ",", 
    "0.9277483407004439`"}], 
-  "}"}]], "Print",ExpressionUUID->"2cb93d5b-7aa1-4015-8230-ad1a975048cb"]
+  "}"}]], "Print",ExpressionUUID->"0bf7e6b0-68e8-45dc-a93e-1f7dc2c0d152"]
 }, Open  ]],
 
 Cell[CellGroupData[{
@@ -1119,23 +1128,8 @@ Cell[CellGroupData[{
 Cell[BoxData[
  RowBox[{
   RowBox[{"<<", "\"\<../data/3-3/winding-10.10.20-28-1-5.m\>\""}], ";", 
-  RowBox[{"<<", "\"\<../data/3-3/wstep-10.10.20-28-1-5-c-18.m\>\""}], ";", 
-  RowBox[{"gaugeField", "=", "gaugeField0"}], ";", 
-  RowBox[{"Print", "[", 
-   RowBox[{"{", 
-    RowBox[{
-     RowBox[{"latticeNorm", "[", "]"}], ",", 
-     RowBox[{"latticeNorm", "[", 
-      RowBox[{"\"\<center\>\"", "\[Rule]", "True"}], "]"}], ",", 
-     RowBox[{"averagePlaquette", "[", "]"}], ",", 
-     RowBox[{"applyGaugeTransforms", "[", 
-      RowBox[{"{", 
-       RowBox[{
-       "1", ",", "1", ",", "6", ",", "1", ",", "5", ",", "6", ",", "5", ",", 
-        "6", ",", "5", ",", "6", ",", "5", ",", "6"}], "}"}], "]"}], ",", 
-     RowBox[{"latticeNorm", "[", "]"}], ",", 
-     RowBox[{"averagePlaquette", "[", "]"}]}], "}"}], "]"}], 
-  ";"}]], "Input",ExpressionUUID->"b8f495b6-bb3a-4572-a17c-583d081652b2"],
+  RowBox[{"<<", "\"\<../data/3-3/wstep-10.10.20-28-1-5-c-18.m\>\""}], 
+  ";"}]], "Input",ExpressionUUID->"630b06c1-6609-4b21-b456-045f92350abc"],
 
 Cell[BoxData[
  RowBox[{"{", 
@@ -1143,14 +1137,14 @@ Cell[BoxData[
   "0.405193387829229`", ",", "0.405193387829229`", ",", "0.962155160289808`", 
    ",", "0.4031021571918958`", ",", "0.4031021571918958`", ",", 
    "0.9621551602898082`"}], 
-  "}"}]], "Print",ExpressionUUID->"4fe00780-34bd-482b-87f7-0f8131d6a131"]
+  "}"}]], "Print",ExpressionUUID->"abeb2b72-6c9f-4439-928e-62241922fef5"]
 }, Open  ]]
-}, Open  ]],
+}, Closed]],
 
 Cell[CellGroupData[{
 
 Cell["3-3/12.16.20-28-5-a-20 *", \
-"Section",ExpressionUUID->"f477ac29-ef21-4752-8533-85352453fe27"],
+"Section",ExpressionUUID->"a5fab1b4-c28e-420e-9df4-5a75fdea7c6f"],
 
 Cell[CellGroupData[{
 
@@ -1166,60 +1160,261 @@ Cell[BoxData[
       RowBox[{"\"\<center\>\"", "\[Rule]", "True"}], "]"}]}], "}"}], "]"}], 
   ";", 
   RowBox[{"<<", "\"\<../data/3-3/step-12.16.20-28-5-a-20.m\>\""}], ";", 
-  RowBox[{"gaugeField", "=", "gaugeField0"}], ";", 
-  RowBox[{"Print", "[", 
-   RowBox[{"{", 
-    RowBox[{
-     RowBox[{"latticeNorm", "[", "]"}], ",", 
-     RowBox[{"latticeNorm", "[", 
-      RowBox[{"\"\<center\>\"", "\[Rule]", "True"}], "]"}], ",", 
-     RowBox[{"applyGaugeTransforms", "[", 
-      RowBox[{
-       RowBox[{"{", 
-        RowBox[{
-        "1", ",", "1", ",", "6", ",", "1", ",", "5", ",", "6", ",", "5", ",", 
-         "6", ",", "5", ",", "6"}], "}"}], ",", 
-       RowBox[{"\"\<maxAbelianGauge\>\"", "\[Rule]", "False"}]}], "]"}], ",", 
-     
-     RowBox[{"latticeNorm", "[", "]"}], ",", 
-     RowBox[{"averagePlaquette", "[", "]"}]}], "}"}], "]"}], 
-  ";"}]], "Input",ExpressionUUID->"c0995228-027c-4138-b612-096edc0316ae"],
-
-Cell[CellGroupData[{
+  RowBox[{"gaugeField", "=", "gaugeField0"}], 
+  ";"}]], "Input",ExpressionUUID->"6fa39b11-9cc1-406e-bd46-357af9df78c4"],
 
 Cell[BoxData[
  RowBox[{"{", 
   RowBox[{
   "0.9025352451865776`", ",", "3.080806747953309`", ",", 
    "2.379606189926599`"}], 
-  "}"}]], "Print",ExpressionUUID->"de96d449-3a53-4db5-a370-8dd85abc373a"],
-
-Cell[BoxData[
- RowBox[{"{", 
-  RowBox[{
-  "3.080823273305907`", ",", "2.3799125714784672`", ",", 
-   "0.3098894548803575`", ",", "0.3098894548803575`", ",", 
-   "0.9977679944615324`"}], 
-  "}"}]], "Print",ExpressionUUID->"95698079-c8ac-4a55-96a4-6fc417699c89"]
-}, Open  ]]
+  "}"}]], "Print",ExpressionUUID->"4a26318e-35b7-47ea-ad72-d9f29594f2fc"]
 }, Open  ]],
 
 Cell[BoxData[
  RowBox[{
   RowBox[{
   "<<", "\"\<../cache/3-3/field-correlators-auto-12.16.20-28-5-a-20.m\>\""}], 
-  ";"}]], "Input",ExpressionUUID->"7690f5f8-2a54-4313-98de-fbd4c5a505cd"],
+  ";"}]], "Input",ExpressionUUID->"0b5d635b-b90f-4b0e-918d-acee2d29ef91"],
 
 Cell[BoxData[
  RowBox[{
   RowBox[{
   "<<", "\"\<../cache/3-3/field-correlators-all-12.16.20-28-5-a-20.m\>\""}], 
-  ";"}]], "Input",ExpressionUUID->"86aaab83-1d77-46a2-a9b9-0dab370862ce"],
+  ";"}]], "Input",ExpressionUUID->"2f0c5616-9069-4daa-b135-ae63be6f4e65"],
+
+Cell[CellGroupData[{
+
+Cell["Calculate", \
+"Subsection",ExpressionUUID->"a6fb9caa-b120-411f-9b1e-5380be80e70e"],
+
+Cell[CellGroupData[{
+
+Cell[BoxData[
+ RowBox[{"applyGaugeTransformStrategy", "[", 
+  "]"}]], "Input",ExpressionUUID->"185b1df2-9703-4caa-b461-5791afb18657"],
+
+Cell[CellGroupData[{
+
+Cell[BoxData[
+ InterpretationBox[
+  RowBox[{
+   TemplateBox[{RowBox[{"\"Thu 13 Aug 2020 14:31:09\"", 
+       StyleBox[
+        RowBox[{"\"GMT\"", "\[InvisibleSpace]", 
+          RowBox[{"-", "7.`"}]}], FontColor -> GrayLevel[0.5]]}],
+     RowBox[{"DateObject", "[", 
+       RowBox[{
+         RowBox[{"{", 
+           
+           RowBox[{"2020", ",", "8", ",", "13", ",", "14", ",", "31", ",", 
+             "9.059482`7.709678353148769"}], "}"}], ",", "\"Instant\"", ",", 
+         "\"Gregorian\"", ",", 
+         RowBox[{"-", "7.`"}]}], "]"}]},
+    "DateObject",
+    Editable->False], 
+   "\[InvisibleSpace]", "\<\"Started external program and detached.\"\>"}],
+  SequenceForm[
+   DateObject[{2020, 8, 13, 14, 31, 9.059482`7.709678353148769}, "Instant", 
+    "Gregorian", -7.], "Started external program and detached."],
+  Editable->
+   False]], "Print",ExpressionUUID->"10437f84-8a24-407d-9fe2-a78003945a13"],
+
+Cell[BoxData[
+ InterpretationBox[
+  RowBox[{
+   TemplateBox[{RowBox[{"\"Thu 13 Aug 2020 14:31:14\"", 
+       StyleBox[
+        RowBox[{"\"GMT\"", "\[InvisibleSpace]", 
+          RowBox[{"-", "7.`"}]}], FontColor -> GrayLevel[0.5]]}],
+     RowBox[{"DateObject", "[", 
+       RowBox[{
+         RowBox[{"{", 
+           
+           RowBox[{"2020", ",", "8", ",", "13", ",", "14", ",", "31", ",", 
+             "14.680405`7.919313022313763"}], "}"}], ",", "\"Instant\"", ",", 
+         "\"Gregorian\"", ",", 
+         RowBox[{"-", "7.`"}]}], "]"}]},
+    "DateObject",
+    Editable->False], 
+   "\[InvisibleSpace]", "\<\"External program finished, \"\>", 
+   "\[InvisibleSpace]", "5", "\[InvisibleSpace]", "\<\" s.\"\>"}],
+  SequenceForm[
+   DateObject[{2020, 8, 13, 14, 31, 14.680405`7.919313022313763}, "Instant", 
+    "Gregorian", -7.], "External program finished, ", 5, " s."],
+  Editable->
+   False]], "Print",ExpressionUUID->"4b4aa2a0-972e-425a-ace5-cf4f6b93e2a8"],
+
+Cell[BoxData[
+ StyleBox["\<\"MAXLAN:      1000, Restart:         7,   NED: -     100,      \
+NEC:       100\\nMATVEC:      1570,  Reorth:      1570, Nloop:        13,  \
+Nlocked:        67\\nTtotal:  4.280858,    T_op:  1.605332, Torth:  2.073392, \
+  Tstart:  0.534304\\nlargeShifts: ops=1570, sumNcol=1570, \
+maxNcol=1\\nlargeShifts: 1570 matrix-vector ops, 1570 reorthogonalizations in \
+2.29 s\\ncutoffNullSpace:  2 (max 2, norm 0, concave 0) of 100 eigenpairs \
+between [0, 1]\\nlinearSolve:  257 iterations, 257 reorthogonalizations in \
+0.32 s\\ndynamicProject:  3658 calls (0 usertol), 7316 matrix-vector ops, max \
+itn 0\\n                 in 1.33 s\\nshifts.c:  init and i/o 0.96 s, \
+calculation 2.61 s\\n\"\>",
+  StripOnInput->False,
+  FontColor->RGBColor[
+   0, 0, 1]]], "Print",ExpressionUUID->"6b661627-a68c-4a8e-aae2-51e878184a53"],
+
+Cell[BoxData[
+ InterpretationBox[
+  RowBox[{
+   TemplateBox[{RowBox[{"\"Thu 13 Aug 2020 14:31:38\"", 
+       StyleBox[
+        RowBox[{"\"GMT\"", "\[InvisibleSpace]", 
+          RowBox[{"-", "7.`"}]}], FontColor -> GrayLevel[0.5]]}],
+     RowBox[{"DateObject", "[", 
+       RowBox[{
+         RowBox[{"{", 
+           
+           RowBox[{"2020", ",", "8", ",", "13", ",", "14", ",", "31", ",", 
+             "38.2722`8.335458406277183"}], "}"}], ",", "\"Instant\"", ",", 
+         "\"Gregorian\"", ",", 
+         RowBox[{"-", "7.`"}]}], "]"}]},
+    "DateObject",
+    Editable->False], 
+   "\[InvisibleSpace]", "\<\"Started external program and detached.\"\>"}],
+  SequenceForm[
+   DateObject[{2020, 8, 13, 14, 31, 38.2722`8.335458406277183}, "Instant", 
+    "Gregorian", -7.], "Started external program and detached."],
+  Editable->
+   False]], "Print",ExpressionUUID->"7b80229e-d76b-4522-b770-7f925e660c16"],
+
+Cell[BoxData[
+ InterpretationBox[
+  RowBox[{
+   TemplateBox[{RowBox[{"\"Thu 13 Aug 2020 14:31:43\"", 
+       StyleBox[
+        RowBox[{"\"GMT\"", "\[InvisibleSpace]", 
+          RowBox[{"-", "7.`"}]}], FontColor -> GrayLevel[0.5]]}],
+     RowBox[{"DateObject", "[", 
+       RowBox[{
+         RowBox[{"{", 
+           
+           RowBox[{"2020", ",", "8", ",", "13", ",", "14", ",", "31", ",", 
+             "43.864466`8.39468782411681"}], "}"}], ",", "\"Instant\"", ",", 
+         "\"Gregorian\"", ",", 
+         RowBox[{"-", "7.`"}]}], "]"}]},
+    "DateObject",
+    Editable->False], 
+   "\[InvisibleSpace]", "\<\"External program finished, \"\>", 
+   "\[InvisibleSpace]", "5", "\[InvisibleSpace]", "\<\" s.\"\>"}],
+  SequenceForm[
+   DateObject[{2020, 8, 13, 14, 31, 43.864466`8.39468782411681}, "Instant", 
+    "Gregorian", -7.], "External program finished, ", 5, " s."],
+  Editable->
+   False]], "Print",ExpressionUUID->"0c6ff196-edfe-4a20-95fd-6761ab71b172"],
+
+Cell[BoxData[
+ StyleBox["\<\"MAXLAN:      1000, Restart:         7,   NED: -     100,      \
+NEC:       100\\nMATVEC:      1561,  Reorth:      1561, Nloop:        13,  \
+Nlocked:        67\\nTtotal:  4.241289,    T_op:  1.624531, Torth:  2.016925, \
+  Tstart:  0.523826\\nlargeShifts: ops=1561, sumNcol=1561, \
+maxNcol=1\\nlargeShifts: 1561 matrix-vector ops, 1561 reorthogonalizations in \
+2.26 s\\ncutoffNullSpace:  0 (max 0, norm 0, concave 0) of 100 eigenpairs \
+between [-1, -1]\\nlinearSolve:  283 iterations, 283 reorthogonalizations in \
+0.33 s\\ndynamicProject:  3692 calls (0 usertol), 7384 matrix-vector ops, max \
+itn 0\\n                 in 1.35 s\\nshifts.c:  init and i/o 0.94 s, \
+calculation 2.60 s\\n\"\>",
+  StripOnInput->False,
+  FontColor->RGBColor[
+   0, 0, 1]]], \
+"Print",ExpressionUUID->"27333f94-fb92-445a-8e76-98f0fdc62838"]
+}, Open  ]],
+
+Cell[BoxData[
+ TemplateBox[{
+  "applyCutoff2","rescale",
+   "\"Rescale maxNorm \\!\\(\\*RowBox[{\\\"\\\\\\\"3.4322982\\\\\\\"\\\"}]\\) \
+to \\!\\(\\*RowBox[{\\\"3.141592653589793`\\\"}]\\)\"",2,11,1,
+   31843651097629165180,"Local","Global`applyCutoff2"},
+  "MessageTemplate2"]], "Message", \
+"MSG",ExpressionUUID->"a66579e7-5e44-4f0b-81d1-7f7bdc2cb549"],
+
+Cell[CellGroupData[{
+
+Cell[BoxData[
+ InterpretationBox[
+  RowBox[{
+   TemplateBox[{RowBox[{"\"Thu 13 Aug 2020 14:32:04\"", 
+       StyleBox[
+        RowBox[{"\"GMT\"", "\[InvisibleSpace]", 
+          RowBox[{"-", "7.`"}]}], FontColor -> GrayLevel[0.5]]}],
+     RowBox[{"DateObject", "[", 
+       RowBox[{
+         RowBox[{"{", 
+           
+           RowBox[{"2020", ",", "8", ",", "13", ",", "14", ",", "32", ",", 
+             "4.804711`7.434242258350322"}], "}"}], ",", "\"Instant\"", ",", 
+         "\"Gregorian\"", ",", 
+         RowBox[{"-", "7.`"}]}], "]"}]},
+    "DateObject",
+    Editable->False], 
+   "\[InvisibleSpace]", "\<\"Started external program and detached.\"\>"}],
+  SequenceForm[
+   DateObject[{2020, 8, 13, 14, 32, 4.804711`7.434242258350322}, "Instant", 
+    "Gregorian", -7.], "Started external program and detached."],
+  Editable->
+   False]], "Print",ExpressionUUID->"e8fdd0a3-59bc-4729-824e-4df096c30698"],
+
+Cell[BoxData[
+ InterpretationBox[
+  RowBox[{
+   TemplateBox[{RowBox[{"\"Thu 13 Aug 2020 14:32:10\"", 
+       StyleBox[
+        RowBox[{"\"GMT\"", "\[InvisibleSpace]", 
+          RowBox[{"-", "7.`"}]}], FontColor -> GrayLevel[0.5]]}],
+     RowBox[{"DateObject", "[", 
+       RowBox[{
+         RowBox[{"{", 
+           
+           RowBox[{"2020", ",", "8", ",", "13", ",", "14", ",", "32", ",", 
+             "10.385269`7.7689927365767835"}], "}"}], ",", "\"Instant\"", ",",
+          "\"Gregorian\"", ",", 
+         RowBox[{"-", "7.`"}]}], "]"}]},
+    "DateObject",
+    Editable->False], 
+   "\[InvisibleSpace]", "\<\"External program finished, \"\>", 
+   "\[InvisibleSpace]", "5", "\[InvisibleSpace]", "\<\" s.\"\>"}],
+  SequenceForm[
+   DateObject[{2020, 8, 13, 14, 32, 10.385269`7.7689927365767835}, "Instant", 
+    "Gregorian", -7.], "External program finished, ", 5, " s."],
+  Editable->
+   False]], "Print",ExpressionUUID->"097370ec-4196-4fcd-ad36-1b320d2b7307"],
+
+Cell[BoxData[
+ StyleBox["\<\"MAXLAN:      1000, Restart:         7,   NED: -     100,      \
+NEC:       100\\nMATVEC:      1561,  Reorth:      1561, Nloop:        13,  \
+Nlocked:        65\\nTtotal:  4.266759,    T_op:  1.655622, Torth:  1.991422, \
+  Tstart:  0.532882\\nlargeShifts: ops=1561, sumNcol=1561, \
+maxNcol=1\\nlargeShifts: 1561 matrix-vector ops, 1561 reorthogonalizations in \
+2.28 s\\ncutoffNullSpace:  0 (max 0, norm 0, concave 0) of 100 eigenpairs \
+between [-1, -1]\\nlinearSolve:  297 iterations, 297 reorthogonalizations in \
+0.36 s\\ndynamicProject:  3720 calls (0 usertol), 7440 matrix-vector ops, max \
+itn 0\\n                 in 1.36 s\\nshifts.c:  init and i/o 1.04 s, \
+calculation 2.65 s\\n\"\>",
+  StripOnInput->False,
+  FontColor->RGBColor[
+   0, 0, 1]]], "Print",ExpressionUUID->"e4e65d56-c482-4cec-89cc-7cf8adf24283"],
+
+Cell[BoxData[
+ RowBox[{"{", 
+  RowBox[{
+  "3.080823273305907`", ",", "2.3799125714784672`", ",", 
+   "0.27029196045678483`", ",", "0.27029196045678483`", ",", 
+   "0.9977679944615322`"}], 
+  "}"}]], "Print",ExpressionUUID->"eb960073-0ff6-423c-bba2-23771a750643"]
+}, Open  ]]
+}, Closed]],
 
 Cell[CellGroupData[{
 
 Cell["Calculate auto", \
-"Subsection",ExpressionUUID->"94c9d744-afce-44c6-b87b-8ab13f011eb4"],
+"Subsubsection",ExpressionUUID->"3b939ea9-a0c7-4664-a87c-f25b5ab32972"],
 
 Cell[CellGroupData[{
 
@@ -1227,7 +1422,7 @@ Cell[BoxData[
  RowBox[{
   RowBox[{"fieldCorr2", "=", 
    RowBox[{"linkCorrelators", "[", "2", "]"}]}], 
-  ";"}]], "Input",ExpressionUUID->"5d5bbc28-2109-4275-9835-1e3730fc3f26"],
+  ";"}]], "Input",ExpressionUUID->"e833e6dd-3727-40ba-867c-cc6ec4be0750"],
 
 Cell[CellGroupData[{
 
@@ -1240,15 +1435,15 @@ Cell[BoxData[
   
   SequenceForm["ops: ", {"2l", "2t1", "2t2", "2t11", "2t12", "2t13"}],
   Editable->
-   False]], "Print",ExpressionUUID->"55ebd357-c40c-4e09-b108-74968db29e68"],
+   False]], "Print",ExpressionUUID->"ca58a3af-0d90-4448-81b7-5120f2850380"],
 
 Cell[BoxData[
  InterpretationBox[
   RowBox[{"\<\"Total time: \"\>", "\[InvisibleSpace]", 
-   "43.580028`7.789802502774852"}],
-  SequenceForm["Total time: ", 43.580028`7.789802502774852],
+   "36.590565`7.713884113371831"}],
+  SequenceForm["Total time: ", 36.590565`7.713884113371831],
   Editable->
-   False]], "Print",ExpressionUUID->"e8fb06ae-0c9d-4e8a-91cd-55f4a424da88"]
+   False]], "Print",ExpressionUUID->"421ea5b0-3110-475d-8564-993f3b5c28d2"]
 }, Open  ]]
 }, Open  ]],
 
@@ -1258,7 +1453,7 @@ Cell[BoxData[
  RowBox[{
   RowBox[{"fieldCorr3", "=", 
    RowBox[{"linkCorrelators", "[", "3", "]"}]}], 
-  ";"}]], "Input",ExpressionUUID->"d91f4b7a-2cb1-455b-8e16-2a99a7905eca"],
+  ";"}]], "Input",ExpressionUUID->"61d0e755-cc4c-4ff3-ae12-85948e0eb53f"],
 
 Cell[CellGroupData[{
 
@@ -1274,15 +1469,15 @@ Cell[BoxData[
   "ops: ", {
    "3m1b", "3m2", "3m4", "3m5", "3m6", "3m8", "3m9", "3pl", "3pt1", "3pt2"}],
   Editable->
-   False]], "Print",ExpressionUUID->"2df12f9e-4ec5-45ca-99cd-5a95831a61c2"],
+   False]], "Print",ExpressionUUID->"adad9f5c-c61b-4e58-a889-848c5014671a"],
 
 Cell[BoxData[
  InterpretationBox[
   RowBox[{"\<\"Total time: \"\>", "\[InvisibleSpace]", 
-   "861.04604`9.085541371565991"}],
-  SequenceForm["Total time: ", 861.04604`9.085541371565991],
+   "966.058567`9.135518454013427"}],
+  SequenceForm["Total time: ", 966.058567`9.135518454013427],
   Editable->
-   False]], "Print",ExpressionUUID->"db317123-652e-47cf-8004-dd229b9dcaaf"]
+   False]], "Print",ExpressionUUID->"a4c2824d-b3d9-4dfa-afb4-9946e8e9c986"]
 }, Open  ]]
 }, Open  ]],
 
@@ -1292,7 +1487,7 @@ Cell[BoxData[
  RowBox[{
   RowBox[{"fieldCorr22", "=", 
    RowBox[{"linkCorrelators", "[", "22", "]"}]}], 
-  ";"}]], "Input",ExpressionUUID->"05a0e0d4-fc1c-411d-8fdd-32a9dcfc27f1"],
+  ";"}]], "Input",ExpressionUUID->"03f7d298-3727-4c30-bd11-79f86d8f4f84"],
 
 Cell[CellGroupData[{
 
@@ -1344,23 +1539,27 @@ Cell[BoxData[
      RowBox[{"{", 
       RowBox[{"\<\"t3\"\>", ",", "\<\"27\"\>"}], "}"}], ",", 
      RowBox[{"{", 
-      RowBox[{"\<\"t3\"\>", ",", "\<\"8S\"\>"}], "}"}]}], "}"}]}],
+      RowBox[{"\<\"t3\"\>", ",", "\<\"8A\"\>"}], "}"}], ",", 
+     RowBox[{"{", 
+      RowBox[{"\<\"t3\"\>", ",", "\<\"8S\"\>"}], "}"}], ",", 
+     RowBox[{"{", 
+      RowBox[{"\<\"t3\"\>", ",", "\<\"Re10\"\>"}], "}"}]}], "}"}]}],
   SequenceForm[
   "ops: ", {{"l", "1"}, {"l", "27"}, {"l", "8S"}, {"m1", "1"}, {"m1", "27"}, {
     "m1", "8A"}, {"m1", "8S"}, {"m1", "Re10"}, {"m2", "1"}, {"m2", "27"}, {
     "m2", "8S"}, {"t1", "1"}, {"t1", "27"}, {"t1", "8A"}, {"t1", "8S"}, {
     "t1", "Re10"}, {"t2", "1"}, {"t2", "27"}, {"t2", "8S"}, {"t3", "1"}, {
-    "t3", "27"}, {"t3", "8S"}}],
+    "t3", "27"}, {"t3", "8A"}, {"t3", "8S"}, {"t3", "Re10"}}],
   Editable->
-   False]], "Print",ExpressionUUID->"5ad7d7e4-4c19-460d-bbc9-aa76719db20d"],
+   False]], "Print",ExpressionUUID->"3694d90d-61d0-4f3c-bafe-7e50df394dd7"],
 
 Cell[BoxData[
  InterpretationBox[
   RowBox[{"\<\"Total time: \"\>", "\[InvisibleSpace]", 
-   "179.546668`8.40469234779734"}],
-  SequenceForm["Total time: ", 179.546668`8.40469234779734],
+   "209.763052`8.47224399110018"}],
+  SequenceForm["Total time: ", 209.763052`8.47224399110018],
   Editable->
-   False]], "Print",ExpressionUUID->"b2fb0295-3992-4a37-9a83-02a642d76838"]
+   False]], "Print",ExpressionUUID->"f3e72426-2af3-4704-85e8-410affa6c197"]
 }, Open  ]]
 }, Open  ]],
 
@@ -1370,7 +1569,7 @@ Cell[BoxData[
  RowBox[{
   RowBox[{"fieldCorr4x", "=", 
    RowBox[{"linkCorrelators", "[", "\"\<4x\>\"", "]"}]}], 
-  ";"}]], "Input",ExpressionUUID->"294e1c66-a9fe-4120-9327-1a3a85ad3a76"],
+  ";"}]], "Input",ExpressionUUID->"2329cca9-ef71-4948-a96c-986af7df9edb"],
 
 Cell[CellGroupData[{
 
@@ -1415,15 +1614,15 @@ Cell[BoxData[
     "4zr", "1"}, {"4zr", "27"}, {"4zr", "8S"}, {"4zz", "1"}, {"4zz", "27"}, {
     "4zz", "8S"}}],
   Editable->
-   False]], "Print",ExpressionUUID->"5693e8af-bb11-49d1-8cae-57105b57428e"],
+   False]], "Print",ExpressionUUID->"bb87a509-023a-4753-969d-93e76191fede"],
 
 Cell[BoxData[
  InterpretationBox[
   RowBox[{"\<\"Total time: \"\>", "\[InvisibleSpace]", 
-   "178.113682`8.401212279388862"}],
-  SequenceForm["Total time: ", 178.113682`8.401212279388862],
+   "150.2739`8.327398555462976"}],
+  SequenceForm["Total time: ", 150.2739`8.327398555462976],
   Editable->
-   False]], "Print",ExpressionUUID->"516a68e9-0b65-470b-b65b-a0aaa944e8ad"]
+   False]], "Print",ExpressionUUID->"6f70f7e9-6883-4c4a-91d9-b658ba404f9b"]
 }, Open  ]]
 }, Open  ]],
 
@@ -1434,8 +1633,8 @@ Cell[BoxData[
   RowBox[{"fieldCorr3A", "=", 
    RowBox[{"linkCorrelators", "[", 
     RowBox[{"3", ",", 
-     RowBox[{"\"\<anomoly\>\"", "\[Rule]", "True"}]}], "]"}]}], 
-  ";"}]], "Input",ExpressionUUID->"79c6f2e4-c451-4141-915b-f61af92a64e8"],
+     RowBox[{"\"\<anomaly\>\"", "\[Rule]", "True"}]}], "]"}]}], 
+  ";"}]], "Input",ExpressionUUID->"ec82e37d-231f-4cf1-b8ad-b8e4bfd3f6ad"],
 
 Cell[CellGroupData[{
 
@@ -1451,15 +1650,15 @@ Cell[BoxData[
   "ops: ", {
    "3m10", "3m2", "3m3", "3m4", "3m5", "3m7", "3m8", "3pl", "3pt1", "3pt2"}],
   Editable->
-   False]], "Print",ExpressionUUID->"9de67dac-6d68-4900-8d88-41b0e44d94df"],
+   False]], "Print",ExpressionUUID->"512e8ef0-56e6-4ee5-8da8-3dd3ad519356"],
 
 Cell[BoxData[
  InterpretationBox[
   RowBox[{"\<\"Total time: \"\>", "\[InvisibleSpace]", 
-   "1093.313145`9.189259567528845"}],
-  SequenceForm["Total time: ", 1093.313145`9.189259567528845],
+   "951.574563`9.128957822016483"}],
+  SequenceForm["Total time: ", 951.574563`9.128957822016483],
   Editable->
-   False]], "Print",ExpressionUUID->"54122efa-f8e6-449c-b7f8-96dc246daddc"]
+   False]], "Print",ExpressionUUID->"01bbce92-951c-4094-ba53-7df3948023c5"]
 }, Open  ]]
 }, Open  ]],
 
@@ -1470,8 +1669,8 @@ Cell[BoxData[
   RowBox[{"fieldCorr22A", "=", 
    RowBox[{"linkCorrelators", "[", 
     RowBox[{"22", ",", 
-     RowBox[{"\"\<anomoly\>\"", "\[Rule]", "True"}]}], "]"}]}], 
-  ";"}]], "Input",ExpressionUUID->"b610a619-3642-4e36-b8f5-d5ed6f74ea14"],
+     RowBox[{"\"\<anomaly\>\"", "\[Rule]", "True"}]}], "]"}]}], 
+  ";"}]], "Input",ExpressionUUID->"d25f4f90-dc9a-459e-a54f-bbde4f0cf893"],
 
 Cell[CellGroupData[{
 
@@ -1522,15 +1721,15 @@ Cell[BoxData[
     "t1", "A1"}, {"t1", "A2"}, {"t1", "A3"}, {"t2", "A1"}, {"t2", "A2"}, {
     "t2", "A3"}, {"t3", "A1"}, {"t3", "A2"}, {"t3", "A3"}}],
   Editable->
-   False]], "Print",ExpressionUUID->"34490dd3-900a-4ab4-a624-8de22a6ba190"],
+   False]], "Print",ExpressionUUID->"858ec633-0ec1-419f-bcba-2951075804f3"],
 
 Cell[BoxData[
  InterpretationBox[
   RowBox[{"\<\"Total time: \"\>", "\[InvisibleSpace]", 
-   "188.37396`8.425535865450591"}],
-  SequenceForm["Total time: ", 188.37396`8.425535865450591],
+   "207.744232`8.46804397230813"}],
+  SequenceForm["Total time: ", 207.744232`8.46804397230813],
   Editable->
-   False]], "Print",ExpressionUUID->"651f8599-3d7b-423e-92f0-ebb302aaab42"]
+   False]], "Print",ExpressionUUID->"ee32f9c2-eec5-4057-943b-8b3f3e78c395"]
 }, Open  ]]
 }, Open  ]],
 
@@ -1541,8 +1740,8 @@ Cell[BoxData[
   RowBox[{"fieldCorr4xA", "=", 
    RowBox[{"linkCorrelators", "[", 
     RowBox[{"\"\<4x\>\"", ",", 
-     RowBox[{"\"\<anomoly\>\"", "\[Rule]", "True"}]}], "]"}]}], 
-  ";"}]], "Input",ExpressionUUID->"606db51f-158d-4dcd-9fae-f849bcf33593"],
+     RowBox[{"\"\<anomaly\>\"", "\[Rule]", "True"}]}], "]"}]}], 
+  ";"}]], "Input",ExpressionUUID->"a10de8b9-d697-4ec7-aad4-1bbd0163ce7a"],
 
 Cell[CellGroupData[{
 
@@ -1587,19 +1786,17 @@ Cell[BoxData[
     "4hz", "A3"}, {"4zr", "A1"}, {"4zr", "A2"}, {"4zr", "A3"}, {
     "4zz", "A1"}, {"4zz", "A2"}, {"4zz", "A3"}}],
   Editable->
-   False]], "Print",ExpressionUUID->"28a15b61-2cf9-43ec-bf2b-a1db424bcaaa"],
+   False]], "Print",ExpressionUUID->"a5f54605-1ff8-4bed-863b-62f554b053bf"],
 
 Cell[BoxData[
  InterpretationBox[
   RowBox[{"\<\"Total time: \"\>", "\[InvisibleSpace]", 
-   "147.070677`8.318041089413743"}],
-  SequenceForm["Total time: ", 147.070677`8.318041089413743],
+   "161.563451`8.35885811897175"}],
+  SequenceForm["Total time: ", 161.563451`8.35885811897175],
   Editable->
-   False]], "Print",ExpressionUUID->"5ff47137-d657-43aa-8425-4738217374ea"]
+   False]], "Print",ExpressionUUID->"c5d93463-7317-49e0-9bc9-40320281ab40"]
 }, Open  ]]
 }, Open  ]],
-
-Cell[CellGroupData[{
 
 Cell[BoxData[
  RowBox[{"Block", "[", 
@@ -1618,23 +1815,13 @@ Cell[BoxData[
        "fieldCorr2", ",", "fieldCorr3", ",", "fieldCorr22", ",", 
         "fieldCorr4x", ",", "fieldCorr3A", ",", "fieldCorr22A", ",", 
         "fieldCorr4xA"}], "}"}]}], "]"}]}]}], 
-  "]"}]], "Input",ExpressionUUID->"88f2db58-925b-4325-8617-5b63e245c33e"],
-
-Cell[BoxData[
- TemplateBox[{
-  "DeleteFile","fdnfnd",
-   "\"Directory or file \
-\\!\\(\\*RowBox[{\\\"\\\\\\\"../cache/3-3/field-correlators-auto-12.16.20-28-\
-5-a-20.m\\\\\\\"\\\"}]\\) not found.\"",2,28,1,31809002095344213828,"Local"},
-  "MessageTemplate"]], "Message", \
-"MSG",ExpressionUUID->"97d22ff2-f0ec-4802-a24a-b645bb4cb1d9"]
-}, Open  ]]
-}, Closed]],
+  "]"}]], "Input",ExpressionUUID->"63328bc9-01ab-471b-8d48-2d079fb370b2"]
+}, Open  ]],
 
 Cell[CellGroupData[{
 
 Cell["Calculate all", \
-"Subsection",ExpressionUUID->"7c3c44f3-a25e-4e2e-8ac7-0353394e99c7"],
+"Subsubsection",ExpressionUUID->"a4914bff-1615-401e-bfe1-d8104d89419b"],
 
 Cell[CellGroupData[{
 
@@ -1644,7 +1831,7 @@ Cell[BoxData[
    RowBox[{"linkCorrelators", "[", 
     RowBox[{"2", ",", 
      RowBox[{"\"\<operators\>\"", "\[Rule]", "All"}]}], "]"}]}], 
-  ";"}]], "Input",ExpressionUUID->"ff3d44b6-5f3e-4104-b3bd-cbb7f0a0c193"],
+  ";"}]], "Input",ExpressionUUID->"1dd1b1b0-fd49-480a-b3b6-5aea7b1cfb3d"],
 
 Cell[CellGroupData[{
 
@@ -1657,15 +1844,15 @@ Cell[BoxData[
   
   SequenceForm["ops: ", {"2l", "2t1", "2t2", "2t11", "2t12", "2t13"}],
   Editable->
-   False]], "Print",ExpressionUUID->"77ccb1ad-9bdf-418f-a2fe-2921910d61e4"],
+   False]], "Print",ExpressionUUID->"c07fe963-ffa5-44cd-affe-7e4ecf9f05be"],
 
 Cell[BoxData[
  InterpretationBox[
   RowBox[{"\<\"Total time: \"\>", "\[InvisibleSpace]", 
-   "41.799785`7.771689045789954"}],
-  SequenceForm["Total time: ", 41.799785`7.771689045789954],
+   "41.871696`7.7724355500421645"}],
+  SequenceForm["Total time: ", 41.871696`7.7724355500421645],
   Editable->
-   False]], "Print",ExpressionUUID->"43949d67-0dc6-4007-9f40-9e0d902b5916"]
+   False]], "Print",ExpressionUUID->"62fb56b7-0868-4cf1-ac37-c504c98086e9"]
 }, Open  ]]
 }, Open  ]],
 
@@ -1677,7 +1864,7 @@ Cell[BoxData[
    RowBox[{"linkCorrelators", "[", 
     RowBox[{"3", ",", 
      RowBox[{"\"\<operators\>\"", "\[Rule]", "All"}]}], "]"}]}], 
-  ";"}]], "Input",ExpressionUUID->"6df2d9cc-198e-41cd-a23a-5fcad1aa261c"],
+  ";"}]], "Input",ExpressionUUID->"204dcdc5-57ee-4dff-b3f8-b60016cd6723"],
 
 Cell[CellGroupData[{
 
@@ -1695,15 +1882,15 @@ Cell[BoxData[
    "3pl", "3pt1", "3pt2", "3m1a", "3m1b", "3m2", "3m3", "3m4", "3m5", "3m6", 
     "3m7", "3m8", "3m9", "3m10"}],
   Editable->
-   False]], "Print",ExpressionUUID->"7f82cc5d-a3c7-4368-871b-e9552d9ee2f1"],
+   False]], "Print",ExpressionUUID->"963bc857-19b2-4052-806a-669dd31630c7"],
 
 Cell[BoxData[
  InterpretationBox[
   RowBox[{"\<\"Total time: \"\>", "\[InvisibleSpace]", 
-   "2100.805849`9.472900915728621"}],
-  SequenceForm["Total time: ", 2100.805849`9.472900915728621],
+   "2255.705621`9.50379741959843"}],
+  SequenceForm["Total time: ", 2255.705621`9.50379741959843],
   Editable->
-   False]], "Print",ExpressionUUID->"8bb6fc41-c8e7-4409-870e-a097e6758fcc"]
+   False]], "Print",ExpressionUUID->"ed9de1fe-a6c8-444e-8d3e-1866cd83ab1d"]
 }, Open  ]]
 }, Open  ]],
 
@@ -1715,7 +1902,7 @@ Cell[BoxData[
    RowBox[{"linkCorrelators", "[", 
     RowBox[{"22", ",", 
      RowBox[{"\"\<operators\>\"", "\[Rule]", "All"}]}], "]"}]}], 
-  ";"}]], "Input",ExpressionUUID->"7995083b-c4ce-455f-997b-80f908f05977"],
+  ";"}]], "Input",ExpressionUUID->"266f4c7a-f04f-42e9-8a8f-a52acd8a5b89"],
 
 Cell[CellGroupData[{
 
@@ -1793,15 +1980,15 @@ Cell[BoxData[
     "m2", "27"}, {"t3", "1"}, {"t3", "8S"}, {"t3", "8A"}, {"t3", "Re10"}, {
     "t3", "27"}}],
   Editable->
-   False]], "Print",ExpressionUUID->"5602e936-47a0-484e-880d-e38df3a07071"],
+   False]], "Print",ExpressionUUID->"5c551b1b-714a-4257-b48e-c04ded5bd732"],
 
 Cell[BoxData[
  InterpretationBox[
   RowBox[{"\<\"Total time: \"\>", "\[InvisibleSpace]", 
-   "205.764667`8.46388579952986"}],
-  SequenceForm["Total time: ", 205.764667`8.46388579952986],
+   "235.439284`8.52239392618229"}],
+  SequenceForm["Total time: ", 235.439284`8.52239392618229],
   Editable->
-   False]], "Print",ExpressionUUID->"64aaa881-2be3-4b28-8e11-9d67727f4518"]
+   False]], "Print",ExpressionUUID->"3a3e2080-c62b-4b29-adff-d539ed60e7aa"]
 }, Open  ]]
 }, Open  ]],
 
@@ -1813,7 +2000,7 @@ Cell[BoxData[
    RowBox[{"linkCorrelators", "[", 
     RowBox[{"\"\<4x\>\"", ",", 
      RowBox[{"\"\<operators\>\"", "\[Rule]", "All"}]}], "]"}]}], 
-  ";"}]], "Input",ExpressionUUID->"2dfd1239-2598-47b2-b594-167bb2004b3e"],
+  ";"}]], "Input",ExpressionUUID->"fa11cfdc-11f9-4118-948b-25afc8a43710"],
 
 Cell[CellGroupData[{
 
@@ -1881,15 +2068,15 @@ Cell[BoxData[
     "4zz", "1"}, {"4zz", "8S"}, {"4zz", "8A"}, {"4zz", "Re10"}, {
     "4zz", "27"}}],
   Editable->
-   False]], "Print",ExpressionUUID->"1eb90ee4-8b23-486f-8f3f-79a9cda27dcf"],
+   False]], "Print",ExpressionUUID->"9b3deab6-a66d-42fd-8a67-ad2d03b1862c"],
 
 Cell[BoxData[
  InterpretationBox[
   RowBox[{"\<\"Total time: \"\>", "\[InvisibleSpace]", 
-   "161.135094`8.357705134593399"}],
-  SequenceForm["Total time: ", 161.135094`8.357705134593399],
+   "173.772186`8.390495262272665"}],
+  SequenceForm["Total time: ", 173.772186`8.390495262272665],
   Editable->
-   False]], "Print",ExpressionUUID->"b62df9ba-edd7-4f43-a00e-e01c39fbcc93"]
+   False]], "Print",ExpressionUUID->"9fd7cc8b-d82c-496d-9439-b537543e450c"]
 }, Open  ]]
 }, Open  ]],
 
@@ -1900,9 +2087,9 @@ Cell[BoxData[
   RowBox[{"fieldCorr3A", "=", 
    RowBox[{"linkCorrelators", "[", 
     RowBox[{"3", ",", 
-     RowBox[{"\"\<anomoly\>\"", "\[Rule]", "True"}], ",", 
+     RowBox[{"\"\<anomaly\>\"", "\[Rule]", "True"}], ",", 
      RowBox[{"\"\<operators\>\"", "\[Rule]", "All"}]}], "]"}]}], 
-  ";"}]], "Input",ExpressionUUID->"87f2e579-7eb3-4144-ac1f-35222cf10ec0"],
+  ";"}]], "Input",ExpressionUUID->"9ef195d5-b9e9-410d-b194-ffd5ff7f39bf"],
 
 Cell[CellGroupData[{
 
@@ -1920,15 +2107,15 @@ Cell[BoxData[
    "3pl", "3pt1", "3pt2", "3m1a", "3m1b", "3m2", "3m3", "3m4", "3m5", "3m6", 
     "3m7", "3m8", "3m9", "3m10"}],
   Editable->
-   False]], "Print",ExpressionUUID->"b501627e-0e27-4452-903f-4cfc142825d6"],
+   False]], "Print",ExpressionUUID->"87ee2670-5abf-4e03-a135-2d4714b50dc1"],
 
 Cell[BoxData[
  InterpretationBox[
   RowBox[{"\<\"Total time: \"\>", "\[InvisibleSpace]", 
-   "1868.974908`9.422118468611421"}],
-  SequenceForm["Total time: ", 1868.974908`9.422118468611421],
+   "2049.486714`9.462160105136773"}],
+  SequenceForm["Total time: ", 2049.486714`9.462160105136773],
   Editable->
-   False]], "Print",ExpressionUUID->"b0a623b6-f7ac-4058-b36d-03827343050f"]
+   False]], "Print",ExpressionUUID->"ed96792d-bacf-47d3-ba5e-01550b883776"]
 }, Open  ]]
 }, Open  ]],
 
@@ -1939,9 +2126,9 @@ Cell[BoxData[
   RowBox[{"fieldCorr22A", "=", 
    RowBox[{"linkCorrelators", "[", 
     RowBox[{"22", ",", 
-     RowBox[{"\"\<anomoly\>\"", "\[Rule]", "True"}], ",", 
+     RowBox[{"\"\<anomaly\>\"", "\[Rule]", "True"}], ",", 
      RowBox[{"\"\<operators\>\"", "\[Rule]", "All"}]}], "]"}]}], 
-  ";"}]], "Input",ExpressionUUID->"7cf0f215-76c2-46db-a4ed-6fb88615c082"],
+  ";"}]], "Input",ExpressionUUID->"46c412be-af12-48ed-9b16-a589a94727c4"],
 
 Cell[CellGroupData[{
 
@@ -1992,15 +2179,15 @@ Cell[BoxData[
     "t2", "A1"}, {"t2", "A2"}, {"t2", "A3"}, {"m2", "A1"}, {"m2", "A2"}, {
     "m2", "A3"}, {"t3", "A1"}, {"t3", "A2"}, {"t3", "A3"}}],
   Editable->
-   False]], "Print",ExpressionUUID->"d3de97c2-affe-406a-87ff-6659300cf496"],
+   False]], "Print",ExpressionUUID->"ca41086f-c581-4048-b053-769b77d49333"],
 
 Cell[BoxData[
  InterpretationBox[
   RowBox[{"\<\"Total time: \"\>", "\[InvisibleSpace]", 
-   "174.302855`8.391819498542626"}],
-  SequenceForm["Total time: ", 174.302855`8.391819498542626],
+   "240.76463`8.532107684221398"}],
+  SequenceForm["Total time: ", 240.76463`8.532107684221398],
   Editable->
-   False]], "Print",ExpressionUUID->"b4ea1560-92dd-4dd8-98d9-bbbd95a9f332"]
+   False]], "Print",ExpressionUUID->"89b4e844-074d-48ba-8348-ec045ae7a159"]
 }, Open  ]]
 }, Open  ]],
 
@@ -2011,9 +2198,9 @@ Cell[BoxData[
   RowBox[{"fieldCorr4xA", "=", 
    RowBox[{"linkCorrelators", "[", 
     RowBox[{"\"\<4x\>\"", ",", 
-     RowBox[{"\"\<anomoly\>\"", "\[Rule]", "True"}], ",", 
+     RowBox[{"\"\<anomaly\>\"", "\[Rule]", "True"}], ",", 
      RowBox[{"\"\<operators\>\"", "\[Rule]", "All"}]}], "]"}]}], 
-  ";"}]], "Input",ExpressionUUID->"929df65e-5500-4447-8505-9f184a92aedf"],
+  ";"}]], "Input",ExpressionUUID->"a36574e6-8fda-4066-8843-db6da0e2e58f"],
 
 Cell[CellGroupData[{
 
@@ -2058,19 +2245,17 @@ Cell[BoxData[
     "4hz", "A3"}, {"4zr", "A1"}, {"4zr", "A2"}, {"4zr", "A3"}, {
     "4zz", "A1"}, {"4zz", "A2"}, {"4zz", "A3"}}],
   Editable->
-   False]], "Print",ExpressionUUID->"a3c9e70d-e66e-492c-b2aa-53e10dec171b"],
+   False]], "Print",ExpressionUUID->"7977c154-1765-4e46-b832-6435b8925505"],
 
 Cell[BoxData[
  InterpretationBox[
   RowBox[{"\<\"Total time: \"\>", "\[InvisibleSpace]", 
-   "139.774086`8.29594165886677"}],
-  SequenceForm["Total time: ", 139.774086`8.29594165886677],
+   "183.56407`8.41430267617988"}],
+  SequenceForm["Total time: ", 183.56407`8.41430267617988],
   Editable->
-   False]], "Print",ExpressionUUID->"7f4d83bb-546f-4213-8320-0167db433e4d"]
+   False]], "Print",ExpressionUUID->"284a034f-9a38-423f-a23a-c5c4b8e04494"]
 }, Open  ]]
 }, Open  ]],
-
-Cell[CellGroupData[{
 
 Cell[BoxData[
  RowBox[{"Block", "[", 
@@ -2089,71 +2274,246 @@ Cell[BoxData[
        "fieldCorr2", ",", "fieldCorr3", ",", "fieldCorr22", ",", 
         "fieldCorr4x", ",", "fieldCorr3A", ",", "fieldCorr22A", ",", 
         "fieldCorr4xA"}], "}"}]}], "]"}]}]}], 
-  "]"}]], "Input",ExpressionUUID->"60627efc-2525-4e67-966f-527a542b24f9"],
-
-Cell[BoxData[
- TemplateBox[{
-  "DeleteFile","fdnfnd",
-   "\"Directory or file \
-\\!\\(\\*RowBox[{\\\"\\\\\\\"../cache/3-3/field-correlators-all-12.16.20-28-5-\
-a-20.m\\\\\\\"\\\"}]\\) not found.\"",2,36,3,31809002095344213828,"Local"},
-  "MessageTemplate"]], "Message", \
-"MSG",ExpressionUUID->"24264c56-ff5b-4fbf-8548-6f5a214e2d46"]
+  "]"}]], "Input",ExpressionUUID->"0e1809a0-90ec-40a7-8413-99f996dbfcf5"]
 }, Open  ]]
 }, Closed]]
-}, Closed]],
+}, Open  ]],
 
 Cell[CellGroupData[{
 
 Cell["3-3/12.16.20-28-5 *", \
-"Section",ExpressionUUID->"42837fa4-8ace-4d92-b32e-d6c000186aac"],
+"Section",ExpressionUUID->"e2fbe6f1-7aa5-431f-a981-a9c0f703b025"],
 
 Cell["Calculate for the original lattice in Landau gauge", \
-"Text",ExpressionUUID->"97a38b2c-03ba-4249-a23f-bb3e3d84ffb0"],
-
-Cell[CellGroupData[{
+"Text",ExpressionUUID->"8ebf0162-0f3c-490b-b30c-a62b182fb754"],
 
 Cell[BoxData[
  RowBox[{
-  RowBox[{"<<", "\"\<../data/3-3/periodic-12.16.20-28-5.m\>\""}], ";", 
-  RowBox[{"Print", "[", 
-   RowBox[{"{", 
-    RowBox[{
-     RowBox[{"latticeNorm", "[", "]"}], ",", 
-     RowBox[{"latticeNorm", "[", 
-      RowBox[{"\"\<center\>\"", "\[Rule]", "True"}], "]"}], ",", 
-     RowBox[{"applyGaugeTransforms", "[", 
-      RowBox[{
-       RowBox[{"{", 
-        RowBox[{
-        "1", ",", "1", ",", "6", ",", "1", ",", "5", ",", "6", ",", "5", ",", 
-         "6", ",", "5", ",", "6"}], "}"}], ",", 
-       RowBox[{"\"\<maxAbelianGauge\>\"", "\[Rule]", "False"}]}], "]"}], ",", 
-     
-     RowBox[{"latticeNorm", "[", "]"}], ",", 
-     RowBox[{"averagePlaquette", "[", "]"}]}], "}"}], "]"}], 
-  ";"}]], "Input",ExpressionUUID->"203e5ad4-a893-4a86-bd8c-025b8611ef1e"],
-
-Cell[BoxData[
- RowBox[{"{", 
-  RowBox[{
-  "3.080806747953309`", ",", "2.379606189926599`", ",", "0.4904352579308789`",
-    ",", "0.4904352579308789`", ",", "0.9025352450683483`"}], 
-  "}"}]], "Print",ExpressionUUID->"d43275de-765b-4290-add2-ff803cfec0fe"]
-}, Open  ]],
+  RowBox[{"<<", "\"\<../data/3-3/periodic-12.16.20-28-5.m\>\""}], 
+  ";"}]], "Input",ExpressionUUID->"9a355e27-f7c8-4762-b732-8c53f2a6920b"],
 
 Cell["The original field, Landau gauge.", \
-"Text",ExpressionUUID->"7d645ca4-2129-4b9b-bffe-5eca9fe7008a"],
+"Text",ExpressionUUID->"a19ffa31-a922-4ad6-98c5-1da9f8beb776"],
 
 Cell[BoxData[
  RowBox[{
   RowBox[{"<<", "\"\<../cache/3-3/field-correlators-12.16.20-28-5.m\>\""}], 
-  ";"}]], "Input",ExpressionUUID->"b1968fd0-fe49-4b62-86ca-6b4eebab796e"],
+  ";"}]], "Input",ExpressionUUID->"c6988315-fbcd-4f1c-9733-a03f3772e288"],
 
 Cell[CellGroupData[{
 
 Cell["Calculate", \
-"Subsection",ExpressionUUID->"964b1031-487e-451f-885d-59e9060e6eaa"],
+"Subsection",ExpressionUUID->"be1a8f13-37b8-466d-81f7-875d01c289b1"],
+
+Cell[CellGroupData[{
+
+Cell[BoxData[
+ RowBox[{"applyGaugeTransformStrategy", "[", 
+  "]"}]], "Input",ExpressionUUID->"4042ccbe-4536-466c-aa5a-f4e99ce416c6"],
+
+Cell[CellGroupData[{
+
+Cell[BoxData[
+ InterpretationBox[
+  RowBox[{
+   TemplateBox[{RowBox[{"\"Thu 13 Aug 2020 16:45:10\"", 
+       StyleBox[
+        RowBox[{"\"GMT\"", "\[InvisibleSpace]", 
+          RowBox[{"-", "7.`"}]}], FontColor -> GrayLevel[0.5]]}],
+     RowBox[{"DateObject", "[", 
+       RowBox[{
+         RowBox[{"{", 
+           
+           RowBox[{"2020", ",", "8", ",", "13", ",", "16", ",", "45", ",", 
+             "10.578892`7.777015169870279"}], "}"}], ",", "\"Instant\"", ",", 
+         "\"Gregorian\"", ",", 
+         RowBox[{"-", "7.`"}]}], "]"}]},
+    "DateObject",
+    Editable->False], 
+   "\[InvisibleSpace]", "\<\"Started external program and detached.\"\>"}],
+  SequenceForm[
+   DateObject[{2020, 8, 13, 16, 45, 10.578892`7.777015169870279}, "Instant", 
+    "Gregorian", -7.], "Started external program and detached."],
+  Editable->
+   False]], "Print",ExpressionUUID->"2e66eca0-5d8f-4f77-abf4-662b0880ba69"],
+
+Cell[BoxData[
+ InterpretationBox[
+  RowBox[{
+   TemplateBox[{RowBox[{"\"Thu 13 Aug 2020 16:45:16\"", 
+       StyleBox[
+        RowBox[{"\"GMT\"", "\[InvisibleSpace]", 
+          RowBox[{"-", "7.`"}]}], FontColor -> GrayLevel[0.5]]}],
+     RowBox[{"DateObject", "[", 
+       RowBox[{
+         RowBox[{"{", 
+           
+           RowBox[{"2020", ",", "8", ",", "13", ",", "16", ",", "45", ",", 
+             "16.342467`7.965892601473031"}], "}"}], ",", "\"Instant\"", ",", 
+         "\"Gregorian\"", ",", 
+         RowBox[{"-", "7.`"}]}], "]"}]},
+    "DateObject",
+    Editable->False], 
+   "\[InvisibleSpace]", "\<\"External program finished, \"\>", 
+   "\[InvisibleSpace]", "5", "\[InvisibleSpace]", "\<\" s.\"\>"}],
+  SequenceForm[
+   DateObject[{2020, 8, 13, 16, 45, 16.342467`7.965892601473031}, "Instant", 
+    "Gregorian", -7.], "External program finished, ", 5, " s."],
+  Editable->
+   False]], "Print",ExpressionUUID->"39033eec-2779-4b31-8934-23ccb4e30c10"],
+
+Cell[BoxData[
+ StyleBox["\<\"MAXLAN:      1000, Restart:         7,   NED: -     100,      \
+NEC:       100\\nMATVEC:      1569,  Reorth:      1569, Nloop:        13,  \
+Nlocked:        65\\nTtotal:  4.281556,    T_op:  1.574013, Torth:  2.089743, \
+  Tstart:  0.534621\\nlargeShifts: ops=1569, sumNcol=1569, \
+maxNcol=1\\nlargeShifts: 1569 matrix-vector ops, 1569 reorthogonalizations in \
+2.29 s\\ncutoffNullSpace:  1 (max 1, norm 1, concave 0) of 100 eigenpairs \
+between [0, 0]\\nlinearSolve:  282 iterations, 282 reorthogonalizations in \
+0.34 s\\ndynamicProject:  3706 calls (0 usertol), 7412 matrix-vector ops, max \
+itn 0\\n                 in 1.35 s\\nshifts.c:  init and i/o 0.95 s, \
+calculation 2.63 s\\n\"\>",
+  StripOnInput->False,
+  FontColor->RGBColor[
+   0, 0, 1]]], "Print",ExpressionUUID->"62f4c4c3-804a-4e7b-a50f-d649fecab9e4"],
+
+Cell[BoxData[
+ InterpretationBox[
+  RowBox[{
+   TemplateBox[{RowBox[{"\"Thu 13 Aug 2020 16:46:47\"", 
+       StyleBox[
+        RowBox[{"\"GMT\"", "\[InvisibleSpace]", 
+          RowBox[{"-", "7.`"}]}], FontColor -> GrayLevel[0.5]]}],
+     RowBox[{"DateObject", "[", 
+       RowBox[{
+         RowBox[{"{", 
+           
+           RowBox[{"2020", ",", "8", ",", "13", ",", "16", ",", "46", ",", 
+             "47.906328`8.432967859984062"}], "}"}], ",", "\"Instant\"", ",", 
+         "\"Gregorian\"", ",", 
+         RowBox[{"-", "7.`"}]}], "]"}]},
+    "DateObject",
+    Editable->False], 
+   "\[InvisibleSpace]", "\<\"Started external program and detached.\"\>"}],
+  SequenceForm[
+   DateObject[{2020, 8, 13, 16, 46, 47.906328`8.432967859984062}, "Instant", 
+    "Gregorian", -7.], "Started external program and detached."],
+  Editable->
+   False]], "Print",ExpressionUUID->"a4d83c75-1cdd-40db-9067-2c3e69d25e6d"],
+
+Cell[BoxData[
+ InterpretationBox[
+  RowBox[{
+   TemplateBox[{RowBox[{"\"Thu 13 Aug 2020 16:46:54\"", 
+       StyleBox[
+        RowBox[{"\"GMT\"", "\[InvisibleSpace]", 
+          RowBox[{"-", "7.`"}]}], FontColor -> GrayLevel[0.5]]}],
+     RowBox[{"DateObject", "[", 
+       RowBox[{
+         RowBox[{"{", 
+           
+           RowBox[{"2020", ",", "8", ",", "13", ",", "16", ",", "46", ",", 
+             "54.633893`8.490037122194272"}], "}"}], ",", "\"Instant\"", ",", 
+         "\"Gregorian\"", ",", 
+         RowBox[{"-", "7.`"}]}], "]"}]},
+    "DateObject",
+    Editable->False], 
+   "\[InvisibleSpace]", "\<\"External program finished, \"\>", 
+   "\[InvisibleSpace]", "5", "\[InvisibleSpace]", "\<\" s.\"\>"}],
+  SequenceForm[
+   DateObject[{2020, 8, 13, 16, 46, 54.633893`8.490037122194272}, "Instant", 
+    "Gregorian", -7.], "External program finished, ", 5, " s."],
+  Editable->
+   False]], "Print",ExpressionUUID->"3c1af8cb-8be4-4466-9e76-d76fd9a0ff5e"],
+
+Cell[BoxData[
+ StyleBox["\<\"MAXLAN:      1000, Restart:         7,   NED: -     100,      \
+NEC:       100\\nMATVEC:      1590,  Reorth:      1590, Nloop:        14,  \
+Nlocked:        81\\nTtotal:  4.319222,    T_op:  1.597294, Torth:  2.097501, \
+  Tstart:  0.542445\\nlargeShifts: ops=1590, sumNcol=1590, \
+maxNcol=1\\nlargeShifts: 1590 matrix-vector ops, 1590 reorthogonalizations in \
+2.31 s\\ncutoffNullSpace:  1 (max 1, norm 0, concave 0) of 100 eigenpairs \
+between [0, 0]\\nlinearSolve:  288 iterations, 288 reorthogonalizations in \
+0.37 s\\ndynamicProject:  3760 calls (0 usertol), 7520 matrix-vector ops, max \
+itn 0\\n                 in 1.37 s\\nshifts.c:  init and i/o 0.95 s, \
+calculation 2.68 s\\n\"\>",
+  StripOnInput->False,
+  FontColor->RGBColor[
+   0, 0, 1]]], "Print",ExpressionUUID->"8938223d-9c16-409c-b0f0-061319265664"],
+
+Cell[BoxData[
+ InterpretationBox[
+  RowBox[{
+   TemplateBox[{RowBox[{"\"Thu 13 Aug 2020 16:48:34\"", 
+       StyleBox[
+        RowBox[{"\"GMT\"", "\[InvisibleSpace]", 
+          RowBox[{"-", "7.`"}]}], FontColor -> GrayLevel[0.5]]}],
+     RowBox[{"DateObject", "[", 
+       RowBox[{
+         RowBox[{"{", 
+           
+           RowBox[{"2020", ",", "8", ",", "13", ",", "16", ",", "48", ",", 
+             "34.330839`8.288259397020749"}], "}"}], ",", "\"Instant\"", ",", 
+         "\"Gregorian\"", ",", 
+         RowBox[{"-", "7.`"}]}], "]"}]},
+    "DateObject",
+    Editable->False], 
+   "\[InvisibleSpace]", "\<\"Started external program and detached.\"\>"}],
+  SequenceForm[
+   DateObject[{2020, 8, 13, 16, 48, 34.330839`8.288259397020749}, "Instant", 
+    "Gregorian", -7.], "Started external program and detached."],
+  Editable->
+   False]], "Print",ExpressionUUID->"4ae51a08-d9dc-4906-aa5f-cfa9b1c73a0b"],
+
+Cell[BoxData[
+ InterpretationBox[
+  RowBox[{
+   TemplateBox[{RowBox[{"\"Thu 13 Aug 2020 16:48:46\"", 
+       StyleBox[
+        RowBox[{"\"GMT\"", "\[InvisibleSpace]", 
+          RowBox[{"-", "7.`"}]}], FontColor -> GrayLevel[0.5]]}],
+     RowBox[{"DateObject", "[", 
+       RowBox[{
+         RowBox[{"{", 
+           
+           RowBox[{"2020", ",", "8", ",", "13", ",", "16", ",", "48", ",", 
+             "46.651165`8.421437470285413"}], "}"}], ",", "\"Instant\"", ",", 
+         "\"Gregorian\"", ",", 
+         RowBox[{"-", "7.`"}]}], "]"}]},
+    "DateObject",
+    Editable->False], 
+   "\[InvisibleSpace]", "\<\"External program finished, \"\>", 
+   "\[InvisibleSpace]", "0", "\[InvisibleSpace]", "\<\" s.\"\>"}],
+  SequenceForm[
+   DateObject[{2020, 8, 13, 16, 48, 46.651165`8.421437470285413}, "Instant", 
+    "Gregorian", -7.], "External program finished, ", 0, " s."],
+  Editable->
+   False]], "Print",ExpressionUUID->"bffc78db-e0db-4321-87aa-dd7ee63ef810"],
+
+Cell[BoxData[
+ StyleBox["\<\"MAXLAN:      1000, Restart:         7,   NED: -     100,      \
+NEC:       100\\nMATVEC:      1643,  Reorth:      1643, Nloop:        14,  \
+Nlocked:        80\\nTtotal:  4.624798,    T_op:  1.726195, Torth:  2.248986, \
+  Tstart:  0.553083\\nlargeShifts: ops=1643, sumNcol=1643, \
+maxNcol=1\\nlargeShifts: 1643 matrix-vector ops, 1643 reorthogonalizations in \
+2.47 s\\ncutoffNullSpace:  1 (max 1, norm 0, concave 0) of 100 eigenpairs \
+between [0, 0]\\nlinearSolve:  276 iterations, 276 reorthogonalizations in \
+0.34 s\\ndynamicProject:  3842 calls (0 usertol), 7684 matrix-vector ops, max \
+itn 0\\n                 in 1.37 s\\nshifts.c:  init and i/o 0.95 s, \
+calculation 2.82 s\\n\"\>",
+  StripOnInput->False,
+  FontColor->RGBColor[
+   0, 0, 1]]], "Print",ExpressionUUID->"cecb4a09-babe-493e-9ba8-bc1a5e8d8142"],
+
+Cell[BoxData[
+ RowBox[{"{", 
+  RowBox[{
+  "3.080806747953309`", ",", "2.379606189926599`", ",", 
+   "0.45636914908511245`", ",", "0.45636914908511245`", ",", 
+   "0.9025352450683485`"}], 
+  "}"}]], "Print",ExpressionUUID->"fbdb1a9b-aeb5-4053-8bf9-294bf337339f"]
+}, Open  ]]
+}, Closed]],
 
 Cell[CellGroupData[{
 
@@ -2161,7 +2521,7 @@ Cell[BoxData[
  RowBox[{
   RowBox[{"fieldCorr2", "=", 
    RowBox[{"linkCorrelators", "[", "2", "]"}]}], 
-  ";"}]], "Input",ExpressionUUID->"0dc7c133-f39c-4d29-9c6b-932ea0e9cbab"],
+  ";"}]], "Input",ExpressionUUID->"541b5a81-a417-42f8-8369-d89e1b00a937"],
 
 Cell[CellGroupData[{
 
@@ -2174,15 +2534,15 @@ Cell[BoxData[
   
   SequenceForm["ops: ", {"2l", "2t1", "2t2", "2t11", "2t12", "2t13"}],
   Editable->
-   False]], "Print",ExpressionUUID->"aede4206-11a6-4fd4-8ca5-5a568db48608"],
+   False]], "Print",ExpressionUUID->"68c17014-f5aa-41a3-a291-a5fa9b0e676a"],
 
 Cell[BoxData[
  InterpretationBox[
   RowBox[{"\<\"Total time: \"\>", "\[InvisibleSpace]", 
-   "39.24`7.744243996539906"}],
-  SequenceForm["Total time: ", 39.24`7.744243996539906],
+   "49.955795`7.849100872587049"}],
+  SequenceForm["Total time: ", 49.955795`7.849100872587049],
   Editable->
-   False]], "Print",ExpressionUUID->"fdcde647-e1d4-4b08-a32d-62696e999f77"]
+   False]], "Print",ExpressionUUID->"d5b907c1-25a4-45f9-850c-9f08295f2a3e"]
 }, Open  ]]
 }, Open  ]],
 
@@ -2192,7 +2552,7 @@ Cell[BoxData[
  RowBox[{
   RowBox[{"fieldCorr3", "=", 
    RowBox[{"linkCorrelators", "[", "3", "]"}]}], 
-  ";"}]], "Input",ExpressionUUID->"e20a96b9-c776-404f-a6f2-2e1bf2ebf9b8"],
+  ";"}]], "Input",ExpressionUUID->"efa6e22a-6bab-48e3-88be-c1f47b708db9"],
 
 Cell[CellGroupData[{
 
@@ -2208,15 +2568,15 @@ Cell[BoxData[
   "ops: ", {
    "3m1b", "3m2", "3m4", "3m5", "3m6", "3m8", "3m9", "3pl", "3pt1", "3pt2"}],
   Editable->
-   False]], "Print",ExpressionUUID->"39fc507f-163b-4f28-bd4c-e264208e19a0"],
+   False]], "Print",ExpressionUUID->"9f7b433d-5401-4285-aa47-666df7425e4a"],
 
 Cell[BoxData[
  InterpretationBox[
   RowBox[{"\<\"Total time: \"\>", "\[InvisibleSpace]", 
-   "1082.401126`9.18490323320956"}],
-  SequenceForm["Total time: ", 1082.401126`9.18490323320956],
+   "1020.074104`9.159146720367712"}],
+  SequenceForm["Total time: ", 1020.074104`9.159146720367712],
   Editable->
-   False]], "Print",ExpressionUUID->"35b31706-460c-4486-9f97-1601df8eefad"]
+   False]], "Print",ExpressionUUID->"5228fa73-1022-40eb-9811-b098f182ad4d"]
 }, Open  ]]
 }, Open  ]],
 
@@ -2226,7 +2586,7 @@ Cell[BoxData[
  RowBox[{
   RowBox[{"fieldCorr22", "=", 
    RowBox[{"linkCorrelators", "[", "22", "]"}]}], 
-  ";"}]], "Input",ExpressionUUID->"5fb31a52-af68-4a21-8a95-c7324c618c9a"],
+  ";"}]], "Input",ExpressionUUID->"6a440a6b-73f8-4948-a4d1-1adaaa04ffb1"],
 
 Cell[CellGroupData[{
 
@@ -2278,23 +2638,27 @@ Cell[BoxData[
      RowBox[{"{", 
       RowBox[{"\<\"t3\"\>", ",", "\<\"27\"\>"}], "}"}], ",", 
      RowBox[{"{", 
-      RowBox[{"\<\"t3\"\>", ",", "\<\"8S\"\>"}], "}"}]}], "}"}]}],
+      RowBox[{"\<\"t3\"\>", ",", "\<\"8A\"\>"}], "}"}], ",", 
+     RowBox[{"{", 
+      RowBox[{"\<\"t3\"\>", ",", "\<\"8S\"\>"}], "}"}], ",", 
+     RowBox[{"{", 
+      RowBox[{"\<\"t3\"\>", ",", "\<\"Re10\"\>"}], "}"}]}], "}"}]}],
   SequenceForm[
   "ops: ", {{"l", "1"}, {"l", "27"}, {"l", "8S"}, {"m1", "1"}, {"m1", "27"}, {
     "m1", "8A"}, {"m1", "8S"}, {"m1", "Re10"}, {"m2", "1"}, {"m2", "27"}, {
     "m2", "8S"}, {"t1", "1"}, {"t1", "27"}, {"t1", "8A"}, {"t1", "8S"}, {
     "t1", "Re10"}, {"t2", "1"}, {"t2", "27"}, {"t2", "8S"}, {"t3", "1"}, {
-    "t3", "27"}, {"t3", "8S"}}],
+    "t3", "27"}, {"t3", "8A"}, {"t3", "8S"}, {"t3", "Re10"}}],
   Editable->
-   False]], "Print",ExpressionUUID->"6febda75-bf34-4166-9670-c716cd791942"],
+   False]], "Print",ExpressionUUID->"2deeb6ca-f891-483a-87b3-e30299fd9810"],
 
 Cell[BoxData[
  InterpretationBox[
   RowBox[{"\<\"Total time: \"\>", "\[InvisibleSpace]", 
-   "205.018194`8.462307401342326"}],
-  SequenceForm["Total time: ", 205.018194`8.462307401342326],
+   "205.05306`8.462381252465972"}],
+  SequenceForm["Total time: ", 205.05306`8.462381252465972],
   Editable->
-   False]], "Print",ExpressionUUID->"ab9ab64b-3a32-42a4-9003-1392c383e673"]
+   False]], "Print",ExpressionUUID->"0ba9cec6-2cbd-46dc-9fe3-5b054ef3f337"]
 }, Open  ]]
 }, Open  ]],
 
@@ -2304,7 +2668,7 @@ Cell[BoxData[
  RowBox[{
   RowBox[{"fieldCorr4x", "=", 
    RowBox[{"linkCorrelators", "[", "\"\<4x\>\"", "]"}]}], 
-  ";"}]], "Input",ExpressionUUID->"30a6a63c-3b37-4ed9-8087-085355c7790e"],
+  ";"}]], "Input",ExpressionUUID->"c64fadf8-4d1a-4551-b3a9-7671ab6a7690"],
 
 Cell[CellGroupData[{
 
@@ -2349,15 +2713,15 @@ Cell[BoxData[
     "4zr", "1"}, {"4zr", "27"}, {"4zr", "8S"}, {"4zz", "1"}, {"4zz", "27"}, {
     "4zz", "8S"}}],
   Editable->
-   False]], "Print",ExpressionUUID->"b21dfc28-5dbf-416e-9ba7-761d6223374d"],
+   False]], "Print",ExpressionUUID->"8f5c1e94-9446-47ac-91c8-487ee3e441fd"],
 
 Cell[BoxData[
  InterpretationBox[
   RowBox[{"\<\"Total time: \"\>", "\[InvisibleSpace]", 
-   "145.101752`8.312187654097013"}],
-  SequenceForm["Total time: ", 145.101752`8.312187654097013],
+   "147.82102`8.320251192519489"}],
+  SequenceForm["Total time: ", 147.82102`8.320251192519489],
   Editable->
-   False]], "Print",ExpressionUUID->"088b550c-081c-4bce-932c-3d868e25635b"]
+   False]], "Print",ExpressionUUID->"daa7dbb8-730c-419f-b3ea-05c30b7ccb28"]
 }, Open  ]]
 }, Open  ]],
 
@@ -2381,77 +2745,239 @@ Cell[BoxData[
         "fieldCorr2", ",", "fieldCorr3", ",", "fieldCorr22", ",", 
          "fieldCorr4x", ",", "fieldCorr3A", ",", "fieldCorr22A", ",", 
          "fieldCorr4xA"}], "}"}]}], "]"}]}]}], 
-   "]"}]}]], "Input",ExpressionUUID->"4631e482-0ac5-4ceb-8427-9caaa3b540ea"]
-}, Open  ]]
-}, Closed]],
-
-Cell[CellGroupData[{
-
-Cell["3-3/16.20.24-28-5-a-12 *", \
-"Section",ExpressionUUID->"6452ebac-4910-4fde-8279-0486aca43bf1"],
-
-Cell[CellGroupData[{
-
-Cell[BoxData[
- RowBox[{
-  RowBox[{"<<", "\"\<../data/3-3/periodic-16.20.24-28-5.m\>\""}], ";", 
-  RowBox[{"Print", "[", 
-   RowBox[{"{", 
-    RowBox[{
-     RowBox[{"averagePlaquette", "[", "]"}], ",", 
-     RowBox[{"latticeNorm", "[", "]"}], ",", 
-     RowBox[{"latticeNorm", "[", 
-      RowBox[{"\"\<center\>\"", "\[Rule]", "True"}], "]"}]}], "}"}], "]"}], 
-  ";", 
-  RowBox[{"<<", "\"\<../data/3-3/step-16.20.24-28-5-a-12.m\>\""}], ";", 
-  RowBox[{"gaugeField", "=", "gaugeField0"}], ";", 
-  RowBox[{"Print", "[", 
-   RowBox[{"{", 
-    RowBox[{
-     RowBox[{"latticeNorm", "[", "]"}], ",", 
-     RowBox[{"latticeNorm", "[", 
-      RowBox[{"\"\<center\>\"", "\[Rule]", "True"}], "]"}], ",", 
-     RowBox[{"applyGaugeTransforms", "[", 
-      RowBox[{
-       RowBox[{"{", 
-        RowBox[{
-        "1", ",", "1", ",", "6", ",", "1", ",", "5", ",", "6", ",", "5", ",", 
-         "6", ",", "5", ",", "6"}], "}"}], ",", 
-       RowBox[{"\"\<maxAbelianGauge\>\"", "\[Rule]", "False"}]}], "]"}], ",", 
-     
-     RowBox[{"latticeNorm", "[", "]"}], ",", 
-     RowBox[{"averagePlaquette", "[", "]"}]}], "}"}], "]"}], 
-  ";"}]], "Input",ExpressionUUID->"a65edccb-21ac-4e81-bcf0-426d78669dd5"],
-
-Cell[CellGroupData[{
-
-Cell[BoxData[
- RowBox[{"{", 
-  RowBox[{
-  "0.9014494421977087`", ",", "3.0782077138006168`", ",", 
-   "2.376569509958624`"}], 
-  "}"}]], "Print",ExpressionUUID->"82956a3a-5461-4dd4-a7c0-9cfabf1c6dd3"],
-
-Cell[BoxData[
- RowBox[{"{", 
-  RowBox[{
-  "0.31940291186835756`", ",", "0.31940291186835756`", ",", 
-   "0.3233101749887642`", ",", "0.3233101749887642`", ",", 
-   "0.9902189104160235`"}], 
-  "}"}]], "Print",ExpressionUUID->"b14b7531-eaa8-48c7-992b-5212341a5daa"]
-}, Open  ]]
+   "]"}]}]], "Input",ExpressionUUID->"53fe987e-cda6-4b74-a2a1-22e2e9d2bf27"]
+}, Closed]]
 }, Open  ]],
 
+Cell[CellGroupData[{
+
+Cell["3-3/16.20.24-28-5-d-20 minimizations", \
+"Section",ExpressionUUID->"b936beea-2eff-4750-a05f-f2df315806ef"],
+
 Cell[BoxData[
  RowBox[{
-  RowBox[{
-  "<<", "\"\<../cache/3-3/field-correlators-16.20.24-28-5-a-12.m\>\""}], 
-  ";"}]], "Input",ExpressionUUID->"652c50c3-a818-4679-b1ca-87894ebf733a"],
+  RowBox[{"<<", "\"\<../data/3-3/periodic-16-28-5.m\>\""}], 
+  ";"}]], "Input",ExpressionUUID->"e3eee0e7-763c-4984-8c1c-28bcc592a274"],
+
+Cell[BoxData[
+ RowBox[{
+  RowBox[{"<<", "\"\<../cache/3-3/field-correlators-16-28-5-d-20-a.m\>\""}], 
+  ";"}]], "Input",ExpressionUUID->"6a47fc61-4ea9-4620-9b75-70db258dad8a"],
 
 Cell[CellGroupData[{
 
 Cell["Calculate", \
-"Subsection",ExpressionUUID->"e36a8835-417f-4da5-9394-0bde75395fd7"],
+"Subsection",ExpressionUUID->"2078a3aa-6432-4892-aa71-de42190a2e63"],
+
+Cell[CellGroupData[{
+
+Cell[BoxData[
+ RowBox[{"applyGaugeTransformStrategy", "[", 
+  "]"}]], "Input",ExpressionUUID->"380f2f80-7ecd-44f4-a494-90c32ee8060a"],
+
+Cell[CellGroupData[{
+
+Cell[BoxData[
+ InterpretationBox[
+  RowBox[{
+   TemplateBox[{RowBox[{"\"Thu 13 Aug 2020 17:14:40\"", 
+       StyleBox[
+        RowBox[{"\"GMT\"", "\[InvisibleSpace]", 
+          RowBox[{"-", "7.`"}]}], FontColor -> GrayLevel[0.5]]}],
+     RowBox[{"DateObject", "[", 
+       RowBox[{
+         RowBox[{"{", 
+           
+           RowBox[{"2020", ",", "8", ",", "13", ",", "17", ",", "14", ",", 
+             "40.198161`8.356781163527817"}], "}"}], ",", "\"Instant\"", ",", 
+         "\"Gregorian\"", ",", 
+         RowBox[{"-", "7.`"}]}], "]"}]},
+    "DateObject",
+    Editable->False], 
+   "\[InvisibleSpace]", "\<\"Started external program and detached.\"\>"}],
+  SequenceForm[
+   DateObject[{2020, 8, 13, 17, 14, 40.198161`8.356781163527817}, "Instant", 
+    "Gregorian", -7.], "Started external program and detached."],
+  Editable->
+   False]], "Print",ExpressionUUID->"28598c12-bedf-43ca-bd20-8d89e2e99bbe"],
+
+Cell[BoxData[
+ InterpretationBox[
+  RowBox[{
+   TemplateBox[{RowBox[{"\"Thu 13 Aug 2020 17:14:49\"", 
+       StyleBox[
+        RowBox[{"\"GMT\"", "\[InvisibleSpace]", 
+          RowBox[{"-", "7.`"}]}], FontColor -> GrayLevel[0.5]]}],
+     RowBox[{"DateObject", "[", 
+       RowBox[{
+         RowBox[{"{", 
+           
+           RowBox[{"2020", ",", "8", ",", "13", ",", "17", ",", "14", ",", 
+             "49.865118`8.45037182687994"}], "}"}], ",", "\"Instant\"", ",", 
+         "\"Gregorian\"", ",", 
+         RowBox[{"-", "7.`"}]}], "]"}]},
+    "DateObject",
+    Editable->False], 
+   "\[InvisibleSpace]", "\<\"External program finished, \"\>", 
+   "\[InvisibleSpace]", "5", "\[InvisibleSpace]", "\<\" s.\"\>"}],
+  SequenceForm[
+   DateObject[{2020, 8, 13, 17, 14, 49.865118`8.45037182687994}, "Instant", 
+    "Gregorian", -7.], "External program finished, ", 5, " s."],
+  Editable->
+   False]], "Print",ExpressionUUID->"cf1727f7-c434-4819-b4cf-1284becd1b4a"],
+
+Cell[BoxData[
+ StyleBox["\<\"MAXLAN:      1000, Restart:         7,   NED: -     100,      \
+NEC:       100\\nMATVEC:      1765,  Reorth:      1765, Nloop:        15,  \
+Nlocked:        79\\nTtotal:  4.781241,    T_op:  1.807798, Torth:  2.276069, \
+  Tstart:  0.583600\\nlargeShifts: ops=1765, sumNcol=1765, \
+maxNcol=1\\nlargeShifts: 1765 matrix-vector ops, 1765 reorthogonalizations in \
+2.56 s\\ncutoffNullSpace:  0 (max 0, norm 0, concave 0) of 100 eigenpairs \
+between [-1, -1]\\nlinearSolve:  253 iterations, 253 reorthogonalizations in \
+0.28 s\\ndynamicProject:  4040 calls (0 usertol), 8080 matrix-vector ops, max \
+itn 0\\n                 in 1.46 s\\nshifts.c:  init and i/o 1.02 s, \
+calculation 2.85 s\\n\"\>",
+  StripOnInput->False,
+  FontColor->RGBColor[
+   0, 0, 1]]], "Print",ExpressionUUID->"e7003250-698d-49b7-bb74-f9d4e938f702"],
+
+Cell[BoxData[
+ InterpretationBox[
+  RowBox[{
+   TemplateBox[{RowBox[{"\"Thu 13 Aug 2020 17:16:28\"", 
+       StyleBox[
+        RowBox[{"\"GMT\"", "\[InvisibleSpace]", 
+          RowBox[{"-", "7.`"}]}], FontColor -> GrayLevel[0.5]]}],
+     RowBox[{"DateObject", "[", 
+       RowBox[{
+         RowBox[{"{", 
+           
+           RowBox[{"2020", ",", "8", ",", "13", ",", "17", ",", "16", ",", 
+             "28.254325`8.203659917921362"}], "}"}], ",", "\"Instant\"", ",", 
+         "\"Gregorian\"", ",", 
+         RowBox[{"-", "7.`"}]}], "]"}]},
+    "DateObject",
+    Editable->False], 
+   "\[InvisibleSpace]", "\<\"Started external program and detached.\"\>"}],
+  SequenceForm[
+   DateObject[{2020, 8, 13, 17, 16, 28.254325`8.203659917921362}, "Instant", 
+    "Gregorian", -7.], "Started external program and detached."],
+  Editable->
+   False]], "Print",ExpressionUUID->"8f71336e-2b6a-45a6-909b-e41a80a25b23"],
+
+Cell[BoxData[
+ InterpretationBox[
+  RowBox[{
+   TemplateBox[{RowBox[{"\"Thu 13 Aug 2020 17:16:35\"", 
+       StyleBox[
+        RowBox[{"\"GMT\"", "\[InvisibleSpace]", 
+          RowBox[{"-", "7.`"}]}], FontColor -> GrayLevel[0.5]]}],
+     RowBox[{"DateObject", "[", 
+       RowBox[{
+         RowBox[{"{", 
+           
+           RowBox[{"2020", ",", "8", ",", "13", ",", "17", ",", "16", ",", 
+             "35.854655`8.307120527611087"}], "}"}], ",", "\"Instant\"", ",", 
+         "\"Gregorian\"", ",", 
+         RowBox[{"-", "7.`"}]}], "]"}]},
+    "DateObject",
+    Editable->False], 
+   "\[InvisibleSpace]", "\<\"External program finished, \"\>", 
+   "\[InvisibleSpace]", "5", "\[InvisibleSpace]", "\<\" s.\"\>"}],
+  SequenceForm[
+   DateObject[{2020, 8, 13, 17, 16, 35.854655`8.307120527611087}, "Instant", 
+    "Gregorian", -7.], "External program finished, ", 5, " s."],
+  Editable->
+   False]], "Print",ExpressionUUID->"3dace394-0554-4b8b-9695-4454f02b9825"],
+
+Cell[BoxData[
+ StyleBox["\<\"MAXLAN:      1000, Restart:         7,   NED: -     100,      \
+NEC:       100\\nMATVEC:      1808,  Reorth:      1808, Nloop:        15,  \
+Nlocked:        80\\nTtotal:  5.023037,    T_op:  1.888591, Torth:  2.427636, \
+  Tstart:  0.595398\\nlargeShifts: ops=1808, sumNcol=1808, \
+maxNcol=1\\nlargeShifts: 1808 matrix-vector ops, 1808 reorthogonalizations in \
+2.69 s\\ncutoffNullSpace:  0 (max 0, norm 0, concave 0) of 100 eigenpairs \
+between [-1, -1]\\nlinearSolve:  258 iterations, 258 reorthogonalizations in \
+0.30 s\\ndynamicProject:  4136 calls (0 usertol), 8272 matrix-vector ops, max \
+itn 0\\n                 in 1.51 s\\nshifts.c:  init and i/o 1.02 s, \
+calculation 2.99 s\\n\"\>",
+  StripOnInput->False,
+  FontColor->RGBColor[
+   0, 0, 1]]], "Print",ExpressionUUID->"929da20d-f051-477b-a5af-aa60ccb417a0"],
+
+Cell[BoxData[
+ InterpretationBox[
+  RowBox[{
+   TemplateBox[{RowBox[{"\"Thu 13 Aug 2020 17:17:10\"", 
+       StyleBox[
+        RowBox[{"\"GMT\"", "\[InvisibleSpace]", 
+          RowBox[{"-", "7.`"}]}], FontColor -> GrayLevel[0.5]]}],
+     RowBox[{"DateObject", "[", 
+       RowBox[{
+         RowBox[{"{", 
+           
+           RowBox[{"2020", ",", "8", ",", "13", ",", "17", ",", "17", ",", 
+             "10.512461`7.77427938405968"}], "}"}], ",", "\"Instant\"", ",", 
+         "\"Gregorian\"", ",", 
+         RowBox[{"-", "7.`"}]}], "]"}]},
+    "DateObject",
+    Editable->False], 
+   "\[InvisibleSpace]", "\<\"Started external program and detached.\"\>"}],
+  SequenceForm[
+   DateObject[{2020, 8, 13, 17, 17, 10.512461`7.77427938405968}, "Instant", 
+    "Gregorian", -7.], "Started external program and detached."],
+  Editable->
+   False]], "Print",ExpressionUUID->"7be56f0b-5de2-40ec-982a-5442e1901b1b"],
+
+Cell[BoxData[
+ InterpretationBox[
+  RowBox[{
+   TemplateBox[{RowBox[{"\"Thu 13 Aug 2020 17:17:17\"", 
+       StyleBox[
+        RowBox[{"\"GMT\"", "\[InvisibleSpace]", 
+          RowBox[{"-", "7.`"}]}], FontColor -> GrayLevel[0.5]]}],
+     RowBox[{"DateObject", "[", 
+       RowBox[{
+         RowBox[{"{", 
+           
+           RowBox[{"2020", ",", "8", ",", "13", ",", "17", ",", "17", ",", 
+             "17.259545`7.9896043270846215"}], "}"}], ",", "\"Instant\"", ",",
+          "\"Gregorian\"", ",", 
+         RowBox[{"-", "7.`"}]}], "]"}]},
+    "DateObject",
+    Editable->False], 
+   "\[InvisibleSpace]", "\<\"External program finished, \"\>", 
+   "\[InvisibleSpace]", "5", "\[InvisibleSpace]", "\<\" s.\"\>"}],
+  SequenceForm[
+   DateObject[{2020, 8, 13, 17, 17, 17.259545`7.9896043270846215}, "Instant", 
+    "Gregorian", -7.], "External program finished, ", 5, " s."],
+  Editable->
+   False]], "Print",ExpressionUUID->"584a7a13-18bb-48e3-ab71-3ec0df052e6f"],
+
+Cell[BoxData[
+ StyleBox["\<\"MAXLAN:      1000, Restart:         7,   NED: -     100,      \
+NEC:       100\\nMATVEC:      1805,  Reorth:      1805, Nloop:        15,  \
+Nlocked:        80\\nTtotal:  4.919570,    T_op:  1.853495, Torth:  2.373777, \
+  Tstart:  0.593111\\nlargeShifts: ops=1805, sumNcol=1805, \
+maxNcol=1\\nlargeShifts: 1805 matrix-vector ops, 1805 reorthogonalizations in \
+2.63 s\\ncutoffNullSpace:  0 (max 0, norm 0, concave 0) of 100 eigenpairs \
+between [-1, -1]\\nlinearSolve:  254 iterations, 254 reorthogonalizations in \
+0.29 s\\ndynamicProject:  4122 calls (0 usertol), 8244 matrix-vector ops, max \
+itn 0\\n                 in 1.50 s\\nshifts.c:  init and i/o 1.02 s, \
+calculation 2.92 s\\n\"\>",
+  StripOnInput->False,
+  FontColor->RGBColor[
+   0, 0, 1]]], "Print",ExpressionUUID->"2a28d58a-d6ae-4de7-bc82-5106f3eaa3e0"],
+
+Cell[BoxData[
+ RowBox[{"{", 
+  RowBox[{
+  "3.0788066614701486`", ",", "2.3766818609062934`", ",", 
+   "0.4340763252999028`", ",", "0.4340763252999028`", ",", 
+   "0.9017923924994083`"}], 
+  "}"}]], "Print",ExpressionUUID->"58d85e24-e194-42ce-a61f-ae8650bb0eed"]
+}, Open  ]]
+}, Closed]],
 
 Cell[CellGroupData[{
 
@@ -2459,7 +2985,7 @@ Cell[BoxData[
  RowBox[{
   RowBox[{"fieldCorr2", "=", 
    RowBox[{"linkCorrelators", "[", "2", "]"}]}], 
-  ";"}]], "Input",ExpressionUUID->"72ac314c-1843-42d2-b3d3-a246ca7e435f"],
+  ";"}]], "Input",ExpressionUUID->"8a5b776d-6d6e-4705-915f-69b2729c45ae"],
 
 Cell[CellGroupData[{
 
@@ -2472,15 +2998,15 @@ Cell[BoxData[
   
   SequenceForm["ops: ", {"2l", "2t1", "2t2", "2t11", "2t12", "2t13"}],
   Editable->
-   False]], "Print",ExpressionUUID->"a22ad171-9a9b-445f-b3c1-d6fa76f12f45"],
+   False]], "Print",ExpressionUUID->"c50b27ef-0dae-4c6d-9c3e-d052719a1b8d"],
 
 Cell[BoxData[
  InterpretationBox[
   RowBox[{"\<\"Total time: \"\>", "\[InvisibleSpace]", 
-   "124.16166`8.244502508157355"}],
-  SequenceForm["Total time: ", 124.16166`8.244502508157355],
+   "44.602706`7.799876205540055"}],
+  SequenceForm["Total time: ", 44.602706`7.799876205540055],
   Editable->
-   False]], "Print",ExpressionUUID->"dcc1d0f2-0e45-4f2e-a00a-8f6aab8de0df"]
+   False]], "Print",ExpressionUUID->"484ffa7a-17b4-48ee-a519-b62a611c9da9"]
 }, Open  ]]
 }, Open  ]],
 
@@ -2490,7 +3016,7 @@ Cell[BoxData[
  RowBox[{
   RowBox[{"fieldCorr3", "=", 
    RowBox[{"linkCorrelators", "[", "3", "]"}]}], 
-  ";"}]], "Input",ExpressionUUID->"f0338f05-7a72-486e-8aaf-8f102dc9836c"],
+  ";"}]], "Input",ExpressionUUID->"23f4d46f-8069-441b-90db-b29c7f35a816"],
 
 Cell[CellGroupData[{
 
@@ -2506,15 +3032,15 @@ Cell[BoxData[
   "ops: ", {
    "3m1b", "3m2", "3m4", "3m5", "3m6", "3m8", "3m9", "3pl", "3pt1", "3pt2"}],
   Editable->
-   False]], "Print",ExpressionUUID->"6bed6b51-e071-4307-8b65-a8572ba8b824"],
+   False]], "Print",ExpressionUUID->"c3497433-3671-4894-ba41-587fbfa3254e"],
 
 Cell[BoxData[
  InterpretationBox[
   RowBox[{"\<\"Total time: \"\>", "\[InvisibleSpace]", 
-   "2718.531435`9.584849357045062"}],
-  SequenceForm["Total time: ", 2718.531435`9.584849357045062],
+   "1099.561944`9.191734698267874"}],
+  SequenceForm["Total time: ", 1099.561944`9.191734698267874],
   Editable->
-   False]], "Print",ExpressionUUID->"10ee34c8-5aa7-4da1-9bf3-13e6e6f06b98"]
+   False]], "Print",ExpressionUUID->"8a1a1afc-c74f-422a-bbb1-e6a0369de282"]
 }, Open  ]]
 }, Open  ]],
 
@@ -2524,7 +3050,7 @@ Cell[BoxData[
  RowBox[{
   RowBox[{"fieldCorr22", "=", 
    RowBox[{"linkCorrelators", "[", "22", "]"}]}], 
-  ";"}]], "Input",ExpressionUUID->"77ccc2f8-f52e-4cf5-b237-0da732fcf35a"],
+  ";"}]], "Input",ExpressionUUID->"8960eaca-8527-4212-9681-258f51419d1d"],
 
 Cell[CellGroupData[{
 
@@ -2576,29 +3102,27 @@ Cell[BoxData[
      RowBox[{"{", 
       RowBox[{"\<\"t3\"\>", ",", "\<\"27\"\>"}], "}"}], ",", 
      RowBox[{"{", 
+      RowBox[{"\<\"t3\"\>", ",", "\<\"8A\"\>"}], "}"}], ",", 
+     RowBox[{"{", 
       RowBox[{"\<\"t3\"\>", ",", "\<\"8S\"\>"}], "}"}], ",", 
      RowBox[{"{", 
-      RowBox[{"\<\"t4\"\>", ",", "\<\"1\"\>"}], "}"}], ",", 
-     RowBox[{"{", 
-      RowBox[{"\<\"t4\"\>", ",", "\<\"27\"\>"}], "}"}], ",", 
-     RowBox[{"{", 
-      RowBox[{"\<\"t4\"\>", ",", "\<\"8S\"\>"}], "}"}]}], "}"}]}],
+      RowBox[{"\<\"t3\"\>", ",", "\<\"Re10\"\>"}], "}"}]}], "}"}]}],
   SequenceForm[
   "ops: ", {{"l", "1"}, {"l", "27"}, {"l", "8S"}, {"m1", "1"}, {"m1", "27"}, {
     "m1", "8A"}, {"m1", "8S"}, {"m1", "Re10"}, {"m2", "1"}, {"m2", "27"}, {
     "m2", "8S"}, {"t1", "1"}, {"t1", "27"}, {"t1", "8A"}, {"t1", "8S"}, {
     "t1", "Re10"}, {"t2", "1"}, {"t2", "27"}, {"t2", "8S"}, {"t3", "1"}, {
-    "t3", "27"}, {"t3", "8S"}, {"t4", "1"}, {"t4", "27"}, {"t4", "8S"}}],
+    "t3", "27"}, {"t3", "8A"}, {"t3", "8S"}, {"t3", "Re10"}}],
   Editable->
-   False]], "Print",ExpressionUUID->"8c7d828e-03fe-4e74-9754-1f1a9b35f85b"],
+   False]], "Print",ExpressionUUID->"c1c835e8-d097-4fd9-af2a-b4f89095effc"],
 
 Cell[BoxData[
  InterpretationBox[
   RowBox[{"\<\"Total time: \"\>", "\[InvisibleSpace]", 
-   "587.778252`8.9197285108188"}],
-  SequenceForm["Total time: ", 587.778252`8.9197285108188],
+   "255.48098`8.557873571232202"}],
+  SequenceForm["Total time: ", 255.48098`8.557873571232202],
   Editable->
-   False]], "Print",ExpressionUUID->"e148ceb1-500c-429a-9fda-f8b77a19dc6e"]
+   False]], "Print",ExpressionUUID->"876689bc-3670-4ac0-b894-04c44cb637d8"]
 }, Open  ]]
 }, Open  ]],
 
@@ -2608,7 +3132,7 @@ Cell[BoxData[
  RowBox[{
   RowBox[{"fieldCorr4x", "=", 
    RowBox[{"linkCorrelators", "[", "\"\<4x\>\"", "]"}]}], 
-  ";"}]], "Input",ExpressionUUID->"76dfc86e-0e3e-4fd1-9ead-6d45849eb1be"],
+  ";"}]], "Input",ExpressionUUID->"e2022552-d55f-4a7e-950a-1746c78cad99"],
 
 Cell[CellGroupData[{
 
@@ -2653,15 +3177,513 @@ Cell[BoxData[
     "4zr", "1"}, {"4zr", "27"}, {"4zr", "8S"}, {"4zz", "1"}, {"4zz", "27"}, {
     "4zz", "8S"}}],
   Editable->
-   False]], "Print",ExpressionUUID->"4d09f398-47ff-40f9-bfae-81773fada38e"],
+   False]], "Print",ExpressionUUID->"3ceabdbe-8d8e-4cb4-b9f9-05fc14484c4b"],
 
 Cell[BoxData[
  InterpretationBox[
   RowBox[{"\<\"Total time: \"\>", "\[InvisibleSpace]", 
-   "409.90139`8.763194388869419"}],
-  SequenceForm["Total time: ", 409.90139`8.763194388869419],
+   "171.839317`8.385637535689206"}],
+  SequenceForm["Total time: ", 171.839317`8.385637535689206],
   Editable->
-   False]], "Print",ExpressionUUID->"127fb6ca-ae9b-4093-ada6-09817c55fc95"]
+   False]], "Print",ExpressionUUID->"8383ff40-7012-4e76-ad49-739c72c5560b"]
+}, Open  ]]
+}, Open  ]],
+
+Cell[BoxData[
+ RowBox[{
+  RowBox[{"fieldCorr3A", "=", "Null"}], ";", 
+  RowBox[{"fieldCorr22A", "=", "Null"}], ";", 
+  RowBox[{"fieldCorr4xA", "=", "Null"}], ";", 
+  RowBox[{"Block", "[", 
+   RowBox[{
+    RowBox[{"{", 
+     RowBox[{
+     "f", "=", "\"\<../cache/3-3/field-correlators-16-28-5-d-20-a.m\>\""}], 
+     "}"}], ",", 
+    RowBox[{
+     RowBox[{"DeleteFile", "[", "f", "]"}], ";", 
+     RowBox[{"Save", "[", 
+      RowBox[{"f", ",", 
+       RowBox[{"{", 
+        RowBox[{
+        "fieldCorr2", ",", "fieldCorr3", ",", "fieldCorr22", ",", 
+         "fieldCorr4x", ",", "fieldCorr3A", ",", "fieldCorr22A", ",", 
+         "fieldCorr4xA"}], "}"}]}], "]"}]}]}], 
+   "]"}]}]], "Input",ExpressionUUID->"32b52087-f873-4c3d-afac-3fd0f96635ae"]
+}, Closed]]
+}, Open  ]],
+
+Cell[CellGroupData[{
+
+Cell["3-3/16.20.24-28-5-a-12 *", \
+"Section",ExpressionUUID->"50185cfa-76bb-47f1-a3d9-e586f704b95f"],
+
+Cell[CellGroupData[{
+
+Cell[BoxData[
+ RowBox[{
+  RowBox[{"<<", "\"\<../data/3-3/periodic-16.20.24-28-5.m\>\""}], ";", 
+  RowBox[{"Print", "[", 
+   RowBox[{"{", 
+    RowBox[{
+     RowBox[{"averagePlaquette", "[", "]"}], ",", 
+     RowBox[{"latticeNorm", "[", "]"}], ",", 
+     RowBox[{"latticeNorm", "[", 
+      RowBox[{"\"\<center\>\"", "\[Rule]", "True"}], "]"}]}], "}"}], "]"}], 
+  ";", 
+  RowBox[{"<<", "\"\<../data/3-3/step-16.20.24-28-5-a-12.m\>\""}], ";", 
+  RowBox[{"gaugeField", "=", "gaugeField0"}], 
+  ";"}]], "Input",ExpressionUUID->"962ce377-08b5-4f76-9d78-3771a3e883ae"],
+
+Cell[BoxData[
+ RowBox[{"{", 
+  RowBox[{
+  "0.9014494421977087`", ",", "3.0782077138006168`", ",", 
+   "2.376569509958624`"}], 
+  "}"}]], "Print",ExpressionUUID->"235803b6-72df-436c-9e93-9ef026f33fec"]
+}, Open  ]],
+
+Cell[BoxData[
+ RowBox[{
+  RowBox[{
+  "<<", "\"\<../cache/3-3/field-correlators-16.20.24-28-5-a-12.m\>\""}], 
+  ";"}]], "Input",ExpressionUUID->"21f2b12c-df67-4f45-a82b-a60fb5ee7851"],
+
+Cell[CellGroupData[{
+
+Cell["Calculate", \
+"Subsection",ExpressionUUID->"478b0d2c-76c6-4201-a299-ea610ae94546"],
+
+Cell[CellGroupData[{
+
+Cell[BoxData[
+ RowBox[{"applyGaugeTransformStrategy", "[", 
+  "]"}]], "Input",ExpressionUUID->"234edf22-70db-4721-aed8-9b5e0c487944"],
+
+Cell[CellGroupData[{
+
+Cell[BoxData[
+ InterpretationBox[
+  RowBox[{
+   TemplateBox[{RowBox[{"\"Thu 13 Aug 2020 17:46:54\"", 
+       StyleBox[
+        RowBox[{"\"GMT\"", "\[InvisibleSpace]", 
+          RowBox[{"-", "7.`"}]}], FontColor -> GrayLevel[0.5]]}],
+     RowBox[{"DateObject", "[", 
+       RowBox[{
+         RowBox[{"{", 
+           
+           RowBox[{"2020", ",", "8", ",", "13", ",", "17", ",", "46", ",", 
+             "54.754194`8.49099236481646"}], "}"}], ",", "\"Instant\"", ",", 
+         "\"Gregorian\"", ",", 
+         RowBox[{"-", "7.`"}]}], "]"}]},
+    "DateObject",
+    Editable->False], 
+   "\[InvisibleSpace]", "\<\"Started external program and detached.\"\>"}],
+  SequenceForm[
+   DateObject[{2020, 8, 13, 17, 46, 54.754194`8.49099236481646}, "Instant", 
+    "Gregorian", -7.], "Started external program and detached."],
+  Editable->
+   False]], "Print",ExpressionUUID->"3fe0b073-2883-4fa7-ad83-4a39a6a2652e"],
+
+Cell[BoxData[
+ InterpretationBox[
+  RowBox[{
+   TemplateBox[{RowBox[{"\"Thu 13 Aug 2020 17:47:06\"", 
+       StyleBox[
+        RowBox[{"\"GMT\"", "\[InvisibleSpace]", 
+          RowBox[{"-", "7.`"}]}], FontColor -> GrayLevel[0.5]]}],
+     RowBox[{"DateObject", "[", 
+       RowBox[{
+         RowBox[{"{", 
+           
+           RowBox[{"2020", ",", "8", ",", "13", ",", "17", ",", "47", ",", 
+             "6.922708`7.592851000968876"}], "}"}], ",", "\"Instant\"", ",", 
+         "\"Gregorian\"", ",", 
+         RowBox[{"-", "7.`"}]}], "]"}]},
+    "DateObject",
+    Editable->False], 
+   "\[InvisibleSpace]", "\<\"External program finished, \"\>", 
+   "\[InvisibleSpace]", "10", "\[InvisibleSpace]", "\<\" s.\"\>"}],
+  SequenceForm[
+   DateObject[{2020, 8, 13, 17, 47, 6.922708`7.592851000968876}, "Instant", 
+    "Gregorian", -7.], "External program finished, ", 10, " s."],
+  Editable->
+   False]], "Print",ExpressionUUID->"0bc32ad1-1de9-4c30-837d-7df2030ee965"],
+
+Cell[BoxData[
+ StyleBox["\<\"MAXLAN:      1000, Restart:         7,   NED: -     100,      \
+NEC:       100\\nMATVEC:      2013,  Reorth:      2013, Nloop:        17,  \
+Nlocked:        77\\nTtotal: 12.676137,    T_op:  3.896036, Torth:  7.655498, \
+  Tstart:  0.889699\\nlargeShifts: ops=2013, sumNcol=2013, \
+maxNcol=1\\nlargeShifts: 2013 matrix-vector ops, 2013 reorthogonalizations in \
+6.63 s\\ncutoffNullSpace:  3 (max 1, norm 0, concave 3) of 100 eigenpairs \
+between [0, 2]\\nlinearSolve:  439 iterations, 439 reorthogonalizations in \
+1.51 s\\ndynamicProject:  4908 calls (0 usertol), 9816 matrix-vector ops, max \
+itn 0\\n                 in 3.53 s\\nshifts.c:  init and i/o 1.99 s, \
+calculation 8.15 s\\n\"\>",
+  StripOnInput->False,
+  FontColor->RGBColor[
+   0, 0, 1]]], \
+"Print",ExpressionUUID->"3db850f4-004c-41c9-9bf6-cc78d4e6ee08"]
+}, Open  ]],
+
+Cell[BoxData[
+ TemplateBox[{
+  "applyCutoff2","rescale",
+   "\"Rescale maxNorm \\!\\(\\*RowBox[{\\\"\\\\\\\"4.5646170\\\\\\\"\\\"}]\\) \
+to \\!\\(\\*RowBox[{\\\"3.141592653589793`\\\"}]\\)\"",2,46,2,
+   31843651097629165180,"Local","Global`applyCutoff2"},
+  "MessageTemplate2"]], "Message", \
+"MSG",ExpressionUUID->"afb9fbaa-0249-408d-b370-9e3300d49315"],
+
+Cell[CellGroupData[{
+
+Cell[BoxData[
+ InterpretationBox[
+  RowBox[{
+   TemplateBox[{RowBox[{"\"Thu 13 Aug 2020 17:48:00\"", 
+       StyleBox[
+        RowBox[{"\"GMT\"", "\[InvisibleSpace]", 
+          RowBox[{"-", "7.`"}]}], FontColor -> GrayLevel[0.5]]}],
+     RowBox[{"DateObject", "[", 
+       RowBox[{
+         RowBox[{"{", 
+           
+           RowBox[{"2020", ",", "8", ",", "13", ",", "17", ",", "48", ",", 
+             "0.315675`6.251815178299676"}], "}"}], ",", "\"Instant\"", ",", 
+         "\"Gregorian\"", ",", 
+         RowBox[{"-", "7.`"}]}], "]"}]},
+    "DateObject",
+    Editable->False], 
+   "\[InvisibleSpace]", "\<\"Started external program and detached.\"\>"}],
+  SequenceForm[
+   DateObject[{2020, 8, 13, 17, 48, 0.315675`6.251815178299676}, "Instant", 
+    "Gregorian", -7.], "Started external program and detached."],
+  Editable->
+   False]], "Print",ExpressionUUID->"44d4a2f1-7854-46e0-9abd-d78a76f62245"],
+
+Cell[BoxData[
+ InterpretationBox[
+  RowBox[{
+   TemplateBox[{RowBox[{"\"Thu 13 Aug 2020 17:48:11\"", 
+       StyleBox[
+        RowBox[{"\"GMT\"", "\[InvisibleSpace]", 
+          RowBox[{"-", "7.`"}]}], FontColor -> GrayLevel[0.5]]}],
+     RowBox[{"DateObject", "[", 
+       RowBox[{
+         RowBox[{"{", 
+           
+           RowBox[{"2020", ",", "8", ",", "13", ",", "17", ",", "48", ",", 
+             "11.527959`7.8143274093693655"}], "}"}], ",", "\"Instant\"", ",",
+          "\"Gregorian\"", ",", 
+         RowBox[{"-", "7.`"}]}], "]"}]},
+    "DateObject",
+    Editable->False], 
+   "\[InvisibleSpace]", "\<\"External program finished, \"\>", 
+   "\[InvisibleSpace]", "10", "\[InvisibleSpace]", "\<\" s.\"\>"}],
+  SequenceForm[
+   DateObject[{2020, 8, 13, 17, 48, 11.527959`7.8143274093693655}, "Instant", 
+    "Gregorian", -7.], "External program finished, ", 10, " s."],
+  Editable->
+   False]], "Print",ExpressionUUID->"d237b4cd-238b-4f92-a320-8bce058738f4"],
+
+Cell[BoxData[
+ StyleBox["\<\"MAXLAN:      1000, Restart:         7,   NED: -     100,      \
+NEC:       100\\nMATVEC:      2058,  Reorth:      2058, Nloop:        17,  \
+Nlocked:        75\\nTtotal: 12.763733,    T_op:  3.965319, Torth:  7.686823, \
+  Tstart:  0.904043\\nlargeShifts: ops=2058, sumNcol=2058, \
+maxNcol=1\\nlargeShifts: 2058 matrix-vector ops, 2058 reorthogonalizations in \
+6.68 s\\ncutoffNullSpace:  4 (max 2, norm 1, concave 4) of 100 eigenpairs \
+between [0, 3]\\nlinearSolve:  377 iterations, 377 reorthogonalizations in \
+1.22 s\\ndynamicProject:  4874 calls (0 usertol), 9748 matrix-vector ops, max \
+itn 0\\n                 in 3.38 s\\nshifts.c:  init and i/o 1.95 s, \
+calculation 7.90 s\\n\"\>",
+  StripOnInput->False,
+  FontColor->RGBColor[
+   0, 0, 1]]], "Print",ExpressionUUID->"8b364190-ff07-4699-bf4a-b95929648e59"],
+
+Cell[BoxData[
+ InterpretationBox[
+  RowBox[{
+   TemplateBox[{RowBox[{"\"Thu 13 Aug 2020 17:49:10\"", 
+       StyleBox[
+        RowBox[{"\"GMT\"", "\[InvisibleSpace]", 
+          RowBox[{"-", "7.`"}]}], FontColor -> GrayLevel[0.5]]}],
+     RowBox[{"DateObject", "[", 
+       RowBox[{
+         RowBox[{"{", 
+           
+           RowBox[{"2020", ",", "8", ",", "13", ",", "17", ",", "49", ",", 
+             "10.235054`7.762665124768529"}], "}"}], ",", "\"Instant\"", ",", 
+         "\"Gregorian\"", ",", 
+         RowBox[{"-", "7.`"}]}], "]"}]},
+    "DateObject",
+    Editable->False], 
+   "\[InvisibleSpace]", "\<\"Started external program and detached.\"\>"}],
+  SequenceForm[
+   DateObject[{2020, 8, 13, 17, 49, 10.235054`7.762665124768529}, "Instant", 
+    "Gregorian", -7.], "Started external program and detached."],
+  Editable->
+   False]], "Print",ExpressionUUID->"66fe0d36-1e2e-41f1-a885-4910c4ad8bec"],
+
+Cell[BoxData[
+ InterpretationBox[
+  RowBox[{
+   TemplateBox[{RowBox[{"\"Thu 13 Aug 2020 17:49:21\"", 
+       StyleBox[
+        RowBox[{"\"GMT\"", "\[InvisibleSpace]", 
+          RowBox[{"-", "7.`"}]}], FontColor -> GrayLevel[0.5]]}],
+     RowBox[{"DateObject", "[", 
+       RowBox[{
+         RowBox[{"{", 
+           
+           RowBox[{"2020", ",", "8", ",", "13", ",", "17", ",", "49", ",", 
+             "21.374715`8.082475316200654"}], "}"}], ",", "\"Instant\"", ",", 
+         "\"Gregorian\"", ",", 
+         RowBox[{"-", "7.`"}]}], "]"}]},
+    "DateObject",
+    Editable->False], 
+   "\[InvisibleSpace]", "\<\"External program finished, \"\>", 
+   "\[InvisibleSpace]", "10", "\[InvisibleSpace]", "\<\" s.\"\>"}],
+  SequenceForm[
+   DateObject[{2020, 8, 13, 17, 49, 21.374715`8.082475316200654}, "Instant", 
+    "Gregorian", -7.], "External program finished, ", 10, " s."],
+  Editable->
+   False]], "Print",ExpressionUUID->"99d1dd73-128f-43cc-b97c-4158452a79c2"],
+
+Cell[BoxData[
+ StyleBox["\<\"MAXLAN:      1000, Restart:         7,   NED: -     100,      \
+NEC:       100\\nMATVEC:      2055,  Reorth:      2055, Nloop:        17,  \
+Nlocked:        75\\nTtotal: 12.417058,    T_op:  3.935699, Torth:  7.394395, \
+  Tstart:  0.877872\\nlargeShifts: ops=2055, sumNcol=2055, \
+maxNcol=1\\nlargeShifts: 2055 matrix-vector ops, 2055 reorthogonalizations in \
+6.50 s\\ncutoffNullSpace:  4 (max 2, norm 0, concave 4) of 100 eigenpairs \
+between [0, 3]\\nlinearSolve:  404 iterations, 404 reorthogonalizations in \
+1.26 s\\ndynamicProject:  4922 calls (0 usertol), 9844 matrix-vector ops, max \
+itn 0\\n                 in 3.35 s\\nshifts.c:  init and i/o 2.05 s, \
+calculation 7.77 s\\n\"\>",
+  StripOnInput->False,
+  FontColor->RGBColor[
+   0, 0, 1]]], "Print",ExpressionUUID->"e86dcafa-d737-419b-871f-766060efc4e8"],
+
+Cell[BoxData[
+ RowBox[{"{", 
+  RowBox[{
+  "0.31940291186835756`", ",", "0.31940291186835756`", ",", 
+   "0.28383913330629396`", ",", "0.28383913330629396`", ",", 
+   "0.9902189104160235`"}], 
+  "}"}]], "Print",ExpressionUUID->"3b34f2ec-4c06-4919-accf-b537a8c35236"]
+}, Open  ]]
+}, Closed]],
+
+Cell[CellGroupData[{
+
+Cell[BoxData[
+ RowBox[{
+  RowBox[{"fieldCorr2", "=", 
+   RowBox[{"linkCorrelators", "[", "2", "]"}]}], 
+  ";"}]], "Input",ExpressionUUID->"b7c5f2a0-46bc-4b6a-bf0d-e1a59e604af9"],
+
+Cell[CellGroupData[{
+
+Cell[BoxData[
+ InterpretationBox[
+  RowBox[{"\<\"ops: \"\>", "\[InvisibleSpace]", 
+   RowBox[{"{", 
+    RowBox[{"\<\"2l\"\>", ",", "\<\"2t1\"\>", ",", "\<\"2t2\"\>", 
+     ",", "\<\"2t11\"\>", ",", "\<\"2t12\"\>", ",", "\<\"2t13\"\>"}], "}"}]}],
+  
+  SequenceForm["ops: ", {"2l", "2t1", "2t2", "2t11", "2t12", "2t13"}],
+  Editable->
+   False]], "Print",ExpressionUUID->"8eeedfd1-9ca5-4cad-a528-5117cd8d378c"],
+
+Cell[BoxData[
+ InterpretationBox[
+  RowBox[{"\<\"Total time: \"\>", "\[InvisibleSpace]", 
+   "151.034596`8.329591436058722"}],
+  SequenceForm["Total time: ", 151.034596`8.329591436058722],
+  Editable->
+   False]], "Print",ExpressionUUID->"31112b8e-f690-4d9e-ac38-00a492b06f7b"]
+}, Open  ]]
+}, Open  ]],
+
+Cell[CellGroupData[{
+
+Cell[BoxData[
+ RowBox[{
+  RowBox[{"fieldCorr3", "=", 
+   RowBox[{"linkCorrelators", "[", "3", "]"}]}], 
+  ";"}]], "Input",ExpressionUUID->"2a4bbd11-ddbe-4130-8ec8-9d6bb22d9d4b"],
+
+Cell[CellGroupData[{
+
+Cell[BoxData[
+ InterpretationBox[
+  RowBox[{"\<\"ops: \"\>", "\[InvisibleSpace]", 
+   RowBox[{"{", 
+    RowBox[{"\<\"3m1b\"\>", ",", "\<\"3m2\"\>", ",", "\<\"3m4\"\>", 
+     ",", "\<\"3m5\"\>", ",", "\<\"3m6\"\>", ",", "\<\"3m8\"\>", 
+     ",", "\<\"3m9\"\>", ",", "\<\"3pl\"\>", ",", "\<\"3pt1\"\>", 
+     ",", "\<\"3pt2\"\>"}], "}"}]}],
+  SequenceForm[
+  "ops: ", {
+   "3m1b", "3m2", "3m4", "3m5", "3m6", "3m8", "3m9", "3pl", "3pt1", "3pt2"}],
+  Editable->
+   False]], "Print",ExpressionUUID->"08b1da21-ebfd-462d-937a-b49f59f43893"],
+
+Cell[BoxData[
+ InterpretationBox[
+  RowBox[{"\<\"Total time: \"\>", "\[InvisibleSpace]", 
+   "3363.19533`9.677267089136421"}],
+  SequenceForm["Total time: ", 3363.19533`9.677267089136421],
+  Editable->
+   False]], "Print",ExpressionUUID->"ddc49d55-bbd3-4900-b134-ff86cfa8dae0"]
+}, Open  ]]
+}, Open  ]],
+
+Cell[CellGroupData[{
+
+Cell[BoxData[
+ RowBox[{
+  RowBox[{"fieldCorr22", "=", 
+   RowBox[{"linkCorrelators", "[", "22", "]"}]}], 
+  ";"}]], "Input",ExpressionUUID->"a6b52c18-824e-4f45-88ba-1f94b6a19515"],
+
+Cell[CellGroupData[{
+
+Cell[BoxData[
+ InterpretationBox[
+  RowBox[{"\<\"ops: \"\>", "\[InvisibleSpace]", 
+   RowBox[{"{", 
+    RowBox[{
+     RowBox[{"{", 
+      RowBox[{"\<\"l\"\>", ",", "\<\"1\"\>"}], "}"}], ",", 
+     RowBox[{"{", 
+      RowBox[{"\<\"l\"\>", ",", "\<\"27\"\>"}], "}"}], ",", 
+     RowBox[{"{", 
+      RowBox[{"\<\"l\"\>", ",", "\<\"8S\"\>"}], "}"}], ",", 
+     RowBox[{"{", 
+      RowBox[{"\<\"m1\"\>", ",", "\<\"1\"\>"}], "}"}], ",", 
+     RowBox[{"{", 
+      RowBox[{"\<\"m1\"\>", ",", "\<\"27\"\>"}], "}"}], ",", 
+     RowBox[{"{", 
+      RowBox[{"\<\"m1\"\>", ",", "\<\"8A\"\>"}], "}"}], ",", 
+     RowBox[{"{", 
+      RowBox[{"\<\"m1\"\>", ",", "\<\"8S\"\>"}], "}"}], ",", 
+     RowBox[{"{", 
+      RowBox[{"\<\"m1\"\>", ",", "\<\"Re10\"\>"}], "}"}], ",", 
+     RowBox[{"{", 
+      RowBox[{"\<\"m2\"\>", ",", "\<\"1\"\>"}], "}"}], ",", 
+     RowBox[{"{", 
+      RowBox[{"\<\"m2\"\>", ",", "\<\"27\"\>"}], "}"}], ",", 
+     RowBox[{"{", 
+      RowBox[{"\<\"m2\"\>", ",", "\<\"8S\"\>"}], "}"}], ",", 
+     RowBox[{"{", 
+      RowBox[{"\<\"t1\"\>", ",", "\<\"1\"\>"}], "}"}], ",", 
+     RowBox[{"{", 
+      RowBox[{"\<\"t1\"\>", ",", "\<\"27\"\>"}], "}"}], ",", 
+     RowBox[{"{", 
+      RowBox[{"\<\"t1\"\>", ",", "\<\"8A\"\>"}], "}"}], ",", 
+     RowBox[{"{", 
+      RowBox[{"\<\"t1\"\>", ",", "\<\"8S\"\>"}], "}"}], ",", 
+     RowBox[{"{", 
+      RowBox[{"\<\"t1\"\>", ",", "\<\"Re10\"\>"}], "}"}], ",", 
+     RowBox[{"{", 
+      RowBox[{"\<\"t2\"\>", ",", "\<\"1\"\>"}], "}"}], ",", 
+     RowBox[{"{", 
+      RowBox[{"\<\"t2\"\>", ",", "\<\"27\"\>"}], "}"}], ",", 
+     RowBox[{"{", 
+      RowBox[{"\<\"t2\"\>", ",", "\<\"8S\"\>"}], "}"}], ",", 
+     RowBox[{"{", 
+      RowBox[{"\<\"t3\"\>", ",", "\<\"1\"\>"}], "}"}], ",", 
+     RowBox[{"{", 
+      RowBox[{"\<\"t3\"\>", ",", "\<\"27\"\>"}], "}"}], ",", 
+     RowBox[{"{", 
+      RowBox[{"\<\"t3\"\>", ",", "\<\"8A\"\>"}], "}"}], ",", 
+     RowBox[{"{", 
+      RowBox[{"\<\"t3\"\>", ",", "\<\"8S\"\>"}], "}"}], ",", 
+     RowBox[{"{", 
+      RowBox[{"\<\"t3\"\>", ",", "\<\"Re10\"\>"}], "}"}]}], "}"}]}],
+  SequenceForm[
+  "ops: ", {{"l", "1"}, {"l", "27"}, {"l", "8S"}, {"m1", "1"}, {"m1", "27"}, {
+    "m1", "8A"}, {"m1", "8S"}, {"m1", "Re10"}, {"m2", "1"}, {"m2", "27"}, {
+    "m2", "8S"}, {"t1", "1"}, {"t1", "27"}, {"t1", "8A"}, {"t1", "8S"}, {
+    "t1", "Re10"}, {"t2", "1"}, {"t2", "27"}, {"t2", "8S"}, {"t3", "1"}, {
+    "t3", "27"}, {"t3", "8A"}, {"t3", "8S"}, {"t3", "Re10"}}],
+  Editable->
+   False]], "Print",ExpressionUUID->"0f6ec3ab-9a58-4581-8abe-1c5eefc2fca8"],
+
+Cell[BoxData[
+ InterpretationBox[
+  RowBox[{"\<\"Total time: \"\>", "\[InvisibleSpace]", 
+   "679.927485`8.98297759503283"}],
+  SequenceForm["Total time: ", 679.927485`8.98297759503283],
+  Editable->
+   False]], "Print",ExpressionUUID->"412a63ac-2f19-4464-84c6-3a4f74c20c31"]
+}, Open  ]]
+}, Open  ]],
+
+Cell[CellGroupData[{
+
+Cell[BoxData[
+ RowBox[{
+  RowBox[{"fieldCorr4x", "=", 
+   RowBox[{"linkCorrelators", "[", "\"\<4x\>\"", "]"}]}], 
+  ";"}]], "Input",ExpressionUUID->"1e45921d-4f70-43b4-9043-ec55646ad6c4"],
+
+Cell[CellGroupData[{
+
+Cell[BoxData[
+ InterpretationBox[
+  RowBox[{"\<\"ops: \"\>", "\[InvisibleSpace]", 
+   RowBox[{"{", 
+    RowBox[{
+     RowBox[{"{", 
+      RowBox[{"\<\"4hr\"\>", ",", "\<\"1\"\>"}], "}"}], ",", 
+     RowBox[{"{", 
+      RowBox[{"\<\"4hr\"\>", ",", "\<\"27\"\>"}], "}"}], ",", 
+     RowBox[{"{", 
+      RowBox[{"\<\"4hr\"\>", ",", "\<\"8S\"\>"}], "}"}], ",", 
+     RowBox[{"{", 
+      RowBox[{"\<\"4hh\"\>", ",", "\<\"1\"\>"}], "}"}], ",", 
+     RowBox[{"{", 
+      RowBox[{"\<\"4hh\"\>", ",", "\<\"27\"\>"}], "}"}], ",", 
+     RowBox[{"{", 
+      RowBox[{"\<\"4hh\"\>", ",", "\<\"8S\"\>"}], "}"}], ",", 
+     RowBox[{"{", 
+      RowBox[{"\<\"4hz\"\>", ",", "\<\"1\"\>"}], "}"}], ",", 
+     RowBox[{"{", 
+      RowBox[{"\<\"4hz\"\>", ",", "\<\"27\"\>"}], "}"}], ",", 
+     RowBox[{"{", 
+      RowBox[{"\<\"4hz\"\>", ",", "\<\"8S\"\>"}], "}"}], ",", 
+     RowBox[{"{", 
+      RowBox[{"\<\"4zr\"\>", ",", "\<\"1\"\>"}], "}"}], ",", 
+     RowBox[{"{", 
+      RowBox[{"\<\"4zr\"\>", ",", "\<\"27\"\>"}], "}"}], ",", 
+     RowBox[{"{", 
+      RowBox[{"\<\"4zr\"\>", ",", "\<\"8S\"\>"}], "}"}], ",", 
+     RowBox[{"{", 
+      RowBox[{"\<\"4zz\"\>", ",", "\<\"1\"\>"}], "}"}], ",", 
+     RowBox[{"{", 
+      RowBox[{"\<\"4zz\"\>", ",", "\<\"27\"\>"}], "}"}], ",", 
+     RowBox[{"{", 
+      RowBox[{"\<\"4zz\"\>", ",", "\<\"8S\"\>"}], "}"}]}], "}"}]}],
+  SequenceForm[
+  "ops: ", {{"4hr", "1"}, {"4hr", "27"}, {"4hr", "8S"}, {"4hh", "1"}, {
+    "4hh", "27"}, {"4hh", "8S"}, {"4hz", "1"}, {"4hz", "27"}, {"4hz", "8S"}, {
+    "4zr", "1"}, {"4zr", "27"}, {"4zr", "8S"}, {"4zz", "1"}, {"4zz", "27"}, {
+    "4zz", "8S"}}],
+  Editable->
+   False]], "Print",ExpressionUUID->"1608182d-e582-4743-bd73-8464e7d3b190"],
+
+Cell[BoxData[
+ InterpretationBox[
+  RowBox[{"\<\"Total time: \"\>", "\[InvisibleSpace]", 
+   "502.527465`8.851674800386188"}],
+  SequenceForm["Total time: ", 502.527465`8.851674800386188],
+  Editable->
+   False]], "Print",ExpressionUUID->"951914ac-ec09-432a-bf42-bf9698740c8b"]
 }, Open  ]]
 }, Open  ]],
 
@@ -2686,14 +3708,14 @@ Cell[BoxData[
         "fieldCorr2", ",", "fieldCorr3", ",", "fieldCorr22", ",", 
          "fieldCorr4x", ",", "fieldCorr3A", ",", "fieldCorr22A", ",", 
          "fieldCorr4xA"}], "}"}]}], "]"}]}]}], 
-   "]"}]}]], "Input",ExpressionUUID->"d3cedf29-4547-403e-99f0-f0d72066cf5c"]
-}, Open  ]]
-}, Closed]],
+   "]"}]}]], "Input",ExpressionUUID->"0d691aee-6d5e-4e33-9839-24a7f54a910b"]
+}, Closed]]
+}, Open  ]],
 
 Cell[CellGroupData[{
 
 Cell["3-3/20-28-15-a-20 *", \
-"Section",ExpressionUUID->"36a50921-b54f-4c92-8245-d3344c4341ec"],
+"Section",ExpressionUUID->"4ee1ca77-5e87-4dd8-8aac-77aeee516eda"],
 
 Cell[CellGroupData[{
 
@@ -2709,53 +3731,236 @@ Cell[BoxData[
       RowBox[{"\"\<center\>\"", "\[Rule]", "True"}], "]"}]}], "}"}], "]"}], 
   ";", 
   RowBox[{"<<", "\"\<../data/3-3/step-20-28-15-a-20.m\>\""}], ";", 
-  RowBox[{"gaugeField", "=", "gaugeField0"}], ";", 
-  RowBox[{"Print", "[", 
-   RowBox[{"{", 
-    RowBox[{
-     RowBox[{"latticeNorm", "[", "]"}], ",", 
-     RowBox[{"latticeNorm", "[", 
-      RowBox[{"\"\<center\>\"", "\[Rule]", "True"}], "]"}], ",", 
-     RowBox[{"applyGaugeTransforms", "[", 
-      RowBox[{
-       RowBox[{"{", 
-        RowBox[{
-        "1", ",", "1", ",", "6", ",", "1", ",", "5", ",", "6", ",", "5", ",", 
-         "6", ",", "5", ",", "6"}], "}"}], ",", 
-       RowBox[{"\"\<maxAbelianGauge\>\"", "\[Rule]", "False"}]}], "]"}], ",", 
-     
-     RowBox[{"latticeNorm", "[", "]"}], ",", 
-     RowBox[{"averagePlaquette", "[", "]"}]}], "}"}], "]"}], 
-  ";"}]], "Input",ExpressionUUID->"59cd529f-560a-41af-8629-5e00286f52d5"],
-
-Cell[CellGroupData[{
+  RowBox[{"gaugeField", "=", "gaugeField0"}], 
+  ";"}]], "Input",ExpressionUUID->"6f8682eb-c6bb-4317-8f65-e810452a3624"],
 
 Cell[BoxData[
  RowBox[{"{", 
   RowBox[{
   "0.9026164729132498`", ",", "3.0744629733649647`", ",", 
    "2.3769610801945897`"}], 
-  "}"}]], "Print",ExpressionUUID->"1ea126e1-008a-454f-9c05-61ba30a432c3"],
-
-Cell[BoxData[
- RowBox[{"{", 
-  RowBox[{
-  "0.28829338593105225`", ",", "0.28829338593105225`", ",", 
-   "0.27962009711674896`", ",", "0.27962009711674896`", ",", 
-   "0.9977788227312665`"}], 
-  "}"}]], "Print",ExpressionUUID->"f050647b-ee00-4c72-ad0a-623c30fa4ed2"]
-}, Open  ]]
+  "}"}]], "Print",ExpressionUUID->"18eddc8d-031c-470f-bc09-79c21102dd8a"]
 }, Open  ]],
 
 Cell[BoxData[
  RowBox[{
   RowBox[{"<<", "\"\<../cache/3-3/field-correlators-20-28-15-a-20.m\>\""}], 
-  ";"}]], "Input",ExpressionUUID->"2e6f08a8-0e9e-4bd2-8d75-e7de93c6c9e8"],
+  ";"}]], "Input",ExpressionUUID->"cb46f0bd-0c07-4ccb-bee4-5b3fe910259b"],
 
 Cell[CellGroupData[{
 
 Cell["Calculate", \
-"Subsection",ExpressionUUID->"1f3057bd-3f2b-47a4-8855-730468c74334"],
+"Subsection",ExpressionUUID->"7d03fa09-212e-4a3b-8620-802160eb5721"],
+
+Cell[CellGroupData[{
+
+Cell[BoxData[
+ RowBox[{"applyGaugeTransformStrategy", "[", 
+  "]"}]], "Input",ExpressionUUID->"5da22a40-e979-4d86-968c-fc307000321f"],
+
+Cell[CellGroupData[{
+
+Cell[BoxData[
+ InterpretationBox[
+  RowBox[{
+   TemplateBox[{RowBox[{"\"Thu 13 Aug 2020 19:11:24\"", 
+       StyleBox[
+        RowBox[{"\"GMT\"", "\[InvisibleSpace]", 
+          RowBox[{"-", "7.`"}]}], FontColor -> GrayLevel[0.5]]}],
+     RowBox[{"DateObject", "[", 
+       RowBox[{
+         RowBox[{"{", 
+           
+           RowBox[{"2020", ",", "8", ",", "13", ",", "19", ",", "11", ",", 
+             "24.284946`8.137912124726906"}], "}"}], ",", "\"Instant\"", ",", 
+         "\"Gregorian\"", ",", 
+         RowBox[{"-", "7.`"}]}], "]"}]},
+    "DateObject",
+    Editable->False], 
+   "\[InvisibleSpace]", "\<\"Started external program and detached.\"\>"}],
+  SequenceForm[
+   DateObject[{2020, 8, 13, 19, 11, 24.284946`8.137912124726906}, "Instant", 
+    "Gregorian", -7.], "Started external program and detached."],
+  Editable->
+   False]], "Print",ExpressionUUID->"d0e3f998-09e8-43e1-a8b3-4dee0a3ab085"],
+
+Cell[BoxData[
+ InterpretationBox[
+  RowBox[{
+   TemplateBox[{RowBox[{"\"Thu 13 Aug 2020 19:11:40\"", 
+       StyleBox[
+        RowBox[{"\"GMT\"", "\[InvisibleSpace]", 
+          RowBox[{"-", "7.`"}]}], FontColor -> GrayLevel[0.5]]}],
+     RowBox[{"DateObject", "[", 
+       RowBox[{
+         RowBox[{"{", 
+           
+           RowBox[{"2020", ",", "8", ",", "13", ",", "19", ",", "11", ",", 
+             "40.804414`8.363282123500387"}], "}"}], ",", "\"Instant\"", ",", 
+         "\"Gregorian\"", ",", 
+         RowBox[{"-", "7.`"}]}], "]"}]},
+    "DateObject",
+    Editable->False], 
+   "\[InvisibleSpace]", "\<\"External program finished, \"\>", 
+   "\[InvisibleSpace]", "15", "\[InvisibleSpace]", "\<\" s.\"\>"}],
+  SequenceForm[
+   DateObject[{2020, 8, 13, 19, 11, 40.804414`8.363282123500387}, "Instant", 
+    "Gregorian", -7.], "External program finished, ", 15, " s."],
+  Editable->
+   False]], "Print",ExpressionUUID->"31ae78e6-8759-4cd5-a1d3-f693f6e16b06"],
+
+Cell[BoxData[
+ StyleBox["\<\"MAXLAN:      1000, Restart:         7,   NED: -     100,      \
+NEC:       100\\nMATVEC:      2191,  Reorth:      2191, Nloop:        18,  \
+Nlocked:        82\\nTtotal: 15.281079,    T_op:  4.697545, Torth:  9.340895, \
+  Tstart:  1.047067\\nlargeShifts: ops=2191, sumNcol=2191, \
+maxNcol=1\\nlargeShifts: 2191 matrix-vector ops, 2191 reorthogonalizations in \
+7.95 s\\ncutoffNullSpace:  3 (max 2, norm 0, concave 2) of 100 eigenpairs \
+between [0, 2]\\nlinearSolve:  338 iterations, 338 reorthogonalizations in \
+1.24 s\\ndynamicProject:  5062 calls (0 usertol), 10124 matrix-vector ops, \
+max itn 0\\n                 in 4.10 s\\nshifts.c:  init and i/o 2.04 s, \
+calculation 9.20 s\\n\"\>",
+  StripOnInput->False,
+  FontColor->RGBColor[
+   0, 0, 1]]], "Print",ExpressionUUID->"2ad181f6-0f39-49de-a557-d0b9af3c1f98"],
+
+Cell[BoxData[
+ InterpretationBox[
+  RowBox[{
+   TemplateBox[{RowBox[{"\"Thu 13 Aug 2020 19:12:38\"", 
+       StyleBox[
+        RowBox[{"\"GMT\"", "\[InvisibleSpace]", 
+          RowBox[{"-", "7.`"}]}], FontColor -> GrayLevel[0.5]]}],
+     RowBox[{"DateObject", "[", 
+       RowBox[{
+         RowBox[{"{", 
+           
+           RowBox[{"2020", ",", "8", ",", "13", ",", "19", ",", "12", ",", 
+             "38.631589`8.339517550769802"}], "}"}], ",", "\"Instant\"", ",", 
+         "\"Gregorian\"", ",", 
+         RowBox[{"-", "7.`"}]}], "]"}]},
+    "DateObject",
+    Editable->False], 
+   "\[InvisibleSpace]", "\<\"Started external program and detached.\"\>"}],
+  SequenceForm[
+   DateObject[{2020, 8, 13, 19, 12, 38.631589`8.339517550769802}, "Instant", 
+    "Gregorian", -7.], "Started external program and detached."],
+  Editable->
+   False]], "Print",ExpressionUUID->"54017303-9266-4d75-877f-75d9c4321d3f"],
+
+Cell[BoxData[
+ InterpretationBox[
+  RowBox[{
+   TemplateBox[{RowBox[{"\"Thu 13 Aug 2020 19:12:55\"", 
+       StyleBox[
+        RowBox[{"\"GMT\"", "\[InvisibleSpace]", 
+          RowBox[{"-", "7.`"}]}], FontColor -> GrayLevel[0.5]]}],
+     RowBox[{"DateObject", "[", 
+       RowBox[{
+         RowBox[{"{", 
+           
+           RowBox[{"2020", ",", "8", ",", "13", ",", "19", ",", "12", ",", 
+             "55.132148`8.493979887486244"}], "}"}], ",", "\"Instant\"", ",", 
+         "\"Gregorian\"", ",", 
+         RowBox[{"-", "7.`"}]}], "]"}]},
+    "DateObject",
+    Editable->False], 
+   "\[InvisibleSpace]", "\<\"External program finished, \"\>", 
+   "\[InvisibleSpace]", "15", "\[InvisibleSpace]", "\<\" s.\"\>"}],
+  SequenceForm[
+   DateObject[{2020, 8, 13, 19, 12, 55.132148`8.493979887486244}, "Instant", 
+    "Gregorian", -7.], "External program finished, ", 15, " s."],
+  Editable->
+   False]], "Print",ExpressionUUID->"4581b766-6669-41eb-b28f-2987dddefd72"],
+
+Cell[BoxData[
+ StyleBox["\<\"MAXLAN:      1000, Restart:         7,   NED: -     100,      \
+NEC:       100\\nMATVEC:      2183,  Reorth:      2183, Nloop:        18,  \
+Nlocked:        80\\nTtotal: 14.750145,    T_op:  4.574001, Torth:  8.948467, \
+  Tstart:  1.006301\\nlargeShifts: ops=2183, sumNcol=2183, \
+maxNcol=1\\nlargeShifts: 2183 matrix-vector ops, 2183 reorthogonalizations in \
+7.70 s\\ncutoffNullSpace:  1 (max 1, norm 1, concave 1) of 100 eigenpairs \
+between [0, 0]\\nlinearSolve:  383 iterations, 383 reorthogonalizations in \
+1.39 s\\ndynamicProject:  5136 calls (0 usertol), 10272 matrix-vector ops, \
+max itn 0\\n                 in 4.04 s\\nshifts.c:  init and i/o 2.04 s, \
+calculation 9.10 s\\n\"\>",
+  StripOnInput->False,
+  FontColor->RGBColor[
+   0, 0, 1]]], "Print",ExpressionUUID->"20f07801-fc32-41e2-9e34-6c89c446c251"],
+
+Cell[BoxData[
+ InterpretationBox[
+  RowBox[{
+   TemplateBox[{RowBox[{"\"Thu 13 Aug 2020 19:13:52\"", 
+       StyleBox[
+        RowBox[{"\"GMT\"", "\[InvisibleSpace]", 
+          RowBox[{"-", "7.`"}]}], FontColor -> GrayLevel[0.5]]}],
+     RowBox[{"DateObject", "[", 
+       RowBox[{
+         RowBox[{"{", 
+           
+           RowBox[{"2020", ",", "8", ",", "13", ",", "19", ",", "13", ",", 
+             "52.21136`8.470339980824992"}], "}"}], ",", "\"Instant\"", ",", 
+         "\"Gregorian\"", ",", 
+         RowBox[{"-", "7.`"}]}], "]"}]},
+    "DateObject",
+    Editable->False], 
+   "\[InvisibleSpace]", "\<\"Started external program and detached.\"\>"}],
+  SequenceForm[
+   DateObject[{2020, 8, 13, 19, 13, 52.21136`8.470339980824992}, "Instant", 
+    "Gregorian", -7.], "Started external program and detached."],
+  Editable->
+   False]], "Print",ExpressionUUID->"f0811324-f460-48ad-b3f6-c3175cf67b89"],
+
+Cell[BoxData[
+ InterpretationBox[
+  RowBox[{
+   TemplateBox[{RowBox[{"\"Thu 13 Aug 2020 19:14:08\"", 
+       StyleBox[
+        RowBox[{"\"GMT\"", "\[InvisibleSpace]", 
+          RowBox[{"-", "7.`"}]}], FontColor -> GrayLevel[0.5]]}],
+     RowBox[{"DateObject", "[", 
+       RowBox[{
+         RowBox[{"{", 
+           
+           RowBox[{"2020", ",", "8", ",", "13", ",", "19", ",", "14", ",", 
+             "8.804832`7.697296060833864"}], "}"}], ",", "\"Instant\"", ",", 
+         "\"Gregorian\"", ",", 
+         RowBox[{"-", "7.`"}]}], "]"}]},
+    "DateObject",
+    Editable->False], 
+   "\[InvisibleSpace]", "\<\"External program finished, \"\>", 
+   "\[InvisibleSpace]", "15", "\[InvisibleSpace]", "\<\" s.\"\>"}],
+  SequenceForm[
+   DateObject[{2020, 8, 13, 19, 14, 8.804832`7.697296060833864}, "Instant", 
+    "Gregorian", -7.], "External program finished, ", 15, " s."],
+  Editable->
+   False]], "Print",ExpressionUUID->"9717c663-0f40-431f-a3be-9438d1f7ac45"],
+
+Cell[BoxData[
+ StyleBox["\<\"MAXLAN:      1000, Restart:         7,   NED: -     100,      \
+NEC:       100\\nMATVEC:      2184,  Reorth:      2184, Nloop:        18,  \
+Nlocked:        81\\nTtotal: 14.586671,    T_op:  4.556012, Torth:  8.776380, \
+  Tstart:  1.042253\\nlargeShifts: ops=2184, sumNcol=2184, \
+maxNcol=1\\nlargeShifts: 2184 matrix-vector ops, 2184 reorthogonalizations in \
+7.59 s\\ncutoffNullSpace:  1 (max 1, norm 0, concave 1) of 100 eigenpairs \
+between [0, 0]\\nlinearSolve:  390 iterations, 390 reorthogonalizations in \
+1.47 s\\ndynamicProject:  5152 calls (0 usertol), 10304 matrix-vector ops, \
+max itn 0\\n                 in 4.05 s\\nshifts.c:  init and i/o 2.19 s, \
+calculation 9.07 s\\n\"\>",
+  StripOnInput->False,
+  FontColor->RGBColor[
+   0, 0, 1]]], "Print",ExpressionUUID->"ad4463f9-3db9-402d-bfc5-43df47a83493"],
+
+Cell[BoxData[
+ RowBox[{"{", 
+  RowBox[{
+  "0.28829338593105225`", ",", "0.28829338593105225`", ",", 
+   "0.2403628268427158`", ",", "0.2403628268427158`", ",", 
+   "0.9977788227312667`"}], 
+  "}"}]], "Print",ExpressionUUID->"e6cc2424-0d84-48b7-bc07-ce617ac52704"]
+}, Open  ]]
+}, Closed]],
 
 Cell[CellGroupData[{
 
@@ -2763,7 +3968,7 @@ Cell[BoxData[
  RowBox[{
   RowBox[{"fieldCorr2", "=", 
    RowBox[{"linkCorrelators", "[", "2", "]"}]}], 
-  ";"}]], "Input",ExpressionUUID->"a5b5c210-5c12-45e4-a38c-1d258ab88614"],
+  ";"}]], "Input",ExpressionUUID->"1cdd8d4d-1b92-4a29-a583-c816fae765f5"],
 
 Cell[CellGroupData[{
 
@@ -2776,15 +3981,15 @@ Cell[BoxData[
   
   SequenceForm["ops: ", {"2l", "2t1", "2t2", "2t11", "2t12", "2t13"}],
   Editable->
-   False]], "Print",ExpressionUUID->"4219e05a-5cba-448f-b351-f5c6a819fa99"],
+   False]], "Print",ExpressionUUID->"37e3ee8d-21bd-43d1-a7ee-24bfcbdc1f82"],
 
 Cell[BoxData[
  InterpretationBox[
   RowBox[{"\<\"Total time: \"\>", "\[InvisibleSpace]", 
-   "137.100764`8.287554872753233"}],
-  SequenceForm["Total time: ", 137.100764`8.287554872753233],
+   "166.445325`8.371786599335998"}],
+  SequenceForm["Total time: ", 166.445325`8.371786599335998],
   Editable->
-   False]], "Print",ExpressionUUID->"0fe684b1-7ea7-4759-9168-13140311dd7b"]
+   False]], "Print",ExpressionUUID->"4add83ec-fd45-41af-b628-2071816aabb3"]
 }, Open  ]]
 }, Open  ]],
 
@@ -2794,7 +3999,7 @@ Cell[BoxData[
  RowBox[{
   RowBox[{"fieldCorr3", "=", 
    RowBox[{"linkCorrelators", "[", "3", "]"}]}], 
-  ";"}]], "Input",ExpressionUUID->"16d27ae1-5017-4860-8c65-1491b838e5be"],
+  ";"}]], "Input",ExpressionUUID->"f4262973-13a0-487a-9c9f-6d465a3cb774"],
 
 Cell[CellGroupData[{
 
@@ -2810,15 +4015,15 @@ Cell[BoxData[
   "ops: ", {
    "3m1b", "3m2", "3m4", "3m5", "3m6", "3m8", "3m9", "3pl", "3pt1", "3pt2"}],
   Editable->
-   False]], "Print",ExpressionUUID->"77ee225b-b487-45e7-8be2-f79e754cd53b"],
+   False]], "Print",ExpressionUUID->"5e7634ad-0966-4f57-a384-b99b236ea83f"],
 
 Cell[BoxData[
  InterpretationBox[
   RowBox[{"\<\"Total time: \"\>", "\[InvisibleSpace]", 
-   "2746.94557`9.589365051907508"}],
-  SequenceForm["Total time: ", 2746.94557`9.589365051907508],
+   "3541.447011`9.699695745871674"}],
+  SequenceForm["Total time: ", 3541.447011`9.699695745871674],
   Editable->
-   False]], "Print",ExpressionUUID->"88e08d0d-49ec-4e98-bcd7-11cc2687e9c0"]
+   False]], "Print",ExpressionUUID->"81170c82-008f-4069-b58e-43b8314362cc"]
 }, Open  ]]
 }, Open  ]],
 
@@ -2828,7 +4033,7 @@ Cell[BoxData[
  RowBox[{
   RowBox[{"fieldCorr22", "=", 
    RowBox[{"linkCorrelators", "[", "22", "]"}]}], 
-  ";"}]], "Input",ExpressionUUID->"89babe32-6bab-46f5-936d-6b0757846951"],
+  ";"}]], "Input",ExpressionUUID->"e6248946-fb8a-45b0-983d-8d4453bb9f0d"],
 
 Cell[CellGroupData[{
 
@@ -2880,23 +4085,27 @@ Cell[BoxData[
      RowBox[{"{", 
       RowBox[{"\<\"t3\"\>", ",", "\<\"27\"\>"}], "}"}], ",", 
      RowBox[{"{", 
-      RowBox[{"\<\"t3\"\>", ",", "\<\"8S\"\>"}], "}"}]}], "}"}]}],
+      RowBox[{"\<\"t3\"\>", ",", "\<\"8A\"\>"}], "}"}], ",", 
+     RowBox[{"{", 
+      RowBox[{"\<\"t3\"\>", ",", "\<\"8S\"\>"}], "}"}], ",", 
+     RowBox[{"{", 
+      RowBox[{"\<\"t3\"\>", ",", "\<\"Re10\"\>"}], "}"}]}], "}"}]}],
   SequenceForm[
   "ops: ", {{"l", "1"}, {"l", "27"}, {"l", "8S"}, {"m1", "1"}, {"m1", "27"}, {
     "m1", "8A"}, {"m1", "8S"}, {"m1", "Re10"}, {"m2", "1"}, {"m2", "27"}, {
     "m2", "8S"}, {"t1", "1"}, {"t1", "27"}, {"t1", "8A"}, {"t1", "8S"}, {
     "t1", "Re10"}, {"t2", "1"}, {"t2", "27"}, {"t2", "8S"}, {"t3", "1"}, {
-    "t3", "27"}, {"t3", "8S"}}],
+    "t3", "27"}, {"t3", "8A"}, {"t3", "8S"}, {"t3", "Re10"}}],
   Editable->
-   False]], "Print",ExpressionUUID->"005a3e50-ade4-497a-9a27-4f3b1aea83ed"],
+   False]], "Print",ExpressionUUID->"1547e120-42f3-4628-a584-01f9a56a26f9"],
 
 Cell[BoxData[
  InterpretationBox[
   RowBox[{"\<\"Total time: \"\>", "\[InvisibleSpace]", 
-   "541.15582`8.883837331372124"}],
-  SequenceForm["Total time: ", 541.15582`8.883837331372124],
+   "698.491597`8.99467618366017"}],
+  SequenceForm["Total time: ", 698.491597`8.99467618366017],
   Editable->
-   False]], "Print",ExpressionUUID->"f054158d-50ce-4b53-8839-5e2e31f3d85d"]
+   False]], "Print",ExpressionUUID->"2541bf3a-6da7-4ba3-86f8-3f1e7dea2cfc"]
 }, Open  ]]
 }, Open  ]],
 
@@ -2906,7 +4115,7 @@ Cell[BoxData[
  RowBox[{
   RowBox[{"fieldCorr4x", "=", 
    RowBox[{"linkCorrelators", "[", "\"\<4x\>\"", "]"}]}], 
-  ";"}]], "Input",ExpressionUUID->"2e1e4224-d91a-423e-bca2-0a4afb8157b5"],
+  ";"}]], "Input",ExpressionUUID->"33b5cd1e-1a2d-46ab-b58a-281f29f5cb11"],
 
 Cell[CellGroupData[{
 
@@ -2951,15 +4160,15 @@ Cell[BoxData[
     "4zr", "1"}, {"4zr", "27"}, {"4zr", "8S"}, {"4zz", "1"}, {"4zz", "27"}, {
     "4zz", "8S"}}],
   Editable->
-   False]], "Print",ExpressionUUID->"e29aeb90-f409-4902-af02-cc7d1b07c0bc"],
+   False]], "Print",ExpressionUUID->"ba4ba6c3-eca1-4de8-bbc7-fefd6a64c911"],
 
 Cell[BoxData[
  InterpretationBox[
   RowBox[{"\<\"Total time: \"\>", "\[InvisibleSpace]", 
-   "386.093319`8.737207284442997"}],
-  SequenceForm["Total time: ", 386.093319`8.737207284442997],
+   "450.357741`8.80407262987167"}],
+  SequenceForm["Total time: ", 450.357741`8.80407262987167],
   Editable->
-   False]], "Print",ExpressionUUID->"1cc9f976-ce1e-4b5b-b762-68a79e9bddbf"]
+   False]], "Print",ExpressionUUID->"28768708-fd8c-4617-8b9a-113dbceb0afb"]
 }, Open  ]]
 }, Open  ]],
 
@@ -2983,62 +4192,53 @@ Cell[BoxData[
         "fieldCorr2", ",", "fieldCorr3", ",", "fieldCorr22", ",", 
          "fieldCorr4x", ",", "fieldCorr3A", ",", "fieldCorr22A", ",", 
          "fieldCorr4xA"}], "}"}]}], "]"}]}]}], 
-   "]"}]}]], "Input",ExpressionUUID->"d20011b1-2611-44f0-b237-743fb9ee67b9"]
-}, Open  ]]
-}, Closed]],
+   "]"}]}]], "Input",ExpressionUUID->"9996064c-8f1d-4f44-a95b-38875d39ee40"]
+}, Closed]]
+}, Open  ]],
 
 Cell[CellGroupData[{
 
 Cell["3-3/24.24.30-28-5", \
-"Section",ExpressionUUID->"83fbccef-cd87-4760-8702-b9e1a36ce2db"],
+"Section",ExpressionUUID->"bed4edd4-8646-477b-9d98-3a5d6894549b"],
 
 Cell["Calculate for the original lattice in Landau gauge", \
-"Text",ExpressionUUID->"9d4e47b2-e1aa-4f16-9e1f-507b95293c4f"],
+"Text",ExpressionUUID->"83a37b4b-7f0c-4e37-9b7e-e0b44fdec1f7"],
+
+Cell[BoxData[
+ RowBox[{
+  RowBox[{"<<", "\"\<../data/3-3/periodic-24.24.30-28-5.m\>\""}], 
+  ";"}]], "Input",ExpressionUUID->"f53c36cf-584d-40a2-bbb7-0a45ce49d3c7"],
+
+Cell["The original field, Landau gauge.", \
+"Text",ExpressionUUID->"3cecbe4d-5986-42d6-889c-8bd94b087d9d"],
+
+Cell[BoxData[
+ RowBox[{
+  RowBox[{"<<", "\"\<../cache/3-3/field-correlators-24.24.30-28-5.m\>\""}], 
+  ";"}]], "Input",ExpressionUUID->"04a9de98-e925-4f7b-8e56-4fddd99437d0"],
+
+Cell["Too big to apply Newtons method?", \
+"Text",ExpressionUUID->"d34af424-8305-476c-a264-317f6a3344e6"],
 
 Cell[CellGroupData[{
 
 Cell[BoxData[
- RowBox[{
-  RowBox[{"<<", "\"\<../data/3-3/periodic-24.24.30-28-5.m\>\""}], ";", 
-  RowBox[{"Print", "[", 
-   RowBox[{"{", 
-    RowBox[{
-     RowBox[{"latticeNorm", "[", "]"}], ",", 
-     RowBox[{"latticeNorm", "[", 
-      RowBox[{"\"\<center\>\"", "\[Rule]", "True"}], "]"}], ",", 
-     RowBox[{"applyGaugeTransforms", "[", 
-      RowBox[{
-       RowBox[{"{", 
-        RowBox[{
-        "1", ",", "1", ",", "6", ",", "1", ",", "5", ",", "6", ",", "5", ",", 
-         "6", ",", "5", ",", "6", ",", "5", ",", "6"}], "}"}], ",", 
-       RowBox[{"\"\<maxAbelianGauge\>\"", "\[Rule]", "False"}]}], "]"}], ",", 
-     
-     RowBox[{"latticeNorm", "[", "]"}], ",", 
-     RowBox[{"averagePlaquette", "[", "]"}]}], "}"}], "]"}], 
-  ";"}]], "Input",ExpressionUUID->"925965fe-bab0-409b-8926-6a15144add96"],
+ RowBox[{"applyGaugeTransformStrategy", "[", "False", 
+  "]"}]], "Input",ExpressionUUID->"ce1461c1-1288-44bd-a3a2-63172be72504"],
 
 Cell[BoxData[
  RowBox[{"{", 
   RowBox[{
   "3.0708245951819078`", ",", "2.379007863034701`", ",", 
-   "0.4829037965145299`", ",", "0.4829037965145299`", ",", 
-   "0.9016736560475241`"}], 
-  "}"}]], "Print",ExpressionUUID->"40236fca-b050-470b-af40-c1c57817bce2"]
+   "0.4394066938144839`", ",", "0.4394066938144839`", ",", 
+   "0.9016736560475239`"}], 
+  "}"}]], "Print",ExpressionUUID->"36d375ac-11fe-4294-b2f8-f8bd2027b5d4"]
 }, Open  ]],
-
-Cell["The original field, Landau gauge.", \
-"Text",ExpressionUUID->"ad3bc0f1-8ef3-42d8-8a87-fde68ab355a7"],
-
-Cell[BoxData[
- RowBox[{
-  RowBox[{"<<", "\"\<../cache/3-3/field-correlators-24.24.30-28-5.m\>\""}], 
-  ";"}]], "Input",ExpressionUUID->"b531551d-76ca-4ae0-98c0-134194eef695"],
 
 Cell[CellGroupData[{
 
 Cell["Calculate", \
-"Subsection",ExpressionUUID->"9c98ce2d-12b7-42eb-b176-39cfe1a9b9f8"],
+"Subsection",ExpressionUUID->"7278244e-c51f-46a2-9bfe-82a5a806bdbf"],
 
 Cell[CellGroupData[{
 
@@ -3046,7 +4246,7 @@ Cell[BoxData[
  RowBox[{
   RowBox[{"fieldCorr2", "=", 
    RowBox[{"linkCorrelators", "[", "2", "]"}]}], 
-  ";"}]], "Input",ExpressionUUID->"92e4e296-8fa8-4776-b5ff-4bcfa347e935"],
+  ";"}]], "Input",ExpressionUUID->"4d6d96e6-cb3c-4f6c-b316-b397673f65e0"],
 
 Cell[CellGroupData[{
 
@@ -3059,15 +4259,15 @@ Cell[BoxData[
   
   SequenceForm["ops: ", {"2l", "2t1", "2t2", "2t11", "2t12", "2t13"}],
   Editable->
-   False]], "Print",ExpressionUUID->"2cdba7ae-ed6b-41aa-9501-703d82f7a562"],
+   False]], "Print",ExpressionUUID->"1b5dd85f-7776-4be3-8bb0-14f16c0bb24f"],
 
 Cell[BoxData[
  InterpretationBox[
   RowBox[{"\<\"Total time: \"\>", "\[InvisibleSpace]", 
-   "489.390652`8.84017066733573"}],
-  SequenceForm["Total time: ", 489.390652`8.84017066733573],
+   "500.906857`8.850271974693953"}],
+  SequenceForm["Total time: ", 500.906857`8.850271974693953],
   Editable->
-   False]], "Print",ExpressionUUID->"0c2606a1-06eb-415e-8b83-a4977606a4e6"]
+   False]], "Print",ExpressionUUID->"27072459-a693-4737-bd89-de95bbea6274"]
 }, Open  ]]
 }, Open  ]],
 
@@ -3077,7 +4277,7 @@ Cell[BoxData[
  RowBox[{
   RowBox[{"fieldCorr3", "=", 
    RowBox[{"linkCorrelators", "[", "3", "]"}]}], 
-  ";"}]], "Input",ExpressionUUID->"e1dc426d-4613-4b07-9016-645f0b2eec34"],
+  ";"}]], "Input",ExpressionUUID->"742e4b5f-82db-4128-b86a-00fd5c12a782"],
 
 Cell[CellGroupData[{
 
@@ -3093,15 +4293,15 @@ Cell[BoxData[
   "ops: ", {
    "3m1b", "3m2", "3m4", "3m5", "3m6", "3m8", "3m9", "3pl", "3pt1", "3pt2"}],
   Editable->
-   False]], "Print",ExpressionUUID->"31d2da57-c18f-481a-84df-de32645ea87a"],
+   False]], "Print",ExpressionUUID->"5f955a4e-7552-4261-85a1-26a2a2f34603"],
 
 Cell[BoxData[
  InterpretationBox[
   RowBox[{"\<\"Total time: \"\>", "\[InvisibleSpace]", 
-   "9853.82256`10.144119735402843"}],
-  SequenceForm["Total time: ", 9853.82256`10.144119735402843],
+   "11463.643626`10.209837674377999"}],
+  SequenceForm["Total time: ", 11463.643626`10.209837674377999],
   Editable->
-   False]], "Print",ExpressionUUID->"c8f5cfff-435c-44d3-8f39-68aba192d571"]
+   False]], "Print",ExpressionUUID->"4c96fc37-6525-426b-b445-284aad140555"]
 }, Open  ]]
 }, Open  ]],
 
@@ -3111,7 +4311,7 @@ Cell[BoxData[
  RowBox[{
   RowBox[{"fieldCorr22", "=", 
    RowBox[{"linkCorrelators", "[", "22", "]"}]}], 
-  ";"}]], "Input",ExpressionUUID->"dd27ecd2-d9bb-4c9d-86d0-d1330ebb8db9"],
+  ";"}]], "Input",ExpressionUUID->"ace2867f-9fed-4fcd-b92b-250e3a04f692"],
 
 Cell[CellGroupData[{
 
@@ -3163,23 +4363,27 @@ Cell[BoxData[
      RowBox[{"{", 
       RowBox[{"\<\"t3\"\>", ",", "\<\"27\"\>"}], "}"}], ",", 
      RowBox[{"{", 
-      RowBox[{"\<\"t3\"\>", ",", "\<\"8S\"\>"}], "}"}]}], "}"}]}],
+      RowBox[{"\<\"t3\"\>", ",", "\<\"8A\"\>"}], "}"}], ",", 
+     RowBox[{"{", 
+      RowBox[{"\<\"t3\"\>", ",", "\<\"8S\"\>"}], "}"}], ",", 
+     RowBox[{"{", 
+      RowBox[{"\<\"t3\"\>", ",", "\<\"Re10\"\>"}], "}"}]}], "}"}]}],
   SequenceForm[
   "ops: ", {{"l", "1"}, {"l", "27"}, {"l", "8S"}, {"m1", "1"}, {"m1", "27"}, {
     "m1", "8A"}, {"m1", "8S"}, {"m1", "Re10"}, {"m2", "1"}, {"m2", "27"}, {
     "m2", "8S"}, {"t1", "1"}, {"t1", "27"}, {"t1", "8A"}, {"t1", "8S"}, {
     "t1", "Re10"}, {"t2", "1"}, {"t2", "27"}, {"t2", "8S"}, {"t3", "1"}, {
-    "t3", "27"}, {"t3", "8S"}}],
+    "t3", "27"}, {"t3", "8A"}, {"t3", "8S"}, {"t3", "Re10"}}],
   Editable->
-   False]], "Print",ExpressionUUID->"926096b7-b2ac-46de-8d5f-9b610e947476"],
+   False]], "Print",ExpressionUUID->"cb71551c-3d2f-4527-a677-68cddb9ccd5b"],
 
 Cell[BoxData[
  InterpretationBox[
   RowBox[{"\<\"Total time: \"\>", "\[InvisibleSpace]", 
-   "1899.32155`9.429113493674345"}],
-  SequenceForm["Total time: ", 1899.32155`9.429113493674345],
+   "2155.08351`9.48397910166957"}],
+  SequenceForm["Total time: ", 2155.08351`9.48397910166957],
   Editable->
-   False]], "Print",ExpressionUUID->"5f3455ed-3e17-4310-9c28-aa5fe4895e3c"]
+   False]], "Print",ExpressionUUID->"209ca709-6cca-46fa-b7db-29ccc7fcde4c"]
 }, Open  ]]
 }, Open  ]],
 
@@ -3189,7 +4393,7 @@ Cell[BoxData[
  RowBox[{
   RowBox[{"fieldCorr4x", "=", 
    RowBox[{"linkCorrelators", "[", "\"\<4x\>\"", "]"}]}], 
-  ";"}]], "Input",ExpressionUUID->"104839f1-dc73-41f3-bc4f-c406dc0a371c"],
+  ";"}]], "Input",ExpressionUUID->"9885c4a7-4e4c-421c-805d-4f42c3a85c48"],
 
 Cell[CellGroupData[{
 
@@ -3234,15 +4438,15 @@ Cell[BoxData[
     "4zr", "1"}, {"4zr", "27"}, {"4zr", "8S"}, {"4zz", "1"}, {"4zz", "27"}, {
     "4zz", "8S"}}],
   Editable->
-   False]], "Print",ExpressionUUID->"48565586-c7ff-4562-9bb7-56c96dd0264d"],
+   False]], "Print",ExpressionUUID->"e3b8cadb-b11b-4620-bbdd-85fc4827d1da"],
 
 Cell[BoxData[
  InterpretationBox[
   RowBox[{"\<\"Total time: \"\>", "\[InvisibleSpace]", 
-   "1216.27871`9.23554810265818"}],
-  SequenceForm["Total time: ", 1216.27871`9.23554810265818],
+   "1522.920177`9.333192138464865"}],
+  SequenceForm["Total time: ", 1522.920177`9.333192138464865],
   Editable->
-   False]], "Print",ExpressionUUID->"d95e671f-8dd8-435f-9bd6-467dbf9d1b7b"]
+   False]], "Print",ExpressionUUID->"700fdca5-878e-400a-b1ab-ccd9248ccfc9"]
 }, Open  ]]
 }, Open  ]],
 
@@ -3266,14 +4470,14 @@ Cell[BoxData[
         "fieldCorr2", ",", "fieldCorr3", ",", "fieldCorr22", ",", 
          "fieldCorr4x", ",", "fieldCorr3A", ",", "fieldCorr22A", ",", 
          "fieldCorr4xA"}], "}"}]}], "]"}]}]}], 
-   "]"}]}]], "Input",ExpressionUUID->"969c0e98-840f-4a5f-a6e2-3e52d1cd640d"]
-}, Open  ]]
-}, Closed]],
+   "]"}]}]], "Input",ExpressionUUID->"077506c0-a300-4f5d-b517-989e066d08b9"]
+}, Closed]]
+}, Open  ]],
 
 Cell[CellGroupData[{
 
 Cell["3-4/16-48-15-a-15 *", \
-"Section",ExpressionUUID->"f214507e-9164-423e-89e9-32ecf698d7d3"],
+"Section",ExpressionUUID->"33acd637-ee1a-41c3-ad65-5a04489e135d"],
 
 Cell[CellGroupData[{
 
@@ -3289,53 +4493,236 @@ Cell[BoxData[
       RowBox[{"\"\<center\>\"", "\[Rule]", "True"}], "]"}]}], "}"}], "]"}], 
   ";", 
   RowBox[{"<<", "\"\<../data/3-4/step-16-48-15-a-15.m\>\""}], ";", 
-  RowBox[{"gaugeField", "=", "gaugeField0"}], ";", 
-  RowBox[{"Print", "[", 
-   RowBox[{"{", 
-    RowBox[{
-     RowBox[{"latticeNorm", "[", "]"}], ",", 
-     RowBox[{"latticeNorm", "[", 
-      RowBox[{"\"\<center\>\"", "\[Rule]", "True"}], "]"}], ",", 
-     RowBox[{"applyGaugeTransforms", "[", 
-      RowBox[{
-       RowBox[{"{", 
-        RowBox[{
-        "1", ",", "1", ",", "6", ",", "1", ",", "5", ",", "6", ",", "5", ",", 
-         "6", ",", "5", ",", "6"}], "}"}], ",", 
-       RowBox[{"\"\<maxAbelianGauge\>\"", "\[Rule]", "False"}]}], "]"}], ",", 
-     
-     RowBox[{"latticeNorm", "[", "]"}], ",", 
-     RowBox[{"averagePlaquette", "[", "]"}]}], "}"}], "]"}], 
-  ";"}]], "Input",ExpressionUUID->"aacacf7e-a7a3-4816-8750-e0977432b94f"],
-
-Cell[CellGroupData[{
+  RowBox[{"gaugeField", "=", "gaugeField0"}], 
+  ";"}]], "Input",ExpressionUUID->"9f4db36a-9b8b-4c92-95b7-c2f659f5deee"],
 
 Cell[BoxData[
  RowBox[{"{", 
   RowBox[{
   "0.8925115324316586`", ",", "3.602972946119983`", ",", 
    "2.963656010340393`"}], 
-  "}"}]], "Print",ExpressionUUID->"a92b4f27-55c2-4193-83b1-c0206eaa70ba"],
-
-Cell[BoxData[
- RowBox[{"{", 
-  RowBox[{
-  "0.4151112611824028`", ",", "0.4151112611824028`", ",", 
-   "0.3954536513504429`", ",", "0.3954536513504429`", ",", 
-   "0.993951855230007`"}], 
-  "}"}]], "Print",ExpressionUUID->"a687762c-24c6-4d4b-9c75-1c674aa121d0"]
-}, Open  ]]
+  "}"}]], "Print",ExpressionUUID->"04287a61-37d8-4ba8-8cd3-87c4b49fb56e"]
 }, Open  ]],
 
 Cell[BoxData[
  RowBox[{
   RowBox[{"<<", "\"\<../cache/3-4/field-correlators-16-48-15-a-15.m\>\""}], 
-  ";"}]], "Input",ExpressionUUID->"bff71b79-3fbe-49db-a23a-d63ecd44086a"],
+  ";"}]], "Input",ExpressionUUID->"7e4c437e-7f1a-4091-9535-e7afe37b8ebd"],
 
 Cell[CellGroupData[{
 
 Cell["Calculate", \
-"Subsection",ExpressionUUID->"a1035830-edf5-4127-ad1e-278dee399e73"],
+"Subsection",ExpressionUUID->"627b4d77-1f86-4b1e-90c8-f5f95a39acd7"],
+
+Cell[CellGroupData[{
+
+Cell[BoxData[
+ RowBox[{"applyGaugeTransformStrategy", "[", 
+  "]"}]], "Input",ExpressionUUID->"a89c3b40-aedf-4233-a4a0-6273acfbec5d"],
+
+Cell[CellGroupData[{
+
+Cell[BoxData[
+ InterpretationBox[
+  RowBox[{
+   TemplateBox[{RowBox[{"\"Fri 14 Aug 2020 05:06:34\"", 
+       StyleBox[
+        RowBox[{"\"GMT\"", "\[InvisibleSpace]", 
+          RowBox[{"-", "7.`"}]}], FontColor -> GrayLevel[0.5]]}],
+     RowBox[{"DateObject", "[", 
+       RowBox[{
+         RowBox[{"{", 
+           
+           RowBox[{"2020", ",", "8", ",", "14", ",", "5", ",", "6", ",", 
+             "34.523776`8.290693270008305"}], "}"}], ",", "\"Instant\"", ",", 
+         "\"Gregorian\"", ",", 
+         RowBox[{"-", "7.`"}]}], "]"}]},
+    "DateObject",
+    Editable->False], 
+   "\[InvisibleSpace]", "\<\"Started external program and detached.\"\>"}],
+  SequenceForm[
+   DateObject[{2020, 8, 14, 5, 6, 34.523776`8.290693270008305}, "Instant", 
+    "Gregorian", -7.], "Started external program and detached."],
+  Editable->
+   False]], "Print",ExpressionUUID->"0cfb3834-094f-4c98-94f5-e62bfda1a1b7"],
+
+Cell[BoxData[
+ InterpretationBox[
+  RowBox[{
+   TemplateBox[{RowBox[{"\"Fri 14 Aug 2020 05:06:51\"", 
+       StyleBox[
+        RowBox[{"\"GMT\"", "\[InvisibleSpace]", 
+          RowBox[{"-", "7.`"}]}], FontColor -> GrayLevel[0.5]]}],
+     RowBox[{"DateObject", "[", 
+       RowBox[{
+         RowBox[{"{", 
+           
+           RowBox[{"2020", ",", "8", ",", "14", ",", "5", ",", "6", ",", 
+             "51.021177`8.460325448314173"}], "}"}], ",", "\"Instant\"", ",", 
+         "\"Gregorian\"", ",", 
+         RowBox[{"-", "7.`"}]}], "]"}]},
+    "DateObject",
+    Editable->False], 
+   "\[InvisibleSpace]", "\<\"External program finished, \"\>", 
+   "\[InvisibleSpace]", "15", "\[InvisibleSpace]", "\<\" s.\"\>"}],
+  SequenceForm[
+   DateObject[{2020, 8, 14, 5, 6, 51.021177`8.460325448314173}, "Instant", 
+    "Gregorian", -7.], "External program finished, ", 15, " s."],
+  Editable->
+   False]], "Print",ExpressionUUID->"11e9c9d0-e7d1-4071-9e67-54abc33494dc"],
+
+Cell[BoxData[
+ StyleBox["\<\"MAXLAN:      1000, Restart:         7,   NED: -     100,      \
+NEC:       100\\nMATVEC:      2092,  Reorth:      2092, Nloop:        17,  \
+Nlocked:        71\\nTtotal: 15.429886,    T_op:  5.742059, Torth:  8.576372, \
+  Tstart:  0.878632\\nlargeShifts: ops=2092, sumNcol=2092, \
+maxNcol=1\\nlargeShifts: 2092 matrix-vector ops, 2092 reorthogonalizations in \
+8.22 s\\ncutoffNullSpace:  3 (max 2, norm 0, concave 2) of 100 eigenpairs \
+between [0, 2]\\nlinearSolve:  331 iterations, 331 reorthogonalizations in \
+1.11 s\\ndynamicProject:  4850 calls (0 usertol), 9700 matrix-vector ops, max \
+itn 0\\n                 in 4.39 s\\nshifts.c:  init and i/o 3.61 s, \
+calculation 9.34 s\\n\"\>",
+  StripOnInput->False,
+  FontColor->RGBColor[
+   0, 0, 1]]], "Print",ExpressionUUID->"3189c2ae-be4a-4ede-900e-bede6daa4d4d"],
+
+Cell[BoxData[
+ InterpretationBox[
+  RowBox[{
+   TemplateBox[{RowBox[{"\"Fri 14 Aug 2020 05:08:03\"", 
+       StyleBox[
+        RowBox[{"\"GMT\"", "\[InvisibleSpace]", 
+          RowBox[{"-", "7.`"}]}], FontColor -> GrayLevel[0.5]]}],
+     RowBox[{"DateObject", "[", 
+       RowBox[{
+         RowBox[{"{", 
+           
+           RowBox[{"2020", ",", "8", ",", "14", ",", "5", ",", "8", ",", 
+             "3.414676`7.285924490477079"}], "}"}], ",", "\"Instant\"", ",", 
+         "\"Gregorian\"", ",", 
+         RowBox[{"-", "7.`"}]}], "]"}]},
+    "DateObject",
+    Editable->False], 
+   "\[InvisibleSpace]", "\<\"Started external program and detached.\"\>"}],
+  SequenceForm[
+   DateObject[{2020, 8, 14, 5, 8, 3.414676`7.285924490477079}, "Instant", 
+    "Gregorian", -7.], "Started external program and detached."],
+  Editable->
+   False]], "Print",ExpressionUUID->"24826e50-1a08-44ce-aaf6-ec7b3d334b78"],
+
+Cell[BoxData[
+ InterpretationBox[
+  RowBox[{
+   TemplateBox[{RowBox[{"\"Fri 14 Aug 2020 05:08:19\"", 
+       StyleBox[
+        RowBox[{"\"GMT\"", "\[InvisibleSpace]", 
+          RowBox[{"-", "7.`"}]}], FontColor -> GrayLevel[0.5]]}],
+     RowBox[{"DateObject", "[", 
+       RowBox[{
+         RowBox[{"{", 
+           
+           RowBox[{"2020", ",", "8", ",", "14", ",", "5", ",", "8", ",", 
+             "19.813766`8.04954201365927"}], "}"}], ",", "\"Instant\"", ",", 
+         "\"Gregorian\"", ",", 
+         RowBox[{"-", "7.`"}]}], "]"}]},
+    "DateObject",
+    Editable->False], 
+   "\[InvisibleSpace]", "\<\"External program finished, \"\>", 
+   "\[InvisibleSpace]", "15", "\[InvisibleSpace]", "\<\" s.\"\>"}],
+  SequenceForm[
+   DateObject[{2020, 8, 14, 5, 8, 19.813766`8.04954201365927}, "Instant", 
+    "Gregorian", -7.], "External program finished, ", 15, " s."],
+  Editable->
+   False]], "Print",ExpressionUUID->"06efeef8-499b-4b52-b6a4-6aaaef6fedf3"],
+
+Cell[BoxData[
+ StyleBox["\<\"MAXLAN:      1000, Restart:         7,   NED: -     100,      \
+NEC:       100\\nMATVEC:      2180,  Reorth:      2180, Nloop:        18,  \
+Nlocked:        80\\nTtotal: 15.662188,    T_op:  5.578991, Torth:  8.891167, \
+  Tstart:  0.927559\\nlargeShifts: ops=2180, sumNcol=2180, \
+maxNcol=1\\nlargeShifts: 2180 matrix-vector ops, 2180 reorthogonalizations in \
+8.23 s\\ncutoffNullSpace:  2 (max 2, norm 1, concave 2) of 100 eigenpairs \
+between [0, 1]\\nlinearSolve:  333 iterations, 333 reorthogonalizations in \
+1.11 s\\ndynamicProject:  5030 calls (0 usertol), 10060 matrix-vector ops, \
+max itn 0\\n                 in 4.43 s\\nshifts.c:  init and i/o 3.65 s, \
+calculation 9.34 s\\n\"\>",
+  StripOnInput->False,
+  FontColor->RGBColor[
+   0, 0, 1]]], "Print",ExpressionUUID->"05d6110a-4b61-4325-96a6-b843cc2490be"],
+
+Cell[BoxData[
+ InterpretationBox[
+  RowBox[{
+   TemplateBox[{RowBox[{"\"Fri 14 Aug 2020 05:09:33\"", 
+       StyleBox[
+        RowBox[{"\"GMT\"", "\[InvisibleSpace]", 
+          RowBox[{"-", "7.`"}]}], FontColor -> GrayLevel[0.5]]}],
+     RowBox[{"DateObject", "[", 
+       RowBox[{
+         RowBox[{"{", 
+           
+           RowBox[{"2020", ",", "8", ",", "14", ",", "5", ",", "9", ",", 
+             "33.029748`8.271480240419491"}], "}"}], ",", "\"Instant\"", ",", 
+         "\"Gregorian\"", ",", 
+         RowBox[{"-", "7.`"}]}], "]"}]},
+    "DateObject",
+    Editable->False], 
+   "\[InvisibleSpace]", "\<\"Started external program and detached.\"\>"}],
+  SequenceForm[
+   DateObject[{2020, 8, 14, 5, 9, 33.029748`8.271480240419491}, "Instant", 
+    "Gregorian", -7.], "Started external program and detached."],
+  Editable->
+   False]], "Print",ExpressionUUID->"00aca52c-7441-4c86-a88b-0baaadeb2697"],
+
+Cell[BoxData[
+ InterpretationBox[
+  RowBox[{
+   TemplateBox[{RowBox[{"\"Fri 14 Aug 2020 05:09:49\"", 
+       StyleBox[
+        RowBox[{"\"GMT\"", "\[InvisibleSpace]", 
+          RowBox[{"-", "7.`"}]}], FontColor -> GrayLevel[0.5]]}],
+     RowBox[{"DateObject", "[", 
+       RowBox[{
+         RowBox[{"{", 
+           
+           RowBox[{"2020", ",", "8", ",", "14", ",", "5", ",", "9", ",", 
+             "49.476671`8.446975446562815"}], "}"}], ",", "\"Instant\"", ",", 
+         "\"Gregorian\"", ",", 
+         RowBox[{"-", "7.`"}]}], "]"}]},
+    "DateObject",
+    Editable->False], 
+   "\[InvisibleSpace]", "\<\"External program finished, \"\>", 
+   "\[InvisibleSpace]", "15", "\[InvisibleSpace]", "\<\" s.\"\>"}],
+  SequenceForm[
+   DateObject[{2020, 8, 14, 5, 9, 49.476671`8.446975446562815}, "Instant", 
+    "Gregorian", -7.], "External program finished, ", 15, " s."],
+  Editable->
+   False]], "Print",ExpressionUUID->"bc271e0d-e0e9-4682-9acb-58f58b86fb83"],
+
+Cell[BoxData[
+ StyleBox["\<\"MAXLAN:      1000, Restart:         7,   NED: -     100,      \
+NEC:       100\\nMATVEC:      2074,  Reorth:      2074, Nloop:        17,  \
+Nlocked:        71\\nTtotal: 15.044179,    T_op:  5.422061, Torth:  8.460672, \
+  Tstart:  0.865383\\nlargeShifts: ops=2074, sumNcol=2074, \
+maxNcol=1\\nlargeShifts: 2074 matrix-vector ops, 2074 reorthogonalizations in \
+7.88 s\\ncutoffNullSpace:  1 (max 1, norm 1, concave 0) of 100 eigenpairs \
+between [0, 0]\\nlinearSolve:  350 iterations, 350 reorthogonalizations in \
+1.24 s\\ndynamicProject:  4852 calls (0 usertol), 9704 matrix-vector ops, max \
+itn 0\\n                 in 4.25 s\\nshifts.c:  init and i/o 3.62 s, \
+calculation 9.12 s\\n\"\>",
+  StripOnInput->False,
+  FontColor->RGBColor[
+   0, 0, 1]]], "Print",ExpressionUUID->"bee6dba7-8362-4fd3-88d6-69e36b693fcf"],
+
+Cell[BoxData[
+ RowBox[{"{", 
+  RowBox[{
+  "0.4151112611824028`", ",", "0.4151112611824028`", ",", 
+   "0.33698202437395286`", ",", "0.33698202437395286`", ",", 
+   "0.9939518552300071`"}], 
+  "}"}]], "Print",ExpressionUUID->"644436c9-7036-4d55-b843-09d8f1b82304"]
+}, Open  ]]
+}, Closed]],
 
 Cell[CellGroupData[{
 
@@ -3343,7 +4730,7 @@ Cell[BoxData[
  RowBox[{
   RowBox[{"fieldCorr2", "=", 
    RowBox[{"linkCorrelators", "[", "2", "]"}]}], 
-  ";"}]], "Input",ExpressionUUID->"5e53775b-408b-4ad5-a2d5-ddbdafff4d46"],
+  ";"}]], "Input",ExpressionUUID->"e67d8b9f-f1e1-4ffe-a46e-dc2206b339cc"],
 
 Cell[CellGroupData[{
 
@@ -3356,15 +4743,15 @@ Cell[BoxData[
   
   SequenceForm["ops: ", {"2l", "2t1", "2t2", "2t11", "2t12", "2t13"}],
   Editable->
-   False]], "Print",ExpressionUUID->"4ccb8adf-d87a-4d71-bfc5-f74d031b90a3"],
+   False]], "Print",ExpressionUUID->"1e48c517-a49f-4d87-9883-d9ced4fad43e"],
 
 Cell[BoxData[
  InterpretationBox[
   RowBox[{"\<\"Total time: \"\>", "\[InvisibleSpace]", 
-   "51.896439`7.865652556533862"}],
-  SequenceForm["Total time: ", 51.896439`7.865652556533862],
+   "39.34242`7.745376068217589"}],
+  SequenceForm["Total time: ", 39.34242`7.745376068217589],
   Editable->
-   False]], "Print",ExpressionUUID->"2bab3e45-ec39-4604-b37f-1775bedd445d"]
+   False]], "Print",ExpressionUUID->"7dc9618c-a425-4c70-be78-e39554f62757"]
 }, Open  ]]
 }, Open  ]],
 
@@ -3374,7 +4761,7 @@ Cell[BoxData[
  RowBox[{
   RowBox[{"fieldCorr3", "=", 
    RowBox[{"linkCorrelators", "[", "3", "]"}]}], 
-  ";"}]], "Input",ExpressionUUID->"c676f5c4-4786-4502-b3b3-7b73e5337c0d"],
+  ";"}]], "Input",ExpressionUUID->"73372b14-fc59-4508-b4a4-61a677206998"],
 
 Cell[CellGroupData[{
 
@@ -3390,15 +4777,15 @@ Cell[BoxData[
   "ops: ", {
    "3m1b", "3m2", "3m4", "3m5", "3m6", "3m8", "3m9", "3pl", "3pt1", "3pt2"}],
   Editable->
-   False]], "Print",ExpressionUUID->"d8c1dfe7-aa49-4a45-bcb9-edc65eb663d5"],
+   False]], "Print",ExpressionUUID->"1d413fe3-f8db-4e87-ad7b-75d1dba27717"],
 
 Cell[BoxData[
  InterpretationBox[
   RowBox[{"\<\"Total time: \"\>", "\[InvisibleSpace]", 
-   "1008.165773`9.154046946984955"}],
-  SequenceForm["Total time: ", 1008.165773`9.154046946984955],
+   "999.733389`9.150399194707997"}],
+  SequenceForm["Total time: ", 999.733389`9.150399194707997],
   Editable->
-   False]], "Print",ExpressionUUID->"fe8e9739-8c89-4190-a718-5de8b5c7c01a"]
+   False]], "Print",ExpressionUUID->"410d31a5-a6dc-48c1-bd86-6cfe26445c0c"]
 }, Open  ]]
 }, Open  ]],
 
@@ -3408,7 +4795,7 @@ Cell[BoxData[
  RowBox[{
   RowBox[{"fieldCorr22", "=", 
    RowBox[{"linkCorrelators", "[", "22", "]"}]}], 
-  ";"}]], "Input",ExpressionUUID->"4726e04d-8b3b-4324-a23e-80c665d5cd11"],
+  ";"}]], "Input",ExpressionUUID->"794c21f6-9c58-452e-b8e0-107a3cb84b81"],
 
 Cell[CellGroupData[{
 
@@ -3472,24 +4859,28 @@ Cell[BoxData[
      RowBox[{"{", 
       RowBox[{"\<\"t3\"\>", ",", "\<\"27\"\>"}], "}"}], ",", 
      RowBox[{"{", 
-      RowBox[{"\<\"t3\"\>", ",", "\<\"8S\"\>"}], "}"}]}], "}"}]}],
+      RowBox[{"\<\"t3\"\>", ",", "\<\"8A\"\>"}], "}"}], ",", 
+     RowBox[{"{", 
+      RowBox[{"\<\"t3\"\>", ",", "\<\"8S\"\>"}], "}"}], ",", 
+     RowBox[{"{", 
+      RowBox[{"\<\"t3\"\>", ",", "\<\"Re10\"\>"}], "}"}]}], "}"}]}],
   SequenceForm[
   "ops: ", {{"l", "0"}, {"l", "1"}, {"l", "27"}, {"l", "8S"}, {"m1", "0"}, {
     "m1", "1"}, {"m1", "27"}, {"m1", "8A"}, {"m1", "8S"}, {"m1", "Re10"}, {
     "m2", "0"}, {"m2", "1"}, {"m2", "27"}, {"m2", "8S"}, {"t1", "0"}, {
     "t1", "1"}, {"t1", "27"}, {"t1", "8A"}, {"t1", "8S"}, {"t1", "Re10"}, {
     "t2", "0"}, {"t2", "1"}, {"t2", "27"}, {"t2", "8S"}, {"t3", "0"}, {
-    "t3", "1"}, {"t3", "27"}, {"t3", "8S"}}],
+    "t3", "1"}, {"t3", "27"}, {"t3", "8A"}, {"t3", "8S"}, {"t3", "Re10"}}],
   Editable->
-   False]], "Print",ExpressionUUID->"867bc9d0-7d63-4e8d-9837-af81171f64b0"],
+   False]], "Print",ExpressionUUID->"7a51111f-d219-42d5-85b4-813e26e37470"],
 
 Cell[BoxData[
  InterpretationBox[
   RowBox[{"\<\"Total time: \"\>", "\[InvisibleSpace]", 
-   "265.446354`8.574491762361099"}],
-  SequenceForm["Total time: ", 265.446354`8.574491762361099],
+   "232.79781`8.51749388828841"}],
+  SequenceForm["Total time: ", 232.79781`8.51749388828841],
   Editable->
-   False]], "Print",ExpressionUUID->"63c0c60e-40d5-490d-bdef-1c7ecbf22022"]
+   False]], "Print",ExpressionUUID->"856710b8-6ff6-4892-bc0d-6d772f1dd7d5"]
 }, Open  ]]
 }, Open  ]],
 
@@ -3499,7 +4890,7 @@ Cell[BoxData[
  RowBox[{
   RowBox[{"fieldCorr4x", "=", 
    RowBox[{"linkCorrelators", "[", "\"\<4x\>\"", "]"}]}], 
-  ";"}]], "Input",ExpressionUUID->"bf560775-24a9-4104-9dae-d3ae09567552"],
+  ";"}]], "Input",ExpressionUUID->"4bf21da5-326d-4fbb-aa26-53ada348c18a"],
 
 Cell[CellGroupData[{
 
@@ -3555,15 +4946,15 @@ Cell[BoxData[
     "4zr", "27"}, {"4zr", "8S"}, {"4zz", "0"}, {"4zz", "1"}, {"4zz", "27"}, {
     "4zz", "8S"}}],
   Editable->
-   False]], "Print",ExpressionUUID->"0b7b9926-eda3-4aea-a6ad-5c42011158b3"],
+   False]], "Print",ExpressionUUID->"97fa48ae-b4c3-4030-806d-3c00f6d6c992"],
 
 Cell[BoxData[
  InterpretationBox[
   RowBox[{"\<\"Total time: \"\>", "\[InvisibleSpace]", 
-   "231.536179`8.515133859762297"}],
-  SequenceForm["Total time: ", 231.536179`8.515133859762297],
+   "157.298403`8.347239311225726"}],
+  SequenceForm["Total time: ", 157.298403`8.347239311225726],
   Editable->
-   False]], "Print",ExpressionUUID->"ebcdfbc9-b296-4cf5-9168-8bfd1d10c358"]
+   False]], "Print",ExpressionUUID->"a37b02ba-4173-4204-8575-290677a11f0d"]
 }, Open  ]]
 }, Open  ]],
 
@@ -3574,8 +4965,8 @@ Cell[BoxData[
   RowBox[{"fieldCorr3A", "=", 
    RowBox[{"linkCorrelators", "[", 
     RowBox[{"3", ",", 
-     RowBox[{"\"\<anomoly\>\"", "\[Rule]", "True"}]}], "]"}]}], 
-  ";"}]], "Input",ExpressionUUID->"a5c5bbae-0476-4aa0-ace0-781db23bd438"],
+     RowBox[{"\"\<anomaly\>\"", "\[Rule]", "True"}]}], "]"}]}], 
+  ";"}]], "Input",ExpressionUUID->"ed537799-8372-4aab-8038-e8d38034c902"],
 
 Cell[CellGroupData[{
 
@@ -3591,15 +4982,15 @@ Cell[BoxData[
   "ops: ", {
    "3m10", "3m2", "3m3", "3m4", "3m5", "3m7", "3m8", "3pl", "3pt1", "3pt2"}],
   Editable->
-   False]], "Print",ExpressionUUID->"6ca81b4e-be80-4ab4-a5f4-752acf441c79"],
+   False]], "Print",ExpressionUUID->"4db3800d-b4eb-455d-bf34-45f140020ba9"],
 
 Cell[BoxData[
  InterpretationBox[
   RowBox[{"\<\"Total time: \"\>", "\[InvisibleSpace]", 
-   "1482.247242`9.321435648763115"}],
-  SequenceForm["Total time: ", 1482.247242`9.321435648763115],
+   "1294.112847`9.262487146415484"}],
+  SequenceForm["Total time: ", 1294.112847`9.262487146415484],
   Editable->
-   False]], "Print",ExpressionUUID->"63bebaa6-5eee-4428-b154-326ca66ad7a2"]
+   False]], "Print",ExpressionUUID->"6e9253a7-3741-4e74-92cc-cf751ddd9657"]
 }, Open  ]]
 }, Open  ]],
 
@@ -3610,8 +5001,8 @@ Cell[BoxData[
   RowBox[{"fieldCorr22A", "=", 
    RowBox[{"linkCorrelators", "[", 
     RowBox[{"22", ",", 
-     RowBox[{"\"\<anomoly\>\"", "\[Rule]", "True"}]}], "]"}]}], 
-  ";"}]], "Input",ExpressionUUID->"d65748c9-160d-4aa6-b036-9a0ad058a04d"],
+     RowBox[{"\"\<anomaly\>\"", "\[Rule]", "True"}]}], "]"}]}], 
+  ";"}]], "Input",ExpressionUUID->"20c9de5a-01b1-426b-aa6a-969d8b87c8fc"],
 
 Cell[CellGroupData[{
 
@@ -3662,15 +5053,15 @@ Cell[BoxData[
     "t1", "A1"}, {"t1", "A2"}, {"t1", "A3"}, {"t2", "A1"}, {"t2", "A2"}, {
     "t2", "A3"}, {"t3", "A1"}, {"t3", "A2"}, {"t3", "A3"}}],
   Editable->
-   False]], "Print",ExpressionUUID->"f4b08e9b-d6b7-4941-a640-fbb7989fa64d"],
+   False]], "Print",ExpressionUUID->"c73fa6b7-da23-43ea-a509-256c7e27174f"],
 
 Cell[BoxData[
  InterpretationBox[
   RowBox[{"\<\"Total time: \"\>", "\[InvisibleSpace]", 
-   "204.649525`8.461525738799022"}],
-  SequenceForm["Total time: ", 204.649525`8.461525738799022],
+   "209.093164`8.470854832248857"}],
+  SequenceForm["Total time: ", 209.093164`8.470854832248857],
   Editable->
-   False]], "Print",ExpressionUUID->"b7337410-c30d-463b-891e-672f45784bc1"]
+   False]], "Print",ExpressionUUID->"3d0d587f-3679-49c3-bc47-aaf20561cd48"]
 }, Open  ]]
 }, Open  ]],
 
@@ -3681,8 +5072,8 @@ Cell[BoxData[
   RowBox[{"fieldCorr4xA", "=", 
    RowBox[{"linkCorrelators", "[", 
     RowBox[{"\"\<4x\>\"", ",", 
-     RowBox[{"\"\<anomoly\>\"", "\[Rule]", "True"}]}], "]"}]}], 
-  ";"}]], "Input",ExpressionUUID->"f24db485-5195-4da8-80cd-710a428f9f90"],
+     RowBox[{"\"\<anomaly\>\"", "\[Rule]", "True"}]}], "]"}]}], 
+  ";"}]], "Input",ExpressionUUID->"b6650201-2a79-4d44-a2ba-361f6510e7ee"],
 
 Cell[CellGroupData[{
 
@@ -3727,15 +5118,15 @@ Cell[BoxData[
     "4hz", "A3"}, {"4zr", "A1"}, {"4zr", "A2"}, {"4zr", "A3"}, {
     "4zz", "A1"}, {"4zz", "A2"}, {"4zz", "A3"}}],
   Editable->
-   False]], "Print",ExpressionUUID->"8f605f3b-671b-4296-8435-1a91156be354"],
+   False]], "Print",ExpressionUUID->"b972f70f-44ea-4a67-94c7-14c33d8b00a9"],
 
 Cell[BoxData[
  InterpretationBox[
   RowBox[{"\<\"Total time: \"\>", "\[InvisibleSpace]", 
-   "152.324919`8.333285953688982"}],
-  SequenceForm["Total time: ", 152.324919`8.333285953688982],
+   "145.424974`8.313153992656478"}],
+  SequenceForm["Total time: ", 145.424974`8.313153992656478],
   Editable->
-   False]], "Print",ExpressionUUID->"452e8d7a-ff22-40ae-9c87-5d9f1e9cfc2e"]
+   False]], "Print",ExpressionUUID->"603bcf35-a981-4be4-9e13-a3f0d879b7ac"]
 }, Open  ]]
 }, Open  ]],
 
@@ -3755,61 +5146,52 @@ Cell[BoxData[
        "fieldCorr2", ",", "fieldCorr3", ",", "fieldCorr22", ",", 
         "fieldCorr4x", ",", "fieldCorr3A", ",", "fieldCorr22A", ",", 
         "fieldCorr4xA"}], "}"}]}], "]"}]}]}], 
-  "]"}]], "Input",ExpressionUUID->"d599ea97-7173-4804-8b8c-327ca86cdd04"]
-}, Open  ]]
+  "]"}]], "Input",ExpressionUUID->"516c6360-7c86-4efb-b9d2-c2907c904e61"]
+}, Closed]]
 }, Open  ]],
 
 Cell[CellGroupData[{
 
 Cell["3-4/20.24.30-48-5", \
-"Section",ExpressionUUID->"ca58fc8c-9ef5-49a7-a324-f94600ee91b1"],
+"Section",ExpressionUUID->"a1aea849-4a61-452a-b3d4-e7965bef38dd"],
 
 Cell["Calculate for the original lattice in Landau gauge", \
-"Text",ExpressionUUID->"ebe36f46-9a0a-455d-85fa-5450e9ff39fb"],
-
-Cell[CellGroupData[{
+"Text",ExpressionUUID->"d08df601-af29-4dd8-81e1-2106d7d7c259"],
 
 Cell[BoxData[
  RowBox[{
-  RowBox[{"<<", "\"\<../data/3-4/periodic-20.24.30-48-5.m\>\""}], ";", 
-  RowBox[{"Print", "[", 
-   RowBox[{"{", 
-    RowBox[{
-     RowBox[{"latticeNorm", "[", "]"}], ",", 
-     RowBox[{"latticeNorm", "[", 
-      RowBox[{"\"\<center\>\"", "\[Rule]", "True"}], "]"}], ",", 
-     RowBox[{"applyGaugeTransforms", "[", 
-      RowBox[{
-       RowBox[{"{", 
-        RowBox[{
-        "1", ",", "1", ",", "6", ",", "1", ",", "5", ",", "6", ",", "5", ",", 
-         "6", ",", "5", ",", "6", ",", "5", ",", "6"}], "}"}], ",", 
-       RowBox[{"\"\<maxAbelianGauge\>\"", "\[Rule]", "False"}]}], "]"}], ",", 
-     
-     RowBox[{"latticeNorm", "[", "]"}], ",", 
-     RowBox[{"averagePlaquette", "[", "]"}]}], "}"}], "]"}], 
-  ";"}]], "Input",ExpressionUUID->"1f42bd93-2c54-41f1-b05b-0f01ed0056c5"],
-
-Cell[BoxData[
- RowBox[{"{", 
-  RowBox[{
-  "3.6061729614771116`", ",", "2.96454298243095`", ",", "0.5859638382358799`",
-    ",", "0.5859638382358799`", ",", "0.8923739637716761`"}], 
-  "}"}]], "Print",ExpressionUUID->"f1e7f4b9-34bd-48b5-81b1-4988c7d06f45"]
-}, Open  ]],
+  RowBox[{"<<", "\"\<../data/3-4/periodic-20.24.30-48-5.m\>\""}], 
+  ";"}]], "Input",ExpressionUUID->"d4135db0-9f84-429f-ad11-125b1f0b902d"],
 
 Cell["The original field, Landau gauge.", \
-"Text",ExpressionUUID->"7221cf2e-5edc-4400-8640-0e8a11056f3a"],
+"Text",ExpressionUUID->"58368c45-6fa9-4ddd-954d-7555efd7103e"],
 
 Cell[BoxData[
  RowBox[{
   RowBox[{"<<", "\"\<../cache/3-4/field-correlators-20.24.30-48-5.m\>\""}], 
-  ";"}]], "Input",ExpressionUUID->"84942b70-aeed-48d7-bf67-dbc5801367a6"],
+  ";"}]], "Input",ExpressionUUID->"751b8242-4fa6-4987-b480-b6141289b945"],
+
+Cell["Too big to apply Newtons method?", \
+"Text",ExpressionUUID->"174d799e-ed4e-4a6d-884d-bc9f11d11618"],
 
 Cell[CellGroupData[{
 
 Cell["Calculate", \
-"Subsection",ExpressionUUID->"86af9a8c-fb0a-49bf-9c40-f0fcf580010d"],
+"Subsection",ExpressionUUID->"b4c9b943-1585-4b4b-985e-a62ec02879de"],
+
+Cell[CellGroupData[{
+
+Cell[BoxData[
+ RowBox[{"applyGaugeTransformStrategy", "[", "False", 
+  "]"}]], "Input",ExpressionUUID->"7fe9fbf2-8391-47c5-8619-3a18d48236c5"],
+
+Cell[BoxData[
+ RowBox[{"{", 
+  RowBox[{
+  "3.6061729614771116`", ",", "2.96454298243095`", ",", "0.5390625337343911`",
+    ",", "0.5390625337343911`", ",", "0.8923739637716759`"}], 
+  "}"}]], "Print",ExpressionUUID->"1fb43c7e-7aa8-4ff3-933f-c5fa756f324b"]
+}, Open  ]],
 
 Cell[CellGroupData[{
 
@@ -3817,7 +5199,7 @@ Cell[BoxData[
  RowBox[{
   RowBox[{"fieldCorr2", "=", 
    RowBox[{"linkCorrelators", "[", "2", "]"}]}], 
-  ";"}]], "Input",ExpressionUUID->"3f4bde0b-5acf-44ee-b863-6d1661d0b994"],
+  ";"}]], "Input",ExpressionUUID->"28853312-029a-4b24-bbc5-2f6e1097f143"],
 
 Cell[CellGroupData[{
 
@@ -3830,15 +5212,15 @@ Cell[BoxData[
   
   SequenceForm["ops: ", {"2l", "2t1", "2t2", "2t11", "2t12", "2t13"}],
   Editable->
-   False]], "Print",ExpressionUUID->"11b0fc9e-b778-4d6e-822b-4c71eed5de3b"],
+   False]], "Print",ExpressionUUID->"c5fce659-4c87-4bbc-b502-d544dcd98e76"],
 
 Cell[BoxData[
  InterpretationBox[
   RowBox[{"\<\"Total time: \"\>", "\[InvisibleSpace]", 
-   "343.076289`8.68590570157077"}],
-  SequenceForm["Total time: ", 343.076289`8.68590570157077],
+   "419.251735`8.772989866365611"}],
+  SequenceForm["Total time: ", 419.251735`8.772989866365611],
   Editable->
-   False]], "Print",ExpressionUUID->"9044ebf7-ce40-4e1d-b2d4-ec0ef0cfc102"]
+   False]], "Print",ExpressionUUID->"3430de9f-fe73-4bb9-bcf9-01c0928c72bf"]
 }, Open  ]]
 }, Open  ]],
 
@@ -3848,7 +5230,7 @@ Cell[BoxData[
  RowBox[{
   RowBox[{"fieldCorr3", "=", 
    RowBox[{"linkCorrelators", "[", "3", "]"}]}], 
-  ";"}]], "Input",ExpressionUUID->"2e8359ba-dd36-4461-8e8f-0b615e6ec1e1"],
+  ";"}]], "Input",ExpressionUUID->"e7ecafe7-4255-4b5c-972d-c45bbc16ceab"],
 
 Cell[CellGroupData[{
 
@@ -3864,15 +5246,15 @@ Cell[BoxData[
   "ops: ", {
    "3m1b", "3m2", "3m4", "3m5", "3m6", "3m8", "3m9", "3pl", "3pt1", "3pt2"}],
   Editable->
-   False]], "Print",ExpressionUUID->"33ab6cf1-08b2-42db-a646-5abee4945788"],
+   False]], "Print",ExpressionUUID->"97f2fcc9-d6d4-472a-9fea-5ab3a0f24c06"],
 
 Cell[BoxData[
  InterpretationBox[
   RowBox[{"\<\"Total time: \"\>", "\[InvisibleSpace]", 
-   "7862.175869`10.046057752157322"}],
-  SequenceForm["Total time: ", 7862.175869`10.046057752157322],
+   "9231.592652`10.115791630635453"}],
+  SequenceForm["Total time: ", 9231.592652`10.115791630635453],
   Editable->
-   False]], "Print",ExpressionUUID->"26f2b8dc-5aa5-4007-bc98-5eb13939252f"]
+   False]], "Print",ExpressionUUID->"19689df5-da3c-4a99-85ca-b22fed58279c"]
 }, Open  ]]
 }, Open  ]],
 
@@ -3882,7 +5264,7 @@ Cell[BoxData[
  RowBox[{
   RowBox[{"fieldCorr22", "=", 
    RowBox[{"linkCorrelators", "[", "22", "]"}]}], 
-  ";"}]], "Input",ExpressionUUID->"deed7e8b-1f06-4ac0-a2ad-a6a923fcdd94"],
+  ";"}]], "Input",ExpressionUUID->"9ad5e508-a028-43b3-9399-1733093bc23e"],
 
 Cell[CellGroupData[{
 
@@ -3946,24 +5328,28 @@ Cell[BoxData[
      RowBox[{"{", 
       RowBox[{"\<\"t3\"\>", ",", "\<\"27\"\>"}], "}"}], ",", 
      RowBox[{"{", 
-      RowBox[{"\<\"t3\"\>", ",", "\<\"8S\"\>"}], "}"}]}], "}"}]}],
+      RowBox[{"\<\"t3\"\>", ",", "\<\"8A\"\>"}], "}"}], ",", 
+     RowBox[{"{", 
+      RowBox[{"\<\"t3\"\>", ",", "\<\"8S\"\>"}], "}"}], ",", 
+     RowBox[{"{", 
+      RowBox[{"\<\"t3\"\>", ",", "\<\"Re10\"\>"}], "}"}]}], "}"}]}],
   SequenceForm[
   "ops: ", {{"l", "0"}, {"l", "1"}, {"l", "27"}, {"l", "8S"}, {"m1", "0"}, {
     "m1", "1"}, {"m1", "27"}, {"m1", "8A"}, {"m1", "8S"}, {"m1", "Re10"}, {
     "m2", "0"}, {"m2", "1"}, {"m2", "27"}, {"m2", "8S"}, {"t1", "0"}, {
     "t1", "1"}, {"t1", "27"}, {"t1", "8A"}, {"t1", "8S"}, {"t1", "Re10"}, {
     "t2", "0"}, {"t2", "1"}, {"t2", "27"}, {"t2", "8S"}, {"t3", "0"}, {
-    "t3", "1"}, {"t3", "27"}, {"t3", "8S"}}],
+    "t3", "1"}, {"t3", "27"}, {"t3", "8A"}, {"t3", "8S"}, {"t3", "Re10"}}],
   Editable->
-   False]], "Print",ExpressionUUID->"677e9c02-0f1e-45b5-b27f-399a5c4ae09d"],
+   False]], "Print",ExpressionUUID->"ffb33ec3-5e7b-4e1c-a19f-935a524b30c2"],
 
 Cell[BoxData[
  InterpretationBox[
   RowBox[{"\<\"Total time: \"\>", "\[InvisibleSpace]", 
-   "1688.997334`9.378143961890865"}],
-  SequenceForm["Total time: ", 1688.997334`9.378143961890865],
+   "1868.162248`9.421929589400142"}],
+  SequenceForm["Total time: ", 1868.162248`9.421929589400142],
   Editable->
-   False]], "Print",ExpressionUUID->"237175ce-8009-4b13-9204-a31cab327912"]
+   False]], "Print",ExpressionUUID->"b5b33fc3-950d-4151-95aa-aa5893d40201"]
 }, Open  ]]
 }, Open  ]],
 
@@ -3973,7 +5359,7 @@ Cell[BoxData[
  RowBox[{
   RowBox[{"fieldCorr4x", "=", 
    RowBox[{"linkCorrelators", "[", "\"\<4x\>\"", "]"}]}], 
-  ";"}]], "Input",ExpressionUUID->"cbc6111a-fc89-46ac-a3ae-f49b1c365bd5"],
+  ";"}]], "Input",ExpressionUUID->"e53dab4b-5897-4cc4-a3bb-02cec99191dd"],
 
 Cell[CellGroupData[{
 
@@ -4029,15 +5415,15 @@ Cell[BoxData[
     "4zr", "27"}, {"4zr", "8S"}, {"4zz", "0"}, {"4zz", "1"}, {"4zz", "27"}, {
     "4zz", "8S"}}],
   Editable->
-   False]], "Print",ExpressionUUID->"6d9dcdad-e517-48a6-a14c-ce07529aa04c"],
+   False]], "Print",ExpressionUUID->"acb0934d-01fc-413f-8941-6fe8d27d2409"],
 
 Cell[BoxData[
  InterpretationBox[
   RowBox[{"\<\"Total time: \"\>", "\[InvisibleSpace]", 
-   "1139.034142`9.207051739874197"}],
-  SequenceForm["Total time: ", 1139.034142`9.207051739874197],
+   "1314.207827`9.269179047212727"}],
+  SequenceForm["Total time: ", 1314.207827`9.269179047212727],
   Editable->
-   False]], "Print",ExpressionUUID->"ffde89af-0902-421e-aa26-5de5f41cc4f0"]
+   False]], "Print",ExpressionUUID->"65ca8e2e-d9f4-4e92-94c0-ab8d97354219"]
 }, Open  ]]
 }, Open  ]],
 
@@ -4061,33 +5447,33 @@ Cell[BoxData[
         "fieldCorr2", ",", "fieldCorr3", ",", "fieldCorr22", ",", 
          "fieldCorr4x", ",", "fieldCorr3A", ",", "fieldCorr22A", ",", 
          "fieldCorr4xA"}], "}"}]}], "]"}]}]}], 
-   "]"}]}]], "Input",ExpressionUUID->"42d052ab-cd04-47b7-a4f4-cef2e9608bdf"]
-}, Open  ]]
+   "]"}]}]], "Input",ExpressionUUID->"0ee06777-ddae-4796-a8fd-3dfbfb02ee23"]
 }, Closed]]
+}, Open  ]]
 }, Open  ]],
 
 Cell[CellGroupData[{
 
 Cell["Analysis", \
-"Chapter",ExpressionUUID->"40fc8713-6d38-4714-a06e-91355f7af4f2"],
+"Chapter",ExpressionUUID->"56407d86-5fc9-48da-a017-3bde101fde9b"],
 
 Cell["\<\
 Have tested the \[OpenCurlyDoubleQuote]anomaly\[CloseCurlyDoubleQuote] = \
 False cases.
 Correlators for SU(4) are almost identical to the SU(3) case\
-\>", "Text",ExpressionUUID->"bc950b4d-5f4b-4a3c-93fd-fc024e258ddb"],
+\>", "Text",ExpressionUUID->"6694bdb4-f7a6-4eea-992a-62ae5ed62db1"],
 
 Cell[CellGroupData[{
 
 Cell["Plot the fields themselves", \
-"Section",ExpressionUUID->"8dc2311c-c0f8-428c-8bd9-0f6d0c8abc18"],
+"Section",ExpressionUUID->"f5ce7bca-c129-4d1f-9a59-c31f65f9c886"],
 
 Cell[CellGroupData[{
 
 Cell[BoxData[
  RowBox[{"Column", "[", 
   RowBox[{"SUGenerators", "[", "]"}], 
-  "]"}]], "Input",ExpressionUUID->"e909466d-4dc5-4636-b27b-1b7c7626e1aa"],
+  "]"}]], "Input",ExpressionUUID->"923fdbaa-25c3-48b1-aeac-bfed23532489"],
 
 Cell[BoxData[
  TagBox[GridBox[{
@@ -4197,26 +5583,30 @@ Cell[BoxData[
    GridBoxAlignment->{"Columns" -> {{Left}}},
    GridBoxItemSize->{"Columns" -> {{Automatic}}, "Rows" -> {{Automatic}}}],
   "Column"]], \
-"Output",ExpressionUUID->"9525e9a7-cd1a-45e5-a273-bfc8fc9cb64b"]
+"Output",ExpressionUUID->"8b35a31a-bc1d-41b1-98c2-7353de0956e7"]
 }, Open  ]],
 
 Cell[BoxData[
  RowBox[{"setAxialGauge", "[", "3", 
-  "]"}]], "Input",ExpressionUUID->"c5398a55-ddf3-4d89-8241-4c430c59e17d"],
+  "]"}]], "Input",ExpressionUUID->"78104fde-7918-4d55-999d-dbde945753d4"],
 
 Cell["Animation of links, going through the entire lattice.", \
-"Text",ExpressionUUID->"fadec7da-71fd-45e0-90fc-0a65366b3b6b"],
+"Text",ExpressionUUID->"5bf4c6ac-68bc-4bc2-bb79-1182dba8ffec"],
 
 Cell[BoxData[
- RowBox[{"plotLinks", "[", 
-  RowBox[{"3", ",", "1", ",", "2", ",", 
-   RowBox[{"ImageSize", "\[Rule]", "500"}]}], 
-  "]"}]], "Input",ExpressionUUID->"3147ea4b-0936-4cd4-842a-056634c29db1"],
+ RowBox[{"Block", "[", 
+  RowBox[{
+   RowBox[{"{", 
+    RowBox[{"gaugeField", "=", "gaugeField44"}], "}"}], ",", 
+   RowBox[{"plotLinks", "[", 
+    RowBox[{"3", ",", "1", ",", "2", ",", 
+     RowBox[{"ImageSize", "\[Rule]", "500"}]}], "]"}]}], 
+  "]"}]], "Input",ExpressionUUID->"8276d59d-256d-4639-96f7-cd2a895cf083"],
 
 Cell["\<\
 Plot all components of the field at a single site, with buttons to choose \
 gauge and navigate lattice.\
-\>", "Text",ExpressionUUID->"54d238d8-3d27-4ae4-a85f-d84295d39a31"],
+\>", "Text",ExpressionUUID->"240609cb-9ae2-4e21-b8c7-11245f236069"],
 
 Cell[BoxData[
  RowBox[{"DynamicModule", "[", 
@@ -4507,12 +5897,12 @@ Cell[BoxData[
              RowBox[{"{", 
               RowBox[{"1", ",", "1", ",", "1"}], "}"}]}]}], "]"}]}], "]"}], 
         "]"}]}], "}"}], "]"}]}]}], 
-  "]"}]], "Input",ExpressionUUID->"e7a8eec4-54a9-4bc7-b3b8-721980c57921"],
+  "]"}]], "Input",ExpressionUUID->"7f54feef-ee9b-4d4a-9d4c-250bf5615a40"],
 
 Cell["\<\
 Plot links on a planar slice of the lattice, with buttons to navigate the \
 lattice and choose gauge.\
-\>", "Text",ExpressionUUID->"d82340d0-155e-4b86-b2f7-edcffb86dd44"],
+\>", "Text",ExpressionUUID->"587e3906-be22-43b9-b789-81b74258ddfe"],
 
 Cell[BoxData[
  RowBox[{"DynamicModule", "[", 
@@ -4690,16 +6080,16 @@ Cell[BoxData[
          RowBox[{
          "lgf", ",", "None", ",", "dir1", ",", "dir2", ",", "x", ",", "maxx", 
           ",", "size"}], "]"}], "]"}]}], "}"}], "]"}]}]}], 
-  "]"}]], "Input",ExpressionUUID->"3d506efa-dabd-49e2-8db1-1dc5135c46e6"]
-}, Open  ]],
+  "]"}]], "Input",ExpressionUUID->"fe099ec8-6828-479b-839d-88a41994d831"]
+}, Closed]],
 
 Cell[CellGroupData[{
 
 Cell["Field distributions at a single site", \
-"Section",ExpressionUUID->"48935e57-ad6a-4df8-92bc-26b20deb4cd6"],
+"Section",ExpressionUUID->"b7ef5a39-430e-4a6b-a907-0b762079ee40"],
 
 Cell["Find the distribution of link phases", \
-"Text",ExpressionUUID->"0b69998b-1a92-463b-90fc-bf4679cc4f10"],
+"Text",ExpressionUUID->"e8daabc8-cbf5-47fb-a8b7-649d2e81b2e5"],
 
 Cell[CellGroupData[{
 
@@ -4733,20 +6123,20 @@ Cell[BoxData[
   RowBox[{"Map", "[", 
    RowBox[{"Mean", ",", 
     RowBox[{"Transpose", "[", "distl", "]"}]}], 
-   "]"}]}]], "Input",ExpressionUUID->"a0125904-78ad-4eb2-b5b0-1c37332b1c9a"],
+   "]"}]}]], "Input",ExpressionUUID->"242fdd88-75bd-41e0-9710-b56905bae745"],
 
 Cell[BoxData[
  RowBox[{"{", 
   RowBox[{"0.18408279110825598`", ",", 
    RowBox[{"-", "0.0038169331317982444`"}], ",", 
    RowBox[{"-", "0.18026585797645778`"}]}], 
-  "}"}]], "Output",ExpressionUUID->"e8364c64-50ec-4a3e-a7ca-a83bcc392d34"]
+  "}"}]], "Output",ExpressionUUID->"0c7e4703-91da-4732-98d4-a0739b19636c"]
 }, Open  ]],
 
 Cell["\<\
 Blow up value so shape can be seen. (There seems to be a bug where image can\
 \[CloseCurlyQuote]t be resized in the notebook interface.)\
-\>", "Text",ExpressionUUID->"d9b732ba-16ba-4d1a-8ccb-531b2ca84ce5"],
+\>", "Text",ExpressionUUID->"7e188334-d7cc-4859-a3d9-012613eee39e"],
 
 Cell[CellGroupData[{
 
@@ -4777,7 +6167,7 @@ Cell[BoxData[
      RowBox[{"\"\<centerLabels\>\"", "\[Rule]", "False"}], ",", 
      RowBox[{"Ticks", "\[Rule]", "Automatic"}], ",", 
      RowBox[{"ImageSize", "\[Rule]", "400"}]}], "]"}]}], 
-  "]"}]], "Input",ExpressionUUID->"b5f1a3de-b305-457e-bcce-952c46d02493"],
+  "]"}]], "Input",ExpressionUUID->"b3f04266-0f54-4fa8-982e-8c33aedf1075"],
 
 Cell[CellGroupData[{
 
@@ -4802,7 +6192,7 @@ Cell[BoxData[
    0.07034577673898915}, {-0.0038169331317982557`, 
    0.044816443879846735`}, {-0.18026585797645744`, 0.06952715689775445}}],
   Editable->
-   False]], "Print",ExpressionUUID->"591c2260-710f-4bd2-a799-33bb1a166b65"],
+   False]], "Print",ExpressionUUID->"9e1cc358-0f74-4e48-a5ef-e2f94a30ef13"],
 
 Cell[BoxData[
  RowBox[{"{", 
@@ -4844,12 +6234,12 @@ Cell[BoxData[
        FractionBox["2", "3"], ",", 
        RowBox[{"-", 
         FractionBox["1", "3"]}]}], "}"}]}], "}"}]}], 
-  "}"}]], "Print",ExpressionUUID->"3f7ce0ad-a089-410b-bd37-17880802ded5"]
+  "}"}]], "Print",ExpressionUUID->"b98366c5-4f94-483f-9dde-8fea6f5282b8"]
 }, Open  ]]
 }, Open  ]],
 
 Cell["Similarly, plot a histogram of the norm of the link field.", \
-"Text",ExpressionUUID->"cbc16dc9-98dd-4e81-848a-8743db8c9a3a"],
+"Text",ExpressionUUID->"3ddb6361-26c8-46ae-899e-a4044d43cd49"],
 
 Cell[BoxData[
  RowBox[{"Histogram", "[", 
@@ -4874,11 +6264,11 @@ Cell[BoxData[
      RowBox[{"True", ",", "journalStyle", ",", 
       RowBox[{"{", 
        RowBox[{"FontSize", "\[Rule]", "14"}], "}"}]}], "]"}]}]}], 
-  "]"}]], "Input",ExpressionUUID->"1e6bfaf3-cf0f-400e-b430-29479d4e2939"],
+  "]"}]], "Input",ExpressionUUID->"9eee8f58-5cc6-43b1-996f-243674c5334a"],
 
 Cell["\<\
 Distribution of the correlation of pairs of distinct links at a site.\
-\>", "Text",ExpressionUUID->"5eac5976-d534-4940-a148-ef573fbbf961"],
+\>", "Text",ExpressionUUID->"f7ee21ce-d5e3-470c-bc9b-8e20a72dff86"],
 
 Cell[BoxData[
  RowBox[{
@@ -4925,7 +6315,7 @@ Cell[BoxData[
           RowBox[{"k", ",", 
            RowBox[{"latticeVolume", "[", "]"}]}], "}"}]}], "]"}], ",", "2"}], 
       "]"}]}], "]"}]}], 
-  ";"}]], "Input",ExpressionUUID->"d7017509-acf5-4f61-9807-59b780b0ffc9"],
+  ";"}]], "Input",ExpressionUUID->"89fcf8cb-7bae-4129-bba1-35d722802777"],
 
 Cell[BoxData[
  RowBox[{"Histogram", "[", 
@@ -4949,12 +6339,12 @@ Cell[BoxData[
      RowBox[{"True", ",", "journalStyle", ",", 
       RowBox[{"{", 
        RowBox[{"FontSize", "\[Rule]", "14"}], "}"}]}], "]"}]}]}], 
-  "]"}]], "Input",ExpressionUUID->"dbf8b3b8-5945-46cc-9527-fb18b8870868"],
+  "]"}]], "Input",ExpressionUUID->"f3cf8c7a-e21f-41d3-92b3-3341f5bbcc75"],
 
 Cell["\<\
 Distribution of a link field contracted with f_abc and d_abc.  Naturally, the \
 contraction with f_abc yields zero.\
-\>", "Text",ExpressionUUID->"5f4b0ebb-98de-4128-b93e-38d7c1bd6d67"],
+\>", "Text",ExpressionUUID->"6f86e9d4-7d16-4e68-903c-e235c06bbbad"],
 
 Cell[CellGroupData[{
 
@@ -5025,7 +6415,7 @@ Cell[BoxData[
            RowBox[{"Length", "[", "#", "]"}], "]"}]}]}], "]"}], ",", 
        RowBox[{"StandardDeviation", "[", "#", "]"}]}], "}"}], "&"}], ",", 
     "distLink3"}], 
-   "]"}]}]], "Input",ExpressionUUID->"94ca512d-78eb-4b7c-bc1e-e75acdbdf9fb"],
+   "]"}]}]], "Input",ExpressionUUID->"cc69538c-1099-4ae7-8a35-fa99813a23a3"],
 
 Cell[BoxData[
  RowBox[{"{", 
@@ -5050,7 +6440,7 @@ Cell[BoxData[
        "RowWithSeparators"],
       NumberForm[#, ExponentFunction -> (Null& )]& ], ",", 
      "0.04956928065557913`"}], "}"}]}], 
-  "}"}]], "Output",ExpressionUUID->"699bbb91-fcda-4e1a-b35b-4bcf0694c482"]
+  "}"}]], "Output",ExpressionUUID->"d4b95de7-825b-4887-bccb-65cf4809b8d5"]
 }, Open  ]],
 
 Cell[BoxData[
@@ -5077,13 +6467,13 @@ Cell[BoxData[
      RowBox[{"True", ",", "journalStyle", ",", 
       RowBox[{"{", 
        RowBox[{"FontSize", "\[Rule]", "14"}], "}"}]}], "]"}]}]}], 
-  "]"}]], "Input",ExpressionUUID->"5271aaec-e231-4f00-ab35-0208a20dc13d"],
+  "]"}]], "Input",ExpressionUUID->"3e510d4f-9fc7-46d0-93c9-288de9d07a0b"],
 
 Cell["\<\
 Distribution of the correlation of  all three links at a site.  The f_abc \
 distribution is considerably wider.  Both the d_abc and f_abc distributions \
 are peaked near zero.\
-\>", "Text",ExpressionUUID->"40627f66-54cc-4ca1-8a53-f331a4c73dc1"],
+\>", "Text",ExpressionUUID->"584ad792-47f5-4815-8365-aad0537b321f"],
 
 Cell[CellGroupData[{
 
@@ -5164,7 +6554,7 @@ Cell[BoxData[
            RowBox[{"Length", "[", "#", "]"}], "]"}]}]}], "]"}], ",", 
        RowBox[{"StandardDeviation", "[", "#", "]"}]}], "}"}], "&"}], ",", 
     "distThree"}], 
-   "]"}]}]], "Input",ExpressionUUID->"e297dd22-37bc-41a9-a12f-db869ca5acad"],
+   "]"}]}]], "Input",ExpressionUUID->"b054fff4-478a-423c-92e1-425f7021a569"],
 
 Cell[BoxData[
  RowBox[{"{", 
@@ -5189,7 +6579,7 @@ Cell[BoxData[
        TemplateBox[{"10", 
          RowBox[{"-", "4"}]}, "Superscript", SyntaxForm -> SuperscriptBox]},
       "RowWithSeparators"], ",", "0.007268375998207513`"}], "}"}]}], 
-  "}"}]], "Output",ExpressionUUID->"d79ab1b2-b9e7-4f5d-9fc1-48b6c946ce1f"]
+  "}"}]], "Output",ExpressionUUID->"7f51b7db-1df2-408d-8bf7-f22f885d1ad8"]
 }, Open  ]],
 
 Cell[BoxData[
@@ -5215,13 +6605,13 @@ Cell[BoxData[
      RowBox[{"True", ",", "journalStyle", ",", 
       RowBox[{"{", 
        RowBox[{"FontSize", "\[Rule]", "14"}], "}"}]}], "]"}]}]}], 
-  "]"}]], "Input",ExpressionUUID->"75f7b047-e6d4-4cda-a65f-5e3a97207aba"]
+  "]"}]], "Input",ExpressionUUID->"86694661-dfc1-4654-ba47-4a9f58f7d31d"]
 }, Closed]],
 
 Cell[CellGroupData[{
 
 Cell["2-point correlators", \
-"Section",ExpressionUUID->"9093f0a7-75f8-4581-9d35-a9c9554c7d70"],
+"Section",ExpressionUUID->"cc4f2d93-e78a-4d83-8e3c-481866195d2c"],
 
 Cell[BoxData[
  RowBox[{"GraphicsColumn", "[", 
@@ -5271,12 +6661,12 @@ Cell[BoxData[
      RowBox[{"Normal", "[", "fieldCorr2", "]"}]}], "]"}], ",", 
    RowBox[{"ImageSize", "\[Rule]", 
     RowBox[{"2.0", "*", "figureWidth"}]}]}], 
-  "]"}]], "Input",ExpressionUUID->"d7e9dba4-c52e-42ca-b186-bb69a80700d0"],
+  "]"}]], "Input",ExpressionUUID->"179421cb-6364-474e-9bd2-4ee39755e70d"],
 
 Cell["\<\
 Plot distribution of products.  Need to compare this to the same taking some \
 root of a random lattice.\
-\>", "Text",ExpressionUUID->"231c1f98-be22-4a2f-a6f7-f174dbd0f85d"],
+\>", "Text",ExpressionUUID->"22974f77-0967-4053-8638-5c77fca801a5"],
 
 Cell[CellGroupData[{
 
@@ -5286,7 +6676,7 @@ Cell[BoxData[
    RowBox[{"linkCorrelators", "[", 
     RowBox[{"2", ",", 
      RowBox[{"\"\<distFlag\>\"", "\[Rule]", "True"}]}], "]"}]}], 
-  ";"}]], "Input",ExpressionUUID->"8c4f7fff-d126-48b5-9aeb-6c1326306d87"],
+  ";"}]], "Input",ExpressionUUID->"f0e288da-1193-4d32-83be-fd55c0a7250b"],
 
 Cell[CellGroupData[{
 
@@ -5299,7 +6689,7 @@ Cell[BoxData[
   
   SequenceForm["ops: ", {"2l", "2t1", "2t2", "2t11", "2t12", "2t13"}],
   Editable->
-   False]], "Print",ExpressionUUID->"b4c7b51d-8476-4407-a474-8f26250e85b6"],
+   False]], "Print",ExpressionUUID->"d29bbf12-2f1c-4e54-b98b-148c9f86901b"],
 
 Cell[BoxData[
  InterpretationBox[
@@ -5307,7 +6697,7 @@ Cell[BoxData[
    "47.744401`7.829437446895703"}],
   SequenceForm["Total time: ", 47.744401`7.829437446895703],
   Editable->
-   False]], "Print",ExpressionUUID->"06e7a01c-bd78-4458-b750-aade6b6c6916"]
+   False]], "Print",ExpressionUUID->"0c0f0494-d0e3-4ed6-8af5-ed0dec8d1a88"]
 }, Open  ]]
 }, Open  ]],
 
@@ -5430,10 +6820,10 @@ Cell[BoxData[
         RowBox[{"Normal", "[", "fieldCorr2d", "]"}]}], "]"}], ",", 
       RowBox[{"ImageSize", "\[Rule]", 
        RowBox[{"2.0", "*", "figureWidth"}]}]}], "]"}]}]}], 
-  "]"}]], "Input",ExpressionUUID->"c0269d8d-eabe-4128-9220-b326768d6b64"],
+  "]"}]], "Input",ExpressionUUID->"3f8b68c6-8721-40cd-977d-e9b0cb519470"],
 
 Cell["Same thing, with surface plot.", \
-"Text",ExpressionUUID->"96fe80ec-3ec1-400d-b94b-75ba4a9c9ed6"],
+"Text",ExpressionUUID->"887a1e70-8fd3-4ebc-a0db-aed6f965b594"],
 
 Cell[BoxData[
  RowBox[{"Block", "[", 
@@ -5538,18 +6928,18 @@ Cell[BoxData[
         RowBox[{"Normal", "[", "fieldCorr2d", "]"}]}], "]"}], ",", 
       RowBox[{"ImageSize", "\[Rule]", 
        RowBox[{"2.0", "*", "figureWidth"}]}]}], "]"}]}]}], 
-  "]"}]], "Input",ExpressionUUID->"77dbe536-55c9-49c9-9f69-5720309c1cb9"]
+  "]"}]], "Input",ExpressionUUID->"d59252a8-2e8d-4807-9cbd-f31733530f92"]
 }, Open  ]],
 
 Cell[CellGroupData[{
 
 Cell["Three point correlators", \
-"Section",ExpressionUUID->"a59c9d57-924b-4dd6-8174-f7b859cfefc3"],
+"Section",ExpressionUUID->"7f5e408c-adba-410f-b444-ce4b2538fda5"],
 
 Cell["\<\
 The convention for f_abc indices was modified:  use flipSign = -1 for older \
 data.\
-\>", "Text",ExpressionUUID->"03b83f7f-f79b-498a-9a41-7c8daeeb6f7c"],
+\>", "Text",ExpressionUUID->"1cd7241d-5fd8-4b47-acf3-a14587d895b7"],
 
 Cell[BoxData[
  RowBox[{"Block", "[", 
@@ -5736,13 +7126,13 @@ Cell[BoxData[
         "]"}]}], "]"}], ",", 
      RowBox[{"ImageSize", "\[Rule]", 
       RowBox[{"2.0", "*", "figureWidth"}]}]}], "]"}]}], 
-  "]"}]], "Input",ExpressionUUID->"9fd68514-567f-4223-81c0-8e3b38020252"]
+  "]"}]], "Input",ExpressionUUID->"fbd2fad7-fda6-452c-a9ca-04471f7934bb"]
 }, Open  ]],
 
 Cell[CellGroupData[{
 
 Cell["Four point correlators", \
-"Section",ExpressionUUID->"1b223908-1959-46d3-9b83-b8f8d1615ef0"],
+"Section",ExpressionUUID->"eda7a3d7-ccd5-4ecf-a255-c1a8fb2cc614"],
 
 Cell[BoxData[
  RowBox[{"Block", "[", 
@@ -5802,7 +7192,7 @@ Cell[BoxData[
         "]"}]}], "]"}], ",", 
      RowBox[{"ImageSize", "\[Rule]", 
       RowBox[{"2.0", "*", "figureWidth"}]}]}], "]"}]}], 
-  "]"}]], "Input",ExpressionUUID->"01b87899-55c9-4069-9899-f25fdef20285"],
+  "]"}]], "Input",ExpressionUUID->"61c4d4f2-bc86-40f3-af79-f300551d5651"],
 
 Cell[BoxData[
  RowBox[{"Block", "[", 
@@ -5955,13 +7345,13 @@ Cell[BoxData[
         "]"}]}], "]"}], ",", 
      RowBox[{"ImageSize", "\[Rule]", 
       RowBox[{"2.0", "*", "figureWidth"}]}]}], "]"}]}], 
-  "]"}]], "Input",ExpressionUUID->"fa838f8b-bb87-4bee-b694-46d8da655af6"]
+  "]"}]], "Input",ExpressionUUID->"490694e2-9923-4c87-b70a-58607148ac7f"]
 }, Open  ]]
 }, Open  ]]
 }, Open  ]]
 },
-WindowSize->{756, 710},
-WindowMargins->{{139, Automatic}, {0, Automatic}},
+WindowSize->{943, 693},
+WindowMargins->{{Automatic, 20}, {0, Automatic}},
 PrivateNotebookOptions->{"FileOutlineCache"->False},
 CellChangeTimes->None,
 TrackCellChangeTimes->False,

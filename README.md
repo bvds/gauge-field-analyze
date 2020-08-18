@@ -72,7 +72,7 @@ associated Mathematica input file:
 
 Or, if there is a lot of them:
 
-    perl -e 'for (1..100) {system "../../gauge-field-analyze/programs/ganalyze periodic-16-28.ini.xml$_ periodic-16-28-$_.m"}'
+    perl -e 'for (1..100) {system "../../gauge-field-analyze/3-3-build/programs/ganalyze periodic-16-28.ini.xml$_ periodic-16-28-$_.m"}'
 
 
 ## Bibliography
