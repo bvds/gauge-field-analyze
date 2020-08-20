@@ -413,11 +413,14 @@ polyakovLoopTallies["smeared", width1_, x_, op_:"1"] :=
   tallies];
 
 
-makeVertices[{f_}] := {{0}, If[f>1, {-f}, Nothing], If[f>1, {f}, Nothing]}
+vectorOrder[x_, y_] :=
+    Block[{z = NumericalOrder[Total[x^2], Total[y^2]]},
+          If[z == 0, Order[Sort[Abs[x]], Sort[Abs[y]]], z]];
+makeVertices[{f_}] := If[f>1, {{-f}, {0}, {f}}, {{0}}];
 makeVertices[{f_, rest__}] :=
     Flatten[Map[
-        {Prepend[#, 0], If[f>1, Prepend[#, -f], Nothing],
-         If[f>1, Prepend[#, f], Nothing]}&,
+        If[f>1, {Prepend[#, -f], Prepend[#, 0], Prepend[#, f]},
+           {Prepend[#, 0]}]&,
         makeVertices[{rest}]], 1];
 aFirstCase::usage = "Return first value of an association whose key matches the pattern.";
 Attributes[aFirstCase] = {HoldFirst};
@@ -428,11 +431,19 @@ Attributes[aCases] = {HoldFirst};
 aCases[assoc_, pattern_] :=
     Map[assoc, Cases[Keys[assoc], pattern]];
 
-(* The Polyakov loop correlators are tallied as
-  a function of the area enclosed by the two loops (ntL).
-  This allows easy generalization to non-cubic lattices. *)
+polyakovCorrelatorCount::usage = "Number of distinct correlators, taking into account lattice symmetries and images wrapping around the lattice.";
+polyakovCorrelatorCount[] := polyakovCorrelatorCount[latticeDimensions];
+polyakovCorrelatorCount[dims_] :=
+    Block[{x = Union[Table[{dims[[i]], Sort[Tally[Drop[dims, {i, i}]]]},
+                           {i, Length[dims]}]],
+          volume = Binomial[Floor[First[#]/2]+#[[2]], #[[2]]]&},
+          Total[Apply[Times,
+                      Map[volume, Map[Last, x], {2}], {1}]]];
+
+(* The Polyakov loop correlators are tallied by Longidinal
+   dimension and a list of transverse images. *)
 polyakovCorrelators[dir_, op_] :=
- Block[{nearest = Max[5, 2^(nd-1)],
+ Block[{nearest = 2^(nd-1),
         face = latticeDimensions, pp, nf, vertices},
   face[[dir]] = 1;
   vertices = makeVertices[face];
@@ -459,11 +470,10 @@ polyakovCorrelators[dir_, op_] :=
         ntL = Append[
             Map[
                 (* Longitudinal component is always zero *)
-                Rest[Sort[Abs[#], Less]]&,
-                Take[Sort[
-                    Map[(#-dx)&, vertices],
-                    Less[Norm[#1], Norm[#2]]&],
-                     nearest]],
+                Rest[NumericalSort[Abs[#]]]&,
+                Take[
+                    Sort[Map[(#-dx)&, vertices], vectorOrder],
+                    nearest]],
             latticeDimensions[[dir]]];
         lt = Lookup[tallies, Key[ntL], {0, 0, 0}];
         (* Imaginary part cancels out when averaging over face *)
@@ -474,7 +484,7 @@ polyakovCorrelators[dir_, op_] :=
     tallies],
    {kernel, $KernelCount}], Total]];
 polyakovCorrelators[dir0_, dir1_, width1_, x_, op_] :=
- Block[{nearest = Max[5, 2^(nd-1)],
+ Block[{nearest = 2^(nd-1),
         face = latticeDimensions, pp, skip, nf, vertices},
   face[[dir0]] = 1;
   vertices = makeVertices[face];
@@ -493,7 +503,7 @@ polyakovCorrelators[dir0_, dir1_, width1_, x_, op_] :=
       (* See comment above. *)
       dx = Abs[Mod[x1 - x2 + face/2, face] - face/2];
       (* dir0 component of dx is always zero *)
-      sdx = Rest[Sort[dx, Less]];
+      sdx = Rest[NumericalSort[dx]];
       (* Demand that angle is less than 45 degrees *)
       If[k1 == k2 || (dx[[dir1]]==First[sdx] && First[sdx]<sdx[[2]]),
           (* ntL is the area between the two loops for various
@@ -502,9 +512,9 @@ polyakovCorrelators[dir0_, dir1_, width1_, x_, op_] :=
         ntL = Append[
             Map[
                 (* Longitudinal component is always zero *)
-                Rest[Sort[Abs[#], Less]]&, 
+                Rest[NumericalSort[Abs[#]]]&, 
                 Take[Sort[Map[(#-dx)&, vertices],
-                          Less[Norm[#1], Norm[#2]]&],
+                          vectorOrder],
                      nearest]],
             latticeDimensions[[dir0]]];
          lt = Lookup[tallies, Key[ntL], {0, 0, 0}];
@@ -575,6 +585,14 @@ rescaleCovarianceMatrix[cov_?MatrixQ, err_?VectorQ, label_: None] :=
     Exp[StandardDeviation[Log[rescale]]]}]; 
   Map[(#*rescale) &, cov*rescale]]
 
+casimir::usage = "For the Nambu-Goto string picture.  Since we average
+        over all pairs of a given separation, this will only couple
+        to the even parity states.";
+casimir[state_] :=
+    Block[{degeneracy = Function[i, {0, 1, 2, 2}[[i + 1]]]},
+          8 Pi (degeneracy[state] - (nd-2)/24)];
+
+
 stringModel::usage = "Fit to an exponential plus a constant term, including the universal string correction as well as Coulomb force contributions.  See Andreas Athenodorou, Barak Bringoltz, Michael Teper https://arxiv.org/abs/0709.0693; Ofer Aharony & Zohar Komargodski arXiv:1302.6257v2 [hep-th] 12 Mar 2013; Teper review article http://arxiv.org/abs/0912.3339  The Coulomb force contribution consists of a log(r) term plus a perimeter term.  For option \"stringTension\"->Automatic (default), fit string tension, else use value given.  Likewise for \"coulomb\" and \"perimeter.\"";
 Options[stringModel] = {printResult -> False, "lowerCutoff" -> 0,
                         "upperCutoff" -> Infinity, "order" -> 0,
@@ -597,11 +615,6 @@ stringModel[tallyData_, OptionsPattern[]] :=
       nll = Length[Union[Map[Last, Keys[tallyData]]]],
       llValues = Union[Map[Last, Keys[tallyData]]],
       na = Length[First[Keys[tallyData]]] - 1,
-      (* For the Nambu-Goto string picture.  Since we average
-        over all pairs of a given separation, this will only couple
-        to the even parity states. *)
-      degeneracy = Function[state, {0, 1, 2, 2}[[state + 1]]],
-      casimir = Function[state, 8 Pi (degeneracy[state] - (nd-2)/24)],
       data, cov,
       sin2theta2 = Function[{x, y}, (2 x y/(x^2 + y^2))^2],
       filter = Map[First, Select[
@@ -625,14 +638,15 @@ stringModel[tallyData_, OptionsPattern[]] :=
        be absorbed into c0. *)
      If[nll<2, cPerimeter = 0]];
   If[OptionValue["order"]<2, c1 = 0];
-  If[OptionValue["order"]<2, c2 = 0];
+  (* With only one longitudinal value, this is indistinguishable
+    from the string tension.
+    If nll==1, assume cPerimeter would use up L-dependence. *)
+  If[OptionValue["order"]<2 || nll<3, c2 = 0];
   If[OptionValue["order"]<3, c3 = 0];
   If[OptionValue["order"]<3 || !OptionValue["linearLCorrections"], c4 = 0];
-  (* With two longitudinal values, this can be
-    absorbed into c0 and cPerimeter.
-    Numerically, its contribution is not significant for
-    300 configs nc=4, 12.16.20-48, no cutoff. *)
-  If[OptionValue["order"]<3 || nll<3, c5 = 0];
+  (* With three longitudinal values, this can be
+    absorbed into c0, cPerimeter, and c2. *)
+  If[OptionValue["order"]<3 || nll<4, c5 = 0];
   If[OptionValue["offAxis"]<2, coff1 = 0];
   If[OptionValue["offAxis"]<3, coff3 = 0];
   If[OptionValue["offAxis"]<3 || !OptionValue["linearLCorrections"], coff4 = 0];
@@ -1315,7 +1329,7 @@ sampleCorrelation[{q_, d_} -> x_] :=
 makePlaquetteCorrelations[opts:OptionsPattern[]] :=
     Map[sampleCorrelation,
         Sort[Normal[plaquetteCorrelationTallies[opts]],
-             Less[#1[[1, 2]], #2[[1, 2]]]&]];
+             NumericalOrder[#1[[1, 2]], #2[[1, 2]]]&]];
 
 
 dualShift3 = {{0, 1, 1}, {1, 0, 1}, {1, 1, 0}};

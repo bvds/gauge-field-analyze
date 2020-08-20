@@ -393,7 +393,7 @@ To obtain the string tension,
 we fit the correlator $\Phi_\mu(\mathbf{r})$ to an effective
 potential $F_\mu(\mathbf{r})$.
 This effective potential contains an area law term (linear confinement)
-plus coulomb corrections from Eqn.~(\ref{cpf}) plus power law corrections:
+plus Coulomb corrections from Eqn.~(\ref{cpf}) plus power law corrections:
 %  M. Teper, “Large N and confining flux tubes as strings -
 %  a view from the lattice,”
 %  Acta Phys. Polon. B 40, 3249 (2009). [arXiv:0912.3339 [hep-lat]].
@@ -431,7 +431,7 @@ just the large $\mathbf{r}$ limit.
   \caption{Polyakov loop correlator vs.\ loop area together with
     a fit to Eqn.~(\ref{stringmodel}) for an $\SU(3)$,
     $12\times 16 \times 20$ lattice, $\beta=28$,
-    with $L_\mu \left|\mathbf{r}\right|>23$.
+    with $L_\mu \left|\mathbf{r}\right|>20$.
     Each color represents a different Polyakov loop direction.
     The data is from 300 lattice configurations. \label{pcorr16}}
 \end{figure}
@@ -445,8 +445,7 @@ we calculate the sample covariance matrix $\mathcal{C}$:
 \be
 \mathcal{C}_{i, j} = \cov{\Phi_\mu(\mathbf{r}_i)}{\Phi_\mu(\mathbf{r}_j)} 
 \eq
-using $\ge 300$ Euclidean Lattice Monte Carlo configurations, where
-$\left\{\mathbf{r}_1, \mathbf{r}_2, \ldots\right\}$ is the set of
+where $\left\{\mathbf{r}_1, \mathbf{r}_2, \ldots\right\}$ is the set of
 possible transverse separations.
 Then, one can fit the correlators to the effective
 potential using the standard formula:
@@ -459,16 +458,15 @@ potential using the standard formula:
 An example fit is shown in Fig.~\ref{pcorr16}.  The lattice configurations
 were generated with the Chroma library~\cite{edwards_chroma_2005};
 see Appendix~\ref{configurations} for details.
-The string tension $\sigma a^2 = 0.0157(20)$
+The string tension $\sigma a^2 = 0.0144(19)$
 agrees with Teper's value for $\beta=28$,
 $\sigma a^2 = 0.016210(54)$~\cite{lucini_$mathrmsun$_2002,athenodorou_sun_2017}.
-The fit has $\chi^2=292$ for 223 degrees of freedom,
+The fit has $\chi^2=295$ for 224 degrees of freedom,
 with the covariance matrix derived from 600 lattice configurations.
 However, it should be noted that several model parameters,
-$c_1$, $c_p$, and $c_q$ are highly correlated since
-we don't have sufficient longitudinal values to clearly distinguish
-between them.  We also see that inclusion of the transverse
-images of the Polyakov loop are important for the fit.
+$c_1$, $c_p$, and $c_q$ are highly correlated.
+This example shows that inclusion of the transverse
+images of the Polyakov loop are important for a good fit.
 
 \subsection{Wilson loops}
 
@@ -476,14 +474,31 @@ images of the Polyakov loop are important for the fit.
   \includegraphics{wilsonFit-16}
   \caption{Wilson loop expectation value vs.\ loop size together with
     a fit to Eqn.~(\ref{wfit}) for an $\SU(3)$,
-    $16^3$ lattice, $\beta=28$.  The data is from 30 lattice
+    $16^3$ lattice, $\beta=28$.  The data is from 200 lattice
     configurations.  The error bars on
     the data are too small to be seen. \label{wilsonFit16}}
 \end{figure}
 
+%
+\begin{table}
+  \caption{Parameters for the fit shown in Fig.~\ref{wilsonFit16}.
+    \label{wilsonparameters}}
+  \begin{tabular}{c|c}
+    name & value \\
+    \hline
+  $c_0$ &  1.397(78)\\
+  $\sigma a^2$ & 0.0146(20) \\
+  $c_q$ &  -0.0014(43)\\
+  $c_p$ &  0.0749(22)\\
+  $c_1$ &  0.233(35)\\
+  $c_2$ &  -0.147(26)\\
+  $c_3$ &  0.091(68)\\
+  $c_4$ & 0.259(39)\\
+  \end{tabular}
+\end{table}
+
 We define the Wilson loop operator in the $\mu,\nu$-plane using a product of
 link fields lying on the perimeter of a $w_1\times w_2$ rectangle
-having the given dimensions:
 \be
        \wilson{\mu}{\nu}{w_1}{w_2} = \frac{1}{C_W} \sum_{x}\,
          \underbrace{U_\mu(x) U_\mu(x+a \hat{\mu}) \,\cdots\, U_\nu^\dagger (x)
@@ -523,33 +538,16 @@ The second exponential term represents the contribution from
 the {\em exterior} of the rectangle, given that the lattice
 is periodic in the $\hat{\mu}$ and $\hat\nu$ directions.
 
-%
-\begin{table}
-  \caption{Parameters for the fit shown in Fig.~\ref{wilsonFit16}.
-    \label{wilsonparameters}}
-  \begin{tabular}{c|c}
-    name & value \\
-    \hline
-  $c_0$ &  1.36(14)\\
-  $\sigma a^2$ & 0.0133(43) \\
-  $c_q$ &  0.001(10)\\
-  $c_p$ &  0.0724(41)\\
-  $c_1$ &  0.267(84)\\
-  $c_2$ &  -0.106(48)\\
-  $c_3$ &  0.00(13)\\
-  $c_4$ & 0.249(90)\\
-  \end{tabular}
-\end{table}
 
 An example fit is shown in Fig.~\ref{wilsonFit16}.  
-The fit has $\chi^2=9$ for 13 degrees of freedom,
-with the covariance matrix derived from 70 lattice configurations.
+The fit has $\chi^2=23$ for 13 degrees of freedom,
+with the covariance matrix derived from 600 lattice configurations.
 The best fit parameters are given in Table~\ref{wilsonparameters}.:
 The string tension agrees with Teper's value for $\beta=28$,
 $\sigma a^2 = 0.016210(54)$~\cite{lucini_$mathrmsun$_2002,athenodorou_sun_2017}.
 The Coulomb term $c_q$ is not significant, but it is highly anti-correlated
 with the string tension $\sigma a^2$.  The Wilson loop fit does not
-do a very good job untangling the two.
+do a very good job of untangling the two.
 
 \subsection{Operator distributions}
 
@@ -573,7 +571,7 @@ center of $\SU(N)$ at the vertices.
   \includegraphics{polydist1}
   \includegraphics{polydistr}
   \caption{Distribution for the Wilson loop operator
-    $wilson_{5\times 5}$ for $\SU(3)$, $\beta=28$, $L^3=16^3$,
+    $\wilson{\mu}{\nu}{5}{5}$ for $\SU(3)$, $\beta=28$, $L^3=16^3$,
     averaging over 100 lattice configurations.
     Also shown is the distribution for the strong coupling limit.
     The distribution is
@@ -849,7 +847,7 @@ Newton's method.  Here, we find a gauge transform, Eqn.~(\ref{gauget}),
 that minimizes the lattice norm squared $\sum_{\mu,x}\fnorm{U_\mu^\prime(x)}^2$
 as a function of $B_a(x)$,
 where $U_G(x) = \exp\left(i B_a(x)\, T_a\right)$.
-We construct the the gradient and hessian matrices
+We construct the the gradient and Hessian matrices
 and solve the associated linear system to find a local minimum of
 $\fnorm{\config}^2$.
 Details of this method can be found in Appendix~\ref{newtonNorm}.
@@ -867,7 +865,8 @@ to getting stuck in a non-optimal local minimum.  In addition,
 the ``Landau step'' requires significantly fewer computational resources.
 
 Thus, when minimizing $\fnorm{\config}^2$, we will mostly rely
-on ``Landau steps'' and apply 2-3 Newton's method steps at the very end,
+on ``Landau steps'' and ``center steps,`` as shown in Table~\ref{center4},
+and apply 2-3 Newton's method steps at the very end,
 when already close to the minimum.
 
 \section{Finding the saddle point}
@@ -1084,7 +1083,7 @@ imposing the $\Lambda$ cutoffs, and using the damping factor $\gamma$,
 we can apply the shift iteratively and find saddle-point configurations
 that are of physical interest.  
 
-For a $20^3$ lattice, $\SU(4)$, the Hessian is a
+For a $20^3$ lattice, $\SU(3)$, the Hessian is a
 $192,000 \times 192,000$ matrix with almost $20\times 10^6$
 nonzero matrix elements. Thus, the numerical calculations
 must be carried out using sparse matrix techniques;
