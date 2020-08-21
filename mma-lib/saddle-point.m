@@ -821,7 +821,7 @@ Options[latticeSaddlePointStep] = Join[
     {stepFile -> None, returnShifts -> False}];
 latticeSaddlePointStep[opts:OptionsPattern[]] :=
  Block[{hess, grad, gauge, delta, gaugeField0,
-        output = "", error = "",
+        output = "", error = "", options = {opts},
         stepOut = None, stepShifts,
 	t0 = SessionTime[], t1, t2, t3,
         debug = printLevel[OptionValue[printDetails], 3],
@@ -866,7 +866,7 @@ latticeSaddlePointStep[opts:OptionsPattern[]] :=
            Print["Saving step to ", OptionValue[stepFile]]];
         DeleteFile[OptionValue[stepFile]];
         Save[OptionValue[stepFile],
-             {output, error, {opts}, stepOut,
+             {output, error, options, stepOut,
               delta, stepShifts, gaugeField0}]]];
   t3 = SessionTime[];
   If[debug > 1,

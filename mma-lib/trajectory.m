@@ -214,6 +214,27 @@ bulkPolyakovLoops[inPath_, outFile_, opts:OptionsPattern[]] :=
   t4 = SessionTime[];
   Print["Merged and grouped correlators, dump results ", t4-t3, " s"]];
 
+bulkStringModel::usage = "Aggregate string model fits over a number of lattice configurations.";
+Options[bulkStringModel] = Join[
+    {"lower" -> 1, "upper" -> 1},
+    FilterRules[Options[stringModel], {Except["covarianceMatrix"]}]];
+bulkStringModel[opts:OptionsPattern[]] :=
+ Block[{sopts = Apply[Sequence, FilterRules[
+        {opts}, Options[stringModelFit]]]},
+  Table[
+      Block[{tallyData, ff},
+            tallyData = Map[valueError[#[[i]], Null]&,
+                                      polyakovCorrelatorValues];
+            ff = stringModel[
+                tallyData, sopts,
+                "covarianceMatrix" -> polyakovCorrelatorCovariance];
+            {i, ff["chiSquared"], Map[
+                  {#[[1, 1]], valueError[#[[1, 2]], #[[2]]]}&, 
+                     Transpose[
+                         ff[{"BestFitParameters", 
+                             "ParameterErrors"}]]]}],
+      {i, OptionValue["lower"], OptionValue["upper"]}]];
+
 bulkWilsonLoops::usage = "Aggregate Wilson loops over a number of lattice configurations.  Skip some sizes, to save on time.";
 Options[bulkWilsonLoops] = {"lower" -> 1, "upper" -> 1,
                             "lowerCutoff" -> 4, "skip" -> 2};
