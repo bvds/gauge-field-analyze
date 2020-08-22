@@ -71,8 +71,8 @@ Options[makeObservableTrajectory] = Join[
     {"observables" -> {"distance", "norm", "polyakovCorrelator",
                        "wilsonDiagonal", "wilsonTriangle"},
      "skip" -> 1,
-     "step" -> "../data/3-3/step-16-28", 
-     "periodic" -> "../data/3-3/periodic-16-28",
+     "step" -> "../cache/3-3/step-16-28", 
+     "periodic" -> "/mnt/samson-data/3-3/periodic-16-28",
      (* Defaults for the Newton's steps *)
      largeShiftOptions -> {eigenPairs -> -100, maxLanczosVecs -> 1000},
      Method -> "External", externalAction -> "detach", readInterval -> 5,
