@@ -456,7 +456,7 @@ minimumNormGaugeStep[opts:OptionsPattern[]] :=
 	t0 = SessionTime[], t1, t2, t3,
         debug = printLevel[OptionValue[printDetails], 3],
         action = OptionValue[externalAction],
-        gaugeField0 = gaugeField},
+        gaugeField = gaugeField},
   If[action =!= "read",
      {hess, grad} = landauGaugeHessian[
          Apply[Sequence, FilterRules[{opts}, Options[landauGaugeHessian]]]];
@@ -490,14 +490,14 @@ minimumNormGaugeStep[opts:OptionsPattern[]] :=
       False, Print["delta, first link:  ", Take[delta, nc^2 - 1]]];
   t2 = SessionTime[];
   If[action =!= "write",
-     applyGaugeTransform[gaugeField0, delta];
+     applyGaugeTransform[gaugeField, delta];
      If[StringQ[OptionValue[stepFile]],
         If[debug > 2,
            Print["Saving step to ", OptionValue[stepFile]]];
         DeleteFile[OptionValue[stepFile]];
         Save[OptionValue[stepFile],
              {output, error, {opts}, stepOut,
-              delta, stepShifts, gaugeField0}]]];
+              delta, stepShifts, gaugeField}]]];
   t3 = SessionTime[];
   If[debug > 1,
      Print["minimumNormGaugeStep times:\n"
@@ -505,8 +505,8 @@ minimumNormGaugeStep[opts:OptionsPattern[]] :=
            " s, findDelta = ", t2 - t1,
            " s, applyGaugeTransform = ", t3 - t2, " s"]];
   If[OptionValue[returnShifts],
-     {gaugeField0, stepShifts, stepOut},
-     gaugeField0]];
+     {gaugeField, stepShifts, stepOut},
+     gaugeField]];
 
 
 nStrategies = 7;

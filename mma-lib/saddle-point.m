@@ -820,22 +820,22 @@ Options[latticeSaddlePointStep] = Join[
     Options[findDelta], Options[actionHessian],
     {stepFile -> None, returnShifts -> False}];
 latticeSaddlePointStep[opts:OptionsPattern[]] :=
- Block[{hess, grad, gauge, delta, gaugeField0,
+ Block[{hess, grad, gauge, delta,
+        gaugeField = makeRootLattice[gaugeField],
         output = "", error = "", options = {opts},
         stepOut = None, stepShifts,
 	t0 = SessionTime[], t1, t2, t3,
         debug = printLevel[OptionValue[printDetails], 3],
         action = OptionValue[externalAction]},
-  gaugeField0 = makeRootLattice[];
   If[action =!= "read",
      {hess, grad} = actionHessian[
-         getLink[gaugeField0],
+         getLink[gaugeField],
          Apply[Sequence, FilterRules[{opts}, Options[actionHessian]]]];
      If[debug > 2,
         Print["Constructed hess, grad"]];
      gauge = If[OptionValue[fixedDir] > -1,
                 gaugeTransformShifts[
-                    gaugeField0, OptionValue[fixedDir]], None];
+                    gaugeField, OptionValue[fixedDir]], None];
      If[debug > 2,
         Print["Constructed gauge"]]];
   t1 = SessionTime[];
@@ -860,14 +860,14 @@ latticeSaddlePointStep[opts:OptionsPattern[]] :=
       False, Print["delta, first link:  ", Take[delta, nc^2 - 1]]];
   t2 = SessionTime[];
   If[action =!= "write",
-     applyDelta[gaugeField0, delta, OptionValue[fixedDir]];
+     applyDelta[gaugeField, delta, OptionValue[fixedDir]];
      If[StringQ[OptionValue[stepFile]],
         If[debug > 2,
            Print["Saving step to ", OptionValue[stepFile]]];
         DeleteFile[OptionValue[stepFile]];
         Save[OptionValue[stepFile],
              {output, error, options, stepOut,
-              delta, stepShifts, gaugeField0}]]];
+              delta, stepShifts, gaugeField}]]];
   t3 = SessionTime[];
   If[debug > 1,
      Print["latticeSaddlePointStep times:\n"
@@ -875,5 +875,5 @@ latticeSaddlePointStep[opts:OptionsPattern[]] :=
            " s, findDelta=", t2 - t1,
            " s, applyDelta=", t3 - t2, " s"]];
   If[OptionValue[returnShifts],
-     {gaugeField0, stepShifts, stepOut},
-     gaugeField0]];
+     {gaugeField, stepShifts, stepOut},
+     gaugeField]];

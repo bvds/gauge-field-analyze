@@ -81,7 +81,7 @@ Options[makeObservableTrajectory] = Join[
     Options[singleLinkStep], Options[applyGaugeTransforms]]; 
 makeObservableTrajectory[set_, label_, n_, 
                             opts:OptionsPattern[]] := 
- Block[{gaugeField, delta, gaugeField0, distance = 0,
+ Block[{gaugeField, delta, distance = 0,
            shiftDistance,
            debug = printLevel[OptionValue[printDetails], 1],
         diagonalQ = StringMatchQ[label, "s*"],
@@ -105,11 +105,10 @@ makeObservableTrajectory[set_, label_, n_,
             shiftDistance = Null; (* not always defined *)
             Check[
                 Get[StringRiffle[{OptionValue["step"], ToString[set],
-                                  label, ToString[i]},"-"]<>".m"],
+                                  label, ToString[i]}, "-"]<>".m"],
                 Print["Skipping ", i, ":  file missing."];
                 Throw[Nothing, Get::noopen],
                 {Get::noopen}];
-            gaugeField = gaugeField0;
             (* Delta is not defined for the
               diagonal-only steps. *)
             dd = If[

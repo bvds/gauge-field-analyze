@@ -1070,8 +1070,7 @@ Cell[CellGroupData[{
 Cell[BoxData[
  RowBox[{
   RowBox[{"<<", "\"\<../data/3-3/winding-6.6.20-28-1-5.m\>\""}], ";", 
-  RowBox[{"<<", "\"\<../data/3-3/wstep-6.6.20-28-1-5-a-10.m\>\""}], ";", 
-  RowBox[{"gaugeField", "=", "gaugeField0"}], 
+  RowBox[{"<<", "\"\<../data/3-3/wstep-6.6.20-28-1-5-a-10.m\>\""}], 
   ";"}]], "Input",ExpressionUUID->"73779835-aa86-4a40-af16-b1810674f1cd"],
 
 Cell[BoxData[
@@ -1088,8 +1087,7 @@ Cell[CellGroupData[{
 Cell[BoxData[
  RowBox[{
   RowBox[{"<<", "\"\<../data/3-3/winding-6.6.20-28-1-5.m\>\""}], ";", 
-  RowBox[{"<<", "\"\<../data/3-3/wstep-6.6.20-28-1-5-sc-20.m\>\""}], ";", 
-  RowBox[{"gaugeField", "=", "gaugeField0"}], 
+  RowBox[{"<<", "\"\<../data/3-3/wstep-6.6.20-28-1-5-sc-20.m\>\""}], 
   ";"}]], "Input",ExpressionUUID->"af628f92-3322-43e5-afc4-9061a8501429"],
 
 Cell[BoxData[
@@ -1159,8 +1157,7 @@ Cell[BoxData[
      RowBox[{"latticeNorm", "[", 
       RowBox[{"\"\<center\>\"", "\[Rule]", "True"}], "]"}]}], "}"}], "]"}], 
   ";", 
-  RowBox[{"<<", "\"\<../data/3-3/step-12.16.20-28-5-a-20.m\>\""}], ";", 
-  RowBox[{"gaugeField", "=", "gaugeField0"}], 
+  RowBox[{"<<", "\"\<../data/3-3/step-12.16.20-28-5-a-20.m\>\""}], 
   ";"}]], "Input",ExpressionUUID->"6fa39b11-9cc1-406e-bd46-357af9df78c4"],
 
 Cell[BoxData[
@@ -2277,7 +2274,7 @@ Cell[BoxData[
   "]"}]], "Input",ExpressionUUID->"0e1809a0-90ec-40a7-8413-99f996dbfcf5"]
 }, Open  ]]
 }, Closed]]
-}, Open  ]],
+}, Closed]],
 
 Cell[CellGroupData[{
 
@@ -2747,7 +2744,7 @@ Cell[BoxData[
          "fieldCorr4xA"}], "}"}]}], "]"}]}]}], 
    "]"}]}]], "Input",ExpressionUUID->"53fe987e-cda6-4b74-a2a1-22e2e9d2bf27"]
 }, Closed]]
-}, Open  ]],
+}, Closed]],
 
 Cell[CellGroupData[{
 
@@ -3211,7 +3208,7 @@ Cell[BoxData[
          "fieldCorr4xA"}], "}"}]}], "]"}]}]}], 
    "]"}]}]], "Input",ExpressionUUID->"32b52087-f873-4c3d-afac-3fd0f96635ae"]
 }, Closed]]
-}, Open  ]],
+}, Closed]],
 
 Cell[CellGroupData[{
 
@@ -3231,8 +3228,7 @@ Cell[BoxData[
      RowBox[{"latticeNorm", "[", 
       RowBox[{"\"\<center\>\"", "\[Rule]", "True"}], "]"}]}], "}"}], "]"}], 
   ";", 
-  RowBox[{"<<", "\"\<../data/3-3/step-16.20.24-28-5-a-12.m\>\""}], ";", 
-  RowBox[{"gaugeField", "=", "gaugeField0"}], 
+  RowBox[{"<<", "\"\<../data/3-3/step-16.20.24-28-5-a-12.m\>\""}], 
   ";"}]], "Input",ExpressionUUID->"962ce377-08b5-4f76-9d78-3771a3e883ae"],
 
 Cell[BoxData[
@@ -3710,7 +3706,7 @@ Cell[BoxData[
          "fieldCorr4xA"}], "}"}]}], "]"}]}]}], 
    "]"}]}]], "Input",ExpressionUUID->"0d691aee-6d5e-4e33-9839-24a7f54a910b"]
 }, Closed]]
-}, Open  ]],
+}, Closed]],
 
 Cell[CellGroupData[{
 
@@ -3730,8 +3726,7 @@ Cell[BoxData[
      RowBox[{"latticeNorm", "[", 
       RowBox[{"\"\<center\>\"", "\[Rule]", "True"}], "]"}]}], "}"}], "]"}], 
   ";", 
-  RowBox[{"<<", "\"\<../data/3-3/step-20-28-15-a-20.m\>\""}], ";", 
-  RowBox[{"gaugeField", "=", "gaugeField0"}], 
+  RowBox[{"<<", "\"\<../data/3-3/step-20-28-15-a-20.m\>\""}], 
   ";"}]], "Input",ExpressionUUID->"6f8682eb-c6bb-4317-8f65-e810452a3624"],
 
 Cell[BoxData[
@@ -4194,7 +4189,7 @@ Cell[BoxData[
          "fieldCorr4xA"}], "}"}]}], "]"}]}]}], 
    "]"}]}]], "Input",ExpressionUUID->"9996064c-8f1d-4f44-a95b-38875d39ee40"]
 }, Closed]]
-}, Open  ]],
+}, Closed]],
 
 Cell[CellGroupData[{
 
@@ -4472,7 +4467,7 @@ Cell[BoxData[
          "fieldCorr4xA"}], "}"}]}], "]"}]}]}], 
    "]"}]}]], "Input",ExpressionUUID->"077506c0-a300-4f5d-b517-989e066d08b9"]
 }, Closed]]
-}, Open  ]],
+}, Closed]],
 
 Cell[CellGroupData[{
 
@@ -4492,8 +4487,7 @@ Cell[BoxData[
      RowBox[{"latticeNorm", "[", 
       RowBox[{"\"\<center\>\"", "\[Rule]", "True"}], "]"}]}], "}"}], "]"}], 
   ";", 
-  RowBox[{"<<", "\"\<../data/3-4/step-16-48-15-a-15.m\>\""}], ";", 
-  RowBox[{"gaugeField", "=", "gaugeField0"}], 
+  RowBox[{"<<", "\"\<../data/3-4/step-16-48-15-a-15.m\>\""}], 
   ";"}]], "Input",ExpressionUUID->"9f4db36a-9b8b-4c92-95b7-c2f659f5deee"],
 
 Cell[BoxData[
@@ -5148,7 +5142,7 @@ Cell[BoxData[
         "fieldCorr4xA"}], "}"}]}], "]"}]}]}], 
   "]"}]], "Input",ExpressionUUID->"516c6360-7c86-4efb-b9d2-c2907c904e61"]
 }, Closed]]
-}, Open  ]],
+}, Closed]],
 
 Cell[CellGroupData[{
 
@@ -5449,7 +5443,7 @@ Cell[BoxData[
          "fieldCorr4xA"}], "}"}]}], "]"}]}]}], 
    "]"}]}]], "Input",ExpressionUUID->"0ee06777-ddae-4796-a8fd-3dfbfb02ee23"]
 }, Closed]]
-}, Open  ]]
+}, Closed]]
 }, Open  ]],
 
 Cell[CellGroupData[{
@@ -6929,7 +6923,7 @@ Cell[BoxData[
       RowBox[{"ImageSize", "\[Rule]", 
        RowBox[{"2.0", "*", "figureWidth"}]}]}], "]"}]}]}], 
   "]"}]], "Input",ExpressionUUID->"d59252a8-2e8d-4807-9cbd-f31733530f92"]
-}, Open  ]],
+}, Closed]],
 
 Cell[CellGroupData[{
 
@@ -7127,7 +7121,7 @@ Cell[BoxData[
      RowBox[{"ImageSize", "\[Rule]", 
       RowBox[{"2.0", "*", "figureWidth"}]}]}], "]"}]}], 
   "]"}]], "Input",ExpressionUUID->"fbd2fad7-fda6-452c-a9ca-04471f7934bb"]
-}, Open  ]],
+}, Closed]],
 
 Cell[CellGroupData[{
 
@@ -7346,7 +7340,7 @@ Cell[BoxData[
      RowBox[{"ImageSize", "\[Rule]", 
       RowBox[{"2.0", "*", "figureWidth"}]}]}], "]"}]}], 
   "]"}]], "Input",ExpressionUUID->"490694e2-9923-4c87-b70a-58607148ac7f"]
-}, Open  ]]
+}, Closed]]
 }, Open  ]]
 }, Open  ]]
 },
