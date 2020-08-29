@@ -36,24 +36,28 @@ matrixAsymmetry[mat_] := Max[Abs[Flatten[hess-Transpose[mat]]]];
 (* Shift cutoff *)
 
 applyCutoff1::usage = "Rescale shifts for a single link.  \
-A large value for zzz removes the cutoff.  \
-When Norm[shift]=Pi, there is an inflection \
-point in the associated color matrix meaning that the quadratic \
+When Norm[shift]=Pi, there is an inflection point in the associated \
+color matrix meaning that the quadratic \
 approximation becomes qualitatively different than the full matrix \
-exponential.  Thus, we set shift to zero when Norm[shift]>=Pi.  The \
-cutoff represents the Norm[shift] where the quadratic approximation \
+exponential.  Thus, we set shift to zero when Norm[shift]>=Pi.  linkCutoff \
+represents the Norm[shift] where the quadratic approximation \
 *starts* breaking down.  In that case, we scale back the size of the \
 shift.";
-applyCutoff1[hess_?VectorQ, grad_, cutoff_: Pi, zzz_: 1] :=
- Block[ (* First, see if any component exceeds the cutoff.  Thus,
-  we avoid any divide-by-zero error. *)
-     {tooBig = Inner[(Pi zzz Abs[#1] <= Abs[#2])&, hess, grad, Or], shift},
-  If[tooBig, Map[0&, grad],
-   (* Otherwise, rescale based on the norm of the shift *)
-   shift = grad/hess;
-   Which[Pi zzz <= Norm[shift], Map[0&, shift],
-         Norm[shift] < cutoff  zzz, shift,
-         True, (cutoff/Norm[shift]) shift]]];
+Options[applyCutoff1] = {ignoreCutoff -> False,
+    linkCutoff -> Pi, linkConcavity -> None};
+applyCutoff1[hess_?VectorQ, grad_, OptionsPattern[]] :=
+ Block[ (* Remove any component that exceeds the cutoff.
+         or has wrong concavity if looking for a maximum. *)
+  {shift, ignore = OpctionValue[ignoreCutoff],
+   cutoff = OptionValue[linkCutoff],
+   concavity = OptionValue[linkConcavity]},
+  (* Otherwise, rescale based on the norm of the shift *)
+  shift = MapThread[
+      If[((ignore && #2 != 0) || Abs[#1] < Pi Abs[#2]) &&
+         (concavity === None || concavity #2 > 0), #1/#2, 0]&,
+        {grad, hess}];
+ If[Norm[shift] < cutoff || ignore, shift,
+       (cutoff/Norm[shift]) shift]];
 applyCutoff2::rescale = "Rescale maxNorm `1` to `2`";
 applyCutoff2::usage = "Rescale shifts on an entire lattice so that \
 the largest norm of a shift on a link is less than the cutoff.";
@@ -794,7 +798,7 @@ findDelta[{hess_, grad_, gauge_}, OptionsPattern[]] :=
        Print["Define hess0, grad0"];
        hess0 = hess; grad0 = grad];
     -damping applyCutoff2[stepShifts, OptionValue[rescaleCutoff], zzz]] /;
- OptionValue[Method] === "steepestDescent";
+ methodName[OptionValue[Method]] === "steepestDescent";
 
 
 SetAttributes[applyDelta, HoldFirst];
@@ -833,7 +837,8 @@ latticeSaddlePointStep[opts:OptionsPattern[]] :=
          Apply[Sequence, FilterRules[{opts}, Options[actionHessian]]]];
      If[debug > 2,
         Print["Constructed hess, grad"]];
-     gauge = If[OptionValue[fixedDir] > -1,
+     gauge = If[OptionValue[fixedDir] > -1 &&
+                methodName[OptionValue[Method]] =!= "steepestDescent",
                 gaugeTransformShifts[
                     gaugeField, OptionValue[fixedDir]], None];
      If[debug > 2,

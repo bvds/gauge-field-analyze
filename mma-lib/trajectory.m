@@ -6,14 +6,13 @@
  *)
 
 linkSaddlePointStep::usage = "One iteration of the saddle point search applied to a single link.  Set ignoreCutoff -> True to test this against the explicit calculation.";
-Options[linkSaddlePointStep] = {ignoreCutoff -> False,
-    linkCutoff -> 1, dampingFactor -> 1,
-    printHessian -> False, printShift -> False};
-linkSaddlePointStep[u2Staples_, u1_, OptionsPattern[]] := 
+Options[linkSaddlePointStep] = Join[
+    {dampingFactor -> 1, printHessian -> False, printShift -> False},
+    Options[applyCutoff1]];
+linkSaddlePointStep[u2Staples_, u1_, opts:OptionsPattern[]] := 
  Block[{
-     cutoff = If[OptionValue[ignoreCutoff], 1, OptionValue[linkCutoff]],
-     zzz = If[OptionValue[ignoreCutoff], Infinity, 1],
-   damping = OptionValue[dampingFactor], debug = False, 
+   copts = Apply[Sequence, FilterRules[{opts}, Options[applyCutoff1]]],
+   damping = OptionValue[dampingFactor],
    ff = u2Staples.u1, grad, mm, oo, values, deltas},
   grad = Map[Tr, SUGenerators[].ff];
   (* Solve linear system mm.shifts = -Im[grad],
@@ -22,7 +21,7 @@ linkSaddlePointStep[u2Staples_, u1_, OptionsPattern[]] :=
   mm = Re[Tr[ff]]/(2.0 Length[ff]) IdentityMatrix[Length[grad]] + 
        SUSymmetric[].Re[grad]/2.0;
   {values, oo} = Eigensystem[mm];
-  deltas = -damping applyCutoff1[values, oo.Im[grad], cutoff, zzz];
+  deltas = -damping applyCutoff1[values, oo.Im[grad], copts];
   If[OptionValue[printHessian],
      Print["Hessian:  ", mm]; 
      Print["gradient:  ", Im[grad]]]; 
@@ -75,7 +74,8 @@ Options[makeObservableTrajectory] = Join[
      "periodic" -> "/mnt/samson-data/3-3/periodic-16-28",
      (* Defaults for the Newton's steps *)
      largeShiftOptions -> {eigenPairs -> -100, maxLanczosVecs -> 1000},
-     Method -> "External", externalAction -> "detach", readInterval -> 5,
+     Method -> {"External", maxLanczosVecs -> 1000},
+     externalAction -> "detach", readInterval -> 5,
      remoteHost -> "samson", processes -> 8
     },
     Options[singleLinkStep], Options[applyGaugeTransforms]]; 
@@ -123,8 +123,8 @@ makeObservableTrajectory[set_, label_, n_,
               distance,
               observable == "norm",
               (* Except for distance, which is already accumulated above,
-                the quantities are gauge invariant, so fixing a gauge
-                won't cause any harm. *)
+                the othere quantities calculated in this loop are gauge
+                invariant, so fixing a gauge won't cause any harm. *)
               applyGaugeTransforms[Flatten[
                   {1, 1, 6, 1, Table[{5, 6}, {12}], 7, 7, 7}], gopts];
               latticeNorm[],
@@ -219,8 +219,8 @@ Options[bulkStringModel] = Join[
     FilterRules[Options[stringModel], {Except["covarianceMatrix"]}]];
 bulkStringModel[opts:OptionsPattern[]] :=
  Block[{sopts = Apply[Sequence, FilterRules[
-        {opts}, Options[stringModelFit]]]},
-  Table[
+        {opts}, Options[stringModel]]], result},
+  result = Table[
       Block[{tallyData, ff},
             tallyData = Map[valueError[#[[i]], Null]&,
                                       polyakovCorrelatorValues];
@@ -232,7 +232,15 @@ bulkStringModel[opts:OptionsPattern[]] :=
                      Transpose[
                          ff[{"BestFitParameters", 
                              "ParameterErrors"}]]]}],
-      {i, OptionValue["lower"], OptionValue["upper"]}]];
+      {i, OptionValue["lower"], OptionValue["upper"]}];
+  Print["Delete graphic before saving notebook."];
+  Print[Graphics[
+      Map[{Text[#[[1]], {#[[2]], #[[3, 1, 2, 1]]}], 
+           Line[{{#[[2]], #[[3, 1, 2, 1]] - #[[3, 1, 2, 2]]},
+                 {#[[2]], #[[3, 1, 2, 1]] + #[[3, 1, 2, 2]]}}]}&,
+      result], Frame -> True, 
+      AspectRatio -> 1, PlotRange -> {All, {0, 0.030}}]];
+  result];
 
 bulkWilsonLoops::usage = "Aggregate Wilson loops over a number of lattice configurations.  Skip some sizes, to save on time.";
 Options[bulkWilsonLoops] = {"lower" -> 1, "upper" -> 1,
