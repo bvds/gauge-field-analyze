@@ -560,6 +560,6 @@ applyGaugeTransforms[s_, opts:OptionsPattern[]] :=
         # == 11,
         setMinimumAxialGauge[dir[], "center" -> True, "damping" -> 1.5]*)
        True,
-       Abort[]
+       Print["Unknown transform ", #]; Abort[]
          ];OptionValue["loopFunction"][])&, s];
    latticeNorm["center" -> True]];

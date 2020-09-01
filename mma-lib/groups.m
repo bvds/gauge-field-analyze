@@ -62,17 +62,18 @@ Join[
 SUSymmetric::usage = "Construct the symmetric coefficients d_{a,b,c},
 caching the result.  This tensor is sparse.";
 SUSymmetric[] := SUSymmetric[nc];
-SUSymmetric[n_?IntegerQ] :=
- SUSymmetric[n] =
-  Block[{gen = SUGenerators[n]},
-	2 SparseArray[Outer[Tr[(#1.#2 + #2.#1).#3]&, gen, gen, gen, 1]]];
+SUSymmetric[n_?IntegerQ] := SUSymmetric[n] =
+ Block[{gen = SUGenerators[n]},
+   (* Simplify, otherwise some complex numbers remain. *)
+   SparseArray[Outer[Simplify[2*Tr[(#1.#2 + #2.#1).#3]]&,
+                             gen, gen, gen, 1]]];
 SUStructure::usage = "Construct the structure constants f_{a,b,c},
 caching the result.  This tensor is sparse.";
 SUStructure[] := SUStructure[nc];
-SUStructure[n_?IntegerQ] :=
- SUStructure[n] =
-  Block[{gen = SUGenerators[n]},
-	2 SparseArray[Im[Outer[Tr[(#1.#2 - #2.#1).#3]&, gen, gen, gen, 1]]]];
+SUStructure[n_?IntegerQ] := SUStructure[n] =
+ Block[{gen = SUGenerators[n]},
+   SparseArray[Outer[Im[Simplify[2*Tr[(#1.#2 - #2.#1).#3]]]&,
+                       gen, gen, gen, 1]]];
 
 centerPhases[mat_] :=(* Used for some testing *)
  Block[{delta, phases = Arg[Eigenvalues[mat]]},
@@ -265,3 +266,23 @@ maxSURotation[uu_] :=
                        Map[{#, 0.0} &, vars]];
   If[False, Print["  result ", result]];
   MatrixExp[I (vars/.result[[2]]).SUGenerators[nc]]];
+
+
+SUStapleMinimum::usage = 
+  "For a general matrix F, find a special unitary matrix U that \
+minimizes Re[Tr[U.F]].";
+Options[SUStapleMinimum] = {printLevel -> 0}; 
+SUStapleMinimum[ff_, OptionsPattern[]] := 
+ Block[{debug = (OptionValue[printLevel] > 0), ud, v, f, w, phase, 
+        value, min, n = Length[ff], lambda},
+  {v, f, w} = SingularValueDecomposition[ff];
+  (* F itself could be singular.  In principle,
+  one would find this phase while calculating the SVD *)
+  phase = Arg[Det[v.ConjugateTranspose[w]]]; 
+  ud = Append[Table[lambda[i], {i, n - 1}], 
+              phase - Sum[lambda[i], {i, n - 1}]];
+  {value, min} = FindMinimum[
+      Cos[ud].Diagonal[f], Table[{lambda[i], 0}, {i, n - 1}]]; 
+  If[debug, Print["phase: ", phase]; 
+            Print["Solution: ", {value, min}]]; 
+  w.DiagonalMatrix[Exp[I ud /. min]].ConjugateTranspose[v]];

@@ -5,15 +5,16 @@
   Numerically, this is much easier.
  *)
 
-linkSaddlePointStep::usage = "One iteration of the saddle point search applied to a single link.  Set ignoreCutoff -> True to test this against the explicit calculation.";
+linkSaddlePointStep::usage = "One iteration of the saddle point search applied to a single link.  Set ignoreCutoff -> True to test this against the explicit calculation.  Returns the new link and the magnitude of the shift squared.";
 Options[linkSaddlePointStep] = Join[
-    {dampingFactor -> 1, printHessian -> False, printShift -> False},
+    {dampingFactor -> 1, printHessian -> False, printShift -> False,
+    linkConcavity -> None},
     Options[applyCutoff1]];
-linkSaddlePointStep[u2Staples_, u1_, opts:OptionsPattern[]] := 
+linkSaddlePointStep[ff_?MatrixQ, opts:OptionsPattern[]] := 
  Block[{
    copts = Apply[Sequence, FilterRules[{opts}, Options[applyCutoff1]]],
    damping = OptionValue[dampingFactor],
-   ff = u2Staples.u1, grad, mm, oo, values, deltas},
+   grad, mm, oo, values, deltas},
   grad = Map[Tr, SUGenerators[].ff];
   (* Solve linear system mm.shifts = -Im[grad],
     paying careful attention to nullspace of mm.
@@ -21,15 +22,28 @@ linkSaddlePointStep[u2Staples_, u1_, opts:OptionsPattern[]] :=
   mm = Re[Tr[ff]]/(2.0 Length[ff]) IdentityMatrix[Length[grad]] + 
        SUSymmetric[].Re[grad]/2.0;
   {values, oo} = Eigensystem[mm];
-  deltas = -damping applyCutoff1[values, oo.Im[grad], copts];
+  deltas = -damping applyCutoff1[values, oo.Im[grad], copts].oo;
   If[OptionValue[printHessian],
      Print["Hessian:  ", mm]; 
      Print["gradient:  ", Im[grad]]]; 
   If[OptionValue[printShift],
-     Print["shifts:  ", deltas.oo]];
-  u1.MatrixExp[I deltas.oo.SUGenerators[]]]; 
+     Print["shifts:  ", deltas]];
+  (* The 1/2 comes from our normalization convention for
+    the generators of SU(N). *)
+  {MatrixExp[I deltas.SUGenerators[]], Total[deltas^2]/2}
+ ]/;OptionValue[linkConcavity] === None; 
 
-linkSaddlePoint::usage = "Saddle point search applied to a single link.  Returns new link value and norm of the change.";
+linkSaddlePointStep[ff_?MatrixQ, opts:OptionsPattern[]] := 
+ Block[{uu, damping = OptionValue[dampingFactor],
+        sign = Sign[OptionValue[linkConcavity]],
+        phases, vectors, center},
+       uu = SUStapleMinimum[sign*ff];
+       (* See the code for SUPower[] *)
+       {phases, vectors, center} = getPhases[uu, True];
+       {Transpose[vectors].(Exp[I phases damping] Conjugate[vectors]),
+        Total[(phases damping)^2]}]/;NumberQ[OptionValue[linkConcavity]]; 
+
+linkSaddlePoint::usage = "Saddle point search applied to a single link.  Returns new link value and norm of the shift squared.";
 Options[linkSaddlePoint] = 
   Join[{Tolerance -> 10^-6, maxCount -> 1, printHessian -> False, 
         printDetails -> True},
@@ -37,33 +51,41 @@ Options[linkSaddlePoint] =
 linkSaddlePoint[dir_, coords_, opts:OptionsPattern[]] := 
  If[boundaryLinkQ[dir, coords],
     {getLink[dir, coords], 0},
-    Block[{maxShift = 4 Pi, u0 = getLink[dir, coords], u1, u2,
-           linkShiftNorm,
+    Block[{uu = getLink[dir, coords], delta2 = 0,
            sopts = Apply[Sequence, FilterRules[
                {opts}, Options[linkSaddlePointStep]]],
-           u2SumStaples, count = 0, uu,
+           sumStaples = sumStaples[dir, coords],
            debug = printLevel[OptionValue[printDetails], 1]},
-     u2 = u1 = SUPower[u0, 0.5];
-     u2SumStaples = u2.sumStaples[dir, coords];
-     While[maxShift > OptionValue[Tolerance] && 
-	   count < OptionValue[maxCount],
-	   count++;
-	   u1 = linkSaddlePointStep[u2SumStaples, u1, sopts]];
-     uu = u1.u2;
-     If[debug > 0, SUMatrixQ[uu, Tolerance -> 10^-7]];
-     {uu, First[SUNorm[uu.ConjugateTranspose[u0]]]}]];
+      Do[
+          Block[{u1 = SUPower[uu, 0.5]},
+                {uu, delta2} = linkSaddlePointStep[
+                    u1.sumStaples.u1, sopts];
+                uu = u1.uu.u1],
+          OptionValue[maxCount]];
+      If[debug > 0, SUMatrixQ[uu, Tolerance -> 10^-7]];
+      {uu, delta2}]];
 
-singleLinkStep::usage = "Apply one-link saddle point step to all links, returning the updated links and the size of the step.";
+singleLinkStep::usage = "Apply one-link saddle point step to all links, updating in a checkerboard fashion, returning the size of the step.";
 Options[singleLinkStep] = Options[linkSaddlePoint];
-singleLinkStep[coordList_List:Null, opts:OptionsPattern[]] :=
-    Block[{tt = Table[
-              ParallelMap[
-                  linkSaddlePoint[dir, #, opts]&,
-                                 If[coordList === Null,
-                                    makeCoordList[], coordList]],
-	      {dir, nd}]},
-          {Map[First, tt, {2}],
-           Sqrt[Mean[Flatten[Map[Last[#]^2&, tt, {2}]]]]}];
+singleLinkStep[opts:OptionsPattern[]] :=
+ Block[{norm2 = 0},
+   Do[
+       (* Shared variables are super-slow in Mathematica,
+          so we find the new link values and then update
+          gaugeField. *)
+       Scan[
+           (setLink[dir, #[[1]], #[[2, 1]]];
+            norm2 += #[[2, 2]])&,
+           ParallelTable[
+               Block[{coords = latticeCoordinates[i]},
+                 If[
+                     Mod[Total[coords], 2] == checkerboard,
+                     coords -> linkSaddlePoint[dir, coords, opts],
+                     Nothing]],
+               {i, latticeVolume[]}]
+       ],
+       {dir, nd}, {checkerboard, 0, 1}]; 
+   Sqrt[norm2/(nd*latticeVolume[])]];
 
 
 Options[makeObservableTrajectory] = Join[
@@ -85,15 +107,13 @@ makeObservableTrajectory[set_, label_, n_,
            shiftDistance,
            debug = printLevel[OptionValue[printDetails], 1],
         diagonalQ = StringMatchQ[label, "s*"],
-        coordList, dd, results, gaugeSegments,
+        dd, results, gaugeSegments,
         gopts = Apply[Sequence, FilterRules[
             Join[{opts}, Options[makeObservableTrajectory]],
             Options[applyGaugeTransforms]]],
         sopts = Apply[Sequence, FilterRules[
             {opts}, Options[singleLinkStep]]]},
   Get[OptionValue["periodic"] <> "-" <> ToString[set] <> ".m"];
-  If[diagonalQ,
-     coordList = makeCoordList[]];
   
   results = Transpose[Table[
       Catch[
@@ -101,8 +121,8 @@ makeObservableTrajectory[set_, label_, n_,
       gaugeSegments = Association[];
       If[i > 0,
          If[diagonalQ,
-            {gaugeField, dd} = singleLinkStep[coordList, sopts],
-            shiftDistance = Null; (* not always defined *)
+            dd = singleLinkStep[sopts],
+            shiftDistance = Null; (* not always defined in the file *)
             Check[
                 Get[StringRiffle[{OptionValue["step"], ToString[set],
                                   label, ToString[i]}, "-"]<>".m"],
@@ -121,12 +141,15 @@ makeObservableTrajectory[set_, label_, n_,
               Which[
               observable == "distance",
               distance,
+              observable == "averagePlaquette",
+              (* This is redundant with wilsonDiagonal *)
+              averagePlaquette[],
               observable == "norm",
               (* Except for distance, which is already accumulated above,
                 the othere quantities calculated in this loop are gauge
                 invariant, so fixing a gauge won't cause any harm. *)
               applyGaugeTransforms[Flatten[
-                  {1, 1, 6, 1, Table[{5, 6}, {12}], 7, 7, 7}], gopts];
+                  {1, 1, 6, 1, Table[{5, 6}, {11}], 7, 6, 7, 6, 7}], gopts];
               latticeNorm[],
               observable == "polyakovCorrelator",
               Map[talliesToAverageErrors,
@@ -141,7 +164,7 @@ makeObservableTrajectory[set_, label_, n_,
                                          {w1, 4, Max[latticeDimensions]-1,  2},
                                          {w2, 4, w1, 2}], 1], {1}], Total],
               True,
-              Abort[]
+              Print["Unknown observable ", observable]; Abort[]
               ]}, {observable, OptionValue["observables"]}], Nothing],
       Get::noopen],
       {i, 0, n}]];

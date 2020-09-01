@@ -44,20 +44,20 @@ represents the Norm[shift] where the quadratic approximation \
 *starts* breaking down.  In that case, we scale back the size of the \
 shift.";
 Options[applyCutoff1] = {ignoreCutoff -> False,
-    linkCutoff -> Pi, linkConcavity -> None};
-applyCutoff1[hess_?VectorQ, grad_, OptionsPattern[]] :=
+                         linkCutoff -> Pi};
+applyCutoff1[hess_?VectorQ, grad_?VectorQ, OptionsPattern[]] :=
  Block[ (* Remove any component that exceeds the cutoff.
          or has wrong concavity if looking for a maximum. *)
-  {shift, ignore = OpctionValue[ignoreCutoff],
-   cutoff = OptionValue[linkCutoff],
-   concavity = OptionValue[linkConcavity]},
+  {shift, ignore = OptionValue[ignoreCutoff],
+   cutoff = OptionValue[linkCutoff]},
   (* Otherwise, rescale based on the norm of the shift *)
   shift = MapThread[
-      If[((ignore && #2 != 0) || Abs[#1] < Pi Abs[#2]) &&
-         (concavity === None || concavity #2 > 0), #1/#2, 0]&,
+      If[(ignore && #2 != 0) || Abs[#1] < Pi Abs[#2], #1/#2, 0]&,
         {grad, hess}];
- If[Norm[shift] < cutoff || ignore, shift,
-       (cutoff/Norm[shift]) shift]];
+  Which[
+      Norm[shift] < cutoff || ignore, shift,
+      Norm[shift] > Pi, Map[0&, shift],
+      True, (cutoff/Norm[shift]) shift]];
 applyCutoff2::rescale = "Rescale maxNorm `1` to `2`";
 applyCutoff2::usage = "Rescale shifts on an entire lattice so that \
 the largest norm of a shift on a link is less than the cutoff.";
