@@ -378,7 +378,7 @@ in the direction $\mu$ and goes through site $x$:
 and define the correlator:
 \be
 \Phi_\mu(\mathbf{r}) = \frac{1}{C_\Phi(\mathbf{r})} \sum_{x, \,y,\, x^\mu = y^\mu =1}
-           \delta_{\mathbf{r},\mathbf{\Delta}(x-y)}
+           \delta_{\mathbf{r},\mathbf{d}(x-y)}
            \langle 0 | \Tr\left(\phi_\mu^\dagger(y)\right)
             \Tr\left(\phi_\mu(x)\right) |0\rangle
            \label{pcorr}
@@ -386,8 +386,8 @@ and define the correlator:
 %
 where the normalization constant $C_\Phi(\mathbf{r})$ is chosen such that
 $\Phi_\mu(\mathbf{r})=1$ for the bare vacuum and
-$\mathbf{\Delta}(x-y)$ is the minimum length positive-component
-vector between $x$ and $y$ taking into account lattice periodicity
+$\mathbf{d}(x-y)$ is the minimum length positive-component
+vector between $x$ and $y$, taking into account lattice periodicity
 and rotation \& reflection symmetries.
 To obtain the string tension,
 we fit the correlator $\Phi_\mu(\mathbf{r})$ to an effective
@@ -404,7 +404,7 @@ plus Coulomb corrections from Eqn.~(\ref{cpf}) plus power law corrections:
          - c_q 2 L_\mu \log(\left|\mathbf{r}\right|) - c_p 2 L_\mu
          - c_1 \frac{L_\mu}{\left|\mathbf{r}\right|}
          - c_2 \frac{\left|\mathbf{r}\right|}{L_\mu} - \cdots \right)\nonumber\\
-         & & + \left[\,\mbox{$2 (D-1)$ transverse images}\,\right]
+         & & + \left[\,\mbox{$2^{D-1}-1$ transverse images}\,\right]
          \; .  \label{stringmodel}
 \end{eqnarray}
 %
@@ -416,8 +416,8 @@ to the Luscher correction~\cite{luscher_anomalies_1980}, with value
 $c_2 = -\pi/6$.
 Since the lattices we use are relatively small, we include contributions
 from fields wrapping around the lattice in the plane transverse to
-$\hat{\mu}$.  Thus, we sum over the two closest images of the Polyakov
-loop in each transverse direction.
+$\hat{\mu}$.  Thus, we sum over the $2^{D-1}$ closest images of the Polyakov
+loop in the transverse plane.
 
 This effective potential is, in principle, equivalent to the more
 conventional sum over states plus finite longitudinal length
@@ -920,14 +920,18 @@ Let $F_\mu(x)$ be the associated sum of staples; then
 \eq
 We can use Eqn.~(\ref{grad}) to construct the gradient vector $\mathbf{q}$.
 Likewise, one can calculate the $n_L\times n_L$ Hessian matrix
-$H$ from
+$H$ using
 \be
       \frac{N}{\beta} \frac{\partial^2 S}{\partial w_a(\mu, x)\, \partial w_b(\nu, y)}
 \eq
 which is nonzero when there is a plaquette which contains both
-$U_\mu(x)$ and $U_\nu(y)$.
-The full calculation of $H$ is rather lengthy and we will not bore the reader
-with the details.
+$U_\mu(x)$ and $U_\nu(y)$.  For example, for $x=y$,
+\be
+      \frac{N}{\beta} \frac{\partial^2 S}{\partial w_a(\mu, x)\, \partial w_b(\nu, x)} = \frac{1}{2}
+   \Re\Tr\left(F_\mu(x) \sqrt{U_\mu(x)} \left(T_a T_b + T_b T_s\right) \sqrt{U_\mu(x)}\right) \; .
+   \label{diaghess}
+\eq
+The other terms of the Hessian follow in a similar fashion.
 
 Some shifts $\mathbf{w}$ correspond to gauge transforms.
 As we shall see, such shifts are problematic for any saddle
@@ -1090,26 +1094,75 @@ must be carried out using sparse matrix techniques;
 details are discussed in Appendix~\ref{krylov}.
 
 
+\subsection{Diagonal blocks of the Hessian and cooling}
+
+The full Newton's method calculation discussed above is numerically
+challenging.
+However, if we ignore the off-diagonal color blocks of the
+Hessian (that is, we only use Eqn.~(\ref{diaghess})),
+then the numerical calculation becomes much simpler.  Since this truncation
+is {\em ad hoc}, it must be determined empirically whether it
+has any utility.  In this case, links in each direction
+are updated in a checkerboard fashion: first the
+$\mu=1$ even links, then $\mu=1$ odd links,
+$\mu=2$ even links, {\em et cetera}.  We will refer to this
+as the ``single-link saddle-point method.''
+
+
+This single-link saddle point method is reminiscent of the
+approach used in a number of investigations of ``lattice
+cooling''~\cite{trottier_exploring_1994,teper_cooling_1994,
+  gonzalez-arroyo_gauge_1995,gonzalez-arroyo_classical_1996,
+  bonati_comparison_2014}.
+In this approach, one attempts to find a local minimum
+of the action by minimizing the action for
+each link separately, iterating over all of the links of the lattice.
+In the folliwng, we will compare the lattice cooling approach to
+a search for the nearest saddle-point.  Our algorithm for performing
+the link-wise minimization is discussed in Appendix~\ref{linkmin}.
+As with the single-link saddle-point method, links in each direction
+are updated in a checkerboard fashion:  first the even links and
+then the odd links.
+
 \subsection{Trajectories}
 
 \begin{figure}
-\includegraphics{trajectory3}
-\caption{Several trajectories are shown for a $16^3$ lattice configuration,
-  $N=3$, $\beta=28$.
-  The starting configuration $\config_0$ was generated using standard Euclidean
-  Lattice Monte Carlo;
-  {\bf 2b} was generated with $\gamma=0.1$, $\Lambda_\mathrm{max} = 2$,
-  and $\Lambda_2=0.04434$;
-  {\bf 2c} was generated with $\gamma=0.5$, $\Lambda_\mathrm{max} = 2$,
-  and $\Lambda_2=0.02217$;
-  {\bf 2d} was generated with $\gamma=0.1$, $\Lambda_\mathrm{max} = 2$,
-  and $\Lambda_2=0.02217$.
-  For {\bf lc}, $\gamma=0.1$, off-diagonal blocks of $H$ were dropped,
-  and a shift
-  was applied to a link when $\left\lVert\mathbf{w}\right\rVert<0.327$.
-  \label{trajectory3}}
+\includegraphics{"avgplaquette-3-4-12-16-20"}
+\hfill
+\includegraphics{"norm-3-4-12-16-20"}
+\caption{Trajectories for $\SU(4)$, $12 \times 16 \times 20$ lattice,
+  $\beta=48$. Trajectory ``5-a'' was computed with $\gamma = 0.1$ and
+  cutoffs $\Lambda_2=0.02$, $\lambda_\mathrm{max}=0.04$, $\Lambda_s = 1$;
+  28 steps.
+  ``15-a'' starts with a different lattice configuration but uses the
+   same parameters; 35 steps.
+   ``5-sa'' uses the same starting configuration as ``5-a`` but steps
+   are calculated with the diagonal color blocks of the Hessian and
+     $\gamma=0.05$; 100 steps, every 5th step is plotted.
+    \label{trajectory3}}
 \end{figure}
-  
+
+
+\begin{figure}
+\includegraphics{"wilsonvalues-3-4-12-16-20"}
+\caption{Wilson loop expectation values along the ``5-a'' trajectory
+ shown in Fig.~\ref{trajectory3}.}
+\end{figure}
+
+\begin{figure}[p]
+\includegraphics{"stringmodel-3-4-12-16-20-a2sigma"}\hfill
+\includegraphics{"stringmodel-3-4-12-16-20-c0"}\\
+\vspace{3ex}
+\includegraphics{"stringmodel-3-4-12-16-20-cCoulomb"}\hfill
+\includegraphics{"stringmodel-3-4-12-16-20-cPerimeter"}\\
+\vspace{3ex}
+\includegraphics{"stringmodel-3-4-12-16-20-chiSquared"}
+\caption{Model paramters along the trajectory for the three trajectories
+  shown in in Fig.~\ref{trajectory3}.  Note that error bars generally
+  decrease as short-length-scale fluctuations are removed from
+  the fields. \label{traj4b}
+ }
+\end{figure}
 
 By applying the procedure discussed in Section~\ref{saddle} iteratively,
 we produce a trajectory of lattice configurations $\config_0$,
@@ -1124,8 +1177,24 @@ where $\mathbf{w}_\rho$ is the shift used to generate $\config_\rho$
 from $\config_{\rho-1}$ and the norm is from Eqn.~(\ref{shiftsize}).
 
 
-In Fig.~\ref{trajectory3}, we show some trajectories
-in terms of $\Delta_\kappa$ and the string tension  $\sigma a^2$.
+In Figs.~\ref{trajectory3} and \ref{traj4b}, we show three
+trajectories for $\SU(4)$ in terms of $\Delta_\kappa$.  Ideally,
+if the Master Field picture is correct, we should see, as
+one moves along the trajectory, that observables that persist
+in the large $N$ limit, like the string tension and the
+glueball spectrum, should persist, at least approximately,
+while the short length scale (perturbative) fluctuations are removed.
+
+For finite $N$ and $a$, we don't expect this picture to
+hold exactly, nor do we expect the saddle points to be
+exact. Similar to the studies of monopoles on the lattice
+% ~\cite{},
+we expect there to be some point where the calculation breaks
+down:  for instance $c_0$ goes to zero (correlations disappear)
+or the string tension blows up.
+
+
+and the string tension  $\sigma a^2$.
 Lucini and Teper report a string tension $\sigma a^2=0.016282(76)$
 for $N=3$, and $\beta=28$ (Ref.~\cite{lucini_$mathrmsun$_2002}, Table~5).
 For the initial configuration $\config_0$ used in Fig.\ref{trajectory3},
@@ -1600,6 +1669,47 @@ the projection operators $P_G$ and
 $\mathbb{I}- \sum_{i} \mathbf{r}_i \otimes \mathbf{r}_i$
 are applied to any Krylov space vector.
 
+\section{Minimizing the action for a single link}
+
+\label{linkmin}
+To minimize the action for a single link $U\in\SU(N)$,
+we want to find $U$ that minimizes
+%
+\be
+S = -\Re\Tr U F \label{uf}
+\eq
+where $F$ is the sum of staples associated with $U$.
+In general this involves minimizing a non-linear function of $N^2-1$
+variables.  However, we can simplify the problem by working
+in a basis where $F$ is diagonal.  Thus, we find the singular
+value decomposition $F = V F^\prime W^\dag$ where $F^\prime$ is diagonal,
+positive semi-definite and $V$ and $W$ are unitary.
+If we define $U^\prime=W^\dag U V$, $U^\prime$ is unitary with some
+phase $\theta$: $\det U^\prime = \det V W^\dag = e^{i \theta}$.
+We further make the {\em asatz} that $S$ is minimized by choosing $U^\prime$
+to be diagonal:
+\be
+U^\prime = \begin{pmatrix}
+  e^{i \lambda_1} & & & \\
+  & \ddots & & \\
+  & & e^{i \lambda_{N-1}} & \\
+  & & & e^{i \lambda_N} \end{pmatrix}
+\eq
+where
+\be
+\lambda_N = \theta - \sum_{i=1}^{N-1} \lambda_i
+\eq
+Thus, one minimizes
+\be
+S = % -\Re\Tr\left(U^\prime F^\prime\right) =
+    -\sum_{i=1}^N \cos\left(\lambda_i\right) F_{i,i}^\prime \label{diagmin}
+\eq
+with respect to $\left\{\lambda_1, \lambda_2, \ldots, \lambda_{N-1}\right\}$.
+In practice, the minimum of (\ref{diagmin}) is computed numerically
+using standard library routines.
+One can show that if $U_\mathrm{min}^\prime$ is a minimum of
+(\ref{diagmin}) then $W U_\mathrm{min}^\prime V^\dag$ is a global minimum
+of Eqn.~(\ref{uf}) with respect to $U$.
 
 \bibliography{physics}  % Use physics.bib
 
