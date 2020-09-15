@@ -546,15 +546,15 @@ rescaleCorrelators[tallies_] :=
         (#->tallies[#]/aFirstCase[tallies, {{0..}, __, Last[#]}])&,
         Keys[tallies]]];
 
-(* See files "poisson-equation.nb" and "coulomb.nb"
+(* See files "maxwell-lattice.nb" and "coulomb.nb"
   Second argument is length of wire, third is separation. *)
 Clear[wilsonCoulomb];
 wilsonCoulomb[False, l_, r_, eps_:1] := wilsonCoulomb[False, l, r, eps] =
     Block[{eta = Sqrt[l^2 + r^2]},
           2*(l*Log[l/eps] - l - r + eta - l*Log[(eta + l)/r])];
 wilsonCoulomb[True, l_?NumericQ, r_?NumericQ] := wilsonCoulomb[True, l, r] =
-2*Sum[pointPotential3[l1 - l2, 0, 0] -
-      pointPotential3[l1 - l2, r, 0], {l1, l}, {l2, l}];
+Sum[pointPotential3[l1 - l2, 0, 0] -
+    pointPotential3[l1 - l2, r, 0], {l1, l}, {l2, l}];
 
 
 (* For these constants to be used in plots and tables, they
