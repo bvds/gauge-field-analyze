@@ -61,10 +61,12 @@ eigenvectors of the covariance matrix.
 Alternatively, one can just solve the linear system.  \
 This is generally slower, but can handle a sparse covariance matrix \
 without losing sparsity.";
-Options[covariantFit2] = Options[FindMinimum]; 
+Options[covariantFit2] = Options[FindMinimum];
+covariantFit2::singular = "Hessian is singular for `1`";
 covariantFit2[cov_?MatrixQ, data_?MatrixQ, Except[_List, form_], pars_, vars_,
    opts : OptionsPattern[]] := 
- Block[{err2, oo, diff, ls, fm, fpars},
+ Block[{err2, oo, diff, ls, fm, fpars, jac},
+  fpars = Map[If[ListQ[#], First[#], #]&, pars];
   diff = Map[(Last[#] - form /. 
              MapThread[Rule, {vars, Drop[#, -1]}]) &, data];
   fm = If[OptionValue[Method] === "LevenbergMarquardt" || 
@@ -73,10 +75,24 @@ covariantFit2[cov_?MatrixQ, data_?MatrixQ, Except[_List, form_], pars_, vars_,
           If[Min[err2] <= 10^-10*Abs[Max[err2]],
              Message[General::npdef, cov];
              Return[$Failed]];
-          FindMinimum[Total[(oo.diff)^2/err2], pars, opts],
+          jac = D[diff, {fpars}];
+          If[False,
+             Print["Jacobian ", {Dimensions[jac], pars}];
+             Print["Jacobian ", MatrixForm[jac]]];
+          FindMinimum[
+              Null, pars, Method -> {
+                  "LevenbergMarquardt",
+                  (* The Sqrt[2] is from the definition of the
+                    residual:  f = r.r/2.
+                    The RuleDelayed allows us to evaluate the dot
+                    product after the parameters have numerical
+                    values. *)
+                  "Residual" :> Sqrt[2/err2] * (oo.diff),
+                  "Jacobian" :> Sqrt[2/err2] * (oo.jac)},
+              (* FindMinimum is HoldAll *)
+              Evaluate[Apply[Sequence, FilterRules[{opts}, {Method}]]]],
           ls = LinearSolve[cov];
           FindMinimum[diff.ls[diff], pars, opts]];
-  fpars = Map[First, fm[[2]]];
   (* Use Module to create a closure rather than use
     the Mathematica strategy of using subvalues; see
     https://mathematica.stackexchange.com/questions/15945 *)
@@ -89,10 +105,18 @@ covariantFit2[cov_?MatrixQ, data_?MatrixQ, Except[_List, form_], pars_, vars_,
          model["chiSquared"] = fm[[1]];
          model["FitResiduals"] = diff/.fm[[2]];
          model["BestFitParameters"] = fm[[2]];
-         model["CovarianceMatrix"] := Inverse[hess];
+         model["CovarianceMatrix"] := Block[
+             {ns = NullSpace[hess]},
+             If[Length[ns] == 0, Inverse[hess],
+                Message[covariantFit2::singular,
+                        ns.Map[First, model["BestFitParameters"]]];
+                $Failed]];
          model["CorrelationMatrix"] := Block[
-             {w = 1/Sqrt[Diagonal[model["CovarianceMatrix"]]]},
-             Map[w*#&, model["CovarianceMatrix"]]*w];
+             {covMat = model["CovarianceMatrix"], w},
+             If[covMat === $Failed,
+                $Failed,
+                w = 1/Sqrt[Diagonal[model["CovarianceMatrix"]]];
+                Map[w*#&, model["CovarianceMatrix"]]*w]];
          (* See https://mathematica.stackexchange.com/questions/89626 *)
          model["ParameterTableEntries"] := Map[
              Join[#, {#[[1]]/#[[2]],
