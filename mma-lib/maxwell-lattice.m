@@ -11,8 +11,9 @@ addTo[k_?IntegerQ, co_?ListQ, dx_: 1] :=
 makeCoords2[r_] := (maxx = 0; basis = 0; radius = r; 
   coords = Association[];
   index = Association[]; 
-  Do[If[Norm[{i, j}] < r, basis += 1; If[maxx < i, maxx = i]; 
-                          coords[basis] = {i, j}; index[{i, j}] = basis],
+  Do[If[Norm[{i, j}] < r,
+        basis += 1; If[maxx < i, maxx = i]; 
+        coords[basis] = {i, j}; index[{i, j}] = basis],
      {i, 0, r}, {j, 0, i}])
 
 makeMatrix2[] := (aa = 
@@ -27,10 +28,10 @@ makeMatrix2[] := (aa =
   aa[[index[{0, 0}], index[{1, 0}]]] -= 2; 
   Block[{x, y, epsilon}, 
    Do[{x, y} = coords[k]; 
-    If[! KeyExistsQ[index, {x + 1, y}], 
+    If[!KeyExistsQ[index, {x + 1, y}], 
      epsilon = N[Sqrt[radius^2 - y^2] - x]; 
      If[False, Print[{{x, y}, epsilon}]]; aa[[k, k]] += 1/epsilon - 1;
-      If[! KeyExistsQ[index, {x, y + 1}], 
+      If[!KeyExistsQ[index, {x, y + 1}], 
       epsilon = N[Sqrt[radius^2 - x^2] - y]; 
       If[False, Print[{{x, y}, epsilon}]]; 
       aa[[k, k]] += 1/epsilon - 1]], {k, basis}]]; 
@@ -66,34 +67,36 @@ makeMatrix3[] := (aa =
     SparseArray[
      Flatten[Table[{x, y, z} = coords[i]; 
        Append[Table[
-         If[KeyExistsQ[
-           index, {x, y, z} + delta], {i, 
-            index[{x, y, z} + delta]} -> -1, 
-          Nothing], {delta, {{-1, 0, 0}, {1, 0, 0}, {0, -1, 0}, {0, 1,
-             0}, {0, 0, -1}, {0, 0, 1}}}], {i, i} -> 6], {i, basis}]],
+           If[KeyExistsQ[index, {x, y, z} + delta],
+              {i, index[{x, y, z} + delta]} -> -1, 
+              Nothing],
+           {delta, {{-1, 0, 0}, {1, 0, 0}, {0, -1, 0},
+                    {0, 1, 0}, {0, 0, -1}, {0, 0, 1}}}],
+              {i, i} -> 6],
+                   {i, basis}]],
       basis]]; 
   Block[{x, y, z, epsilon}, 
    Do[{x, y, z} = coords[k];
     (* radius border *)
-    If[! KeyExistsQ[index, {x + 1, y, z}], 
+    If[!KeyExistsQ[index, {x + 1, y, z}], 
      epsilon = N[Sqrt[radius^2 - y^2 - z^2] - x]; 
      aa[[k, k]] += 1/epsilon - 1; 
-     If[! KeyExistsQ[index, {x, y + 1, z}], 
+     If[!KeyExistsQ[index, {x, y + 1, z}], 
       epsilon = N[Sqrt[radius^2 - x^2 - z^2] - y]; 
       aa[[k, k]] += 1/epsilon - 1]; 
-     If[! KeyExistsQ[index, {x, y, z + 1}], 
+     If[!KeyExistsQ[index, {x, y, z + 1}], 
       epsilon = N[Sqrt[radius^2 - x^2 - y^2] - z]; 
       aa[[k, k]] += 1/epsilon - 1]];
     (* top face *)
-    If[y == z, addTo[k, {x, y, z - 1}]; addTo[k, {x, y + 1, z}]];
+    If[y == z, addTo[k, {x, y, z - 1}, -1]; addTo[k, {x, y + 1, z}, -1]];
     (* bottom face *)
-    If[z == 0 , addTo[k, {x, y, 1}]];
+    If[z == 0 , addTo[k, {x, y, 1}, -1]];
     (* side face *)  
-    If[x == y, addTo[k, {x + 1, y, z}]; addTo[k, {x, y - 1, z}]];
+    If[x == y, addTo[k, {x + 1, y, z}, -1]; addTo[k, {x, y - 1, z}, -1]];
     (* Edge *)
-    If[y == z == 0, addTo[k, {x, 1, 0}, 2]]; 
-    If[z == x == y, addTo[k, {x, y, z - 1}]; addTo[k, {x + 1, y, z}]];
-    If[x == 0 && y == 0 && z == 0, addTo[k, {1, 0, 0}, 3]],
+    If[y == z == 0, addTo[k, {x, 1, 0}, -2]]; 
+    If[z == x == y, addTo[k, {x, y, z - 1}, -1]; addTo[k, {x + 1, y, z}, -1]];
+    If[x == 0 && y == 0 && z == 0, addTo[k, {1, 0, 0}, -3]],
       {k, basis}]];
   b = Table[0, {basis}];
   b[[index[{0, 0, 0}]]] = 1.0;)

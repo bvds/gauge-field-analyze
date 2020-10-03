@@ -8,7 +8,7 @@ pointPotential3 /: pointPotential3::cutoff =
  
 pointPotential3 /: pointPotential3::usage = "Return the potential for a point \
 charge in 3 dimensions, calculated using the lowest order lattice \
-discretization.  This was create by Mma notebook \"poisson-equation.nb\""
+discretization.  This was create by Mma notebook \"maxwell-lattice.nb\""
  
 pointPotential3Data = <|{0, 0, 0} -> 0.25167001201814, 
      {1, 0, 0} -> 0.0850033453514733, {1, 1, 0} -> 0.05413043584720376, 
