@@ -5,6 +5,8 @@
 %
 %  Using Zotero to generate physics.bib file.
 %
+%  In Zotero, export as "UTF-8 without BOM" to avoid an error in Ubuntu 20.
+%
 %  A number of sites set language=en which Zotero
 %  passes on to BibTex, but LaTeX package babel doesn't know ``en.''
 %  In Zotero, either remove the language field or set it to ``english''
@@ -17,13 +19,17 @@
 %    sudo unzip revtex4-2-tds.zip -d /usr/share/texlive/texmf-dist/
 %    sudo mktexlsr /usr/share/texlive/texmf-dist/
 %
-\bibliographystyle{apsrev4-2}
+%  RevTex 4.2 does not properly handle very long author lists.
+%  Run this to truncate the author list for the 2014 Brambilla article:
+%    perl -pi -e 's/and Eidelman,.*}/and others}/' physics.bib
 %
+\bibliographystyle{apsrev4-2}
 %
 \usepackage{amsmath}
 \usepackage{mathtools} % For MoveEqnLeft
 \usepackage{amsfonts}
 \usepackage{graphicx}
+\usepackage{afterpage} % For figure placement
 %
 \newcommand{\da}{\dagger}  % symbol for Hermitian conjugate dagger
 \newcommand{\be}{\begin{equation}}
@@ -52,11 +58,12 @@
 
 \begin{abstract}
   We find saddle points of $\SU(N)$ Yang Mills action in three
-  space-time dimensions and examine their properties using
-  various gauge invariant operators.  In addition, we use Landau
-  gauge to study the gauge fields themselves.  The ultimate goal of this work
-  to to determine the functional form of the vacuum gauge field in
-  the large $N$ limit, Witten's Master Field.
+  space-time dimensions for various values of $N$.
+  Using Landau gauge, we examine various correlators of the gauge fields
+  in the vicinity of the saddle-point.
+  The ultimate goal of
+  this work to to determine the functional form of the vacuum gauge
+  field in the large $N$ limit, Witten's Master Field.
 \end{abstract}
 
 \pacs{Valid PACS appear here.
@@ -77,7 +84,7 @@ lattice gauge theory has become the tool of choice for
 non-perturbative studies of QCD.  Although numerical
 calculations using Wilson's lattice have generated numerous
 physical results, the nature of the QCD vacuum itself
-has remained somewhat of a mystery.
+has remained somewhat of a mystery~\cite{brambilla_qcd_2014}.
 
 % In 1982 't Hooft suggested that center vortices could
 % explain confinement and subsequent numerical experiments
@@ -89,14 +96,13 @@ has remained somewhat of a mystery.
 
 In 1979, Witten pointed out that QCD has some rather remarkable
 properties in the $N \to \infty$ limit.  In particular,
-expectation values of observables become dominated by a single
+expectation values of gauge invariant observables become dominated by a single
 classical configuration of the gauge field, the
 ``master field''~\cite{witten_1/n_1980}.
 Although this idea was compelling, there seemed to be no
-way to figure out exactly what this Master Field could be.
-
+way to figure out exactly what this master field could be.
 However, in the intervening 40 years, we have learned a number
-of things that make the quest for the master field perhaps
+of things that make the quest for this master field perhaps
 attainable.  We note the following:
 
 \begin{enumerate}
@@ -112,46 +118,61 @@ attainable.  We note the following:
  perturbative and non-perturbative calculations~\cite{lucini_sun_2013}.
  In particular, Teper and collaborators have shown this to be the case for
  the glueball spectrum in both 2+1~\cite{teper_$mathrmsun$_1998,lucini_$mathrmsun$_2002,athenodorou_sun_2017}
- and 3+1 dimensions~\cite{teper_large-n_2005}.  Indeed, properties
- of the $N\to\infty$ master field should be seen, in an approximate sense,
- in $\SU(2)$ and $\SU(3)$ calculations.
+ and 3+1 dimensions~\cite{teper_large-n_2005}.
 
 \item The behavior of $\SU(N)$ gauge theory in 3 space-time dimensions
   is remarkably similar to the 4 dimensional theory~\cite{teper_$mathrmsun$_1998,lucini_$mathrmsun$_2002,teper_large-n_2005}.
-  Although the scale is generated quite differently in each case ---
-  in 4 dimensions, it is generated dynamically through quantum
-  fluctuations while in 3 dimensions the coupling is dimensionful ---
-  once a scale is generated, the theories behave in a very similar manner.
+  Although the scale is generated quite differently in each case---in
+  4 dimensions, it is generated dynamically through quantum
+  fluctuations while in 3 dimensions the coupling is dimensionful---once
+  the scale exists, the theories behave in a very similar manner.
 
 \end{enumerate}
+%
+The idea of exploiting this combination (pure gauge theory, 2+1 dimensons,
+and large $N$) to study QCD  is not new.  Indeed, a number of
+researchers, most notably Mike Teper and various collaborators,
+have pursued this strategy vigorously over the last 25
+years~\cite[Section~5.2]{lucini_sun_2013},
+The main focus of that work has been to connect gauge
+theory to some effective string theory, with the main result being
+that string theory works suprisingly well
+as a description of large-$N$ gauge theory~\cite{brandt_effective_2016}.
+In particular, the lowest
+order string theory (the Nambu-Goto string) describes the confining
+potential at length scales well below what one would expect
+from dimensional arguments.
 
-These facts suggest a research program for studying the QCD vacuum state:
-one should look at approximate saddle-points of the gauge field action
-in 3 spacetime dimensions for various values of $N$, looking for a
-description that emerges in the $N\to \infty$ limit.
-Hopefully, this description
-can then be generalized to the 4 dimensional theory.
+The concept of the master field only exists in the $N\to \infty$
+limit.  At finite $N$ and finite lattice spacing, we would expect the associated
+saddle-points to exist in some approximate sense.  In a numerical
+procedure, one might expect that a numerical search for a saddle-point
+would initially move toward a physically interesting field
+configuration, but eventually move to toward the bare vacuum state
+or some other physically uninteresting state.  This was what was seen
+in various lattice cooling studies in the 1980s where one
+would reach a ``semiclassical plateau'' before eventually
+decaying to the bare vacuum state~\cite{campostrini_cooling_1989,teper_cooling_1994}.  As $N$ increases, one would expect this ``semiclassical plateau''
+to be come more and more robust.
 
-If we take the Master Field picture seriously, then a typical gauge
-field configuration in a finite $N$ Monte Carlo simulation should
-contain some approximation of this master field and should be able to
-produce the full spectrum of long-range observables. This
-approximation should become increasingly precise as $N\to\infty$.
-
-In the present work, we will pursue the first steps of this program.
-We will start with conventional 2+1 dimension lattice gauge
-theory field configurations for various values of $N$ and
-calculate the nearest associated saddle-point configurations.
-Using these configurations we can determing  measure various
-physical observables and see how well they approximate the
-full theory.
-
-We will pay special attention to Landau gauge transformed
-field configurations.  Landau gauge gives us the best hope
+In the present work, we will turn our attention back
+to this ``semi-classical plateau'' and attempt to understand
+the associated large $N$ limit.  Rather than locally
+minimizing the action, we will look for saddle-points of
+the action, calculated globally, using Newton's method.
+Our calculations will focus on $N=3,4$.
+Also, rather than measuring physical observables, we will focus
+on the fields themselves, using Landau gauge.
+Landau gauge gives us the best hope
 of connecting the Wilson link variables to the continuum
 Yang Mills fields.
 
+In Section~\ref{def}, we introduce the Wilson action and
+a define a number of useful norms.  In Section~\ref{observables} ...
+
+
 \section{Definitions}
+\label{def}
 
 The purpose of the section is to set some notation.
 
@@ -253,6 +274,7 @@ use $\znorm{U_\mu(x)}$ to define the associated lattice norm
 \eq
 
 \section{Observables}
+\label{observables}
 
 We will use Polyakov loops and Wilson loops to monitor the
 behavior of the gauge fields when moving from
@@ -271,104 +293,18 @@ might behave during this process.  We will not tackle that
 issue in the present investigation, but will stick to the bare
 (unimproved) operators.
 
-\subsection{Coulomb corrections}
-
-In $D=4$ spacetime directions, there is a clear separation---both
-experimentally and in lattice calculations---between a
-short distance regime where the heavy quark potential is
-dominated by a $1/r$ Coulomb force potential and a
-long-distance regime having a linear confining
-potential~\cite{bali_static_2000,brambilla_effective-field_2005}.
-In $D=3$, the Coulomb potential goes as $\log(r)$ and there is no 
-clear separation and some care must be taken to distinguish it from
-the linear confining potential.  In this section, we derive
-the functional form of the Coulomb contribution to
-the effective potential for Polyakov loop correlators and Wilson
-loops.
-
-If we consider a pair of charges separated by some
-distance $r$ at some instant in time, the Coulomb potential is
-equal to the energy stored in the electric
-field produced by those charges (electrostatics in $D-1$
-dimensions).  Equivalently, we can consider currents
-in $D$ Euclidean spacetime dimensions.  In that case,
-the classical action is equal to the
-energy of the magnetic field produced by those currents
-(magnetostatics in $D$ dimensions).  Using the textbook
-formula~\cite{jackson_classical_1975}
-for the magnetostatic energy associated with a current density
-$\mathbf{J}(\mathbf{x})$,
-%
-\be
-S = \frac{1}{2} \int d^3\mathbf{x}\, d^3\mathbf{x}^\prime\,
-\frac{\mathbf{J}(\mathbf{x}) \cdot
-  \mathbf{J}(\mathbf{x}^\prime)}{
-  \left| \mathbf{x}-\mathbf{x}^\prime\right|} \, ,
-\eq
-%
-we can find the action associated with a number of thin wires
-carrying a constant current. (We set the current equal to 1 in
-the following.)
-
-In the case of two Polyakov loops with opposite currents separated
-by distance $r$ with periodic boundary conditions, period $L$,
-there is a self-energy term plus an interaction term:
-%
-\begin{eqnarray}
-S_\Phi &=& 2 \int_0^L dx \int_{x+\varepsilon/2}^\infty dy
-\left(\frac{1}{y-x} -\frac{1}{\sqrt{(y-x)^2 + r^2}}\right) \\
-  &=& 2 L \log\left(\frac{r}{\varepsilon}\right) + O(\varepsilon)\, .
-\end{eqnarray}
-%
-Thus, we obtain the usual $L \log(r)$ term plus a
-self-energy term proportional to the length
-of the currents, $2L$.  The $\log(\varepsilon)$ divergence
-is from approximating the current density as a thin wire.
-Since the normalization
-of this field relative to the bare link fields is
-unknown, one can fit the Coulomb contribution to the
-Polyakov loop correlator using
-\be
-       c_q 2 L \log(r) + c_p 2 L \, , \label{cpf}
-\eq
-where $c_q$ and $c_p$ are unknown.
-
-In the case of a $w_1\times w_2$ Wilson loop, we obtain
-a more complicated expression
-%
-\begin{eqnarray}
-  S_W &=& 2 \int_0^{w_1} dx \int_{x+\varepsilon}^{w_1} \frac{dx^\prime}{x^\prime-x}
-               \nonumber\\
-               & &  - \int_0^{w_1} dx \int_{0}^{w_1} \frac{dx^\prime}{
-                 \sqrt{(x^\prime-x)^2+ w_2^2}}
-               \nonumber\\
-               & &  +\left[w_1 \leftrightarrow w_2 \right]\\
-               &=&  \Theta\!\left(w_1, w_2\right) +
-               \Theta\!\left(w_2, w_1\right)
-              - 2 (w_1 + w_2) \log(\varepsilon) + O(\varepsilon) 
-\end{eqnarray}
-where
-\be
-\Theta\!\left(\ell, r\right) = 2 \left(
-    \sqrt{\ell^2+r^2} - \ell - r
-    - \ell\log\left(\frac{\sqrt{\ell^2+r^2} + \ell}{r\ell}\right)
-   \right) \;.
-\eq
-Similar the the above, 
-we obtain a self-energy term that is proportional to the perimeter of
-the rectangle.  Thus, we can fit the Coulomb
-contribution to the Wilson loop using
-%
-\be
-    c_q  \left(\Theta\!\left(w_1, w_2\right) +
-               \Theta\!\left(w_2, w_1\right)\right)
-        + c_p  2\left(w_1+w_2\right)  \label{cwf}
-\eq
-%
-where $c_p$ and $c_q$ in Eqns.~(\ref{cpf}) and (\ref{cwf})
-should be equivalent.
 
 \subsection{Polyakov loop correlators}
+
+\begin{figure}
+  \includegraphics{polycorr12-16-20}
+  \caption{Polyakov loop correlator vs.\ loop area together with
+    a fit to Eqn.~(\ref{stringmodel}) for an $\SU(3)$,
+    $12\times 16 \times 20$ lattice, $\beta=28$,
+    with $L_\mu \left|\mathbf{r}\right|>20$.
+    Each color represents a different Polyakov loop direction.
+    The data is from 300 lattice configurations. \label{pcorr16}}
+\end{figure}
 
 Let us define a Polyakov loop that winds once around the lattice
 in the direction $\mu$ and goes through site $x$:
@@ -384,16 +320,19 @@ and define the correlator:
            \label{pcorr}
 \eq
 %
-where the normalization constant $C_\Phi(\mathbf{r})$ is chosen such that
-$\Phi_\mu(\mathbf{r})=1$ for the bare vacuum and
+where $\mathbf{r}$ has units of $a$ and
 $\mathbf{d}(x-y)$ is the minimum length positive-component
 vector between $x$ and $y$, taking into account lattice periodicity
 and rotation \& reflection symmetries.
+The normalization constant $C_\Phi(\mathbf{r})$ is chosen such that
+$\Phi_\mu(\mathbf{r})=1$ for the bare vacuum.
 To obtain the string tension,
 we fit the correlator $\Phi_\mu(\mathbf{r})$ to an effective
 potential $F_\mu(\mathbf{r})$.
 This effective potential contains an area law term (linear confinement)
-plus Coulomb corrections from Eqn.~(\ref{cpf}) plus power law corrections:
+plus Coulomb corrections
+%(Appendix~\ref{coulomb})
+plus power law corrections:
 %  M. Teper, “Large N and confining flux tubes as strings -
 %  a view from the lattice,”
 %  Acta Phys. Polon. B 40, 3249 (2009). [arXiv:0912.3339 [hep-lat]].
@@ -425,16 +364,6 @@ corrections~\cite{teper_large_2009,aharony_effective_2013}.
 We use the effective potential form since we are interested in
 the behavior over a range transverse separations, rather than
 just the large $\mathbf{r}$ limit.
-
-\begin{figure}
-  \includegraphics{polycorr12-16-20}
-  \caption{Polyakov loop correlator vs.\ loop area together with
-    a fit to Eqn.~(\ref{stringmodel}) for an $\SU(3)$,
-    $12\times 16 \times 20$ lattice, $\beta=28$,
-    with $L_\mu \left|\mathbf{r}\right|>20$.
-    Each color represents a different Polyakov loop direction.
-    The data is from 300 lattice configurations. \label{pcorr16}}
-\end{figure}
 
 When measuring $\Phi_\mu(\mathbf{r})$ for a single lattice configuration,
 the link fields are re-used for each value of $\mathbf{r}$.  This means
@@ -468,18 +397,9 @@ $c_1$, $c_p$, and $c_q$ are highly correlated.
 This example shows that inclusion of the transverse
 images of the Polyakov loop are important for a good fit.
 
+
 \subsection{Wilson loops}
 
-\begin{figure}
-  \includegraphics{wilsonFit-16}
-  \caption{Wilson loop expectation value vs.\ loop size together with
-    a fit to Eqn.~(\ref{wfit}) for an $\SU(3)$,
-    $16^3$ lattice, $\beta=28$.  The data is from 200 lattice
-    configurations.  The error bars on
-    the data are too small to be seen. \label{wilsonFit16}}
-\end{figure}
-
-%
 \begin{table}
   \caption{Parameters for the fit shown in Fig.~\ref{wilsonFit16}.
     \label{wilsonparameters}}
@@ -497,6 +417,15 @@ images of the Polyakov loop are important for a good fit.
   \end{tabular}
 \end{table}
 
+\begin{figure}
+  \includegraphics{wilsonFit-16}
+  \caption{Wilson loop expectation value vs.\ loop size together with
+    a fit to Eqn.~(\ref{wfit}) for an $\SU(3)$,
+    $16^3$ lattice, $\beta=28$.  The data is from 200 lattice
+    configurations.  The error bars on
+    the data are too small to be seen. \label{wilsonFit16}}
+\end{figure}
+
 We define the Wilson loop operator in the $\mu,\nu$-plane using a product of
 link fields lying on the perimeter of a $w_1\times w_2$ rectangle
 \be
@@ -510,6 +439,7 @@ $\mathcal{W} = \left\langle 0 \right|
  \Tr \wilson{\mu}{\nu}{w_1}{w_2} \left|0\right\rangle $
 to an effective
 potential containing a linearly confining term plus Coulomb terms
+% (Appendix~\ref{coulomb})
 plus power law corrections:
 %
 \begin{align}
@@ -549,65 +479,6 @@ The Coulomb term $c_q$ is not significant, but it is highly anti-correlated
 with the string tension $\sigma a^2$.  The Wilson loop fit does not
 do a very good job of untangling the two.
 
-\subsection{Operator distributions}
-
-The quantity that is actually measured can be generalized, as well.
-For some loop operator $\mathcal{O}\in\SU(N)$, one usually
-measures the expectation value of the trace,
-$\langle 0 | \Tr \mathcal{O} |0\rangle$, or for $k$-strings,
-one measures expectation values of higher order operators
-like $\Tr\left( \mathcal{O}^k\right)$.
-However, this is not the most general gauge-invariant observable.
-The most general physical observable is the distribution of the
-eigenvalues of $\mathcal{O}$.  If $e^{i\lambda_1}$,\ldots, $e^{i\lambda_N}$
-are the eigenvalues of $\mathcal{O}$, we can order $\lambda_j$ in
-some fashion $\lambda_1\ge \lambda_2 \ge \ldots$ and demand that
-$\lambda_j-\lambda_k\le 2\pi$ (see Appendix~\ref{roots}).
-In that case, physically
-distinct values lie on an ($N-1$)-simplex with the elements of the
-center of $\SU(N)$ at the vertices.
-
-\begin{figure}
-  \includegraphics{polydist1}
-  \includegraphics{polydistr}
-  \caption{Distribution for the Wilson loop operator
-    $\wilson{\mu}{\nu}{5}{5}$ for $\SU(3)$, $\beta=28$, $L^3=16^3$,
-    averaging over 100 lattice configurations.
-    Also shown is the distribution for the strong coupling limit.
-    The distribution is
-    symmetric under charge conjugation,
-    % $2 \lambda_1 +\lambda_2 \to 2 \lambda_1 +\lambda_2 $,
-    $\lambda_2 \to -\lambda_2$.
-   \label{polydist1}}
-\end{figure}
-% \begin{figure}
-%  \includegraphics{polydist2}
-%  \caption{Distribution for $\Tr \wilson{\mu,\nu}{5}{5}/N$  for
-%    the data shown in Fig.~\ref{polydist1}.  
-%   The distribution is symmetric under complex conjugation,
-%    $\mathcal{O}\to\mathcal{O}^\dagger$.
-%    The distribution lies inside the blue lines representing
-%    the edges of the triangle in Fig.~\ref{polydist1}.
-%    \label{polydist2}}
-%\end{figure}
-
-By way of example, we show the distribution of the
-$5\times5$ Wilson loop operator for $\SU(3)$ in Fig.~\ref{polydist1}.
-For comparison, we also show the distribution for
-the strong coupling limit (random $\SU(N)$ matrices).
-Notice that the shape of the two distributions appear to
-be quite similar, except that the $\wilson{\mu}{\nu}{5}{5}$ distribution
-is shifted toward $\mathbb{I}$, reflecting the fact that
-$\langle\Tr \wilson{\mu}{\nu}{5}{5}\rangle >0$.
-
-% We can relate the distribution in $\lambda_j$-space to the
-% distribution of $\Tr\mathcal{O}$.
-% For $\SU(2)$, $\Tr \mathcal{O}$ is real and for $\SU(3)$, $\Tr \mathcal{O}$
-% is complex.  In both cases, the map from the $\lambda_j$-space to
-% $\Tr \mathcal{O}$ is injective and one can just as well look at the
-% distribution of $\Tr \mathcal{O}$; see Fig.~\ref{polydist2}.
-% However, for $N>3$, information is lost when taking the trace
-% of $\mathcal{O}$.
 
 \section{Landau gauge}
 
@@ -667,13 +538,6 @@ That is, when computing the logarithms in Eqn.~(\ref{landau}) one uses
 
 
 \subsection{Maximal center gauge}
-
-Although maximal center gauge~\cite{del_debbio_center_1997}
-has been an important topic in the
-literature~\cite{greensite_confinement_2003},
-we will not consider it separately from Landau gauge.
-This section explains why and introduces our best algorithm
-for finding Landau gauge.
 
 \begin{table}
   \caption{Local search for maximal center gauge,
@@ -772,6 +636,13 @@ for finding Landau gauge.
     12 & center step       & 0.4751 & 12287 &   1 &   0\\
   \end{tabular}
   \end{table}
+
+Although maximal center gauge~\cite{del_debbio_center_1997}
+has been an important topic in the
+literature~\cite{greensite_confinement_2003},
+we will not consider it separately from Landau gauge.
+This section explains why and introduces our best algorithm
+for finding Landau gauge.
 
 On the lattice, maximal center gauge corresponds
 to a gauge transform that minimizes $\znorm{\config}$. 
@@ -931,7 +802,7 @@ $U_\mu(x)$ and $U_\nu(y)$.  For example, for $x=y$,
    \Re\Tr\left(F_\mu(x) \sqrt{U_\mu(x)} \left(T_a T_b + T_b T_s\right) \sqrt{U_\mu(x)}\right) \; .
    \label{diaghess}
 \eq
-The other terms of the Hessian follow in a similar fashion.
+The $x \neq y$ terms of the Hessian are constructed in a similar fashion.
 
 Some shifts $\mathbf{w}$ correspond to gauge transforms.
 As we shall see, such shifts are problematic for any saddle
@@ -992,6 +863,15 @@ as well as a lattice-wide Euclidean norm, averaged over links
   \label{eigenAll}}
 \end{figure}
 
+\begin{figure}
+\includegraphics{shiftPairs}
+\caption{Scatter plot of eigenvalue-gradient pairs of $H^\prime$
+  for a $6^3$ lattice, $\beta = 8.175$, $N=3$.  The pairs above the
+  v-shaped wedge correspond to large shifts and will dominate
+  the solution to the linear system, Eqn.~(\ref{linear2}).
+  \label{shiftPairs}}
+\end{figure}
+
 In principle, to find the nearest saddle point, one would
 find $H$ and $\mathbf{q}$, solve the linear system
 \be
@@ -1027,16 +907,7 @@ Then we can solve the linear system
 and set $\mathbf{w} = - P_G^T \mathbf{y}^\prime$.  However, this is
 still insufficient to yield a well-behaved linear system.
 
-\begin{figure}
-\includegraphics{shiftPairs}
-\caption{Scatter plot of eigenvalue-gradient pairs of $H^\prime$
-  for a $6^3$ lattice, $\beta = 8.175$, $N=3$.  The pairs above the
-  v-shaped wedge correspond to large shifts and will dominate
-  the solution to the linear system, Eqn.~(\ref{linear2}).
-  \label{shiftPairs}}
-\end{figure}
-
-To better understand this issue, let us find the eigenvalues
+To better understand this issue, let us define the eigenvalues
 $\left(\heigen_1, \heigen_2, \ldots\right)$ and
 eigenvectors $V=\left(\mathbf{v}_1, \mathbf{v}_2, \ldots\right)$
 of $H^\prime$ and express Eqn.~(\ref{linear2}) in the eigenspace of $H^\prime$:
@@ -1051,10 +922,10 @@ where $\overline{\mathbf{y}} = V \mathbf{y}^\prime$ and
 $\overline{\mathbf{q}}  = V \mathbf{q}^\prime$.
 The solution is simply
 \be
-    \overline{y}_i = \frac{\overline{q}_i}{\heigen_i} \; .
+    \overline{y}_i = \frac{\overline{q}_i}{\heigen_i} \; ;
 \eq
-In any case where $\left|\heigen_i\right|\ll
-\left|\overline{q}_i\right|$,
+see Fig.~\ref{shiftPairs} for an example. 
+For any case where $\left|\heigen_i\right|\ll \left|\overline{q}_i\right|$,
 there will be a large shift that will dominate the solution
 to the linear system.
 Thus, we impose cutoffs $\Lambda_2$ and $\Lambda_\mathrm{max}$:
@@ -1085,7 +956,7 @@ Typically, $\Lambda_s = 1$ or $2$ is used.
 Armed with these three tools:  removing infinitesimal-gauge-transform shifts,
 imposing the $\Lambda$ cutoffs, and using the damping factor $\gamma$,
 we can apply the shift iteratively and find saddle-point configurations
-that are of physical interest.  
+that are of physical interest.
 
 For a $20^3$ lattice, $\SU(3)$, the Hessian is a
 $192,000 \times 192,000$ matrix with almost $20\times 10^6$
@@ -1104,8 +975,8 @@ then the numerical calculation becomes much simpler.  Since this truncation
 is {\em ad hoc}, it must be determined empirically whether it
 has any utility.  In this case, links in each direction
 are updated in a checkerboard fashion: first the
-$\mu=1$ even links, then $\mu=1$ odd links,
-$\mu=2$ even links, {\em et cetera}.  We will refer to this
+$\mu=1$, $x$ even links, then $\mu=1$, $x$ odd links,
+$\mu=2$, $x$ even links, {\em et cetera}.  We will refer to this
 as the ``single-link saddle-point method.''
 
 
@@ -1114,7 +985,7 @@ approach used in a number of investigations of ``lattice
 cooling''~\cite{trottier_exploring_1994,teper_cooling_1994,
   gonzalez-arroyo_gauge_1995,gonzalez-arroyo_classical_1996,
   bonati_comparison_2014}.
-In this approach, one attempts to find a local minimum
+In lattice cooling, one attempts to find a local minimum
 of the action by minimizing the action for
 each link separately, iterating over all of the links of the lattice.
 In the folliwng, we will compare the lattice cooling approach to
@@ -1136,18 +1007,15 @@ then the odd links.
   28 steps.
   ``15-a'' starts with a different lattice configuration but uses the
    same parameters; 35 steps.
-   ``5-sa'' uses the same starting configuration as ``5-a`` but steps
-   are calculated with the diagonal color blocks of the Hessian and
-     $\gamma=0.05$; 100 steps, every 5th step is plotted.
+   ``5-sb'' uses the same starting configuration as ``5-a`` but steps
+   are calculated with the single-link saddle-point method,
+     $\gamma=0.1$; 75 steps, every 5th step is plotted.
+   ``5-sc'' uses the same starting configuration as ``5-a`` but steps
+   are calculated with lattice cooling,
+     $\gamma=0.1$; 50 steps, every 5th step is plotted.
     \label{trajectory3}}
 \end{figure}
 
-
-\begin{figure}
-\includegraphics{"wilsonvalues-3-4-12-16-20"}
-\caption{Wilson loop expectation values along the ``5-a'' trajectory
- shown in Fig.~\ref{trajectory3}.}
-\end{figure}
 
 \begin{figure}[p]
 \includegraphics{"stringmodel-3-4-12-16-20-a2sigma"}\hfill
@@ -1157,12 +1025,20 @@ then the odd links.
 \includegraphics{"stringmodel-3-4-12-16-20-cPerimeter"}\\
 \vspace{3ex}
 \includegraphics{"stringmodel-3-4-12-16-20-chiSquared"}
-\caption{Model paramters along the trajectory for the three trajectories
-  shown in in Fig.~\ref{trajectory3}.  Note that error bars generally
-  decrease as short-length-scale fluctuations are removed from
-  the fields. \label{traj4b}
+\caption{$\chi^2$ fit of polyakov loop correlators to $F_\mu(\mathbf{r})$,
+  Eqn.~(\ref{stringmodel}),
+  for points along the four trajectories
+  shown in in Fig.~\ref{trajectory3}.
+  The covariance matrix used in the fit was
+  constructed from 1100 lattice configurations.
+  Note that error bars generally decrease as short-length-scale
+  fluctuations are removed from the fields.  \label{traj4b}
  }
 \end{figure}
+
+% Allow any full-page figure to be placed just after
+% the end of the current page.
+\afterpage{\clearpage}
 
 By applying the procedure discussed in Section~\ref{saddle} iteratively,
 we produce a trajectory of lattice configurations $\config_0$,
@@ -1183,7 +1059,7 @@ if the Master Field picture is correct, we should see, as
 one moves along the trajectory, that observables that persist
 in the large $N$ limit, like the string tension and the
 glueball spectrum, should persist, at least approximately,
-while the short length scale (perturbative) fluctuations are removed.
+after the short length scale (perturbative) fluctuations are removed.
 
 For finite $N$ and $a$, we don't expect this picture to
 hold exactly, nor do we expect the saddle points to be
@@ -1223,6 +1099,13 @@ This procedure is much easier to apply numerically.
 As shown in trajectory {\bf lc},
 we see that that the string tension can remain relatively stable,
 but $\config_\kappa$ eventually degrades to the trivial vacuum.
+
+
+\begin{figure}
+\includegraphics{"wilsonvalues-3-4-12-16-20"}
+\caption{Wilson loop expectation values along the ``5-a'' trajectory
+ shown in Fig.~\ref{trajectory3}.}
+\end{figure}
 
 {\bf  To do:
   finish $\SU(3)$, $L^3=20^3$ calculation and
@@ -1475,6 +1358,7 @@ Thus, the norm defined in Eqn.~(\ref{sunorm}) is simply
 \eq
 
 
+
 \section{Lattice configurations}
 \label{configurations}
 
@@ -1555,8 +1439,8 @@ as well as a lattice-wide Euclidean norm, averaged over sites
 
 The lattice norm is invariant under global color rotations and
 the gradient will be zero in those directions.
-Thus, we introduce an $N\times n_G$ matrix $G$
-representing $N$ infinitesmimal global color rotations.
+Thus, we introduce an $(N^2-1)\times n_G$ matrix $G$
+representing $N^2-1$ infinitesmimal global color rotations.
 We use the associated null-space operator $P_G$,
 \be
 G P_G^T = 0 \;, \quad P_G P_G^T = \mathbb{I} \; ,
@@ -1684,9 +1568,9 @@ variables.  However, we can simplify the problem by working
 in a basis where $F$ is diagonal.  Thus, we find the singular
 value decomposition $F = V F^\prime W^\dag$ where $F^\prime$ is diagonal,
 positive semi-definite and $V$ and $W$ are unitary.
-If we define $U^\prime=W^\dag U V$, $U^\prime$ is unitary with some
-phase $\theta$: $\det U^\prime = \det V W^\dag = e^{i \theta}$.
-We further make the {\em asatz} that $S$ is minimized by choosing $U^\prime$
+If we define $U^\prime=W^\dag U V$, $U^\prime$ is unitary with some overall
+phase $\theta/N$: $\det U^\prime = \det V W^\dag = e^{i \theta}$.
+We make the {\em asatz} that $S$ is minimized by choosing $U^\prime$
 to be diagonal:
 \be
 U^\prime = \begin{pmatrix}
@@ -1705,11 +1589,11 @@ S = % -\Re\Tr\left(U^\prime F^\prime\right) =
     -\sum_{i=1}^N \cos\left(\lambda_i\right) F_{i,i}^\prime \label{diagmin}
 \eq
 with respect to $\left\{\lambda_1, \lambda_2, \ldots, \lambda_{N-1}\right\}$.
-In practice, the minimum of (\ref{diagmin}) is computed numerically
+In practice, the minimum of (\ref{diagmin}) can be computed numerically
 using standard library routines.
-One can show that if $U_\mathrm{min}^\prime$ is a minimum of
-(\ref{diagmin}) then $W U_\mathrm{min}^\prime V^\dag$ is a global minimum
-of Eqn.~(\ref{uf}) with respect to $U$.
+One can show that if $\left\{\lambda_1, \lambda_2, \ldots, \lambda_{N-1}\right\}$ is a minimum of
+(\ref{diagmin}) then $U = W U^\prime V^\dag$ is indeed a global minimum
+of Eqn.~(\ref{uf}) in the full $(N^2-1)$-dimensional space.
 
 \bibliography{physics}  % Use physics.bib
 

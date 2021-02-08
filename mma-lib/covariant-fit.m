@@ -109,7 +109,7 @@ covariantFit2[cov_?MatrixQ, data_?MatrixQ, Except[_List, form_], pars_, vars_,
              {ns = NullSpace[hess]},
              If[Length[ns] == 0, Inverse[hess],
                 Message[covariantFit2::singular,
-                        ns.Map[First, model["BestFitParameters"]]];
+                        Chop[ns].Map[First, model["BestFitParameters"]]];
                 $Failed]];
          model["CorrelationMatrix"] := Block[
              {covMat = model["CovarianceMatrix"], w},
@@ -118,14 +118,23 @@ covariantFit2[cov_?MatrixQ, data_?MatrixQ, Except[_List, form_], pars_, vars_,
                 w = 1/Sqrt[Diagonal[model["CovarianceMatrix"]]];
                 Map[w*#&, model["CovarianceMatrix"]]*w]];
          (* See https://mathematica.stackexchange.com/questions/89626 *)
-         model["ParameterTableEntries"] := Map[
-             Join[#, {#[[1]]/#[[2]],
-                      2 (1 - CDF[StudentTDistribution[dof],
-                                 Abs[#[[1]]/#[[2]]]])}]&,
-                 Transpose[
-                     {Map[#[[2]]&, model["BestFitParameters"]],
-                      Sqrt[Diagonal[model["CovarianceMatrix"]]]}]];
-         model["ParameterErrors"] := Sqrt[Diagonal[model["CovarianceMatrix"]]];
+         model["ParameterTableEntries"] := Block[
+             {covMat = model["CovarianceMatrix"]},
+             If[covMat === $Failed,
+                Map[{#[[2]], Null, Null, Null}&,
+                    model["BestFitParameters"]],
+                Map[
+                    Join[#, {#[[1]]/#[[2]],
+                             2 (1 - CDF[StudentTDistribution[dof],
+                                        Abs[#[[1]]/#[[2]]]])}]&,
+                        Transpose[
+                            {Map[#[[2]]&, model["BestFitParameters"]],
+                             model["ParameterErrors"]}]]]];
+         model["ParameterErrors"] := Block[
+             {covMat = model["CovarianceMatrix"]},
+             If[covMat === $Failed,
+                Map[Null&, model["BestFitParameters"]],
+                Sqrt[Diagonal[covMat]]]];
          model["ParameterTable"] := Style[TableForm[
              model["ParameterTableEntries"],
              TableHeadings->{Map[First, model["BestFitParameters"]],

@@ -15,7 +15,7 @@ AC_PROG_RANLIB
 AC_CHECK_TOOL(AR, ar, [ar])
 
 # Initialise automake
-AM_INIT_AUTOMAKE([-Wall -Werror foreign subdir-objects])
+AM_INIT_AUTOMAKE([-Wall -Wno-error foreign subdir-objects])
 
 # defines...
 AC_CONFIG_HEADERS([include/ganalyze_config_internal.h])

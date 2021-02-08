@@ -594,15 +594,16 @@ casimir[state_] :=
 
 
 stringModel::usage = "Fit to an exponential plus a constant term, including the universal string correction as well as Coulomb force contributions.  See Andreas Athenodorou, Barak Bringoltz, Michael Teper https://arxiv.org/abs/0709.0693; Ofer Aharony & Zohar Komargodski arXiv:1302.6257v2 [hep-th] 12 Mar 2013; Teper review article http://arxiv.org/abs/0912.3339  The Coulomb force contribution consists of a log(r) term plus a perimeter term.  For option \"stringTension\"->Automatic (default), fit string tension, else use value given.  Likewise for \"coulomb\" and \"perimeter.\"";
-Options[stringModel] = {printResult -> False, "lowerCutoff" -> 0,
+Options[stringModel] = {printResult -> False, "lowerCutoff" -> 1/2,
                         "upperCutoff" -> Infinity, "order" -> 0,
                         "eigenstate" -> 0, "NambuGoto" -> False,
                         "offAxis" -> 0, "linearLCorrections" -> True,
                         "pointPotential" -> True,
                         "rescaleCovarianceMatrix" -> False,
                         "stringTension" -> Automatic,
-                        "coulomb" -> Automatic, "perimeter" -> Automatic,
+                        "coulomb" -> 0, "perimeter" -> 0,
                         "covarianceMatrix" -> None};
+stringModel::lowerCutoff = "Invalid combination of \"pointPotential\" and \"lowerCutoff,\" exiting";
 stringModel[tallyData_, OptionsPattern[]] :=
  Block[(* Protect against any global definitions of model parameters
          and allow for local constant value. *)
@@ -619,8 +620,8 @@ stringModel[tallyData_, OptionsPattern[]] :=
       sin2theta2 = Function[{x, y}, (2 x y/(x^2 + y^2))^2],
       filter = Map[First, Select[
           MapIndexed[{#2[[1]], #1}&, Keys[tallyData]],
-          (Norm[#[[2,1]]]*#[[2,-1]] > OptionValue["lowerCutoff"] &&
-           Norm[#[[2,1]]]*#[[2,-1]] < OptionValue["upperCutoff"])&]]},
+          (Norm[#[[2,1]]] > OptionValue["lowerCutoff"] &&
+           Norm[#[[2,1]]] < OptionValue["upperCutoff"])&]]},
   data = Normal[tallyData][[filter]];
   cov = If[OptionValue["covarianceMatrix"] === None,
            Map[(#[[2, 2]]^2)&, data],
@@ -628,8 +629,9 @@ stringModel[tallyData_, OptionsPattern[]] :=
                  If[OptionValue["rescaleCovarianceMatrix"],
                     rescaleCovarianceMatrix[cc, Map[#[[2,2]]&, data]],
                     cc]]];
-  If[OptionValue["stringTension"] =!= Automatic,
-     a2sigma = OptionValue["stringTension"]];
+  If[Not[OptionValue["pointPotential"] || OptionValue["lowerCutoff"] > 0],
+     Message[stringModel::lowerCutoff];
+     Return[$Failed]];
   If[OptionValue["coulomb"] =!= Automatic,
      cCoulomb = OptionValue["coulomb"]];
   If[OptionValue["perimeter"] =!= Automatic,
@@ -637,6 +639,8 @@ stringModel[tallyData_, OptionsPattern[]] :=
      (* With only one longitudinal value, this can
        be absorbed into c0. *)
      If[nll<2, cPerimeter = 0]];
+  If[OptionValue["stringTension"] =!= Automatic,
+     a2sigma = OptionValue["stringTension"]];
   If[OptionValue["order"]<2, c1 = 0];
   (* With only one longitudinal value, this is indistinguishable
     from the string tension.
@@ -674,14 +678,15 @@ stringModel[tallyData_, OptionsPattern[]] :=
         but preferred sign was const<0. *)
       Sum[Block[
           {r = Sqrt[x[i]^2 + y[i]^2],
-           offAxis = sin2theta2[x[i], y[i]]}, 
+           offAxis = sin2theta2[x[i], y[i]],
+           pointPot = OptionValue["pointPotential"]}, 
           Which[
               potentialForm,
               (* area law potential shape with Coulomb correction
                 and power law  corrections *)
               c0*Exp[-r*ll*a2sigma -
-                     2*cCoulomb*ll*If[OptionValue["pointPotential"],
-                                      pointPotential2[x[i], y[i]], Log[r]] -
+                     cCoulomb*ll*If[pointPot,
+                         pointPotential2[x[i], y[i]], Log[r]] -
                      2*cPerimeter*ll -
                      (* second order corrections *)
                      (* leading r correction to string tension *)
@@ -757,7 +762,7 @@ stringModel[tallyData_, OptionsPattern[]] :=
   ff["filter"] = filter;
   If[OptionValue[printResult],
      Print["Correlation matrix: ",ff["CorrelationMatrix"]];
-     (* Print["Covariance matrix: ",ff["CovarianceMatrix"]]; *)
+     (* Print["Covariance matrix: ", ff["CovarianceMatrix"]]; *)
      Print[ff["ParameterTable"]];
      Print["chi^2: ", ff["chiSquared"],
            " for ",
@@ -772,7 +777,7 @@ Options[wilsonModel] = {printResult -> False, "order" -> 0,
                         "lowerCutoff" -> 0, "upperCutoff" -> 0,
                         "upperAreaCutoff" -> 0,
                         "stringTension" -> Automatic, "pointPotential" -> True,
-                        "coulomb" -> Automatic, "perimeter" -> Automatic,
+                        "coulomb" -> 0, "perimeter" -> 0,
                         "covarianceMatrix" -> None};
 wilsonModel[data0_, OptionsPattern[]] :=
  Block[(* Protect against any global definitions of model parameters

@@ -33,3 +33,21 @@ LDADD = lib/libganalyze.a @QDPXX_LIBS@ @LIBS@
 
 bin_PROGRAMS = programs/ganalyze
 programs_ganalyze_SOURCES = programs/gauge-analyze.cc
+
+#
+#  Latex paper
+#
+%.aux: %.tex
+	pdflatex $*
+
+%.bbl: physics.bib %.aux
+	perl -pi -e 's/and Eidelman,.*}/and others}/g' physics.bib
+	bibtex $*
+
+saddle-3 saddle-3.pdf: saddle-3.tex saddle-3.bbl
+	pdflatex saddle-3
+	pdflatex saddle-3
+
+schrott schrott.pdf: schrott.tex schrott.bbl
+	pdflatex schrott
+	pdflatex schrott

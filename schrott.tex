@@ -1,0 +1,212 @@
+%\documentclass[twocolumn,eqsecnum,aps,]{revtex4-2}
+\documentclass[preprint,aps,prd]{revtex4-2}
+%\documentclass[eqsecnum,aps]{revtex}
+%
+%
+%  Using Zotero to generate physics.bib file.
+%
+%  A number of sites set language=en which Zotero
+%  passes on to BibTex, but LaTeX package babel doesn't know ``en.''
+%  In Zotero, either remove the language field or set it to ``english''
+%  before exporting to BibTex.
+%\usepackage[english]{babel}
+%
+%
+%  Ubuntu doesn't have the latest RevTex.
+%  Download and install using:
+%    sudo unzip revtex4-2-tds.zip -d /usr/share/texlive/texmf-dist/
+%    sudo mktexlsr /usr/share/texlive/texmf-dist/
+%
+%  RevTex 4.2 does not properly handle very long author lists.
+%  Run this to truncate the author list for the 2014 Brambilla article:
+%    perl -pi -e 's/and Eidelman[^}]*/and others/g' physics.bib
+%
+\bibliographystyle{apsrev4-2}
+%
+\usepackage{amsmath}
+\usepackage{mathtools} % For MoveEqnLeft
+\usepackage{amsfonts}
+\usepackage{graphicx}
+\usepackage{afterpage} % For figure placement
+%
+\newcommand{\da}{\dagger}  % symbol for Hermitian conjugate dagger
+\newcommand{\be}{\begin{equation}}
+\newcommand{\eq}{\end{equation}}
+\newcommand{\integer}{\mathbb{Z}}       % set of integers
+\newcommand{\zentrum}{\mathcal{Z}}       % set of integers
+\newcommand{\plaquette}{\Box}
+\newcommand{\config}{\mathcal{U}}
+\newcommand{\orelax}{\xi}
+\newcommand{\heigen}{h}
+\newcommand\wilson[4]{\Omega_{#1, #2}\left(#3,#4\right)}
+\DeclareMathOperator{\SU}{SU}
+\DeclareMathOperator{\Tr}{Tr}
+\newcommand\fnorm[1]{\left\lVert #1 \right\rVert_\mathrm{F}}
+\newcommand\znorm[1]{\left\lVert #1 \right\rVert_\zentrum}
+\newcommand\cov[2]{\mathrm{cov}\!\left(#1, #2\right)}
+
+\begin{document}
+
+\section{Operator distributions}
+
+\begin{figure}
+  \includegraphics{polydist1}
+  \includegraphics{polydistr}
+  \caption{Distribution for the Wilson loop operator
+    $\wilson{\mu}{\nu}{5}{5}$ for $\SU(3)$, $\beta=28$, $L^3=16^3$,
+    averaging over 100 lattice configurations.
+    Also shown is the distribution for the strong coupling limit.
+    The distribution is
+    symmetric under charge conjugation,
+    % $2 \lambda_1 +\lambda_2 \to 2 \lambda_1 +\lambda_2 $,
+    $\lambda_2 \to -\lambda_2$.
+   \label{polydist1}}
+\end{figure}
+% \begin{figure}
+%  \includegraphics{polydist2}
+%  \caption{Distribution for $\Tr \wilson{\mu,\nu}{5}{5}/N$  for
+%    the data shown in Fig.~\ref{polydist1}.  
+%   The distribution is symmetric under complex conjugation,
+%    $\mathcal{O}\to\mathcal{O}^\dagger$.
+%    The distribution lies inside the blue lines representing
+%    the edges of the triangle in Fig.~\ref{polydist1}.
+%    \label{polydist2}}
+%\end{figure}
+
+The quantity that is actually measured can be generalized, as well.
+For some loop operator $\mathcal{O}\in\SU(N)$, one usually
+measures the expectation value of the trace,
+$\langle 0 | \Tr \mathcal{O} |0\rangle$, or for $k$-strings,
+one measures expectation values of higher order operators
+like $\Tr\left( \mathcal{O}^k\right)$.
+However, this is not the most general gauge-invariant observable.
+The most general physical observable is the distribution of the
+eigenvalues of $\mathcal{O}$.  If $e^{i\lambda_1}$,\ldots, $e^{i\lambda_N}$
+are the eigenvalues of $\mathcal{O}$, we can order $\lambda_j$ in
+some fashion $\lambda_1\ge \lambda_2 \ge \ldots$ and demand that
+$\lambda_j-\lambda_k\le 2\pi$ (see Appendix~\ref{roots}).
+In that case, physically
+distinct values lie on an ($N-1$)-simplex with the elements of the
+center of $\SU(N)$ at the vertices.
+
+By way of example, we show the distribution of the
+$5\times5$ Wilson loop operator for $\SU(3)$ in Fig.~\ref{polydist1}.
+For comparison, we also show the distribution for
+the strong coupling limit (random $\SU(N)$ matrices).
+Notice that the shape of the two distributions appear to
+be quite similar, except that the $\wilson{\mu}{\nu}{5}{5}$ distribution
+is shifted toward $\mathbb{I}$, reflecting the fact that
+$\langle\Tr \wilson{\mu}{\nu}{5}{5}\rangle >0$.
+
+% We can relate the distribution in $\lambda_j$-space to the
+% distribution of $\Tr\mathcal{O}$.
+% For $\SU(2)$, $\Tr \mathcal{O}$ is real and for $\SU(3)$, $\Tr \mathcal{O}$
+% is complex.  In both cases, the map from the $\lambda_j$-space to
+% $\Tr \mathcal{O}$ is injective and one can just as well look at the
+% distribution of $\Tr \mathcal{O}$; see Fig.~\ref{polydist2}.
+% However, for $N>3$, information is lost when taking the trace
+% of $\mathcal{O}$.
+
+
+\section{Coulomb corrections}
+\label{coulomb}
+
+In $D=4$ spacetime directions, there is a clear separation---both
+experimentally and in lattice calculations---between a
+short distance regime where the heavy quark potential is
+dominated by a $1/r$ Coulomb force potential and a
+long-distance regime having a linear confining
+potential~\cite{bali_static_2000,brambilla_effective-field_2005}.
+In $D=3$, the Coulomb potential goes as $\log(r)$ and distinguishing
+it from the linear confining potential is more difficult.
+In this section, we derive
+the functional form of the Coulomb contribution to
+the effective potential for Polyakov loop correlators and Wilson
+loops.
+
+If we consider a pair of charges separated by some
+distance $r$ at some instant in time, the Coulomb potential is
+equal to the energy stored in the electric
+field produced by those charges (electrostatics in $D-1$
+dimensions).  Equivalently, we can consider currents
+in $D$ Euclidean spacetime dimensions.  In that case,
+the classical action is equal to the
+energy of the magnetic field produced by those currents
+(magnetostatics in $D$ dimensions).  Using the textbook
+formula~\cite{jackson_classical_1975}
+for the magnetostatic energy associated with a current density
+$\mathbf{J}(\mathbf{x})$,
+%
+\be
+S = \frac{1}{2} \int d^3\mathbf{x}\, d^3\mathbf{x}^\prime\,
+\frac{\mathbf{J}(\mathbf{x}) \cdot
+  \mathbf{J}(\mathbf{x}^\prime)}{
+  \left| \mathbf{x}-\mathbf{x}^\prime\right|} \, ,
+\eq
+%
+we can find the action associated with a number of thin wires
+carrying a constant current. (We set the current equal to 1 in
+the following.)
+
+In the case of two Polyakov loops with opposite currents separated
+by distance $r$ with periodic boundary conditions, period $L$,
+there is a self-energy term plus an interaction term:
+%
+\begin{eqnarray}
+S_\Phi &=& 2 \int_0^L dx \int_{x+\varepsilon/2}^\infty dy
+\left(\frac{1}{y-x} -\frac{1}{\sqrt{(y-x)^2 + r^2}}\right) \\
+  &=& 2 L \log\left(\frac{r}{\varepsilon}\right) + O(\varepsilon)\, .
+\end{eqnarray}
+%
+Thus, we obtain the usual $L \log(r)$ term plus a
+self-energy term proportional to the length
+of the currents, $2L$.  The $\log(\varepsilon)$ divergence
+is from approximating the current density as a thin wire.
+Since the normalization
+of this field relative to the bare link fields is
+unknown, one can fit the Coulomb contribution to the
+Polyakov loop correlator using
+\be
+       c_q 2 L \log(r) + c_p 2 L \, , \label{cpf}
+\eq
+where $c_q$ and $c_p$ are unknown.
+
+In the case of a $w_1\times w_2$ Wilson loop, we obtain
+a more complicated expression
+%
+\begin{eqnarray}
+  S_W &=& 2 \int_0^{w_1} dx \int_{x+\varepsilon}^{w_1} \frac{dx^\prime}{x^\prime-x}
+               \nonumber\\
+               & &  - \int_0^{w_1} dx \int_{0}^{w_1} \frac{dx^\prime}{
+                 \sqrt{(x^\prime-x)^2+ w_2^2}}
+               \nonumber\\
+               & &  +\left[w_1 \leftrightarrow w_2 \right]\\
+               &=&  \Theta\!\left(w_1, w_2\right) +
+               \Theta\!\left(w_2, w_1\right)
+              - 2 (w_1 + w_2) \log(\varepsilon) + O(\varepsilon) 
+\end{eqnarray}
+where
+\be
+\Theta\!\left(\ell, r\right) = 2 \left(
+    \sqrt{\ell^2+r^2} - \ell - r
+    - \ell\log\left(\frac{\sqrt{\ell^2+r^2} + \ell}{r\ell}\right)
+   \right) \;.
+\eq
+Similar the the above, 
+we obtain a self-energy term that is proportional to the perimeter of
+the rectangle.  Thus, we can fit the Coulomb
+contribution to the Wilson loop using
+%
+\be
+    c_q  \left(\Theta\!\left(w_1, w_2\right) +
+               \Theta\!\left(w_2, w_1\right)\right)
+        + c_p  2\left(w_1+w_2\right)  \label{cwf}
+\eq
+%
+where $c_p$ and $c_q$ in Eqns.~(\ref{cpf}) and (\ref{cwf})
+should be equivalent.
+
+
+\bibliography{physics}  % Use physics.bib
+
+\end{document}

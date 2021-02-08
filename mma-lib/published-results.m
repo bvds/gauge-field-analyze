@@ -1,6 +1,6 @@
-teperTension::usage = "Square root of the string tension in units of the lattice spacing for a specific beta.  From Athenodorou-Teper2017_Article_SUNGaugeTheoriesIn21Dimensions.pdf";
+teperTension::usage = "The lattice spacing in units of the string tension for a specific beta.  From Athenodorou-Teper2017_Article_SUNGaugeTheoriesIn21Dimensions.pdf";
 teperTension[nd_, nc_, "1", beta_, plaquette_]:=
-    teperTension[nc, nc, 1, beta, plaquette];
+    teperTension[nd, nc, 1, beta, plaquette];
 teperTension[nd_, nc_, beta_, plaquette_]:=
     teperTension[nd, nc, 1, beta, plaquette];
 
@@ -110,3 +110,17 @@ Module[{
     teperTension[3, nc, 1, beta, plaquette]*
     data[[nc-3, Which[op=="2A", 1, op=="2S", 2, op=="3A", 3, op="3M", 4]]]
 ];
+
+
+
+(* From https://arxiv.org/abs/hep-lat/0607015
+The functional form of the extrapolation in nc is not theoretically
+justified but does fit the lattice data and the asymptotic value qualitatively
+agrees with the one loop perturbative calculation. *)
+sommerScale::usage = "The Sommer reference scale, in units of the string tension.";
+sommerScale[3, _] := sommerScale[3]
+sommerScale[3] := Sqrt[valueError[1.52, 0.01*1.52]];
+meyerScale::usage = "Length scale marking the transition between the
+perturbative regeme and the string regeme, in units of the string tension.";
+meyerScale[3, nc_] := sommerScale[]*(valueError[0.402, 0.045] +
+                                  valueError[2.80, 0.20]/nc);
