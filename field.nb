@@ -64,7 +64,7 @@ Cell[BoxData[
 
 Cell[BoxData[
  RowBox[{
-  RowBox[{"<<", "\"\<mma-lib/teper-results.m\>\""}], ";", 
+  RowBox[{"<<", "\"\<mma-lib/published-results.m\>\""}], ";", 
   RowBox[{"<<", "\"\<mma-lib/plot.m\>\""}], ";"}]], "Input",
  InitializationCell->
   True,ExpressionUUID->"bf94b4b6-bc25-4621-9d28-d4080f4dd8b7"],
