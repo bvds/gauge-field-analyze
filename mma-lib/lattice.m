@@ -601,7 +601,7 @@ Options[stringModel] = {printResult -> False, "lowerCutoff" -> 1/2,
                         "pointPotential" -> True,
                         "rescaleCovarianceMatrix" -> False,
                         "stringTension" -> Automatic,
-                        "coulomb" -> 0, "perimeter" -> 0,
+                        "coulomb" -> 0, "perimeter" -> Automatic,
                         "covarianceMatrix" -> None};
 stringModel::lowerCutoff = "Invalid combination of \"pointPotential\" and \"lowerCutoff,\" exiting";
 stringModel[tallyData_, OptionsPattern[]] :=
@@ -775,9 +775,8 @@ Options[wilsonModel] = {printResult -> False, "order" -> 0,
                           upperCutoff limits the lattice size minus the width
                           of the Wilson loop. *)
                         "lowerCutoff" -> 0, "upperCutoff" -> 0,
-                        "upperAreaCutoff" -> 0,
                         "stringTension" -> Automatic, "pointPotential" -> True,
-                        "coulomb" -> 0, "perimeter" -> 0,
+                        "coulomb" -> 0, "perimeter" -> Automatic,
                         "covarianceMatrix" -> None};
 wilsonModel[data0_, OptionsPattern[]] :=
  Block[(* Protect against any global definitions of model parameters
@@ -789,8 +788,6 @@ wilsonModel[data0_, OptionsPattern[]] :=
           MapIndexed[{#2[[1]], #1}&, Keys[data0]],
           (#[[2, 1]] > OptionValue["lowerCutoff"] &&
            #[[2, 2]] > OptionValue["lowerCutoff"] &&
-           #[[2, 1]] #[[2, 2]] < #[[2, 3]] #[[2,4]] -
-                           OptionValue["upperAreaCutoff"] &&
            #[[2, 1]] < #[[2, 3]] - OptionValue["upperCutoff"] &&
            #[[2, 2]] < #[[2, 4]] - OptionValue["upperCutoff"])&]]},
   data = Normal[data0][[filter]];

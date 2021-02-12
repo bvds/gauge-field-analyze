@@ -1,8 +1,8 @@
-teperTension::usage = "The lattice spacing in units of the string tension for a specific beta.  From Athenodorou-Teper2017_Article_SUNGaugeTheoriesIn21Dimensions.pdf";
-teperTension[nd_, nc_, "1", beta_, plaquette_]:=
-    teperTension[nd, nc, 1, beta, plaquette];
-teperTension[nd_, nc_, beta_, plaquette_]:=
-    teperTension[nd, nc, 1, beta, plaquette];
+latticeSpacing::usage = "The lattice spacing in units of the string tension for a specific beta.  From Athenodorou-Teper2017_Article_SUNGaugeTheoriesIn21Dimensions.pdf";
+latticeSpacing[nd_, nc_, "1", beta_, plaquette_]:=
+    latticeSpacing[nd, nc, 1, beta, plaquette];
+latticeSpacing[nd_, nc_, beta_, plaquette_]:=
+    latticeSpacing[nd, nc, 1, beta, plaquette];
 
 Module[{
     (* The c1 coefficients in Table 19 in Athenodorou Teper2017 paper
@@ -25,8 +25,8 @@ Module[{
             Null,
             {valueError[0.19486, 0.00017], valueError[-0.033, 0.005],
              Null}}},
-  teperTensionData[3] = data;
-  teperTension[3, nc_, 1, beta_, plaquette_:1] :=
+  latticeSpacingData[3] = data;
+  latticeSpacing[3, nc_, 1, beta_, plaquette_:1] :=
     Block[{betai = beta plaquette/(2 nc^2)},
           (data[[nc, 1]] + data[[nc, 3]]/betai)/betai]];
 
@@ -77,9 +77,9 @@ Module[{
              Sqrt[tensionFromMass[#[[2]], #[[4]]]],
              Sqrt[tensionFromMass[#[[2]], #[[5]]]],
              #[[6]]}&, data];
-   teperTensionData[3, 4] = d2;
+   latticeSpacingData[3, 4] = d2;
    (* May want to eventually memoize this. *)
-   teperTension[3, nc:4, op_, beta_, plaquette_:1] :=
+   latticeSpacing[3, nc:4, op_, beta_, plaquette_:1] :=
     Block[{model, beta0, betai = beta*plaquette/(2 nc^2),
            col = Which[op=="2A", 4, op=="2S", 5, op=="1test", 6]},
      model = LinearModelFit[
@@ -106,8 +106,8 @@ Module[{
         {valueError[1.2753, 0.0022], valueError[1.4961, 0.0041],
          valueError[1.3573, 0.0033], valueError[1.6861, 0.0067]}}},
 
-  teperTension[3, nc_, op_, beta_, plaquette_:1] :=
-    teperTension[3, nc, 1, beta, plaquette]*
+  latticeSpacing[3, nc_, op_, beta_, plaquette_:1] :=
+    latticeSpacing[3, nc, 1, beta, plaquette]*
     data[[nc-3, Which[op=="2A", 1, op=="2S", 2, op=="3A", 3, op="3M", 4]]]
 ];
 

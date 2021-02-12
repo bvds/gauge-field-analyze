@@ -46,6 +46,7 @@
 \newcommand\fnorm[1]{\left\lVert #1 \right\rVert_\mathrm{F}}
 \newcommand\znorm[1]{\left\lVert #1 \right\rVert_\zentrum}
 \newcommand\cov[2]{\mathrm{cov}\!\left(#1, #2\right)}
+\newcommand{\meyerscale}{r_\mathrm{s}}
 
 \begin{document}
 %\draft
@@ -58,7 +59,7 @@
 
 \begin{abstract}
   We find saddle points of $\SU(N)$ Yang Mills action in three
-  space-time dimensions for various values of $N$.
+  space-time dimensions for $N=3,4$.
   Using Landau gauge, we examine various correlators of the gauge fields
   in the vicinity of the saddle-point.
   The ultimate goal of
@@ -133,7 +134,7 @@ The idea of exploiting this combination (pure gauge theory, 2+1 dimensons,
 and large $N$) to study QCD  is not new.  Indeed, a number of
 researchers, most notably Mike Teper and various collaborators,
 have pursued this strategy vigorously over the last 25
-years~\cite[Section~5.2]{lucini_sun_2013},
+years~\cite[Section~5.2]{lucini_sun_2013}.
 The main focus of that work has been to connect gauge
 theory to some effective string theory, with the main result being
 that string theory works suprisingly well
@@ -145,8 +146,8 @@ from dimensional arguments.
 
 The concept of the master field only exists in the $N\to \infty$
 limit.  At finite $N$ and finite lattice spacing, we would expect the associated
-saddle-points to exist in some approximate sense.  In a numerical
-procedure, one might expect that a numerical search for a saddle-point
+saddle-point to exist in some approximate sense.  In a numerical
+procedure, one might expect that a search for the saddle-point
 would initially move toward a physically interesting field
 configuration, but eventually move to toward the bare vacuum state
 or some other physically uninteresting state.  This was what was seen
@@ -168,8 +169,8 @@ of connecting the Wilson link variables to the continuum
 Yang Mills fields.
 
 In Section~\ref{def}, we introduce the Wilson action and
-a define a number of useful norms.  In Section~\ref{observables} ...
-
+a define a number of useful norms.  In Section~\ref{observables}
+{\bf ...  to do ...}
 
 \section{Definitions}
 \label{def}
@@ -281,7 +282,7 @@ behavior of the gauge fields when moving from
 the original Euclidean lattice configuration toward
 a saddle-point.  The goal here is not to make precise
 measurements of the string tension and glueball spectra
-but to probe the qualitative behavior for just a single
+but to monitor the qualitative behavior for just a single
 lattice configuration.
 
 As we move toward the saddle-point of a lattice configuration,
@@ -297,11 +298,12 @@ issue in the present investigation, but will stick to the bare
 \subsection{Polyakov loop correlators}
 
 \begin{figure}
+  % Generated in the "Bulk Polyakov loop correlator" section in "gauge.nb"
   \includegraphics{polycorr12-16-20}
   \caption{Polyakov loop correlator vs.\ loop area together with
     a fit to Eqn.~(\ref{stringmodel}) for an $\SU(3)$,
     $12\times 16 \times 20$ lattice, $\beta=28$,
-    with $L_\mu \left|\mathbf{r}\right|>20$.
+    with $\left|\mathbf{r}\right|\ge 4$.
     Each color represents a different Polyakov loop direction.
     The data is from 300 lattice configurations. \label{pcorr16}}
 \end{figure}
@@ -329,8 +331,8 @@ $\Phi_\mu(\mathbf{r})=1$ for the bare vacuum.
 To obtain the string tension,
 we fit the correlator $\Phi_\mu(\mathbf{r})$ to an effective
 potential $F_\mu(\mathbf{r})$.
-This effective potential contains an area law term (linear confinement)
-plus Coulomb corrections
+This effective potential contains the string tension $\sigma$
+%plus Coulomb corrections
 %(Appendix~\ref{coulomb})
 plus power law corrections:
 %  M. Teper, “Large N and confining flux tubes as strings -
@@ -340,63 +342,83 @@ plus power law corrections:
 \begin{eqnarray}
          F_\mu(\mathbf{r}) &=& c_0 \exp\left(
          -\sigma a^2 \left|\mathbf{r}\right| L_\mu
-         - c_q 2 L_\mu \log(\left|\mathbf{r}\right|) - c_p 2 L_\mu
+         % - c_q 2 L_\mu \log(\left|\mathbf{r}\right|)
+         - c_p 2 L_\mu
          - c_1 \frac{L_\mu}{\left|\mathbf{r}\right|}
          - c_2 \frac{\left|\mathbf{r}\right|}{L_\mu} - \cdots \right)\nonumber\\
          & & + \left[\,\mbox{$2^{D-1}-1$ transverse images}\,\right]
          \; .  \label{stringmodel}
 \end{eqnarray}
 %
-In the case of
-a cube-shaped lattice $L_\mu = L$, the $c_p$ term can be absorbed into
-the normalization constant $c_0$ and the $c_2$ term is indistinguishable from
-the string tension.  If excited states are ignored, the $c_2$ term corresponds
-to the Luscher correction~\cite{luscher_anomalies_1980}, with value
-$c_2 = -\pi/6$.
-Since the lattices we use are relatively small, we include contributions
-from fields wrapping around the lattice in the plane transverse to
-$\hat{\mu}$.  Thus, we sum over the $2^{D-1}$ closest images of the Polyakov
-loop in the transverse plane.
+In the case of a cube-shaped lattice $L_\mu = L$, the $c_p$ term can
+be absorbed into the normalization constant $c_0$ and
+the $c_2$ term is indistinguishable from the string tension.
+If excited states are ignored, the perimeter term $c_p 2 L_\mu$ is a
+renormalization scheme-dependent self-energy,
+$c_1 L_\mu/\left|\mathbf{r}\right|$ is the universal leading correction
+for open strings, with $c_1 = -\pi (D-2)/24$, and
+$c_2 \left|\mathbf{r}\right|/L_\mu$ is the universal correction
+for closed strings, with $c_2 = -\pi (D-2)/6$; there is no
+$\left|\mathbf{r}\right| L_\mu^0$
+term~\cite{luscher_anomalies_1980,luscher_quark_2002,aharony_effective_2013}.
+The bare Polyakov loop operator should have a small overlap with
+any excited state, so one would expect this picture to hold to a
+good approximation.
 
-This effective potential is, in principle, equivalent to the more
-conventional sum over states plus finite longitudinal length
-corrections~\cite{teper_large_2009,aharony_effective_2013}.
-We use the effective potential form since we are interested in
-the behavior over a range transverse separations, rather than
-just the large $\mathbf{r}$ limit.
+Since the lattices we use have a relatively small volume, we include
+contributions from fields wrapping around the lattice in the plane
+transverse to $\hat{\mu}$.  Thus, we sum over the $2^{D-1}$ closest
+images of the Polyakov loop in the transverse plane.
 
 When measuring $\Phi_\mu(\mathbf{r})$ for a single lattice configuration,
 the link fields are re-used for each value of $\mathbf{r}$.  This means
 that the loop correlators $\Phi_\mu(\mathbf{r})$ versus $\mathbf{r}$
 are not statistically independent, compromising the $\chi^2$ fitting process.
 To address this,
-we calculate the sample covariance matrix $\mathcal{C}$:
+we calculate the sample covariance matrix $\mathcal{C}_\mu$ for each $\mu$:
 \be
-\mathcal{C}_{i, j} = \cov{\Phi_\mu(\mathbf{r}_i)}{\Phi_\mu(\mathbf{r}_j)} 
+\left(\mathcal{C}_\mu\right)_{i, j} = \cov{\Phi_\mu(\mathbf{r}_i)}{\Phi_\mu(\mathbf{r}_j)} 
 \eq
 where $\left\{\mathbf{r}_1, \mathbf{r}_2, \ldots\right\}$ is the set of
 possible transverse separations.
 Then, one can fit the correlators to the effective
 potential using the standard formula:
 \be
-\chi^2 = \sum_{i,j} \left(\Phi_\mu(\mathbf{r}_i) - F_\mu(\mathbf{r}_i)\right)
-               \left(\mathcal{C}^{-1}\right)_{i,j}
-               \left(\Phi_\mu(\mathbf{r}_j) - F_\mu(\mathbf{r}_j)\right)
+\chi^2 = \sum_{\mu,i,j} \left(\Phi_\mu(\mathbf{r}_i) - F_\mu(\mathbf{r}_i)\right)
+               \left(\mathcal{C}_\mu^{-1}\right)_{i,j}
+               \left(\Phi_\mu(\mathbf{r}_j) - F_\mu(\mathbf{r}_j)\right) \; .
 \eq
 
 An example fit is shown in Fig.~\ref{pcorr16}.  The lattice configurations
 were generated with the Chroma library~\cite{edwards_chroma_2005};
 see Appendix~\ref{configurations} for details.
-The string tension $\sigma a^2 = 0.0144(19)$
+The string tension $\sigma a^2 = 0.0181(20)$
 agrees with Teper's value for $\beta=28$,
 $\sigma a^2 = 0.016210(54)$~\cite{lucini_$mathrmsun$_2002,athenodorou_sun_2017}.
-The fit has $\chi^2=295$ for 224 degrees of freedom,
+The fit has $\chi^2=229$ for 195 degrees of freedom,
 with the covariance matrix derived from 600 lattice configurations.
 However, it should be noted that several model parameters,
-$c_1$, $c_p$, and $c_q$ are highly correlated.
+$c_2$, $c_p$, and $\sigma a^2$ are highly correlated.
 This example shows that inclusion of the transverse
 images of the Polyakov loop are important for a good fit.
 
+At small enough distances, the theory becomes perturbative and the
+effective potential will become dominated by the Coulomb potential.
+H. Meyer defines a length scale $\meyerscale$ that marks the transition from
+the perturbative regime to the string-dominated
+regime~\cite{meyer_static_2006},
+%
+% sommerScale[]*{valueError[0.402, 0.045], valueError[2.80, 0.20]}
+\be
+         \meyerscale \sqrt{\sigma} =  0.496(56) + \frac{3.45(25)}{N} \; .
+\eq
+%
+Our effective potential should be valid for
+$\left|\mathbf{r}\right|>\meyerscale$.  For the example shown in
+Fig.~\ref{pcorr16}, $\meyerscale \approx 13 a$, substantially larger
+than the cutoff $\left|\mathbf{r}\right|\ge 4$.
+So, at least at this level of precision, we see that $F_\mu(\mathbf{r})$
+continues to work well at substantially smaller distance scales.
 
 \subsection{Wilson loops}
 

@@ -62,7 +62,7 @@ plotStringModelFit[tallyData_, opts:OptionsPattern[]] :=
         sin2theta2 = Function[{x, y}, (2*x*y/(x^2+y^ 2))^2],
         offAxis = Function[dir, Apply[sin2theta2, Drop[#, {dir}]]&],
         nearest, maxx, miny, maxy, nn, ff, cd = ColorData[1]}, 
-  nn = Select[Normal[tallyData], (True || Norm[#[[1, 1]]] > 0) &]; 
+  nn = Select[Normal[tallyData], (False || Norm[#[[1, 1]]] > 1) &]; 
   ff = stringModel[tallyData,
        Apply[Sequence, FilterRules[{opts}, Options[stringModel]]],
                    printResult -> True];
@@ -93,15 +93,15 @@ plotStringModelFit[tallyData_, opts:OptionsPattern[]] :=
                          ", \!\(\*StyleBox[\"N\",\nFontSlant->\"Italic\"]\) = ", nc}],
                     Row[{Row[latticeDimensions, "\[Times]"], "lattice"}, 
                         " "]}]], {maxx, maxy}, {1.1, 1.1}]},
-      Prolog -> {{Gray, Line[{{0, 0}, {maxx, 0}}]}, 
+      Prolog -> {(*{Gray, Line[{{0, 0}, {maxx, 0}}]},*) 
                  If[lowerCutoff > 0,
-                    {Gray, 
+                    {Gray,
                      Text["cutoff", {lowerCutoff*Min[latticeDimensions], 0},
                           {-1.5, -1}, {0, 1}],
-                     Map[
-                         Line[{{lowerCutoff*#, miny},
-                               {lowerCutoff*#, maxy 2/3}}]&,
-                             Union[latticeDimensions]]},
+                     Block[{i=1}, Map[
+                         {cd[i++],Line[{{lowerCutoff*#, miny},
+                                        {lowerCutoff*#, maxy 2/3}}]}&,
+                                  Union[latticeDimensions]]]},
                     Nothing]},
       PlotStyle -> cd,
       Axes -> False, Frame -> True,
