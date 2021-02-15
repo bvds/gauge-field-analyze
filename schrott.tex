@@ -207,6 +207,88 @@ where $c_p$ and $c_q$ in Eqns.~(\ref{cpf}) and (\ref{cwf})
 should be equivalent.
 
 
+\subsection{Spectrum}
+
+\begin{figure}
+   configuration $\config_0$\\
+   \includegraphics{corrOriginal}\\
+   configuration $\config_{10}$\\
+   \includegraphics{corr2d10}\\
+   configuration $\config_{20}$\\
+   \includegraphics{corr2d20Even}
+\caption{Correlations of the even plaquette operator for several points
+  along trajectory {\bf 2d} shown in Fig.~\ref{trajectory3}.
+  Also shown is an exponential corresponding to Teper's value
+  for the lowest $0^{++}$ glueball.
+  \label{corr2dEven}}
+\end{figure}
+
+\begin{figure}
+   \includegraphics{corr2d20Odd}
+   \caption{Correlations of the odd plaquette operator for
+     lattice configuration
+     $\config_{20}$ on trajectory {\bf 2d} shown in Fig.~\ref{trajectory3}.
+  Also shown is an exponential corresponding to Teper's value
+  for the lowest $0^{--}$ glueball.
+  \label{corr2dOdd}}
+\end{figure}
+
+\begin{figure}
+   \includegraphics{corrLink995}
+   \caption{Correlations of the even plaquette operator for
+     the $\plaquette_\mathrm{avg} \approx 0.995$ lattice configuration
+     on trajectory {\bf lc} shown in Fig.~\ref{trajectory3}.
+    Also shown is an exponential corresponding to Teper's value
+     for the lowest $0^{++}$ glueball.
+     We do not see the desired exponential behavior.
+  \label{corrLink995}}
+\end{figure}
+
+We can look at other properties of the gauge configuration
+as we move along the trajectory.  In particular, let us look
+at the correlators of the charge conjugation even plaquette operator
+\be
+  \left\langle
+  \left(\Re \plaquette_{\mu,\nu}(x) - \plaquette_\mathrm{avg}\right)
+  \left(\Re \plaquette_{\alpha,\beta}(y) - \plaquette_\mathrm{avg}\right)
+  \right\rangle
+\eq
+as a function of the separation of the two plaquettes
+\be
+\mathrm{separation} =
+        \left\lVert \left(x+a \hat{\mu}/2+ a\hat{\nu}/2\right) -
+             \left(y+a \hat{\alpha}/2+ a\hat{\beta}/2\right)
+             \right\rVert \; .
+\eq
+This correlator couples to the $0^{++}$ glueball states.
+
+In Fig.~\ref{corr2dEven}, we plot the correlation for various relative
+orientations of the two plaquettes for several points along the
+best trajectory in~\ref{trajectory3}.  We also plot an exponential
+corresponding to Teper's value for the $0^{++}$ glueball,
+mass $0.5517(38)/a$ for $\beta=28$, $L^3=23^3$~\cite{teper_$mathrmsun$_1998}.
+The exponential only demonstrates that there is qualitative agreement.
+Since the correlator also has contributions from the excited $0^{++}$
+states, a quantitative fit would require a more extensive analysis,
+with additional operators in the correlation function.  However, one
+would expect the single plaquette operator to couple very strongly
+to the lowest state and not so strongly to the excited states.
+
+Likewise, we can look at the charge conjugation odd correlator
+\be
+  \left\langle
+  \left(\Im \plaquette_{\mu,\nu}(x) - \plaquette_\mathrm{avg}\right)
+  \left(\Im \plaquette_{\alpha,\beta}(y) - \plaquette_\mathrm{avg}\right)
+  \right\rangle   \; ,
+\eq
+corresponding to the $0^{--}$ glueball states; see Fig.~\ref{corr2dOdd}.
+Also shown is an exponential corresponding to the lowest $0^{--}$ state,
+mass $0.8133(57)/a$ \cite{teper_$mathrmsun$_1998}.
+
+In the case where the off-diagonal color blocks of $H$ are dropped,
+we do not see the desired exponential behavior in the correlator,
+Fig.~\ref{corrLink995}.
+
 \bibliography{physics}  % Use physics.bib
 
 \end{document}

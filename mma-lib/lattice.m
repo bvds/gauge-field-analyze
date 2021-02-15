@@ -561,7 +561,7 @@ Sum[pointPotential3[l1 - l2, 0, 0] -
   are defined as global variables.
   Alternatively, one could wrap these and the function in Module[]
   to define a unique instance. *)
-Clear[choSquared, a2sigma, c0, c1, c2, c3, c4, c5,
+Clear[choSquared, a2sigma, c0, c1, c2, c3, c4, c5, c6, cm1,
       coff1, coff3, coff4,
       cCoulomb, cPerimeter,
       eigenNorm, sConstant, lConstant, rConstant, offConstant];
@@ -570,6 +570,7 @@ Format[a2sigma] = Row[{Style["a", Italic]^2, "\[Sigma]"}];
 Format[cCoulomb] = Subscript["c", "q"];
 Format[cPerimeter] = Subscript["c", "p"];
 Do[Format[Symbol["c"<>ToString[i]]] = Subscript["c", i], {i, 0, 6}];
+Do[Format[Symbol["cm"<>ToString[i]]] = Subscript["c", -i], {i, 1}];
 Format[eigenNorm[i_]] := Subscript["C", i];
 Format[sConstant[i_]] := Row[{Style["a", Italic]^2,
                               Subscript["\[Sigma]", i]}];
@@ -593,7 +594,7 @@ casimir[state_] :=
           8 Pi (degeneracy[state] - (nd-2)/24)];
 
 
-stringModel::usage = "Fit to an exponential plus a constant term, including the universal string correction as well as Coulomb force contributions.  See Andreas Athenodorou, Barak Bringoltz, Michael Teper https://arxiv.org/abs/0709.0693; Ofer Aharony & Zohar Komargodski arXiv:1302.6257v2 [hep-th] 12 Mar 2013; Teper review article http://arxiv.org/abs/0912.3339  The Coulomb force contribution consists of a log(r) term plus a perimeter term.  For option \"stringTension\"->Automatic (default), fit string tension, else use value given.  Likewise for \"coulomb\" and \"perimeter.\"";
+stringModel::usage = "Fit to an exponential plus a constant term, including the universal string correction as well as Coulomb force contributions.  See Andreas Athenodorou, Barak Bringoltz, Michael Teper https://arxiv.org/abs/0709.0693; Ofer Aharony & Zohar Komargodski arXiv:1302.6257v2 [hep-th] 12 Mar 2013; Teper review article http://arxiv.org/abs/0912.3339  For option \"stringTension\"->Automatic (default), fit string tension, else use the value given.  Likewise for \"coulomb\" and \"perimeter.\"";
 Options[stringModel] = {printResult -> False, "lowerCutoff" -> 1/2,
                         "upperCutoff" -> Infinity, "order" -> 0,
                         "eigenstate" -> 0, "NambuGoto" -> False,
@@ -608,7 +609,7 @@ stringModel[tallyData_, OptionsPattern[]] :=
  Block[(* Protect against any global definitions of model parameters
          and allow for local constant value. *)
      {ff, f0, x, y, ll, a2sigma, cCoulomb, cPerimeter,
-      c1, c2, c3, c4, c5,
+      c1, c2, c3, c4, c5, 
       offConstant, rConstant, lConstant,
       coff1, coff3, coff4,
       potentialForm = (OptionValue["eigenstate"] == 0),
@@ -641,11 +642,11 @@ stringModel[tallyData_, OptionsPattern[]] :=
      If[nll<2, cPerimeter = 0]];
   If[OptionValue["stringTension"] =!= Automatic,
      a2sigma = OptionValue["stringTension"]];
-  If[OptionValue["order"]<2, c1 = 0];
   (* With only one longitudinal value, this is indistinguishable
     from the string tension.
     If nll==1, assume cPerimeter would use up L-dependence. *)
-  If[OptionValue["order"]<2 || nll<3, c2 = 0];
+  If[OptionValue["order"]<2 || nll<3, c1 = 0];
+  If[OptionValue["order"]<2, c2 = 0];
   If[OptionValue["order"]<3, c3 = 0];
   If[OptionValue["order"]<3 || !OptionValue["linearLCorrections"], c4 = 0];
   (* With three longitudinal values, this can be
@@ -689,10 +690,10 @@ stringModel[tallyData_, OptionsPattern[]] :=
                          pointPotential2[x[i], y[i]], Log[r]] -
                      2*cPerimeter*ll -
                      (* second order corrections *)
-                     (* leading r correction to string tension *)
-                     (c1 + coff1*offAxis)*ll/r -
                      (* Luscher term, resummed *)
-                     c2*r/ll -
+                     c1*r/ll -
+                     (* leading r correction to string tension *)
+                     (c2 + coff1*offAxis)*ll/r -
                      (* third order corrections *)
                      (* leading r correction to coulomb potential *)
                      (c3 + coff3*offAxis)*ll/r^2 -
@@ -726,6 +727,8 @@ stringModel[tallyData_, OptionsPattern[]] :=
               {a2sigma, a2sigma/.f0["BestFitParameters"]},  Nothing]},
           If[potentialForm,
              {{c0, c0/.f0["BestFitParameters"]},
+              If[!NumericQ[cCoulomb], {cCoulomb, 0.02}, Nothing],
+              If[!NumericQ[cPerimeter], {cPerimeter, 0.}, Nothing],
               If[!NumericQ[c1], {c1, 0.0}, Nothing],
               If[!NumericQ[c2], {c2, 0.0}, Nothing],
               If[!NumericQ[c3], {c3, 0.0}, Nothing],
@@ -733,9 +736,7 @@ stringModel[tallyData_, OptionsPattern[]] :=
               If[!NumericQ[c5], {c5, 0.0}, Nothing],
               If[!NumericQ[coff1], {coff1, 0.0}, Nothing],
               If[!NumericQ[coff3], {coff3, 0.0}, Nothing],
-              If[!NumericQ[coff4], {coff4, 0.0}, Nothing],
-              If[!NumericQ[cCoulomb], {cCoulomb, 0.02}, Nothing],
-              If[!NumericQ[cPerimeter], {cPerimeter, 0.}, Nothing]},
+              If[!NumericQ[coff4], {coff4, 0.0}, Nothing]},
              Join[
                  Table[{eigenNorm[j], c0/(j+1.0)/.f0["BestFitParameters"]},
                        {j, 0, OptionValue["eigenstate"] - 1}],
@@ -782,7 +783,7 @@ wilsonModel[data0_, OptionsPattern[]] :=
  Block[(* Protect against any global definitions of model parameters
          and allow for local constant value. *)
      {ff, w1, w2, l1, l2,
-      a2sigma, cCoulomb, cPerimeter, c1, c2, c3, c4,
+      a2sigma, cCoulomb, cPerimeter, cm1, c1, c2, c3, c4, c5, c6,
       data,
      filter = Map[First, Select[
           MapIndexed[{#2[[1]], #1}&, Keys[data0]],
@@ -799,10 +800,14 @@ wilsonModel[data0_, OptionsPattern[]] :=
   If[OptionValue["perimeter"] =!= Automatic,
      cPerimeter = OptionValue["perimeter"],
      If[OptionValue["order"]<1, cPerimeter = 0]];
+  (* c1 = 0; c5=0; c3 = 0; c6 = 0; *)
+  If[OptionValue["order"]<1, cm1 = 0];
   If[OptionValue["order"]<1, c1 = 0];
   If[OptionValue["order"]<2, c2 = 0];
-  If[OptionValue["order"]<3, c3 = 0];
+  If[OptionValue["order"]<2, c3 = 0];
   If[OptionValue["order"]<3, c4 = 0];
+  If[OptionValue["order"]<3, c5 = 0];
+  If[OptionValue["order"]<3, c6 = 0];
   ff = covariantFit2[
     If[OptionValue["covarianceMatrix"] === None,
        Map[(#[[2, 2]]^2)&, data],
@@ -812,34 +817,46 @@ wilsonModel[data0_, OptionsPattern[]] :=
            cCoulomb*(wilsonCoulomb[OptionValue["pointPotential"], w1, w2] +
                      wilsonCoulomb[OptionValue["pointPotential"], w2, w1]) -
            cPerimeter*2*(w1 + w2) -
-           c2*(w1/w2 + w2/w1) -
+           c1*(w1/w2 + w2/w1) -
+           c2*(1/w1 + 1/w2) -
            c3*(w1/w2^2 + w2/w1^2) -
-           c4*(1/w1 + 1/w2)] +
+           c4/(w1*w2) -
+           c5*(1/w1^2 + 1/w2^2) -
+           c6*(w1/w2^3 + w2/w1^3)] +
     (* Contribution from the exterior of the loop,
       using lattice periodicity.
 
-      Dividing into two terms, one for each diretion,
+      Dividing into two terms, one for each direction,
       gives an extremely poor fit. *)
     c0 Exp[-(l1*l2 - w1*w2)*a2sigma -
            cCoulomb*(wilsonCoulomb[OptionValue["pointPotential"],
                                    w1, l2 - w2] +
                      wilsonCoulomb[OptionValue["pointPotential"],
                                    w2, l1 - w1]) -
-           cPerimeter*2*(w1 + w2) - c1*(l1 + l2 - w1 - w2)],
+           cPerimeter*2*(w1 + w2) - cm1*(l1 + l2 - w1 - w2)],
     {{c0, 1.0},
      If[!NumericQ[a2sigma], {a2sigma, 0.016}, Nothing],
      If[!NumericQ[cCoulomb], {cCoulomb, 0.01}, Nothing],
      If[!NumericQ[cPerimeter], {cPerimeter, 0.01}, Nothing],
+     If[!NumericQ[cm1], {cm1, 0.0}, Nothing],
      If[!NumericQ[c1], {c1, 0.0}, Nothing],
      If[!NumericQ[c2], {c2, 0.0}, Nothing],
      If[!NumericQ[c3], {c3, 0.0}, Nothing],
-     If[!NumericQ[c4], {c4, 0.0}, Nothing]},
+     If[!NumericQ[c4], {c4, 0.0}, Nothing],
+     If[!NumericQ[c5], {c5, 0.0}, Nothing],
+     If[!NumericQ[c6], {c6, 0.0}, Nothing]},
     {w1, w2, l1, l2},
     Method -> "LevenbergMarquardt"];
   If[OptionValue[printResult],
      Print["Correlation matrix: ",ff["CorrelationMatrix"]];
      (* Print["Covariance matrix: ",ff["CovarianceMatrix"]]; *)
      Print[ff["ParameterTable"]];
+     Print[ColumnForm[Map[
+         Row[{#[[1, 1]], " = ", 
+              valueError[#[[1, 2]], #[[2]]]}]&, 
+            Transpose[
+                ff[{"BestFitParameters", 
+                    "ParameterErrors"}]]]]];
      Print["chi^2: ", ff["chiSquared"],
            " for ",
            Length[data]-Length[ff["BestFitParameters"]], " d.o.f."]];

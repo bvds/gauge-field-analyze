@@ -332,8 +332,6 @@ To obtain the string tension,
 we fit the correlator $\Phi_\mu(\mathbf{r})$ to an effective
 potential $F_\mu(\mathbf{r})$.
 This effective potential contains the string tension $\sigma$
-%plus Coulomb corrections
-%(Appendix~\ref{coulomb})
 plus power law corrections:
 %  M. Teper, “Large N and confining flux tubes as strings -
 %  a view from the lattice,”
@@ -344,8 +342,9 @@ plus power law corrections:
          -\sigma a^2 \left|\mathbf{r}\right| L_\mu
          % - c_q 2 L_\mu \log(\left|\mathbf{r}\right|)
          - c_p 2 L_\mu
-         - c_1 \frac{L_\mu}{\left|\mathbf{r}\right|}
-         - c_2 \frac{\left|\mathbf{r}\right|}{L_\mu} - \cdots \right)\nonumber\\
+         - c_1 \frac{\left|\mathbf{r}\right|}{L_\mu}
+         - c_2 \frac{L_\mu}{\left|\mathbf{r}\right|}
+         - \cdots \right)\nonumber\\
          & & + \left[\,\mbox{$2^{D-1}-1$ transverse images}\,\right]
          \; .  \label{stringmodel}
 \end{eqnarray}
@@ -355,10 +354,10 @@ be absorbed into the normalization constant $c_0$ and
 the $c_2$ term is indistinguishable from the string tension.
 If excited states are ignored, the perimeter term $c_p 2 L_\mu$ is a
 renormalization scheme-dependent self-energy,
-$c_1 L_\mu/\left|\mathbf{r}\right|$ is the universal leading correction
-for open strings, with $c_1 = -\pi (D-2)/24$, and
-$c_2 \left|\mathbf{r}\right|/L_\mu$ is the universal correction
-for closed strings, with $c_2 = -\pi (D-2)/6$; there is no
+$c_1 \left|\mathbf{r}\right|/L_\mu$ is the universal correction
+for closed strings, with $c_1 = -\pi (D-2)/6$, and
+$c_2 L_\mu/\left|\mathbf{r}\right|$ is the universal leading correction
+for open strings, with $c_2 = -\pi (D-2)/24$; there is no
 $\left|\mathbf{r}\right| L_\mu^0$
 term~\cite{luscher_anomalies_1980,luscher_quark_2002,aharony_effective_2013}.
 The bare Polyakov loop operator should have a small overlap with
@@ -387,6 +386,7 @@ potential using the standard formula:
 \chi^2 = \sum_{\mu,i,j} \left(\Phi_\mu(\mathbf{r}_i) - F_\mu(\mathbf{r}_i)\right)
                \left(\mathcal{C}_\mu^{-1}\right)_{i,j}
                \left(\Phi_\mu(\mathbf{r}_j) - F_\mu(\mathbf{r}_j)\right) \; .
+               \label{invcov}
 \eq
 
 An example fit is shown in Fig.~\ref{pcorr16}.  The lattice configurations
@@ -397,8 +397,8 @@ agrees with Teper's value for $\beta=28$,
 $\sigma a^2 = 0.016210(54)$~\cite{lucini_$mathrmsun$_2002,athenodorou_sun_2017}.
 The fit has $\chi^2=229$ for 195 degrees of freedom,
 with the covariance matrix derived from 600 lattice configurations.
-However, it should be noted that several model parameters,
-$c_2$, $c_p$, and $\sigma a^2$ are highly correlated.
+However, it should be noted that  $\sigma a^2$ is strongly anti-correlated
+with both $c_p$ and $c_1$.
 This example shows that inclusion of the transverse
 images of the Polyakov loop are important for a good fit.
 
@@ -423,29 +423,38 @@ continues to work well at substantially smaller distance scales.
 \subsection{Wilson loops}
 
 \begin{table}
-  \caption{Parameters for the fit shown in Fig.~\ref{wilsonFit16}.
+  \caption{Parameters for the fit shown in Fig.~\ref{wilsonFit16}.  Note
+    that $c_3$ and $c_6$ are not significant.   The string tension is
+    highly anti-correlated with the perimeter term $c_p$.
+    The string tension $\sigma a^2$ agrees with Teper's value for $\beta=28$,
+    $\sigma a^2 = 0.016210(54)$~\cite{lucini_$mathrmsun$_2002,
+      athenodorou_sun_2017}.
     \label{wilsonparameters}}
   \begin{tabular}{c|c}
     name & value \\
     \hline
-  $c_0$ &  1.397(78)\\
-  $\sigma a^2$ & 0.0146(20) \\
-  $c_q$ &  -0.0014(43)\\
-  $c_p$ &  0.0749(22)\\
-  $c_1$ &  0.233(35)\\
-  $c_2$ &  -0.147(26)\\
-  $c_3$ &  0.091(68)\\
-  $c_4$ & 0.259(39)\\
+  $\sigma a^2$ & 0.01588(50) \\
+  $c_0$ &  1.312(14)\\
+  $c_p$ &  0.0671(16)\\
+  $c_1$ &  -0.097(15)\\
+  $c_2$ &  0.239(15)\\
+  $c_3$ &  0.038(35)\\
+  $c_4$ & -0.158(14)\\
+  $c_5$ & -0.055(13)\\
+  $c_6$ & -0.021(31)\\
+  $c_{-1}$ & 0.307(21)\\
   \end{tabular}
 \end{table}
 
 \begin{figure}
   \includegraphics{wilsonFit-16}
-  \caption{Wilson loop expectation value vs.\ loop size together with
-    a fit to Eqn.~(\ref{wfit}) for an $\SU(3)$,
-    $16^3$ lattice, $\beta=28$.  The data is from 200 lattice
-    configurations.  The error bars on
-    the data are too small to be seen. \label{wilsonFit16}}
+  \caption{Difference of the Wilson loop expectation value $\mathcal{W}$
+    and a fit to Eqn.~(\ref{wfit}) vs.\ loop size
+    for an $\SU(3)$, $16^3$ lattice, $\beta=28$.  The blue line represents
+    the standard error of the data point and the red \& green lines
+    represent the magnitude of the difference relative to zero.
+    The fit cutoff $2 \le w_1,w_2\le 14$ is represented by the dotted lines.
+    The data is from 200 lattice configurations. \label{wilsonFit16}}
 \end{figure}
 
 We define the Wilson loop operator in the $\mu,\nu$-plane using a product of
@@ -459,30 +468,28 @@ with normalization $C_W$ chosen such that $\wilson{\mu}{\nu}{m}{n} = \mathbb{I}$
 for the bare vacuum.  In this case, we can fit
 $\mathcal{W} = \left\langle 0 \right|
  \Tr \wilson{\mu}{\nu}{w_1}{w_2} \left|0\right\rangle $
-to an effective
-potential containing a linearly confining term plus Coulomb terms
-% (Appendix~\ref{coulomb})
+to an effective potential containing a linearly confining term
 plus power law corrections:
 %
 \begin{align}
   \MoveEqLeft W\left(w_1, w_2; L_\mu, L_\nu\right) =  \nonumber \\
-       & c_0^\prime \exp\left[
+       & c_0 \exp\left[
        -\sigma a^2 w_1 w_2 
-       - c_q  \left(\Theta\!\left(w_1, w_2\right) +
-       \Theta\!\left(w_2, w_1\right)\right)
        - c_p  2\left(w_1+w_2\right)
-     \vphantom{\frac{w_1}{w_2}}\right. \nonumber \\ & \hspace{4em} \left.
-           - c_2 \left(\frac{w_1}{w_2}+\frac{w_2}{w_1}\right)
+       \vphantom{\frac{w_1}{w_2}}\right. \nonumber \\ & \hspace{4em}
+        - c_1 \left(\frac{w_1}{w_2}+\frac{w_2}{w_1}\right)
+           - c_2 \left(\frac{1}{w_1}+\frac{1}{w_2}\right)
            - c_3 \left(\frac{w_1}{w_2^2}+\frac{w_2}{w_1^2}\right)
-           - c_4 \left(\frac{1}{w_1^2}+\frac{1}{w_2^2}\right) - \cdots
+           \nonumber \\ & \hspace{4em} \left.
+           - \frac{c_4}{w_1 w_2}
+           - c_5 \left(\frac{1}{w_1^2}+\frac{1}{w_2^2}\right)
+           - c_6 \left(\frac{w_1}{w_2^3}+\frac{w_2}{w_1^3}\right) - \cdots
        \right]\nonumber\\ &
-      \mbox{} + c_0^\prime \exp\left[
-       -\sigma a^2 (L_\mu L_\nu - w_1 w_2) -
-           c_q  \left(\Theta\!\left(w_1, L_\nu - w_2\right) +
-               \Theta\!\left(w_2, L_\mu - w_1\right)\right)
+      \mbox{} + c_0 \exp\left[
+       -\sigma a^2 (L_\mu L_\nu - w_1 w_2)
        \right. \nonumber \\ & \hspace{4em} \left.
        - c_p  2\left(w_1+w_2\right) 
-     - c_1\left(L_1 +L_2 - w_1 -w_2\right) - \cdots
+     - c_{-1}\left(L_1 +L_2 - w_1 -w_2\right) - \cdots
      \right]\; .  \label{wfit}
 \end{align}
 %
@@ -490,16 +497,13 @@ The second exponential term represents the contribution from
 the {\em exterior} of the rectangle, given that the lattice
 is periodic in the $\hat{\mu}$ and $\hat\nu$ directions.
 
-
+As with the Polyakov loop correlators, we find a sample
+covariance matrix and fit $\mathcal{W}$ to (\ref{wfit})
+using the analog of Eqn.~(\ref{invcov}).
 An example fit is shown in Fig.~\ref{wilsonFit16}.  
-The fit has $\chi^2=23$ for 13 degrees of freedom,
+The fit has $\chi^2=118$ for 81 degrees of freedom,
 with the covariance matrix derived from 600 lattice configurations.
-The best fit parameters are given in Table~\ref{wilsonparameters}.:
-The string tension agrees with Teper's value for $\beta=28$,
-$\sigma a^2 = 0.016210(54)$~\cite{lucini_$mathrmsun$_2002,athenodorou_sun_2017}.
-The Coulomb term $c_q$ is not significant, but it is highly anti-correlated
-with the string tension $\sigma a^2$.  The Wilson loop fit does not
-do a very good job of untangling the two.
+The best fit parameters are given in Table~\ref{wilsonparameters}.
 
 
 \section{Landau gauge}
@@ -765,9 +769,11 @@ when already close to the minimum.
 \section{Finding the saddle point}
 \label{saddlePoint}
 
-In the following, we will introduce an iterative
+In the following, we will describe an iterative
 procedure---Newton's method---for finding the saddle-point
 of the action associated with a single lattice configuration.
+The procedure is complicated by the fact that the associated
+Hessian matrix is singular.
 
 \subsection{Shifts of the gauge fields}
 
@@ -830,8 +836,8 @@ Some shifts $\mathbf{w}$ correspond to gauge transforms.
 As we shall see, such shifts are problematic for any saddle
 point search, since the action is constant in those directions.
 To address this issue, we determine the set of shifts that are
-equivalent to infinitesimal gauge transforms.  Consider a gauge transform
-at site $x$; its action on link $U_\mu(x)$ is:
+equivalent to infinitesimal gauge transforms.  Consider an
+infinitesimal gauge transform at site $x$; its action on link $U_\mu(x)$ is:
 \be
 U_\mu(x) \to e^{i C_a(x) T_a} U_\mu(x) = U_\mu(x) + i C_a(x) T_a U_\mu(x) +
        \mathrm{O}\!\left(C_a^2\right)
@@ -879,18 +885,18 @@ as well as a lattice-wide Euclidean norm, averaged over links
 
 \begin{figure}
 \includegraphics{eigenAll}
-\caption{Histogram of the eigenvalues of $H$ for a $6^3$ lattice,
-  $\beta = 8.175$, $N=3$.  We see a peak around zero due to the
-  $\SU(3)$ gauge symmetry.
+\caption{Histogram of the eigenvalues of $H$ for a $6^3$
+  lattice configuration, $\beta = 8.175$, $N=3$.
+  We see a peak around zero due to the $\SU(3)$ gauge symmetry.
   \label{eigenAll}}
 \end{figure}
 
 \begin{figure}
 \includegraphics{shiftPairs}
 \caption{Scatter plot of eigenvalue-gradient pairs of $H^\prime$
-  for a $6^3$ lattice, $\beta = 8.175$, $N=3$.  The pairs above the
-  v-shaped wedge correspond to large shifts and will dominate
-  the solution to the linear system, Eqn.~(\ref{linear2}).
+  for a $6^3$ lattice configuration, $\beta = 8.175$, $N=3$.
+  The pairs above the V-shaped wedge correspond to large shifts and
+  will dominate the solution to the linear system, Eqn.~(\ref{linear2}).
   \label{shiftPairs}}
 \end{figure}
 
@@ -904,7 +910,7 @@ Since the action $S$ is not quadratic in $\mathbf{w}$, one
 would then iterate this process to find the actual saddle point
 (Newton's method).
 
-However, in practice, this procedure does not work.  To see why, let us
+In practice, however, this procedure does not work.  To see why, let us
 look at the eigenvalues of $H$.  As seen in Figure~\ref{eigenAll},
 we see that the eigenvalues are strongly peaked around zero,
 due to the gauge symmetry of the theory.  Thus, the linear
@@ -1154,87 +1160,6 @@ measured for $\config_\kappa$ and $\config_\kappa^\prime$ are approximately equa
 Moreover,  $\Delta_\kappa \approx \Delta_\kappa^\prime$.
 
 
-\subsection{Spectrum}
-
-\begin{figure}
-   configuration $\config_0$\\
-   \includegraphics{corrOriginal}\\
-   configuration $\config_{10}$\\
-   \includegraphics{corr2d10}\\
-   configuration $\config_{20}$\\
-   \includegraphics{corr2d20Even}
-\caption{Correlations of the even plaquette operator for several points
-  along trajectory {\bf 2d} shown in Fig.~\ref{trajectory3}.
-  Also shown is an exponential corresponding to Teper's value
-  for the lowest $0^{++}$ glueball.
-  \label{corr2dEven}}
-\end{figure}
-
-\begin{figure}
-   \includegraphics{corr2d20Odd}
-   \caption{Correlations of the odd plaquette operator for
-     lattice configuration
-     $\config_{20}$ on trajectory {\bf 2d} shown in Fig.~\ref{trajectory3}.
-  Also shown is an exponential corresponding to Teper's value
-  for the lowest $0^{--}$ glueball.
-  \label{corr2dOdd}}
-\end{figure}
-
-\begin{figure}
-   \includegraphics{corrLink995}
-   \caption{Correlations of the even plaquette operator for
-     the $\plaquette_\mathrm{avg} \approx 0.995$ lattice configuration
-     on trajectory {\bf lc} shown in Fig.~\ref{trajectory3}.
-    Also shown is an exponential corresponding to Teper's value
-     for the lowest $0^{++}$ glueball.
-     We do not see the desired exponential behavior.
-  \label{corrLink995}}
-\end{figure}
-
-We can look at other properties of the gauge configuration
-as we move along the trajectory.  In particular, let us look
-at the correlators of the charge conjugation even plaquette operator
-\be
-  \left\langle
-  \left(\Re \plaquette_{\mu,\nu}(x) - \plaquette_\mathrm{avg}\right)
-  \left(\Re \plaquette_{\alpha,\beta}(y) - \plaquette_\mathrm{avg}\right)
-  \right\rangle
-\eq
-as a function of the separation of the two plaquettes
-\be
-\mathrm{separation} =
-        \left\lVert \left(x+a \hat{\mu}/2+ a\hat{\nu}/2\right) -
-             \left(y+a \hat{\alpha}/2+ a\hat{\beta}/2\right)
-             \right\rVert \; .
-\eq
-This correlator couples to the $0^{++}$ glueball states.
-
-In Fig.~\ref{corr2dEven}, we plot the correlation for various relative
-orientations of the two plaquettes for several points along the
-best trajectory in~\ref{trajectory3}.  We also plot an exponential
-corresponding to Teper's value for the $0^{++}$ glueball,
-mass $0.5517(38)/a$ for $\beta=28$, $L^3=23^3$~\cite{teper_$mathrmsun$_1998}.
-The exponential only demonstrates that there is qualitative agreement.
-Since the correlator also has contributions from the excited $0^{++}$
-states, a quantitative fit would require a more extensive analysis,
-with additional operators in the correlation function.  However, one
-would expect the single plaquette operator to couple very strongly
-to the lowest state and not so strongly to the excited states.
-
-Likewise, we can look at the charge conjugation odd correlator
-\be
-  \left\langle
-  \left(\Im \plaquette_{\mu,\nu}(x) - \plaquette_\mathrm{avg}\right)
-  \left(\Im \plaquette_{\alpha,\beta}(y) - \plaquette_\mathrm{avg}\right)
-  \right\rangle   \; ,
-\eq
-corresponding to the $0^{--}$ glueball states; see Fig.~\ref{corr2dOdd}.
-Also shown is an exponential corresponding to the lowest $0^{--}$ state,
-mass $0.8133(57)/a$ \cite{teper_$mathrmsun$_1998}.
-
-In the case where the off-diagonal color blocks of $H$ are dropped,
-we do not see the desired exponential behavior in the correlator,
-Fig.~\ref{corrLink995}.
 
 \section{Gauge field correlators}
 
