@@ -47,6 +47,7 @@
 \newcommand\znorm[1]{\left\lVert #1 \right\rVert_\zentrum}
 \newcommand\cov[2]{\mathrm{cov}\!\left(#1, #2\right)}
 \newcommand{\meyerscale}{r_\mathrm{s}}
+\newcommand{\cNorm}{c_z}
 
 \begin{document}
 %\draft
@@ -338,26 +339,26 @@ plus power law corrections:
 %  Acta Phys. Polon. B 40, 3249 (2009). [arXiv:0912.3339 [hep-lat]].
 %
 \begin{eqnarray}
-         F_\mu(\mathbf{r}) &=& c_0 \exp\left(
+         F_\mu(\mathbf{r}) &=&  \cNorm \exp\left(
          -\sigma a^2 \left|\mathbf{r}\right| L_\mu
          % - c_q 2 L_\mu \log(\left|\mathbf{r}\right|)
-         - c_p 2 L_\mu
-         - c_1 \frac{\left|\mathbf{r}\right|}{L_\mu}
-         - c_2 \frac{L_\mu}{\left|\mathbf{r}\right|}
+         - c_p 2 L_\mu 
+         - c_0 \frac{\left|\mathbf{r}\right|}{L_\mu}
+         - c_1 \frac{L_\mu}{\left|\mathbf{r}\right|}
          - \cdots \right)\nonumber\\
          & & + \left[\,\mbox{$2^{D-1}-1$ transverse images}\,\right]
          \; .  \label{stringmodel}
 \end{eqnarray}
 %
 In the case of a cube-shaped lattice $L_\mu = L$, the $c_p$ term can
-be absorbed into the normalization constant $c_0$ and
-the $c_2$ term is indistinguishable from the string tension.
+be absorbed into the normalization constant $\cNorm$ and
+the $c_0$ term is indistinguishable from the string tension.
 If excited states are ignored, the perimeter term $c_p 2 L_\mu$ is a
 renormalization scheme-dependent self-energy,
-$c_1 \left|\mathbf{r}\right|/L_\mu$ is the universal correction
-for closed strings, with $c_1 = -\pi (D-2)/6$, and
-$c_2 L_\mu/\left|\mathbf{r}\right|$ is the universal leading correction
-for open strings, with $c_2 = -\pi (D-2)/24$; there is no
+$c_0 \left|\mathbf{r}\right|/L_\mu$ is the universal correction
+for closed strings, with $c_0 = -\pi (D-2)/6$, and
+$c_1 L_\mu/\left|\mathbf{r}\right|$ is the universal leading correction
+for open strings, with $c_1 = -\pi (D-2)/24$; there is no
 $\left|\mathbf{r}\right| L_\mu^0$
 term~\cite{luscher_anomalies_1980,luscher_quark_2002,aharony_effective_2013}.
 The bare Polyakov loop operator should have a small overlap with
@@ -392,11 +393,11 @@ potential using the standard formula:
 An example fit is shown in Fig.~\ref{pcorr16}.  The lattice configurations
 were generated with the Chroma library~\cite{edwards_chroma_2005};
 see Appendix~\ref{configurations} for details.
+The fit has $\chi^2=229$ for 195 degrees of freedom,
+with the covariance matrix derived from 600 lattice configurations.
 The string tension $\sigma a^2 = 0.0181(20)$
 agrees with Teper's value for $\beta=28$,
 $\sigma a^2 = 0.016210(54)$~\cite{lucini_$mathrmsun$_2002,athenodorou_sun_2017}.
-The fit has $\chi^2=229$ for 195 degrees of freedom,
-with the covariance matrix derived from 600 lattice configurations.
 However, it should be noted that  $\sigma a^2$ is strongly anti-correlated
 with both $c_p$ and $c_1$.
 This example shows that inclusion of the transverse
@@ -415,7 +416,7 @@ regime~\cite{meyer_static_2006},
 %
 Our effective potential should be valid for
 $\left|\mathbf{r}\right|>\meyerscale$.  For the example shown in
-Fig.~\ref{pcorr16}, $\meyerscale \approx 13 a$, substantially larger
+Fig.~\ref{pcorr16}, $\meyerscale \approx 13 a$, much larger
 than the cutoff $\left|\mathbf{r}\right|\ge 4$.
 So, at least at this level of precision, we see that $F_\mu(\mathbf{r})$
 continues to work well at substantially smaller distance scales.
@@ -423,26 +424,25 @@ continues to work well at substantially smaller distance scales.
 \subsection{Wilson loops}
 
 \begin{table}
-  \caption{Parameters for the fit shown in Fig.~\ref{wilsonFit16}.  Note
-    that $c_3$ and $c_6$ are not significant.   The string tension is
-    highly anti-correlated with the perimeter term $c_p$.
-    The string tension $\sigma a^2$ agrees with Teper's value for $\beta=28$,
-    $\sigma a^2 = 0.016210(54)$~\cite{lucini_$mathrmsun$_2002,
-      athenodorou_sun_2017}.
+  \caption{Parameters for the fit shown in Fig.~\ref{wilsonFit16}.
+    The string tension is highly anti-correlated with the perimeter
+    term $c_p$.  The string corrections are universal corrections
+    valid for any open
+    string~\cite{luscher_anomalies_1980,luscher_quark_2002,aharony_effective_2013}.
     \label{wilsonparameters}}
-  \begin{tabular}{c|c}
-    name & value \\
+  \begin{tabular}{c|c|l}
+    name & value & expected value\\
     \hline
-  $\sigma a^2$ & 0.01588(50) \\
-  $c_0$ &  1.312(14)\\
-  $c_p$ &  0.0671(16)\\
-  $c_1$ &  -0.097(15)\\
+  $\sigma a^2$ & 0.01588(50) & 0.016210(54), Teper calculation~\cite{lucini_$mathrmsun$_2002,athenodorou_sun_2017}.\\
+  $\cNorm$ &  1.312(14) & \\
+  $c_p$ &  0.0671(16) & 0.0630(77), our Polyakov loop correlator, Fig.~\ref{pcorr16}\\
+  $c_1$ &  -0.097(15) & $-\pi (D-2)/24 \approx -0.131$, string correction\\
   $c_2$ &  0.239(15)\\
-  $c_3$ &  0.038(35)\\
-  $c_4$ & -0.158(14)\\
-  $c_5$ & -0.055(13)\\
-  $c_6$ & -0.021(31)\\
-  $c_{-1}$ & 0.307(21)\\
+  $c_3$ &  0.038(35) & 0, string correction\\
+  $c_4$ & -0.158(14) & \\
+  $c_5$ & -0.055(13) &\\
+  $c_6$ & -0.021(31) & $-\pi^2 (D-2)^2/1152 \approx -0.0086$, string correction\\
+  $c_{-1}$ & 0.307(21) &\\
   \end{tabular}
 \end{table}
 
@@ -450,8 +450,8 @@ continues to work well at substantially smaller distance scales.
   \includegraphics{wilsonFit-16}
   \caption{Difference of the Wilson loop expectation value $\mathcal{W}$
     and a fit to Eqn.~(\ref{wfit}) vs.\ loop size
-    for an $\SU(3)$, $16^3$ lattice, $\beta=28$.  The blue line represents
-    the standard error of the data point and the red \& green lines
+    for an $\SU(3)$, $16^3$ lattice, $\beta=28$.  Each blue line represents
+    the standard error of that data point and the red \& green lines
     represent the magnitude of the difference relative to zero.
     The fit cutoff $2 \le w_1,w_2\le 14$ is represented by the dotted lines.
     The data is from 200 lattice configurations. \label{wilsonFit16}}
@@ -473,7 +473,7 @@ plus power law corrections:
 %
 \begin{align}
   \MoveEqLeft W\left(w_1, w_2; L_\mu, L_\nu\right) =  \nonumber \\
-       & c_0 \exp\left[
+       &  \cNorm \exp\left[
        -\sigma a^2 w_1 w_2 
        - c_p  2\left(w_1+w_2\right)
        \vphantom{\frac{w_1}{w_2}}\right. \nonumber \\ & \hspace{4em}
@@ -485,10 +485,10 @@ plus power law corrections:
            - c_5 \left(\frac{1}{w_1^2}+\frac{1}{w_2^2}\right)
            - c_6 \left(\frac{w_1}{w_2^3}+\frac{w_2}{w_1^3}\right) - \cdots
        \right]\nonumber\\ &
-      \mbox{} + c_0 \exp\left[
+      \mbox{} + \cNorm \exp\left[
        -\sigma a^2 (L_\mu L_\nu - w_1 w_2)
        \right. \nonumber \\ & \hspace{4em} \left.
-       - c_p  2\left(w_1+w_2\right) 
+       - c_p  2\left(w_1+w_2\right)
      - c_{-1}\left(L_1 +L_2 - w_1 -w_2\right) - \cdots
      \right]\; .  \label{wfit}
 \end{align}
@@ -504,7 +504,12 @@ An example fit is shown in Fig.~\ref{wilsonFit16}.
 The fit has $\chi^2=118$ for 81 degrees of freedom,
 with the covariance matrix derived from 600 lattice configurations.
 The best fit parameters are given in Table~\ref{wilsonparameters}.
-
+The fact that the fit is very poor for points outside the cutoff,
+$w_2 = 1$, suggests that there are effects that are poorly modeled
+by power-law corrections.  It also means that
+there is a significant systematic error associated with the choice
+of cutoff; the errors shown in Table~\ref{wilsonparameters} are
+statistical errors only.
 
 \section{Landau gauge}
 
@@ -536,12 +541,12 @@ where
    \overline{M} = \frac{\orelax}{2 D} \sum_\mu \log\left(U_\mu(x)\right) -
    \log(U_\mu\left(x-a \hat{\mu})\right)  \; . \label{landau}
 \eq
+%
 At each site of the lattice, one can calculate $U_G(x)$ and apply it,
 moving through the lattice sites in a checkerboard fashion,
 first all the even sites and then all the odd sites.
 This constitutes one minimization step, what we will call
-a ``Landau step,'' in a
-successive over-relaxation (SOR) procedure.
+a ``Landau step,'' in a successive over-relaxation (SOR) procedure.
 The relaxation factor $\orelax$ can be adjusted to speed numerical
 convergence.
 In practice, we find the fastest convergence for $\orelax \approx 1.7$;
@@ -679,7 +684,7 @@ link fields distributed fairly evenly across $\zentrum$.
 See Table~\ref{center1} for an example.
 
 However, this procedure fails to remove long-range field fluctuations
-associated with the random choice of gauge.  We can remove
+associated with the initial random choice of gauge.  We can remove
 such fluctuations by another gauge choice:  axial gauge
 $\partial_\mu A_\mu = 0$ (no sum on $\mu$).
 That is, for direction $\mu$, we choose a gauge such that $U_\mu(x)$
@@ -767,7 +772,6 @@ and apply 2-3 Newton's method steps at the very end,
 when already close to the minimum.
 
 \section{Finding the saddle point}
-\label{saddlePoint}
 
 In the following, we will describe an iterative
 procedure---Newton's method---for finding the saddle-point
@@ -776,6 +780,7 @@ The procedure is complicated by the fact that the associated
 Hessian matrix is singular.
 
 \subsection{Shifts of the gauge fields}
+\label{shiftSection}
 
 \begin{figure}
   \[
@@ -802,189 +807,14 @@ We define a ``shift'' for each link as
 \eq
 where $T_a$ are generators of $\SU(N)$, with normalization
 $\delta_{a,b} = 2 \Tr(T_a T_b)$ and the square root is defined
-in Appendix~\ref{roots}.
-We can then take partial derivatives of $N S/\beta$ with
+in Appendix~\ref{roots}; see Fig.~\ref{shift}.
+We can then take partial derivatives of the action $N S/\beta$ with
 respect to the $n_L$ shifts $\mathbf{w} = \left(w_1(1, x_1), \ldots\right)$
 to obtain the gradient vector $\mathbf{q}$ and Hessian matrix
 $H$.  The gradient and Hessian can be used to estimate the
-position of the nearest saddle point.
-
-Let us consider the gradient for the link $U_\mu(x)$.
-The gradient will involve the $2 (D-1)$ plaquettes that include that link.
-Let $F_\mu(x)$ be the associated sum of staples; then
-\be
-   \frac{N}{\beta} \frac{\partial S}{\partial w_a(\mu, x)} =
-   \Im\Tr\left(F_\mu(x) \sqrt{U_\mu(x)} T_a \sqrt{U_\mu(x)}\right) \; .
-   \label{grad}
-\eq
-We can use Eqn.~(\ref{grad}) to construct the gradient vector $\mathbf{q}$.
-Likewise, one can calculate the $n_L\times n_L$ Hessian matrix
-$H$ using
-\be
-      \frac{N}{\beta} \frac{\partial^2 S}{\partial w_a(\mu, x)\, \partial w_b(\nu, y)}
-\eq
-which is nonzero when there is a plaquette which contains both
-$U_\mu(x)$ and $U_\nu(y)$.  For example, for $x=y$,
-\be
-      \frac{N}{\beta} \frac{\partial^2 S}{\partial w_a(\mu, x)\, \partial w_b(\nu, x)} = \frac{1}{2}
-   \Re\Tr\left(F_\mu(x) \sqrt{U_\mu(x)} \left(T_a T_b + T_b T_s\right) \sqrt{U_\mu(x)}\right) \; .
-   \label{diaghess}
-\eq
-The $x \neq y$ terms of the Hessian are constructed in a similar fashion.
-
-Some shifts $\mathbf{w}$ correspond to gauge transforms.
-As we shall see, such shifts are problematic for any saddle
-point search, since the action is constant in those directions.
-To address this issue, we determine the set of shifts that are
-equivalent to infinitesimal gauge transforms.  Consider an
-infinitesimal gauge transform at site $x$; its action on link $U_\mu(x)$ is:
-\be
-U_\mu(x) \to e^{i C_a(x) T_a} U_\mu(x) = U_\mu(x) + i C_a(x) T_a U_\mu(x) +
-       \mathrm{O}\!\left(C_a^2\right)
-\eq
-But this is equal to some infinitesimal shift $w_a(\mu, x)$ on
-the same link $U_\mu(x)$:
-\be
-U_\mu(x) \to U_\mu(x) + i w_a(\mu,x) \sqrt{U_\mu(x)}T_a \sqrt{U_\mu(x)} +
-       \mathrm{O}\!\left(w_a^2\right)
-\eq
-%
-Equating the two and taking the trace:
-\be
-w_a(\mu,x) = 2 C_b(x) \Tr\left(\sqrt{U_\mu(x)} T_a
-                     \sqrt{U_\mu^\da(x)} T_b\right) \; . \label{gs}
-\eq
-Using Eqn.~(\ref{gs}), one can construct an $n_G \times n_L$ matrix
-$G$ that relates shifts to infinitesimal gauge transforms
-at each lattice site.
-Since the action is invariant under gauge transforms, $G \mathbf{q} = 0$.
-However, since the Hessian represents the quadratic term, $G H G^T \neq 0$.
-
-Since we are using the Hessian, we are approximating
-the action $S$ as being quadratic in $\mathbf{w}$.  If $\mathbf{w}$
-is too large, the quadratic approximation is no longer valid.
-Thus, we need to monitor the size of the shifts.
-Using Eqn.~(\ref{sunorm}), we will define two norms for the shifts:
-a lattice-wide $\infty$-norm,
-\be
-\left\lVert \mathbf{w}\right\rVert_{\mathrm{max}} =
-     \max_{x,\mu} \fnorm{e^{i w_{a}(\mu, x) T_a}}
-     = \max_{x,\mu} \sqrt{\frac{1}{2}\sum_a w_a^2(\mu, x)}
-\eq
-as well as a lattice-wide Euclidean norm, averaged over links
-\be
-\left\lVert \mathbf{w}\right\rVert_2 =
-      \sqrt{\frac{1}{V_L D} \sum_{x, \mu}
-        \fnorm{e^{i w_{a}(\mu, x) T_a}}^2}
-     = \sqrt{\frac{1}{2 V_L D} \sum_{x, \mu, a} w_a^2(\mu, x)}
-        \; .  \label{shiftsize}
-\eq
-
-\subsection{Calculating the saddle point}
-\label{saddle}
-
-\begin{figure}
-\includegraphics{eigenAll}
-\caption{Histogram of the eigenvalues of $H$ for a $6^3$
-  lattice configuration, $\beta = 8.175$, $N=3$.
-  We see a peak around zero due to the $\SU(3)$ gauge symmetry.
-  \label{eigenAll}}
-\end{figure}
-
-\begin{figure}
-\includegraphics{shiftPairs}
-\caption{Scatter plot of eigenvalue-gradient pairs of $H^\prime$
-  for a $6^3$ lattice configuration, $\beta = 8.175$, $N=3$.
-  The pairs above the V-shaped wedge correspond to large shifts and
-  will dominate the solution to the linear system, Eqn.~(\ref{linear2}).
-  \label{shiftPairs}}
-\end{figure}
-
-In principle, to find the nearest saddle point, one would
-find $H$ and $\mathbf{q}$, solve the linear system
-\be
-    H \mathbf{y} = \mathbf{q} \label{linear1}
-\eq
-and shift the gauge fields using $\mathbf{w} = -\mathbf{y}$.
-Since the action $S$ is not quadratic in $\mathbf{w}$, one
-would then iterate this process to find the actual saddle point
-(Newton's method).
-
-In practice, however, this procedure does not work.  To see why, let us
-look at the eigenvalues of $H$.  As seen in Figure~\ref{eigenAll},
-we see that the eigenvalues are strongly peaked around zero,
-due to the gauge symmetry of the theory.  Thus, the linear
-system (\ref{linear1}) will be nearly singular and
-the solution will be numerically unstable.  We must be more careful.
-
-To address this issue, we find the null-space $P_G$ of the gauge
-transform matrix $G$,
-\be
-G P_G^T = 0 \; , \quad P_G P_G^T = \mathbb{I}\; .
-\eq
-Then we project $H$ and $\mathbf{q}$ onto
-the subspace of non-gauge-transform shifts:
-\be
-         H^\prime = P_G H P_G^T \quad \mbox{and} \quad
-         \mathbf{q}^\prime = P_G \mathbf{q} \; .
-\eq
-Then we can solve the linear system
-\be
-   H^\prime \mathbf{y}^\prime = \mathbf{q}^\prime \label{linear2}
-\eq
-and set $\mathbf{w} = - P_G^T \mathbf{y}^\prime$.  However, this is
-still insufficient to yield a well-behaved linear system.
-
-To better understand this issue, let us define the eigenvalues
-$\left(\heigen_1, \heigen_2, \ldots\right)$ and
-eigenvectors $V=\left(\mathbf{v}_1, \mathbf{v}_2, \ldots\right)$
-of $H^\prime$ and express Eqn.~(\ref{linear2}) in the eigenspace of $H^\prime$:
-\be
-\begin{pmatrix}
-    \heigen_1 & & \\
-    & \heigen_2 & \\
-    & & \ddots  \end{pmatrix} \overline{\mathbf{y}} =
-  \overline{\mathbf{q}} \label{linear3}
-\eq
-where $\overline{\mathbf{y}} = V \mathbf{y}^\prime$ and
-$\overline{\mathbf{q}}  = V \mathbf{q}^\prime$.
-The solution is simply
-\be
-    \overline{y}_i = \frac{\overline{q}_i}{\heigen_i} \; ;
-\eq
-see Fig.~\ref{shiftPairs} for an example. 
-For any case where $\left|\heigen_i\right|\ll \left|\overline{q}_i\right|$,
-there will be a large shift that will dominate the solution
-to the linear system.
-Thus, we impose cutoffs $\Lambda_2$ and $\Lambda_\mathrm{max}$:
-\begin{eqnarray}
-    \sqrt{2} \left|\overline{q}_i\right|\left\lVert P_G^T \mathbf{v}_i\right\rVert_2
-     &<& \left|\heigen_i\right|\,\Lambda_2 \label{lambda2} \\
-    \sqrt{2} \left|\overline{q}_i\right|
-      \left\lVert P_G^T \mathbf{v}_i\right\rVert_\mathrm{max}
-    &<& \left|\heigen_i\right|\,\Lambda_\mathrm{max} \; .
-\end{eqnarray}
-%
-and set $\overline{y}_i=0$ whenever a cutoff is violated.
-That is, we remove any eigenpairs inside a v-shaped
-region like the one shown in Fig.~\ref{shiftPairs}.  
-
-Finally, since the gauge symmetry of the action is non-linear,
-we do not want to shift the fields by too much before recalculating
-the matrix $G$.  
-Thus, it is useful to add a damping factor $\gamma$ and
-further rescale by $\Lambda_s$ when the shift would
-otherwise be large:
-\be
-  \mathbf{w} = - \gamma \mathbf{y} \min\left(1, \frac{\Lambda_s}{
-    \sqrt{2} \left\lVert \mathbf{y}\right\rVert_\mathrm{max}}\right) \; .
-\eq
-Typically, $\Lambda_s = 1$ or $2$ is used.
-
-Armed with these three tools:  removing infinitesimal-gauge-transform shifts,
-imposing the $\Lambda$ cutoffs, and using the damping factor $\gamma$,
-we can apply the shift iteratively and find saddle-point configurations
-that are of physical interest.
+position of the nearest saddle point, provided that we remove any
+nearly-singular eigenvalues of the Hessian.  Details are discussed in
+Appendix~\ref{saddle}.
 
 For a $20^3$ lattice, $\SU(3)$, the Hessian is a
 $192,000 \times 192,000$ matrix with almost $20\times 10^6$
@@ -994,6 +824,7 @@ details are discussed in Appendix~\ref{krylov}.
 
 
 \subsection{Diagonal blocks of the Hessian and cooling}
+\label{shiftSection2}
 
 The full Newton's method calculation discussed above is numerically
 challenging.
@@ -1007,7 +838,6 @@ $\mu=1$, $x$ even links, then $\mu=1$, $x$ odd links,
 $\mu=2$, $x$ even links, {\em et cetera}.  We will refer to this
 as the ``single-link saddle-point method.''
 
-
 This single-link saddle point method is reminiscent of the
 approach used in a number of investigations of ``lattice
 cooling''~\cite{trottier_exploring_1994,teper_cooling_1994,
@@ -1020,8 +850,7 @@ In the folliwng, we will compare the lattice cooling approach to
 a search for the nearest saddle-point.  Our algorithm for performing
 the link-wise minimization is discussed in Appendix~\ref{linkmin}.
 As with the single-link saddle-point method, links in each direction
-are updated in a checkerboard fashion:  first the even links and
-then the odd links.
+are updated in a checkerboard fashion.
 
 \subsection{Trajectories}
 
@@ -1046,10 +875,7 @@ then the odd links.
 
 
 \begin{figure}[p]
-\includegraphics{"stringmodel-3-4-12-16-20-a2sigma"}\hfill
-\includegraphics{"stringmodel-3-4-12-16-20-c0"}\\
-\vspace{3ex}
-\includegraphics{"stringmodel-3-4-12-16-20-cCoulomb"}\hfill
+\includegraphics{"stringmodel-3-4-12-16-20-logNorm"}\hfill
 \includegraphics{"stringmodel-3-4-12-16-20-cPerimeter"}\\
 \vspace{3ex}
 \includegraphics{"stringmodel-3-4-12-16-20-chiSquared"}
@@ -1068,7 +894,8 @@ then the odd links.
 % the end of the current page.
 \afterpage{\clearpage}
 
-By applying the procedure discussed in Section~\ref{saddle} iteratively,
+By applying any of the procedures discussed in
+Sections~\ref{shiftSection} and \ref{shiftSection2} iteratively,
 we produce a trajectory of lattice configurations $\config_0$,
 $\config_1$, \ldots in configuration space.  For lattice configuration
 $\config_\kappa$, we define
@@ -1092,9 +919,10 @@ after the short length scale (perturbative) fluctuations are removed.
 For finite $N$ and $a$, we don't expect this picture to
 hold exactly, nor do we expect the saddle points to be
 exact. Similar to the studies of monopoles on the lattice
+{\bf ... add citation ...}
 % ~\cite{},
 we expect there to be some point where the calculation breaks
-down:  for instance $c_0$ goes to zero (correlations disappear)
+down:  for instance $\cNorm$ goes to zero (correlations disappear)
 or the string tension blows up.
 
 
@@ -1305,7 +1133,6 @@ Thus, the norm defined in Eqn.~(\ref{sunorm}) is simply
 \eq
 
 
-
 \section{Lattice configurations}
 \label{configurations}
 
@@ -1322,6 +1149,241 @@ multiple lattice configurations.  We used 4 over-relaxations steps
 for every heat bath step.
 
 
+\section{Calculating the saddle point}
+\label{saddle}
+
+Let us consider the gradient for the link $U_\mu(x)$.
+The gradient will involve the $2 (D-1)$ plaquettes that include that link.
+Let $F_\mu(x)$ be the associated sum of staples; then
+\be
+   \frac{N}{\beta} \frac{\partial S}{\partial w_a(\mu, x)} =
+   \Im\Tr\left(F_\mu(x) \sqrt{U_\mu(x)} T_a \sqrt{U_\mu(x)}\right) \; .
+   \label{grad}
+\eq
+We can use Eqn.~(\ref{grad}) to construct the gradient vector $\mathbf{q}$.
+Likewise, one can calculate the $n_L\times n_L$ Hessian matrix
+$H$ using
+\be
+      \frac{N}{\beta} \frac{\partial^2 S}{\partial w_a(\mu, x)\, \partial w_b(\nu, y)}
+\eq
+which is nonzero when there is a plaquette which contains both
+$U_\mu(x)$ and $U_\nu(y)$.  For example, for $x=y$,
+\be
+      \frac{N}{\beta} \frac{\partial^2 S}{\partial w_a(\mu, x)\, \partial w_b(\nu, x)} = \frac{1}{2}
+   \Re\Tr\left(F_\mu(x) \sqrt{U_\mu(x)} \left(T_a T_b + T_b T_s\right) \sqrt{U_\mu(x)}\right) \; .
+   \label{diaghess}
+\eq
+The $x \neq y$ terms of the Hessian are constructed in a similar fashion.
+
+Some shifts $\mathbf{w}$ correspond to gauge transforms.
+Such shifts are problematic for any saddle
+point search, since the action is constant in those directions.
+To address this issue, we determine the set of shifts that are
+equivalent to infinitesimal gauge transforms.  Consider an
+infinitesimal gauge transform at site $x$; its action on link $U_\mu(x)$ is:
+\be
+U_\mu(x) \to e^{i C_a(x) T_a} U_\mu(x) = U_\mu(x) + i C_a(x) T_a U_\mu(x) +
+       \mathrm{O}\!\left(C_a^2\right)
+\eq
+But this is equal to some infinitesimal shift $w_a(\mu, x)$ on
+the same link $U_\mu(x)$:
+\be
+U_\mu(x) \to U_\mu(x) + i w_a(\mu,x) \sqrt{U_\mu(x)}T_a \sqrt{U_\mu(x)} +
+       \mathrm{O}\!\left(w_a^2\right)
+\eq
+%
+Equating the two and taking the trace:
+\be
+w_a(\mu,x) = 2 C_b(x) \Tr\left(\sqrt{U_\mu(x)} T_a
+                     \sqrt{U_\mu^\da(x)} T_b\right) \; . \label{gs}
+\eq
+Using Eqn.~(\ref{gs}), one can construct an $n_G \times n_L$ matrix
+$G$ that relates shifts to infinitesimal gauge transforms
+at each lattice site.
+Since the action is invariant under gauge transforms, $G \mathbf{q} = 0$.
+However, since the Hessian represents the quadratic term, $G H G^T \neq 0$.
+
+Since we are using the Hessian, we are approximating
+the action $S$ as being quadratic in $\mathbf{w}$.  If $\mathbf{w}$
+is too large, the quadratic approximation is no longer valid.
+Thus, we need to monitor the size of the shifts.
+Using Eqn.~(\ref{sunorm}), we will define two norms for the shifts:
+a lattice-wide $\infty$-norm,
+\be
+\left\lVert \mathbf{w}\right\rVert_{\mathrm{max}} =
+     \max_{x,\mu} \fnorm{e^{i w_{a}(\mu, x) T_a}}
+     = \max_{x,\mu} \sqrt{\frac{1}{2}\sum_a w_a^2(\mu, x)}
+\eq
+as well as a lattice-wide Euclidean norm, averaged over links
+\be
+\left\lVert \mathbf{w}\right\rVert_2 =
+      \sqrt{\frac{1}{V_L D} \sum_{x, \mu}
+        \fnorm{e^{i w_{a}(\mu, x) T_a}}^2}
+     = \sqrt{\frac{1}{2 V_L D} \sum_{x, \mu, a} w_a^2(\mu, x)}
+        \; .  \label{shiftsize}
+\eq
+
+
+In principle, to find the nearest saddle point, one would
+find $H$ and $\mathbf{q}$, solve the linear system
+\be
+    H \mathbf{y} = \mathbf{q} \label{linear1}
+\eq
+and shift the gauge fields using $\mathbf{w} = -\mathbf{y}$.
+Since the action $S$ is not quadratic in $\mathbf{w}$, one
+would then iterate this process to find the actual saddle point
+(Newton's method).
+
+\begin{figure}
+\includegraphics{eigenAll}
+\caption{Histogram of the eigenvalues of $H$ for a $6^3$
+  lattice configuration, $\beta = 8.175$, $N=3$.
+  We see a peak around zero due to the $\SU(3)$ gauge symmetry.
+  \label{eigenAll}}
+\end{figure}
+
+In practice, however, this procedure does not work.  To see why, let us
+look at the eigenvalues of $H$.  As seen in Figure~\ref{eigenAll},
+we see that the eigenvalues are strongly peaked around zero,
+due to the gauge symmetry of the theory.  Thus, the linear
+system (\ref{linear1}) will be nearly singular and
+the solution will be numerically unstable.  We must be more careful.
+
+\begin{figure}
+\includegraphics{shiftPairs}
+\caption{Scatter plot of eigenvalue-gradient pairs of $H^\prime$
+  for a $6^3$ lattice configuration, $\beta = 8.175$, $N=3$.
+  The pairs above the V-shaped wedge correspond to large shifts and
+  will dominate the solution to the linear system, Eqn.~(\ref{linear2}).
+  \label{shiftPairs}}
+\end{figure}
+
+To address this issue, we find the null-space projection $P_G$
+of the gauge transform matrix $G$,
+\be
+G P_G^T = 0 \; , \quad P_G P_G^T = \mathbb{I}\; .
+\eq
+Then we project $H$ and $\mathbf{q}$ onto
+the subspace of non-gauge-transform shifts:
+\be
+         H^\prime = P_G H P_G^T \quad \mbox{and} \quad
+         \mathbf{q}^\prime = P_G \mathbf{q} \; .
+\eq
+Then we can solve the linear system
+\be
+   H^\prime \mathbf{y}^\prime = \mathbf{q}^\prime \; . \label{linear2} 
+\eq
+However, this is still insufficient to yield a well-behaved linear system.
+To better understand this issue, let us define the eigenvalues
+$\left(\heigen_1, \heigen_2, \ldots\right)$ and
+eigenvectors $V=\left(\mathbf{v}_1, \mathbf{v}_2, \ldots\right)$
+of $H^\prime$ and express Eqn.~(\ref{linear2}) in the eigenspace of $H^\prime$:
+\be
+\begin{pmatrix}
+    \heigen_1 & & \\
+    & \heigen_2 & \\
+    & & \ddots  \end{pmatrix} \overline{\mathbf{y}} =
+  \overline{\mathbf{q}} \label{linear3}
+\eq
+where $\overline{\mathbf{y}} = V \mathbf{y}^\prime$ and
+$\overline{\mathbf{q}}  = V \mathbf{q}^\prime$.
+The solution is simply
+\be
+    \overline{y}_i = \frac{\overline{q}_i}{\heigen_i} \; ;
+\eq
+see Fig.~\ref{shiftPairs} for an example. 
+For any case where $\left|\heigen_i\right|\ll \left|\overline{q}_i\right|$,
+there will be a large shift that will dominate the solution
+to the linear system.
+Thus, we impose cutoffs $\Lambda_2$ and $\Lambda_\mathrm{max}$:
+\begin{eqnarray}
+    \sqrt{2} \left|\overline{q}_i\right|\left\lVert P_G^T \mathbf{v}_i\right\rVert_2
+     &<& \left|\heigen_i\right|\,\Lambda_2 \label{lambda2} \\
+    \sqrt{2} \left|\overline{q}_i\right|
+      \left\lVert P_G^T \mathbf{v}_i\right\rVert_\mathrm{max}
+    &<& \left|\heigen_i\right|\,\Lambda_\mathrm{max} \; .
+\end{eqnarray}
+%
+and set $\overline{y}_i=0$ whenever a cutoff is violated.
+That is, we remove any eigenpairs inside a v-shaped
+region like the one shown in Fig.~\ref{shiftPairs}.  
+
+Finally, since the gauge symmetry of the action is non-linear,
+we do not want to shift the fields by too much before recalculating
+the matrix $G$.  
+Thus, it is useful to add a damping factor $\gamma$ and
+further rescale by $\Lambda_s$ when the shift would
+otherwise be large:
+\be
+  \mathbf{w} = - \gamma \mathbf{y} \min\left(1, \frac{\Lambda_s}{
+    \sqrt{2} \left\lVert \mathbf{y}\right\rVert_\mathrm{max}}\right) \; ,
+\eq
+where $\mathbf{y} = P_G^T V^T \overline{\mathbf{y}}$. 
+Typically, $\Lambda_s = 1$ or $2$ is used.
+
+Armed with these three tools:  removing infinitesimal-gauge-transform shifts,
+imposing the $\Lambda$ cutoffs, and using the damping factor $\gamma$,
+we can apply the shift iteratively and find saddle-point configurations
+that are of physical interest.
+
+
+\section{Solving a constrained linear system}
+\label{krylov}
+
+For lattices of interest, the basis size $n_L$ is large enough
+that direct solution is not possible and one must resort to Krylov
+space methods (sparse matrix methods).
+The Hessian matrix $H$ is sparse, with an $(N^2-1)\times(N^2-1)$
+color block structure and $6D-5$ nonzero blocks per row/column.
+The gauge transform matrix $G$ has the same color block structure
+with $2 D$ nonzero blocks per row and $2$ nonzero blocks per column.
+
+In order to preserve the sparsity of the matrices, we never
+explicitly construct the space of non-transform shifts used in
+Eqn.~(\ref{linear2}).  Instead, we apply the projection
+operator $P_G$ to any Krylov space vector $\mathbf{v}$ using:
+\be
+    P_G \mathbf{v} = \mathbf{v} - G^T \mathbf{u} \; ,
+\eq
+where $\mathbf{u}$ is a solution of the linear system
+\be
+  G G^T \mathbf{u} = G \mathbf{v} \; .\label{gcg}
+\eq
+Eqn.~(\ref{gcg}) is solved using the conjugate gradient
+algorithm, subroutine MINRES-QLP~\cite{choi_algorithm_2014}.
+The matrix $G G^T$ is well-conditioned, so this typically converges
+in less than 40 steps.
+
+We use the Lanczos library nu-TRLan~\cite{yamazaki_adaptive_2010},
+modified so that $P_G$ is applied to any Krylov space vector, to
+find the smallest eigenpairs of $\left(P_G H\right)^2$.  From these, we find
+the eigenvectors $\left\{\mathbf{r}_1, \mathbf{r}_2, \ldots\right\}$
+associated with eigenpairs $\left(\heigen_i^2, \mathbf{r}_i\right)$
+that violate the $\Lambda$ cutoffs,
+%
+\begin{eqnarray}
+   \frac{\sqrt{2}\, \mathbf{r}_i \mathbf{\cdot} \mathbf{q}
+   \left\lVert \mathbf{r}_i\right\rVert_2}{\left|\heigen_i\right| }
+     &>& \Lambda_2  \quad\mbox{or} \\
+   \frac{\sqrt{2}\, \mathbf{r}_i\mathbf{\cdot} \mathbf{q}
+   \left\lVert \mathbf{r}_i\right\rVert_\mathrm{max}}{\left|\heigen_i\right| }
+     &>& \Lambda_\mathrm{max} \; .
+\end{eqnarray}
+%
+To ensure that we have found all the eigenpairs that violate the cutoffs,
+we may need to calculate as many as 2000 to 4000 of the lowest eigenpairs
+in the Lanzos routine.  As one moves along a trajectory towards the
+saddle point, the gradient vector decreases in magnitude and fewer eigenpairs
+exceed the $\Lambda$ cutoffs.
+
+Finally, we solve the linear system $H \mathbf{y} = \mathbf{q}$
+using the conjugate gradient algorithm,
+subroutine MINRES-QLP~\cite{choi_algorithm_2014}, modified so that
+the projection operators $P_G$ and 
+$\mathbb{I}- \sum_{i} \mathbf{r}_i \otimes \mathbf{r}_i$
+are applied to any Krylov space vector.
+
+
 \section{Newton's method for minimizing the lattice norm}
 \label{newtonNorm}
 
@@ -1330,7 +1392,7 @@ that minimizes the lattice norm squared $\sum_{\mu,x}\fnorm{U_\mu^\prime(x)}^2$
 as a function of $B_a(x)$,
 where $U_G(x) = \exp\left(i B_a(x)\, T_a\right)$.
 The strategy employed here closely follows the strategy used to find
-saddle-points of the action, Section~\ref{saddlePoint} and
+saddle-points of the action, Appendix~\ref{saddle} and
 Appendix~\ref{krylov}, with one important difference:  we are trying
 to find a minimum, rather than a saddle-point.  The $n_G$ partial
 derivatives
@@ -1440,65 +1502,9 @@ gauge choice, $H^\prime$ has many
 negative eigenvalues and one should
 expect that Newton's method will work very poorly.
 However, after some intial minimization of the lattice
-norm, we see that very few---if any---eigenvalues violate the cutoffs
-and Newton's method should work quite well.
+norm using other methods, we see that very few---if any---eigenvalues
+violate the cutoffs and Newton's method should work quite well.
 
-
-\section{Solving a constrained linear system}
-\label{krylov}
-
-For lattices of interest, the basis size $n_L$ is large enough
-that direct solution is not possible and one must resort to Krylov
-space methods (sparse matrix methods).
-The Hessian matrix $H$ is sparse, with an $(N^2-1)\times(N^2-1)$
-color block structure and $6D-5$ nonzero blocks per row/column.
-The gauge transform matrix $G$ has the same color block structure
-with $2 D$ nonzero blocks per row and $2$ nonzero blocks per column.
-
-In order to preserve the sparsity of the matrices, we never
-explicitly construct the space of non-transform shifts used in
-Eqn.~(\ref{linear2}).  Instead, we apply the projection
-operator $P_G$ to any Krylov space vector $\mathbf{v}$ using:
-\be
-    P_G \mathbf{v} = \mathbf{v} - G^T \mathbf{u} \; ,
-\eq
-where $\mathbf{u}$ is a solution of the linear system
-\be
-  G G^T \mathbf{u} = G \mathbf{v} \; .\label{gcg}
-\eq
-Eqn.~(\ref{gcg}) is solved using the conjugate gradient
-algorithm, subroutine MINRES-QLP~\cite{choi_algorithm_2014}.
-The matrix $G G^T$ is well-conditioned, so this typically converges
-in less than 40 steps.
-
-We use the Lanczos library nu-TRLan~\cite{yamazaki_adaptive_2010},
-modified so that $P_G$ is applied to any Krylov space vector, to
-find the smallest eigenpairs of $\left(P_G H\right)^2$.  From these, we find
-the eigenvectors $\left\{\mathbf{r}_1, \mathbf{r}_2, \ldots\right\}$
-associated with eigenpairs $\left(\heigen_i^2, \mathbf{r}_i\right)$
-that violate the $\Lambda$ cutoffs,
-%
-\begin{eqnarray}
-   \frac{\sqrt{2}\, \mathbf{r}_i \mathbf{\cdot} \mathbf{q}
-   \left\lVert \mathbf{r}_i\right\rVert_2}{\left|\heigen_i\right| }
-     &>& \Lambda_2  \quad\mbox{or} \\
-   \frac{\sqrt{2}\, \mathbf{r}_i\mathbf{\cdot} \mathbf{q}
-   \left\lVert \mathbf{r}_i\right\rVert_\mathrm{max}}{\left|\heigen_i\right| }
-     &>& \Lambda_\mathrm{max} \; .
-\end{eqnarray}
-%
-To ensure that we have found all the eigenpairs that violate the cutoffs,
-we may need to calculate as many as 2000 to 4000 of the lowest eigenpairs
-in the Lanzos routine.  As one moves along a trajectory towards the
-saddle point, the gradient vector decreases in magnitude and fewer eigenpairs
-exceed the $\Lambda$ cutoffs.
-
-Finally, we solve the linear system $H \mathbf{y} = \mathbf{q}$
-using the conjugate gradient algorithm,
-subroutine MINRES-QLP~\cite{choi_algorithm_2014}, modified so that
-the projection operators $P_G$ and 
-$\mathbb{I}- \sum_{i} \mathbf{r}_i \otimes \mathbf{r}_i$
-are applied to any Krylov space vector.
 
 \section{Minimizing the action for a single link}
 
@@ -1507,7 +1513,7 @@ To minimize the action for a single link $U\in\SU(N)$,
 we want to find $U$ that minimizes
 %
 \be
-S = -\Re\Tr U F \label{uf}
+\tilde{S} = -\Re\Tr U F \label{uf}
 \eq
 where $F$ is the sum of staples associated with $U$.
 In general this involves minimizing a non-linear function of $N^2-1$
@@ -1517,8 +1523,7 @@ value decomposition $F = V F^\prime W^\dag$ where $F^\prime$ is diagonal,
 positive semi-definite and $V$ and $W$ are unitary.
 If we define $U^\prime=W^\dag U V$, $U^\prime$ is unitary with some overall
 phase $\theta/N$: $\det U^\prime = \det V W^\dag = e^{i \theta}$.
-We make the {\em asatz} that $S$ is minimized by choosing $U^\prime$
-to be diagonal:
+We make the {\em ansatz} that $U^\prime$ is diagonal:
 \be
 U^\prime = \begin{pmatrix}
   e^{i \lambda_1} & & & \\
@@ -1528,11 +1533,11 @@ U^\prime = \begin{pmatrix}
 \eq
 where
 \be
-\lambda_N = \theta - \sum_{i=1}^{N-1} \lambda_i
+\lambda_N = \theta - \sum_{i=1}^{N-1} \lambda_i \; .
 \eq
-Thus, one minimizes
+Thus, we minimize
 \be
-S = % -\Re\Tr\left(U^\prime F^\prime\right) =
+\tilde{S} = % -\Re\Tr\left(U^\prime F^\prime\right) =
     -\sum_{i=1}^N \cos\left(\lambda_i\right) F_{i,i}^\prime \label{diagmin}
 \eq
 with respect to $\left\{\lambda_1, \lambda_2, \ldots, \lambda_{N-1}\right\}$.

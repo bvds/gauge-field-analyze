@@ -271,10 +271,14 @@ maxSURotation[uu_] :=
 SUStapleMinimum::usage = 
   "For a general matrix F, find a special unitary matrix U that \
 minimizes Re[Tr[U.F]].";
-Options[SUStapleMinimum] = {printLevel -> 0}; 
+SUStapleMinimum::diagonal = "Diagonal elements `1`"; 
+Options[SUStapleMinimum] = {printLevel -> 0};
 SUStapleMinimum[ff_, OptionsPattern[]] := 
  Block[{debug = (OptionValue[printLevel] > 0), ud, v, f, w, phase, 
-        value, min, n = Length[ff], lambda},
+        value, min, n = Length[ff], lambda,
+        (* Shift start a bit to handle test cases where the
+          diagonal matrix is proportional to the identity.  *)
+        start = Pi - 10.^-5},
   {v, f, w} = SingularValueDecomposition[ff];
   (* F itself could be singular.  In principle,
   one would find this phase while calculating the SVD *)
@@ -282,7 +286,8 @@ SUStapleMinimum[ff_, OptionsPattern[]] :=
   ud = Append[Table[lambda[i], {i, n - 1}], 
               phase - Sum[lambda[i], {i, n - 1}]];
   {value, min} = FindMinimum[
-      Cos[ud].Diagonal[f], Table[{lambda[i], 0}, {i, n - 1}]]; 
-  If[debug, Print["phase: ", phase]; 
+      (* Use minimum of the first N-1 terms as starting value. *)
+      Cos[ud].Diagonal[f], Table[{lambda[i], start}, {i, n - 1}]]; 
+  If[debug, Print["phase: ", phase, " diagonals: ", Chop[Diagonal[f]]]; 
             Print["Solution: ", {value, min}]]; 
   w.DiagonalMatrix[Exp[I ud /. min]].ConjugateTranspose[v]];

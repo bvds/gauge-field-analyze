@@ -54,7 +54,7 @@ plotPlaquetteCorrelations[corr_, opts:OptionsPattern[]] :=
              Line[{{0, 0}, {1/2 + Max[Map[First, corr]], 0}}]}];
 
 Options[plotStringModelFit] = Join[Options[ErrorListPlot],
-                                   Options[stringModel],
+                                   Options[stringModelBare],
                                    {"maxx" -> All}];
 plotStringModelFit[tallyData_, opts:OptionsPattern[]] :=
  Block[{lowerCutoff = OptionValue["lowerCutoff"], diffs,
@@ -63,8 +63,8 @@ plotStringModelFit[tallyData_, opts:OptionsPattern[]] :=
         offAxis = Function[dir, Apply[sin2theta2, Drop[#, {dir}]]&],
         nearest, maxx, miny, maxy, nn, ff, cd = ColorData[1]}, 
   nn = Select[Normal[tallyData], (False || Norm[#[[1, 1]]] > 1) &]; 
-  ff = stringModel[tallyData,
-       Apply[Sequence, FilterRules[{opts}, Options[stringModel]]],
+  ff = stringModelBare[tallyData,
+       Apply[Sequence, FilterRules[{opts}, Options[stringModelBare]]],
                    printResult -> True];
   nearest = Length[nn[[1, 1]]] - 1;
   maxx = If[OptionValue["maxx"] === All,
@@ -84,8 +84,11 @@ plotStringModelFit[tallyData_, opts:OptionsPattern[]] :=
       Epilog -> {Text[
           ColumnForm[
               Join[Map[
-                  Row[{#[[1, 1]], " = ", 
-                       valueError[#[[1, 2]], #[[2]]]}]&, 
+                  Row[If[#[[1,1]] === logNorm,
+                         {cNorm, " = ",
+                          Exp[valueError[#[[1, 2]], #[[2]]]]},
+                         {#[[1, 1]], " = ", 
+                          valueError[#[[1, 2]], #[[2]]]}]]&, 
                      Transpose[
                          ff[{"BestFitParameters", 
                              "ParameterErrors"}]]],
@@ -188,8 +191,14 @@ plotWilsonModelFit[data0_, diffFlag_?BooleanQ, opts:OptionsPattern[]]:=
                           Line[{{#[[1, 1]], #[[1, 2]], 
                                  fff - #[[2, 2]]},
                                 {#[[1, 1]], #[[1, 2]], 
-                                 fff + #[[2, 2]]}}]}}] &, sdata],
-               {Dotted, Line[{{lco, lco, 0},
+                                 fff + #[[2, 2]]}}]},
+                         {GrayLevel[0.6],
+                          Line[{{#[[1, 1]], #[[1, 2]], 0},
+                                {Max[#[[1, 1]] -1, #[[1, 2]]], #[[1, 2]], 0}}],
+                         Line[{{#[[1, 1]], #[[1, 2]], 0},
+                               {#[[1, 1]], Max[#[[1, 2]] -1, 1], 0}}]}}] &,
+                        Reverse[Sort[sdata]]],
+               {Dashed, Line[{{lco, lco, 0},
                               {Max[latticeDimensions]-uco,lco, 0},
                               {Max[latticeDimensions]-uco,
                                Max[latticeDimensions]-uco,0}}]}},

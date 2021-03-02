@@ -122,5 +122,5 @@ sommerScale[3, _] := sommerScale[3]
 sommerScale[3] := Sqrt[valueError[1.52, 0.01*1.52]];
 meyerScale::usage = "Length scale marking the transition between the
 perturbative regeme and the string regeme, in units of the string tension.";
-meyerScale[3, nc_] := sommerScale[]*(valueError[0.402, 0.045] +
+meyerScale[3, nc_] := sommerScale[3]*(valueError[0.402, 0.045] +
                                   valueError[2.80, 0.20]/nc);
