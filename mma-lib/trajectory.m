@@ -91,6 +91,7 @@ singleLinkStep[opts:OptionsPattern[]] :=
 Options[makeObservableTrajectory] = Join[
     {"observables" -> {"distance", "norm", "polyakovCorrelator",
                        "wilsonDiagonal", "wilsonTriangle"},
+     "polyakovLoopType" -> "simple",
      "skip" -> 1,
      "step" -> "../cache/3-3/step-16-28", 
      "periodic" -> "/mnt/samson-data/3-3/periodic-16-28",
@@ -100,6 +101,7 @@ Options[makeObservableTrajectory] = Join[
      externalAction -> "detach", readInterval -> 5,
      remoteHost -> "samson", processes -> 8
     },
+    Options[polyakovCorrelatorTallies],
     Options[singleLinkStep], Options[applyGaugeTransforms]]; 
 makeObservableTrajectory[set_, label_, n_, 
                             opts:OptionsPattern[]] := 
@@ -111,6 +113,8 @@ makeObservableTrajectory[set_, label_, n_,
         gopts = Apply[Sequence, FilterRules[
             Join[{opts}, Options[makeObservableTrajectory]],
             Options[applyGaugeTransforms]]],
+        popts = Apply[Sequence, FilterRules[
+            {opts}, Options[polyakovCorrelatorTallies]]],
         sopts = Apply[Sequence, FilterRules[
             {opts}, Options[singleLinkStep]]]},
   Get[OptionValue["periodic"] <> "-" <> ToString[set] <> ".m"];
@@ -153,7 +157,8 @@ makeObservableTrajectory[set_, label_, n_,
               latticeNorm[],
               observable == "polyakovCorrelator",
               Map[talliesToAverageErrors,
-                  polyakovCorrelatorTallies["simple","1"]],
+                  polyakovCorrelatorTallies[
+                      OptionValue["polyakovLoopType"], "1", popts]],
               observable == "wilsonDiagonal",
               Merge[Apply[averageWilsonLoop,
                            Table[{w, w}, {w, Max[latticeDimensions]-1}],
@@ -173,14 +178,15 @@ makeObservableTrajectory[set_, label_, n_,
       {observable, OptionValue["observables"]}]]];
 
 bulkPolyakovLoops::usage = "Aggregate Polyakov loop correlators over a number of lattice configurations.";
-Options[bulkPolyakovLoops] = {"lower" -> 1, "upper" -> 1};
+Options[bulkPolyakovLoops] = {"polyakovLoopType" -> "simple",
+                              "lower" -> 1, "upper" -> 1};
 bulkPolyakovLoops[inPath_, outFile_, opts:OptionsPattern[]] :=
  Block[{t0 = SessionTime[], t1, t2, t3, t4,
         tallyData, cov},
   tallyData = Merge[Table[
       Block[{gaugeField},
             Get[inPath <> ToString[i] <> ".m"]; 
-            polyakovCorrelatorTallies["simple", "1"]],
+            polyakovCorrelatorTallies[OptionValue["polyakovLoopType"], "1"]],
       {i, OptionValue["lower"], OptionValue["upper"]}], Join];
   t1 = SessionTime[];
   Print["Finished aggregating data. tallyData memory:  ",

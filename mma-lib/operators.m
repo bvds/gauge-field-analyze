@@ -14,30 +14,72 @@ averagePlaquette[dir1_, dir2_] :=
 
 smearLinks::usage = "For a given lattice, smear spatial link fields using Eqn. (23) in B. Lucini, M. Teper, U. Wenger https://arxiv.org/abs/hep-lat/0404008.  Returns the smeared lattice configuration.";
 smearLinks::elbow = "Elbow operators not implemented.";
+timeSmearLinks = 0;
 smearLinks[dir0_, pa_:0.30, pd_:0.12] :=
     Block[
-        {gf = gaugeField, i=1},
-        Do[
-            Block[{coord = latticeCoordinates[k], ff, xx},
-                  If[dir1 != dir0 && dir2 != dir1 && dir2 != dir0,
-                     xx = shift[dir2, coord, -1];
-                     ff = getLink[dir1, coord] + pa*(
-                          getLink[dir2, coord] .
-                          getLink[dir1, shift[dir2, coord]] .
-                          ConjugateTranspose[getLink[dir2, shift[dir1, coord]]] +
-                          ConjugateTranspose[getLink[dir2, xx]] .
-                          getLink[dir1, xx].
-                          getLink[dir2, shift[dir1, xx]]);
-                     If[nd > 3,
-                        Message[smearLinks::elbow];
-                        Return[$Failed]];
-                     If[coord == {1,1,1} && i++ <5 && False,
-                        Print[{{dir0, dir1, dir2}, ff}]];
-                     gf[[dir1, linearSiteIndex[coord]]] =
-                     SUStapleMinimum[
-                         -ConjugateTranspose[ff],
-                         printLevel -> If[coord == {1, 1, 1} && False, 1, 0]]]],
-            {dir1, nd}, {k, latticeVolume[]}, {dir2, nd}];
+        {gf = gaugeField, i=1, t0 = SessionTime[], result},
+        Which[
+            True,
+            (* Non-parallel version with sum over staples fixed *)
+            Do[
+                If[dir1 != dir0, Block[
+                    {coord = latticeCoordinates[k], ff, xx, t0, z},
+                    ff = Sum[
+                        xx = shift[dir2, coord, -1];
+                        getLink[dir1, coord] + pa*(
+                            getLink[dir2, coord] .
+                            getLink[dir1, shift[dir2, coord]] .
+                            ConjugateTranspose[getLink[dir2, shift[dir1, coord]]] +
+                            ConjugateTranspose[getLink[dir2, xx]] .
+                            getLink[dir1, xx].
+                            getLink[dir2, shift[dir1, xx]]),
+                        {dir2, Complement[Range[nd], {dir0, dir1}]}];
+                    If[nd > 3,
+                       Message[smearLinks::elbow];
+                       Return[$Failed]];
+                    If[coord == {1,1,1} && i++ <5 && False,
+                       Print[{{dir0, dir1, dir2}, ff}]];
+                    t0 = SessionTime[];
+                    gf[[dir1, linearSiteIndex[coord]]] =
+                    SUStapleMinimum[
+                        -ConjugateTranspose[ff],
+                        printLevel -> If[coord == {1, 1, 1} && False, 1, 0]];
+                    tMinimum += SessionTime[] - t0;
+                    {dir1, coord, z}]],
+                {k, latticeVolume[]}, {dir1, nd}];
+            timeSmearLinks += SessionTime[] - t0,
+            True,
+            (* Parallel version *)
+            result = ParallelTable[
+                If[dir1 != dir0, Block[
+                    {coord = latticeCoordinates[k], ff, xx, t0, z},
+                    ff = Sum[
+                        xx = shift[dir2, coord, -1];
+                        getLink[dir1, coord] + pa*(
+                            getLink[dir2, coord] .
+                            getLink[dir1, shift[dir2, coord]] .
+                            ConjugateTranspose[getLink[dir2, shift[dir1, coord]]] +
+                            ConjugateTranspose[getLink[dir2, xx]] .
+                            getLink[dir1, xx].
+                            getLink[dir2, shift[dir1, xx]]),
+                        {dir2, Complement[Range[nd], {dir0, dir1}]}];
+                    If[nd > 3,
+                       Message[smearLinks::elbow];
+                       Return[$Failed]];
+                    If[coord == {1,1,1} && i++ <5 && False,
+                       Print[{{dir0, dir1, dir2}, ff}]];
+                    t0 = SessionTime[];
+                    z = SUStapleMinimum[
+                        -ConjugateTranspose[ff],
+                        printLevel -> If[coord == {1, 1, 1} && False, 1, 0]];
+                    tMinimum += SessionTime[] - t0;
+                    {dir1, linearSiteIndex[coord], z}],
+                   Nothing],
+                {k, latticeVolume[]}, {dir1, nd}];
+            Scan[(gf[[#[[1]], #[[2]]]] = #[[3]])&,
+                                 result, {2}];
+            timeSmearLinks += SessionTime[] - t0;
+        ];
         gf];
 
 simpleBlock::usage = "For a given lattice, create a new lattice that is blocked in the spatial directions, using Eqn. (24) in B. Lucini, M. Teper, U. Wenger https://arxiv.org/abs/hep-lat/0404008.  Returns the new lattice dimensions as well as the blocked lattice configuration using latticeIndex[coord] ordering.";
@@ -72,13 +114,15 @@ applyBlock[var_, val_, body_] :=
     If[var === val, body, Block[{var = val}, body]];
 Attributes[applyBlock] = {HoldAll};
 applyBlockSteps::usage = "Apply some number of smearLinks and simpleBlock operations to a lattice, returning the new lattice dimensions as well as the resulting lattice configuration using latticeIndex[coord] ordering.";
-Options[applyBlockSteps] = {"levels" -> 3, "anchors" -> Automatic,
+Options[applyBlockSteps] = {"blockLevels" -> 3, "anchors" -> Automatic,
                            "smearA" -> 0.30};
+timeApplyBlockSteps = 0.0;
 applyBlockSteps[dir0_, OptionsPattern[]] :=
     Block[
         {indexFunction = linearSiteIndex,
          dims = latticeDimensions,
          gf = gaugeField,
+         t0 = SessionTime[],
          an},
         Do[applyBlock[
             linearSiteIndex, indexFunction,
@@ -92,25 +136,32 @@ applyBlockSteps[dir0_, OptionsPattern[]] :=
                 gaugeField = smearLinks[dir0, OptionValue["smearA"]];
                 {dims, gf} = simpleBlock[dir0, an];
                 indexFunction = latticeIndex]],
-           {i, OptionValue["levels"]}];
+           {i, OptionValue["blockLevels"]}];
+        timeApplyBlockSteps += SessionTime[] - t0;
         {dims, gf}];
 
 Options[polyakovLoopTallies] = Join[{
     
     }, Options[applyBlockSteps]];
-polyakovLoopTallies["blocked", op_:1, opts:OptionsPattern[]] :=
+(* Prevent op from matching an option *)
+timePolyakovLoopTallies = 0.0;
+polyakovLoopTallies["blocked", op:_?AtomQ:1, opts:OptionsPattern[]] :=
     Block[
-        {tallies = Association[], dims, gf, dir0,
+        {debug = False, dims, gf, dir0,
+         t0 = SessionTime[],
          aopts = Apply[Sequence, FilterRules[
-             {opts}, Options[applyBlockSteps]]]},
+             {opts}, Options[applyBlockSteps]]],
+         tallies = Association[]},
         Do[
             {dims, gf} = applyBlockSteps[dir0, aopts];
+            If[debug, Print["blocked dimensions ", dims]]; 
             Do[
                 If[dir1 != dir0,
                    (* sum up over loops in the dir1 direction *)
                    Block[
-                       {face = dims, uu, ntl lt
-                                             linearSiteIndex = latticeIndex,
+                       {face = dims, uu, ntl, lt,
+                        gaugeField = gf,
+                        linearSiteIndex = latticeIndex,
                         latticeDimensions = dims},
                        face[[dir1]] = 1;
                        Do[
@@ -120,21 +171,26 @@ polyakovLoopTallies["blocked", op_:1, opts:OptionsPattern[]] :=
                                Do[
                                    uu = uu.getLink[dir1, shift[dir1, coord, l]],
                                    {l, dims[[dir1]]}];
-                               ntl = {dir0, dir1, dims[[dir0]]};
-                               lt = Lookup[tallies, Key[ntL], {0, 0, 0}];
+                               ntl = {dir0, dir1, coord[[dir0]]};
+                               lt = Lookup[tallies, Key[ntl], {0, 0}];
                                y = stringOperator[uu, op];
                                lt += {1, y};
+                               If[debug,
+                                  Print["  coord=", coord, " lookup ",
+                                        {ntl, KeyExistsQ[tallies, ntl], lt}]];
                                tallies[ntl] = lt],
                            {k, latticeVolume[face]}]
                    ]],
                 {dir1, nd}],
             {dir0, nd}];
+        timePolyakovLoopTallies += SessionTime[] - t0;
         tallies];
 
 Options[polyakovCorrelatorTallies] = Join[{
     
     }, Options[polyakovLoopTallies]];
-polyakovCorrelatorTallies["blocked", op_:1, opts:OptionsPattern[]] :=
+(* Prevent op from matching an option *)
+polyakovCorrelatorTallies["blocked", op:_?AtomQ:1, opts:OptionsPattern[]] :=
     Block[
         {tallies = Association[],
          loops,
@@ -145,18 +201,19 @@ polyakovCorrelatorTallies["blocked", op_:1, opts:OptionsPattern[]] :=
             If[dir1 != dir0,
                Do[
                    Block[
-                       (* use minimum distance around lattice *)
-                       {delta = Min[k1 - k2,
+                       (* use the minimum distance including
+                         looping around the lattice *)
+                       {r = Min[k1 - k2,
                                     k2 + latticeDimensions[[dir0]] - k1],
                         ntl, lt, y1, y2, z},
                        y1 = loops[{dir0, dir1, k1}];
                        y2 = loops[{dir0, dir1, k2}];
                        Assert[y1[[1]] == y2[[1]]];
-                       ntl = {delta, latticeDimensions[[dir0]],
+                       ntl = {r, latticeDimensions[[dir0]],
                               latticeDimensions[[dir1]]};
-                       lt = Lookup[tallies, Key[ntL], {0, 0, 0}];
-                       (* The imaginary part cancels out when averaging over face *)
-                       z = Re[Conjugate[y1[[2]]] y2[[2]]]/(y1[[1]]*y2[[1]]);
+                       lt = Lookup[tallies, Key[ntl], {0, 0, 0}];
+                       (* The imaginary part cancels out when averaging over slices *)
+                       z = Re[Conjugate[y1[[2]]]*y2[[2]]]/(y1[[1]]*y2[[1]]);
                        lt += {1, z, z^2};
                        tallies[ntl] = lt],
                    {k1, latticeDimensions[[dir0]]},

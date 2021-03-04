@@ -273,21 +273,73 @@ SUStapleMinimum::usage =
 minimizes Re[Tr[U.F]].";
 SUStapleMinimum::diagonal = "Diagonal elements `1`"; 
 Options[SUStapleMinimum] = {printLevel -> 0};
-SUStapleMinimum[ff_, OptionsPattern[]] := 
- Block[{debug = (OptionValue[printLevel] > 0), ud, v, f, w, phase, 
-        value, min, n = Length[ff], lambda,
-        (* Shift start a bit to handle test cases where the
-          diagonal matrix is proportional to the identity.  *)
-        start = Pi - 10.^-5},
-  {v, f, w} = SingularValueDecomposition[ff];
-  (* F itself could be singular.  In principle,
-  one would find this phase while calculating the SVD *)
-  phase = Arg[Det[v.ConjugateTranspose[w]]]; 
-  ud = Append[Table[lambda[i], {i, n - 1}], 
-              phase - Sum[lambda[i], {i, n - 1}]];
-  {value, min} = FindMinimum[
-      (* Use minimum of the first N-1 terms as starting value. *)
-      Cos[ud].Diagonal[f], Table[{lambda[i], start}, {i, n - 1}]]; 
-  If[debug, Print["phase: ", phase, " diagonals: ", Chop[Diagonal[f]]]; 
-            Print["Solution: ", {value, min}]]; 
-  w.DiagonalMatrix[Exp[I ud /. min]].ConjugateTranspose[v]];
+tStapleMin = 0.0;
+countStapleMin = 0;
+Module[
+    {func, grad, hess, func0},
+    func = Compile[
+        {{phase, _Real}, {lambda, _Real, 1}, {fdiag, _Real, 1}},
+        Block[{n1 = Length[lambda]},
+              Sum[Cos[lambda[[i]]]*fdiag[[i]], {i, n1}] +
+              Cos[phase - Total[lambda]]*fdiag[[-1]]],
+        "RuntimeOptions" -> {"EvaluateSymbolically" -> False}];
+    grad = Compile[
+        {{phase, _Real}, {lambda, _Real, 1}, {fdiag, _Real, 1}},
+        Block[{n1 = Length[lambda]},
+              Table[-Sin[lambda[[i]]]*fdiag[[i]], {i, n1}] + 
+              Sin[phase - Total[lambda]]*fdiag[[-1]]],
+        "RuntimeOptions" -> {"EvaluateSymbolically" -> False}];
+    hess = Compile[
+        {{phase, _Real}, {lambda, _Real, 1}, {fdiag, _Real, 1}},
+        Block[{n1 = Length[lambda],
+               x = -Cos[phase-Total[lambda]]*fdiag[[-1]]},
+              Table[If[i==j, x - Cos[lambda[[i]]]*fdiag[[i]], x],
+                    {i, n1}, {j, n1}]],
+        "RuntimeOptions" -> {"EvaluateSymbolically" -> False}];
+    (* Delay evaluation until values are numeric *)
+    func0[a_, b_, c_] := func[a, b, c]/;VectorQ[b, NumberQ];
+
+    SUStapleMinimum[ff_, OptionsPattern[]] := 
+    Block[{debug = (OptionValue[printLevel] > 0), v, f, w, lv0, lvs, fd, phase, 
+           value, min, n1 = Length[ff] - 1, lambda, t0,
+           (* Use minimum of the first N-1 terms as starting value. *)
+           (* Shift start a bit to handle test cases where the
+             diagonal matrix is proportional to the identity.  *)
+           start = Pi - 10.^-5},
+          {v, f, w} = SingularValueDecomposition[ff];
+          (* F itself could be singular.  In principle,
+            one would find this phase while calculating the SVD *)
+          phase = Arg[Det[v.ConjugateTranspose[w]]];
+          lv0 = Table[lambda[i], {i, n1}];
+          lvs = Append[lv0, phase - Total[lv0]];
+          fd = Diagonal[f];
+          t0 = SessionTime[];
+          (* Different possible methods for minimization. *)
+          {value, min} = Which[
+              False,
+              (* Simple version *)
+              (* SU(3) 16.6s -4.6388, SU(4) 22.8s -6.16467  *)
+              FindMinimum[
+                  Cos[lvs].fd,
+                  Table[{lambda[i], start}, {i, n1}]],
+              False,
+              (* SU(3) 13.2s -4.6388, SU(4) 20.1s -6.16467 *)
+              FindMinimum[
+                  func0[phase, lv0, fd],
+                  Table[{lambda[i], start}, {i, n1}],
+                  Gradient :> grad[phase, lv0, fd]],
+              True,
+              (* Not suprisingly, this is the fastest *)
+              (* SU(3) 12.0 s -4.6388, SU(4) 15.0s -6.16467 *)
+              FindMinimum[
+                  func0[phase, lv0, fd],
+                  Table[{lambda[i], start}, {i, n1}],
+                  Gradient :> grad[phase, lv0, fd],
+                  Method -> {"Newton", "Hessian" :> hess[phase, lv0, fd]}]];
+          tStapleMin += SessionTime[] - t0;
+          countStapleMin += 1;
+          If[NumberQ[valueStapleMin], valueStapleMin += value];
+          If[debug, Print["phase: ", phase, " diagonals: ", Chop[fd]]; 
+                    Print["Solution: ", {value, min}]]; 
+          w.DiagonalMatrix[Exp[I lvs/.min]].ConjugateTranspose[v]]
+];
