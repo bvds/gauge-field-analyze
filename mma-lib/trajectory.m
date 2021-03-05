@@ -37,7 +37,7 @@ linkSaddlePointStep[ff_?MatrixQ, opts:OptionsPattern[]] :=
  Block[{uu, damping = OptionValue[dampingFactor],
         sign = Sign[OptionValue[linkConcavity]],
         phases, vectors, center},
-       uu = SUStapleMinimum[sign*ff];
+       uu = SUStapleMaximum[sign*ff];
        (* See the code for SUPower[] *)
        {phases, vectors, center} = getPhases[uu, True];
        {Transpose[vectors].(Exp[I phases damping] Conjugate[vectors]),

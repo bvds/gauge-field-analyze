@@ -11,75 +11,77 @@ averagePlaquette[dir1_, dir2_] :=
     Sum[Re[plaquette[dir1, dir2, latticeCoordinates[k]]],
 	     {k, latticeVolume[]}]/(latticeVolume[]*nc);
 
-
-smearLinks::usage = "For a given lattice, smear spatial link fields using Eqn. (23) in B. Lucini, M. Teper, U. Wenger https://arxiv.org/abs/hep-lat/0404008.  Returns the smeared lattice configuration.";
-smearLinks::elbow = "Elbow operators not implemented.";
-timeSmearLinks = 0;
-smearLinks[dir0_, pa_:0.30, pd_:0.12] :=
+smearLink::usage = "For a given lattice, smear a spatial link field using Eqn. (23) in B. Lucini, M. Teper, U. Wenger https://arxiv.org/abs/hep-lat/0404008.  Returns the smeared link field.";
+smearLink::elbow = "Elbow operators not implemented.";
+smearLink::value = "{dir0, dir1, ff} = `1`";
+tMaximum = 0;
+Options[smearLink] = Join[{"smearA" -> 0.30, "smearD" -> 0.12},
+                          Options[SUStapleMaximum]];
+smearLink[dir0_, dir1_, coord_, opts:OptionsPattern[]] :=
     Block[
-        {gf = gaugeField, i=1, t0 = SessionTime[], result},
-        Which[
-            True,
-            (* Non-parallel version with sum over staples fixed *)
+        {ff, xx, z, t0, debug = False,
+         pa = OptionValue["smearA"], pd = OptionValue["smearD"],
+         mopts = Apply[Sequence, FilterRules[
+             {opts}, Options[SUStapleMaximum]]]},
+        ff = Sum[
+            xx = shift[dir2, coord, -1];
+            getLink[dir1, coord] + pa*(
+                getLink[dir2, coord] .
+                getLink[dir1, shift[dir2, coord]] .
+                ConjugateTranspose[getLink[dir2, shift[dir1, coord]]] +
+                ConjugateTranspose[getLink[dir2, xx]] .
+                getLink[dir1, xx].
+                getLink[dir2, shift[dir1, xx]]),
+            {dir2, Complement[Range[nd], {dir0, dir1}]}];
+        If[nd > 3,
+           Message[smearLink::elbow];
+           Return[$Failed]];
+        If[coord == {1,1,1} && debug,
+           Message[smearLink::value, {dir0, dir1, ff}]];
+        t0 = SessionTime[];
+        z = SUStapleMaximum[
+            ConjugateTranspose[ff], mopts,
+            (* For debugging *)
+            printLevel :> If[coord == {1, 1, 1} && False, 1, 0]];
+        tMaximum += SessionTime[] - t0;
+        z];
+
+smearLinks::usage = "Apply smearLink[] to a lattice configuration, returning the smeared lattice configuration.";
+timeSmearLinks = 0;
+Options[smearLinks] = Options[smearLink];
+smearLinks[dir0_, opts:OptionsPattern[]] :=
+    Block[
+        {gf = gaugeField, t0 = SessionTime[], result},
+        If[
+            False,
+            (* Non-parallel version *)
             Do[
                 If[dir1 != dir0, Block[
-                    {coord = latticeCoordinates[k], ff, xx, t0, z},
-                    ff = Sum[
-                        xx = shift[dir2, coord, -1];
-                        getLink[dir1, coord] + pa*(
-                            getLink[dir2, coord] .
-                            getLink[dir1, shift[dir2, coord]] .
-                            ConjugateTranspose[getLink[dir2, shift[dir1, coord]]] +
-                            ConjugateTranspose[getLink[dir2, xx]] .
-                            getLink[dir1, xx].
-                            getLink[dir2, shift[dir1, xx]]),
-                        {dir2, Complement[Range[nd], {dir0, dir1}]}];
-                    If[nd > 3,
-                       Message[smearLinks::elbow];
-                       Return[$Failed]];
-                    If[coord == {1,1,1} && i++ <5 && False,
-                       Print[{{dir0, dir1, dir2}, ff}]];
-                    t0 = SessionTime[];
-                    gf[[dir1, linearSiteIndex[coord]]] =
-                    SUStapleMinimum[
-                        -ConjugateTranspose[ff],
-                        printLevel -> If[coord == {1, 1, 1} && False, 1, 0]];
-                    tMinimum += SessionTime[] - t0;
-                    {dir1, coord, z}]],
-                {k, latticeVolume[]}, {dir1, nd}];
-            timeSmearLinks += SessionTime[] - t0,
-            True,
+                    {coord = latticeCoordinates[k], z},
+                    z = smearLink[dir0, dir1, coord, opts];
+                    If[z == $Failed, Return[$Failed]];
+                    gf[[dir1, linearSiteIndex[coord]]] = z]],
+                {dir1, nd}, {k, latticeVolume[]}],
             (* Parallel version *)
             result = ParallelTable[
-                If[dir1 != dir0, Block[
-                    {coord = latticeCoordinates[k], ff, xx, t0, z},
-                    ff = Sum[
-                        xx = shift[dir2, coord, -1];
-                        getLink[dir1, coord] + pa*(
-                            getLink[dir2, coord] .
-                            getLink[dir1, shift[dir2, coord]] .
-                            ConjugateTranspose[getLink[dir2, shift[dir1, coord]]] +
-                            ConjugateTranspose[getLink[dir2, xx]] .
-                            getLink[dir1, xx].
-                            getLink[dir2, shift[dir1, xx]]),
-                        {dir2, Complement[Range[nd], {dir0, dir1}]}];
-                    If[nd > 3,
-                       Message[smearLinks::elbow];
-                       Return[$Failed]];
-                    If[coord == {1,1,1} && i++ <5 && False,
-                       Print[{{dir0, dir1, dir2}, ff}]];
-                    t0 = SessionTime[];
-                    z = SUStapleMinimum[
-                        -ConjugateTranspose[ff],
-                        printLevel -> If[coord == {1, 1, 1} && False, 1, 0]];
-                    tMinimum += SessionTime[] - t0;
-                    {dir1, linearSiteIndex[coord], z}],
-                   Nothing],
-                {k, latticeVolume[]}, {dir1, nd}];
-            Scan[(gf[[#[[1]], #[[2]]]] = #[[3]])&,
-                                 result, {2}];
-            timeSmearLinks += SessionTime[] - t0;
-        ];
+                Block[{result, tMaximum = 0, tStapleMax = 0,
+                       valueStapleMax = 0, countStapleMax = 0},
+                      result = Table[
+                          Block[
+                              {coord = latticeCoordinates[k], z},
+                              z = smearLink[dir0, dir1, coord, opts];
+                              If[z == $Failed, Return[$Failed]];
+                              {dir1, linearSiteIndex[coord], z}],
+                          {k, kernel, latticeVolume[], $KernelCount},
+                          {dir1, Complement[Range[nd], {dir0}]}];
+                      {result, {tMaximum, tStapleMax,
+                                valueStapleMax, countStapleMax}}],
+                {kernel, $KernelCount}];
+            Scan[Scan[(gf[[#[[1]], #[[2]]]] = #[[3]])&, First[#], {2}]&,
+                     result];
+            {tMaximum, tStapleMax, valueStapleMax, countStapleMax} +=
+            Total[Map[Last, result]]];
+        timeSmearLinks += SessionTime[] - t0;
         gf];
 
 simpleBlock::usage = "For a given lattice, create a new lattice that is blocked in the spatial directions, using Eqn. (24) in B. Lucini, M. Teper, U. Wenger https://arxiv.org/abs/hep-lat/0404008.  Returns the new lattice dimensions as well as the blocked lattice configuration using latticeIndex[coord] ordering.";
@@ -90,20 +92,20 @@ simpleBlock[dir0_, anchor_] :=
                          latticeDimensions[[dir]]], {dir, nd}],
          multiplier = Table[If[dir == dir0, 1, 2], {dir, nd}],
          oddQ = Table[If[dir != dir0, Mod[latticeDimensions[[dir]], 2] == 1],
-                      {dir, nd}],
-         coord, bCoord,
-         result},
-        result = Table[
-            bCoord = latticeCoordinates[k, dims];
-            coord = wrapIt[(bCoord-1)*multiplier + anchor,
+                      {dir, nd}]},
+        {dims,
+         Table[ParallelTable[
+             Block[
+                 {bCoord, coord},
+                 bCoord = latticeCoordinates[k, dims];
+                 coord = wrapIt[(bCoord-1)*multiplier + anchor,
                             latticeDimensions];
-            If[dir1 != dir0,
-               (* Just use the last link if the lattice dimension is odd. *)
-               If[oddQ[[dir1]] && bCoord[[dir1]] == dims[[dir1]],
-                  getLink[dir1, coord],
-                  getLink[dir1, coord].getLink[dir1, shift[dir1, coord]]]],
-            {dir1, nd}, {k, latticeVolume[dims]}];
-        {dims, result}];
+                 If[dir1 != dir0,
+                    (* Use the last link if the lattice dimension is odd. *)
+                    If[oddQ[[dir1]] && bCoord[[dir1]] == dims[[dir1]],
+                       getLink[dir1, coord],
+                       getLink[dir1, coord].getLink[dir1, shift[dir1, coord]]]]],
+             {k, latticeVolume[dims]}], {dir1, nd}]}];
 
 applyBlock::usage = "Create a local variable with dynamic scoping, only when needed.";
     (* Example:
@@ -114,15 +116,17 @@ applyBlock[var_, val_, body_] :=
     If[var === val, body, Block[{var = val}, body]];
 Attributes[applyBlock] = {HoldAll};
 applyBlockSteps::usage = "Apply some number of smearLinks and simpleBlock operations to a lattice, returning the new lattice dimensions as well as the resulting lattice configuration using latticeIndex[coord] ordering.";
-Options[applyBlockSteps] = {"blockLevels" -> 3, "anchors" -> Automatic,
-                           "smearA" -> 0.30};
+Options[applyBlockSteps] = Join[{"blockLevels" -> 3, "anchors" -> Automatic},
+                                Options[smearLinks]];
 timeApplyBlockSteps = 0.0;
-applyBlockSteps[dir0_, OptionsPattern[]] :=
+applyBlockSteps[dir0_, opts:OptionsPattern[]] :=
     Block[
         {indexFunction = linearSiteIndex,
          dims = latticeDimensions,
          gf = gaugeField,
          t0 = SessionTime[],
+         sopts = Apply[Sequence, FilterRules[
+             {opts}, Options[smearLinks]]],
          an},
         Do[applyBlock[
             linearSiteIndex, indexFunction,
@@ -133,7 +137,7 @@ applyBlockSteps[dir0_, OptionsPattern[]] :=
                         Length[OptionValue["anchors"]] < i,
                         Table[1, {nd}],
                         OptionValue["anchors"][[i]]];
-                gaugeField = smearLinks[dir0, OptionValue["smearA"]];
+                gaugeField = smearLinks[dir0, sopts];
                 {dims, gf} = simpleBlock[dir0, an];
                 indexFunction = latticeIndex]],
            {i, OptionValue["blockLevels"]}];

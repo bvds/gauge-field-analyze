@@ -848,7 +848,7 @@ of the action by minimizing the action for
 each link separately, iterating over all of the links of the lattice.
 In the folliwng, we will compare the lattice cooling approach to
 a search for the nearest saddle-point.  Our algorithm for performing
-the link-wise minimization is discussed in Appendix~\ref{linkmin}.
+the link-wise minimization is discussed in Appendix~\ref{linkmax}.
 As with the single-link saddle-point method, links in each direction
 are updated in a checkerboard fashion.
 
@@ -1508,15 +1508,15 @@ violate the cutoffs and Newton's method should work quite well.
 
 \section{Minimizing the action for a single link}
 
-\label{linkmin}
+\label{linkmax}
 To minimize the action for a single link $U\in\SU(N)$,
-we want to find $U$ that minimizes
+we want to find $U$ that maximizes
 %
 \be
-\tilde{S} = -\Re\Tr U F \label{uf}
+-\tilde{S} = \Re\Tr U F \label{uf}
 \eq
 where $F$ is the sum of staples associated with $U$.
-In general this involves minimizing a non-linear function of $N^2-1$
+In general this involves maximizing a non-linear function of $N^2-1$
 variables.  However, we can simplify the problem by working
 in a basis where $F$ is diagonal.  Thus, we find the singular
 value decomposition $F = V F^\prime W^\dag$ where $F^\prime$ is diagonal,
@@ -1535,16 +1535,16 @@ where
 \be
 \lambda_N = \theta - \sum_{i=1}^{N-1} \lambda_i \; .
 \eq
-Thus, we minimize
+Thus, we maximize
 \be
-\tilde{S} = % -\Re\Tr\left(U^\prime F^\prime\right) =
-    -\sum_{i=1}^N \cos\left(\lambda_i\right) F_{i,i}^\prime \label{diagmin}
+-\tilde{S} = % \Re\Tr\left(U^\prime F^\prime\right) =
+    \sum_{i=1}^N \cos\left(\lambda_i\right) F_{i,i}^\prime \label{diagmax}
 \eq
 with respect to $\left\{\lambda_1, \lambda_2, \ldots, \lambda_{N-1}\right\}$.
-In practice, the minimum of (\ref{diagmin}) can be computed numerically
+In practice, the maximum of (\ref{diagmax}) can be computed numerically
 using standard library routines.
-One can show that if $\left\{\lambda_1, \lambda_2, \ldots, \lambda_{N-1}\right\}$ is a minimum of
-(\ref{diagmin}) then $U = W U^\prime V^\dag$ is indeed a global minimum
+One can show that if $\left\{\lambda_1, \lambda_2, \ldots, \lambda_{N-1}\right\}$ is a maximum of
+(\ref{diagmax}) then $U = W U^\prime V^\dag$ is indeed a global maximum
 of Eqn.~(\ref{uf}) in the full $(N^2-1)$-dimensional space.
 
 \bibliography{physics}  % Use physics.bib

@@ -268,13 +268,14 @@ maxSURotation[uu_] :=
   MatrixExp[I (vars/.result[[2]]).SUGenerators[nc]]];
 
 
-SUStapleMinimum::usage = 
+SUStapleMaximum::usage = 
   "For a general matrix F, find a special unitary matrix U that \
-minimizes Re[Tr[U.F]].";
-SUStapleMinimum::diagonal = "Diagonal elements `1`"; 
-Options[SUStapleMinimum] = {printLevel -> 0};
-tStapleMin = 0.0;
-countStapleMin = 0;
+maximizes Re[Tr[U.F]].";
+SUStapleMaximum::diagonal = "Diagonal elements `1`"; 
+Options[SUStapleMaximum] = {printLevel -> 0, AccuracyGoal -> 7,
+                            Method -> "fast"};
+SUStapleMaximum::lstol = "FindMaximum::lstol error for phase=`1`, fd=`2`";
+countStapleMax = 0;
 Module[
     {func, grad, hess, func0},
     func = Compile[
@@ -299,13 +300,21 @@ Module[
     (* Delay evaluation until values are numeric *)
     func0[a_, b_, c_] := func[a, b, c]/;VectorQ[b, NumberQ];
 
-    SUStapleMinimum[ff_, OptionsPattern[]] := 
-    Block[{debug = (OptionValue[printLevel] > 0), v, f, w, lv0, lvs, fd, phase, 
-           value, min, n1 = Length[ff] - 1, lambda, t0,
-           (* Use minimum of the first N-1 terms as starting value. *)
+    SUStapleMaximum[ff_, OptionsPattern[]] := 
+    Block[{debug = (OptionValue[printLevel] > 0),
+           method = OptionValue[Method],
+           v, f, w, lv0, lvs, fd,
+           phase, value, max, n1 = Length[ff] - 1, lambda, t0,
+           (* There seems to be some instability with respect
+              to floating point numbers.  Sometimes, we get an
+              FindMaximum::lstol error, and sometimes not, for the
+              same matrix ff.
+              As a work-around, increase the error bound a bit. *)
+           accGoal = OptionValue[AccuracyGoal],
+           (* Use the maximum of the first N-1 terms as the starting value. *)
            (* Shift start a bit to handle test cases where the
              diagonal matrix is proportional to the identity.  *)
-           start = Pi - 10.^-5},
+           start = 1.0*10^-8},
           {v, f, w} = SingularValueDecomposition[ff];
           (* F itself could be singular.  In principle,
             one would find this phase while calculating the SVD *)
@@ -314,32 +323,43 @@ Module[
           lvs = Append[lv0, phase - Total[lv0]];
           fd = Diagonal[f];
           t0 = SessionTime[];
-          (* Different possible methods for minimization. *)
-          {value, min} = Which[
-              False,
-              (* Simple version *)
-              (* SU(3) 16.6s -4.6388, SU(4) 22.8s -6.16467  *)
-              FindMinimum[
-                  Cos[lvs].fd,
-                  Table[{lambda[i], start}, {i, n1}]],
-              False,
-              (* SU(3) 13.2s -4.6388, SU(4) 20.1s -6.16467 *)
-              FindMinimum[
-                  func0[phase, lv0, fd],
-                  Table[{lambda[i], start}, {i, n1}],
-                  Gradient :> grad[phase, lv0, fd]],
-              True,
-              (* Not suprisingly, this is the fastest *)
-              (* SU(3) 12.0 s -4.6388, SU(4) 15.0s -6.16467 *)
-              FindMinimum[
-                  func0[phase, lv0, fd],
-                  Table[{lambda[i], start}, {i, n1}],
-                  Gradient :> grad[phase, lv0, fd],
-                  Method -> {"Newton", "Hessian" :> hess[phase, lv0, fd]}]];
-          tStapleMin += SessionTime[] - t0;
-          countStapleMin += 1;
-          If[NumberQ[valueStapleMin], valueStapleMin += value];
-          If[debug, Print["phase: ", phase, " diagonals: ", Chop[fd]]; 
-                    Print["Solution: ", {value, min}]]; 
-          w.DiagonalMatrix[Exp[I lvs/.min]].ConjugateTranspose[v]]
+          (* Different possible methods for maximization. *)
+          Check[
+              {value, max} = Which[
+                  method == "slow" || method == "Newton",
+                  (* Simple version, optionally using Newton's method *)
+                  (* SU(3) 16.6s 4.6388, SU(4) 22.8s 6.16467  *)
+                  FindMaximum[
+                      Cos[lvs].fd,
+                      Table[{lambda[j], start}, {j, n1}],
+                      Method -> If[method == "Newton", method, Automatic],
+                      AccuracyGoal -> accGoal],
+                  method == "medium",
+                  (* SU(3) 13.2s 4.6388, SU(4) 20.1s 6.16467 *)
+                  FindMaximum[
+                      func0[phase, lv0, fd],
+                      Table[{lambda[i], start}, {i, n1}],
+                      Gradient :> grad[phase, lv0, fd],
+                      Method -> "Newton",
+                      AccuracyGoal -> accGoal],
+                  method == "fast",
+                  (* Not suprisingly, this is the fastest *)
+                  (* SU(3) 12.0 s 4.6388, SU(4) 15.0s 6.16467 *)
+                  FindMaximum[
+                      func0[phase, lv0, fd],
+                      Table[{lambda[i], start}, {i, n1}],
+                      Gradient :> grad[phase, lv0, fd],
+                      Method -> {"Newton",
+                                 "Hessian" :> hess[phase, lv0, fd]},
+                      AccuracyGoal -> accGoal]],
+              Message[SUStapleMaximum::lstol, phase, fd];
+              Return[$Failed],
+              FindMaximum::lstol];
+          If[NumberQ[tStapleMax], tStapleMax += SessionTime[] - t0];
+          countStapleMax += 1;
+          If[NumberQ[valueStapleMax], valueStapleMax += value];
+          If[debug, Print[method, " phase: ", phase,
+                          " diagonals: ", Chop[fd]]; 
+                    Print["Solution: ", {value, max}]]; 
+          w.DiagonalMatrix[Exp[I lvs/.max]].ConjugateTranspose[v]]
 ];
