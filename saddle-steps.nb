@@ -25,6 +25,7 @@ notebooks \
 
 Cell[BoxData[
  RowBox[{
+  RowBox[{"<<", "\"\<mma-lib/timing.m\>\""}], ";", 
   RowBox[{"<<", "\"\<mma-lib/groups.m\>\""}], ";", 
   RowBox[{"<<", "\"\<mma-lib/xml.m\>\""}], ";", 
   RowBox[{"Needs", "[", "\"\<ErrorBarPlots`\>\"", "]"}]}]], "Input",
@@ -3501,8 +3502,8 @@ Cell[BoxData[
      RowBox[{"DateObject", "[", 
        RowBox[{
          RowBox[{"{", 
-           
-           RowBox[{"2020", ",", "6", ",", "24", ",", "8", ",", "29", ",", 
+           RowBox[{
+            "2020", ",", "6", ",", "24", ",", "8", ",", "29", ",", 
              "30.677957`8.23940141535569"}], "}"}], ",", "\"Instant\"", ",", 
          "\"Gregorian\"", ",", 
          RowBox[{"-", "7.`"}]}], "]"}]},
@@ -7818,8 +7819,8 @@ Cell[BoxData[
      RowBox[{"DateObject", "[", 
        RowBox[{
          RowBox[{"{", 
-           RowBox[{
-            "2020", ",", "6", ",", "23", ",", "23", ",", "15", ",", 
+           
+           RowBox[{"2020", ",", "6", ",", "23", ",", "23", ",", "15", ",", 
              "46.328915`8.418427105976184"}], "}"}], ",", "\"Instant\"", ",", 
          "\"Gregorian\"", ",", 
          RowBox[{"-", "7.`"}]}], "]"}]},
@@ -8213,8 +8214,8 @@ Cell[BoxData[
      RowBox[{"DateObject", "[", 
        RowBox[{
          RowBox[{"{", 
-           RowBox[{
-            "2020", ",", "6", ",", "24", ",", "2", ",", "3", ",", 
+           
+           RowBox[{"2020", ",", "6", ",", "24", ",", "2", ",", "3", ",", 
              "27.714451`8.19528126180034"}], "}"}], ",", "\"Instant\"", ",", 
          "\"Gregorian\"", ",", 
          RowBox[{"-", "7.`"}]}], "]"}]},
@@ -8433,8 +8434,8 @@ Cell[BoxData[
      RowBox[{"DateObject", "[", 
        RowBox[{
          RowBox[{"{", 
-           RowBox[{
-            "2020", ",", "6", ",", "24", ",", "3", ",", "2", ",", 
+           
+           RowBox[{"2020", ",", "6", ",", "24", ",", "3", ",", "2", ",", 
              "9.319531`7.7219690439908035"}], "}"}], ",", "\"Instant\"", ",", 
          "\"Gregorian\"", ",", 
          RowBox[{"-", "7.`"}]}], "]"}]},
@@ -13117,7 +13118,6 @@ Cell[BoxData[
         RowBox[{
          SubscriptBox["\<\"c\"\>", "0"], ",", 
          TagBox[
-          
           TemplateBox[{
            "\[ThinSpace]","\" \"",InterpretationBox[
             "\"0.18\"", 0.1793861112466708374`2.0836274630505547, AutoDelete -> 
@@ -23995,8 +23995,8 @@ Cell[BoxData[
           
           TemplateBox[{
            "\[ThinSpace]","\" \"",InterpretationBox[
-            "\"0.013\"", 0.0126655526990022901`1.4671571628609106, AutoDelete -> 
-             True],"\"\[PlusMinus]\"",InterpretationBox[
+            "\"0.013\"", 0.0126655526990022901`1.4671571628609106, AutoDelete -> T\
+rue],"\"\[PlusMinus]\"",InterpretationBox[
             "\"0.043\"", 0.0431983325480525329`2., AutoDelete -> True]},
            "RowWithSeparators"],
           NumberForm[#, ExponentFunction -> (Null& )]& ]}], "}"}], ",", 
@@ -34039,8 +34039,8 @@ Cell[BoxData[
      RowBox[{"DateObject", "[", 
        RowBox[{
          RowBox[{"{", 
-           RowBox[{
-            "2021", ",", "2", ",", "6", ",", "20", ",", "18", ",", 
+           
+           RowBox[{"2021", ",", "2", ",", "6", ",", "20", ",", "18", ",", 
              "59.764602`8.529019004750616"}], "}"}], ",", "\"Instant\"", ",", 
          "\"Gregorian\"", ",", 
          RowBox[{"-", "7.`"}]}], "]"}]},
@@ -34243,8 +34243,8 @@ Cell[BoxData[
      RowBox[{"DateObject", "[", 
        RowBox[{
          RowBox[{"{", 
-           
-           RowBox[{"2021", ",", "2", ",", "7", ",", "4", ",", "24", ",", 
+           RowBox[{
+            "2021", ",", "2", ",", "7", ",", "4", ",", "24", ",", 
              "26.405814`8.17427454189741"}], "}"}], ",", "\"Instant\"", ",", 
          "\"Gregorian\"", ",", 
          RowBox[{"-", "7.`"}]}], "]"}]},
@@ -39413,8 +39413,8 @@ Cell[BoxData[
      RowBox[{"DateObject", "[", 
        RowBox[{
          RowBox[{"{", 
-           
-           RowBox[{"2020", ",", "5", ",", "9", ",", "20", ",", "21", ",", 
+           RowBox[{
+            "2020", ",", "5", ",", "9", ",", "20", ",", "21", ",", 
              "58.658631`8.520906896354338"}], "}"}], ",", "\"Instant\"", ",", 
          "\"Gregorian\"", ",", 
          RowBox[{"-", "7.`"}]}], "]"}]},
@@ -41807,8 +41807,8 @@ Cell[BoxData[
      RowBox[{"DateObject", "[", 
        RowBox[{
          RowBox[{"{", 
-           RowBox[{
-            "2020", ",", "6", ",", "12", ",", "18", ",", "59", ",", 
+           
+           RowBox[{"2020", ",", "6", ",", "12", ",", "18", ",", "59", ",", 
              "18.600372`8.022096614271097"}], "}"}], ",", "\"Instant\"", ",", 
          "\"Gregorian\"", ",", 
          RowBox[{"-", "7.`"}]}], "]"}]},
@@ -47441,8 +47441,8 @@ Cell[BoxData[
      RowBox[{"DateObject", "[", 
        RowBox[{
          RowBox[{"{", 
-           RowBox[{
-            "2020", ",", "8", ",", "29", ",", "23", ",", "9", ",", 
+           
+           RowBox[{"2020", ",", "8", ",", "29", ",", "23", ",", "9", ",", 
              "25.546898`8.159913156351216"}], "}"}], ",", "\"Instant\"", ",", 
          "\"Gregorian\"", ",", 
          RowBox[{"-", "7.`"}]}], "]"}]},
@@ -52023,7 +52023,6 @@ Cell[BoxData[
         RowBox[{
          SubscriptBox["\<\"c\"\>", "0"], ",", 
          TagBox[
-          
           TemplateBox[{
            "\[ThinSpace]","\" \"",InterpretationBox[
             "\"0.050\"", 0.0502666987702323417`2.3145088841021324, AutoDelete -> 
@@ -52287,7 +52286,6 @@ Cell[BoxData[
         RowBox[{
          SubscriptBox["\<\"c\"\>", "0"], ",", 
          TagBox[
-          
           TemplateBox[{
            "\[ThinSpace]","\" \"",InterpretationBox[
             "\"0.030\"", 0.0296582373002297443`2.312085740782309, AutoDelete -> 
@@ -52551,7 +52549,6 @@ Cell[BoxData[
         RowBox[{
          SubscriptBox["\<\"c\"\>", "0"], ",", 
          TagBox[
-          
           TemplateBox[{
            "\[ThinSpace]","\" \"",InterpretationBox[
             "\"0.0346\"", 0.0345652693858003249`2.5969487935517983, 
@@ -57645,8 +57642,8 @@ Cell[BoxData[
      RowBox[{"DateObject", "[", 
        RowBox[{
          RowBox[{"{", 
-           RowBox[{
-            "2020", ",", "5", ",", "23", ",", "17", ",", "52", ",", 
+           
+           RowBox[{"2020", ",", "5", ",", "23", ",", "17", ",", "52", ",", 
              "12.035952`7.833055432969527"}], "}"}], ",", "\"Instant\"", ",", 
          "\"Gregorian\"", ",", 
          RowBox[{"-", "7.`"}]}], "]"}]},
@@ -60728,8 +60725,8 @@ Cell[BoxData[
      RowBox[{"DateObject", "[", 
        RowBox[{
          RowBox[{"{", 
-           
-           RowBox[{"2020", ",", "5", ",", "31", ",", "15", ",", "39", ",", 
+           RowBox[{
+            "2020", ",", "5", ",", "31", ",", "15", ",", "39", ",", 
              "7.612593`7.634107598525784"}], "}"}], ",", "\"Instant\"", ",", 
          "\"Gregorian\"", ",", 
          RowBox[{"-", "7.`"}]}], "]"}]},
@@ -63768,8 +63765,8 @@ Cell[BoxData[
      RowBox[{"DateObject", "[", 
        RowBox[{
          RowBox[{"{", 
-           
-           RowBox[{"2021", ",", "2", ",", "16", ",", "11", ",", "42", ",", 
+           RowBox[{
+            "2021", ",", "2", ",", "16", ",", "11", ",", "42", ",", 
              "51.666791`8.465786463807579"}], "}"}], ",", "\"Instant\"", ",", 
          "\"Gregorian\"", ",", 
          RowBox[{"-", "7.`"}]}], "]"}]},
@@ -64244,8 +64241,8 @@ Cell[BoxData[
      RowBox[{"DateObject", "[", 
        RowBox[{
          RowBox[{"{", 
-           
-           RowBox[{"2021", ",", "2", ",", "17", ",", "12", ",", "35", ",", 
+           RowBox[{
+            "2021", ",", "2", ",", "17", ",", "12", ",", "35", ",", 
              "15.681321`7.94795763007814"}], "}"}], ",", "\"Instant\"", ",", 
          "\"Gregorian\"", ",", 
          RowBox[{"-", "7.`"}]}], "]"}]},
@@ -64312,8 +64309,8 @@ Cell[BoxData[
      RowBox[{"DateObject", "[", 
        RowBox[{
          RowBox[{"{", 
-           RowBox[{
-            "2021", ",", "2", ",", "17", ",", "15", ",", "53", ",", 
+           
+           RowBox[{"2021", ",", "2", ",", "17", ",", "15", ",", "53", ",", 
              "48.629081`8.439471038348302"}], "}"}], ",", "\"Instant\"", ",", 
          "\"Gregorian\"", ",", 
          RowBox[{"-", "7.`"}]}], "]"}]},
@@ -64927,6 +64924,7 @@ Cell[BoxData[
            "\"\[Sigma]\""},
           "RowDefault"], ",", 
          TagBox[
+          
           TemplateBox[{
            "\[ThinSpace]","\" \"",InterpretationBox[
             "\"0.044\"", 0.0441521319767556875`1.904953138125693, AutoDelete -> 
@@ -64950,7 +64948,6 @@ Cell[BoxData[
         RowBox[{
          SubscriptBox["\<\"c\"\>", "\<\"q\"\>"], ",", 
          TagBox[
-          
           TemplateBox[{
            "\[ThinSpace]","\" \"",InterpretationBox[
             "\"0.04\"", 0.0398194541196851201`1.0681641785276965, AutoDelete -> 
@@ -66237,6 +66234,7 @@ Cell[BoxData[
         RowBox[{
          SubscriptBox["\<\"c\"\>", "\<\"q\"\>"], ",", 
          TagBox[
+          
           TemplateBox[{
            "\[ThinSpace]","\" \"",InterpretationBox[
             "\"0.027\"", 0.0270917936617501749`1.5088674834344304, AutoDelete -> 
@@ -66256,8 +66254,8 @@ Cell[BoxData[
             "\"0.023\"", 0.0234393932826227995`2., AutoDelete -> True]},
            "RowWithSeparators"],
           NumberForm[#, ExponentFunction -> (Null& )]& ]}], "}"}]}], "}"}]}], 
-    "}"}]}], "}"}]], \
-"Output",ExpressionUUID->"419bbec5-ecfd-4766-bdc1-8135c73f8372"]
+    "}"}]}], 
+  "}"}]], "Output",ExpressionUUID->"419bbec5-ecfd-4766-bdc1-8135c73f8372"]
 }, Open  ]],
 
 Cell[CellGroupData[{
@@ -71953,6 +71951,7 @@ Cell[BoxData[
         RowBox[{
          SubscriptBox["\<\"c\"\>", "0"], ",", 
          TagBox[
+          
           TemplateBox[{
            "\[ThinSpace]","\" \"",InterpretationBox[
             "\"0.0287\"", 0.0286511849663063367`2.847858698584109, AutoDelete -> 
@@ -72700,6 +72699,7 @@ Cell[BoxData[
         RowBox[{
          SubscriptBox["\<\"c\"\>", "0"], ",", 
          TagBox[
+          
           TemplateBox[{
            "\[ThinSpace]","\" \"",InterpretationBox[
             "\"0.13\"", 0.1302284057201643641`1.874018131104391, AutoDelete -> 
@@ -72831,7 +72831,6 @@ Cell[BoxData[
         RowBox[{
          SubscriptBox["\<\"c\"\>", "0"], ",", 
          TagBox[
-          
           TemplateBox[{
            "\[ThinSpace]","\" \"",InterpretationBox[
             "\"0.0194\"", 0.0193586242138252609`2.653829489568162, AutoDelete -> 
@@ -73095,7 +73094,6 @@ Cell[BoxData[
         RowBox[{
          SubscriptBox["\<\"c\"\>", "0"], ",", 
          TagBox[
-          
           TemplateBox[{
            "\[ThinSpace]","\" \"",InterpretationBox[
             "\"0.0153\"", 0.0152967085648419761`2.542668447698927, AutoDelete -> 
@@ -83277,7 +83275,7 @@ Cell[BoxData["$Aborted"], \
 },
 Evaluator->"Kernel 2",
 WindowSize->{992, 693},
-WindowMargins->{{104, Automatic}, {11, Automatic}},
+WindowMargins->{{104, Automatic}, {0, Automatic}},
 PrivateNotebookOptions->{"FileOutlineCache"->False},
 TrackCellChangeTimes->False,
 FrontEndVersion->"11.2 for Linux x86 (64-bit) (September 10, 2017)",
