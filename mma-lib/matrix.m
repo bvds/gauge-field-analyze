@@ -2,11 +2,6 @@
   Utilities for sparse matrix construction;
   used by saddle-point.m and gauge.m.
  *)
-
-SetAttributes[addTime, {HoldAll, SequenceHold}];
-addTime[timer_, expr_] :=
- Block[{t1 = SessionTime[], result = expr},
-  timer += SessionTime[] - t1; result]; 
 printMemory[n_] := EngineeringForm[N[ByteCount[n]], 3];
 printLevel[opt_, default_] :=
     Which[NumberQ[opt], opt,

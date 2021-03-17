@@ -49,6 +49,16 @@ wrapIt[coords_] := wrapIt[coords, latticeDimensions];
 wrapIt[coords_List, dims_] :=
     MapThread[(1 + Mod[#1 - 1, #2])&, {coords, dims}];
 
+getLatticeSlice::usage = "Construct a slice of the lattice with the given direction and coordinate value.  Returns {latticeDimension, gaugeField} using latticeIndex[coord] ordering.";
+getLatticeSlice[dir0_, t_] :=
+    Block[
+        {dims = Drop[latticeDimensions, {dir0}]},
+        {dims, Table[
+            Block[{coord = latticeCoordinates[k, dims]},
+                  getLink[dir1, Insert[coord, t, dir0]]],
+            {dir1, Drop[Range[nd], {dir0}]}, {k, latticeVolume[dims]}]}
+    ];
+
 
 (* Handle lattice where some number of links-sites have
   been frozen. *)
